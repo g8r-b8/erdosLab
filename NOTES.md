@@ -132,3 +132,11 @@ Plan for 468: (1) finish sorry-free Lean (sum_T_le pending), public repo with E4
 (2) PDF/markdown write-up (WRITEUP_468.md) incl. all-N via Romanov (agent working);
 (3) user posts a proof claim on forum/thread/468 with AI disclosure + links;
 (4) optionally comment on formal-conjectures PR #4076 offering the disproof; optional arXiv note.
+Prize triage result (agent, 2026-09-22): nothing quick.
+- #132 ($100 "any nontrivial result"): claims for small n (Beller n=8 Lean conditional; Marche 7–13;
+  Chojecki n=8 flawed); ienjoymath lower bound (9/7)n for CDL Problem 1.6 (upper 3/2). Realistic
+  line: stability version of Altman/Fishburn for convex position. Unproved.
+- #634 ($25): n=19 claimed impossible by George (Jul 2026) and Harries (Jul 2026), unaccepted;
+  full "find all N" far off. Beeson arXiv 2607.19572.
+- #708 ($100): Chen claim O(n log log n) unaccepted; prize needs (2+o(1))n.
+- 104, 661, 99, 101, 588, 470, 86, 241, 120: deep.
