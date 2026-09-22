@@ -15,7 +15,10 @@ Before committing effort to a candidate, and again before claiming success:
    solved/proved statement exists, drop it.
 3. Search arXiv / the web for "Erdős problem <N>" in the last ~2 years (lots were closed
    by AI-assisted work in 2025–2026). Any claimed resolution → drop it.
-4. Record the evidence (URLs + date checked) in `NOTES.md` under the candidate.
+4. Check EVERY cross-referenced / "See also" / duplicate problem page AND its forum thread
+   (e.g. #468 ↔ #1054): comments get MOVED between threads and resolutions are often recorded
+   only on the sibling page. Also read Tao's AI-contributions wiki and the OEIS entries' links.
+5. Record the evidence (URLs + date checked) in `NOTES.md` under the candidate.
 If you can't confirm it's open, it's not a candidate.
 
 ## Candidate selection

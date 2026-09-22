@@ -1,6 +1,17 @@
 # Erdős Problem #468: prefix sums of divisors
 
-**Status (ours):** DISPROVED, "almost all N" version; Lean-verified, sorry-free.
+> **⚠ NOT NEW — DO NOT POST AS A NEW RESULT (found 2026-09-22 by the parallel audit session).**
+> Terence Tao proved the same bound (upper density of {N : f(N) ≤ δN} ≪ δ², same first-moment
+> method) on **2025-11-01** in the #468 thread; the comment was later **moved to the #1054 thread**
+> (#1054 = same f with divisor 1 counted, Guy B2, OEIS A167485), so the #468 page showed nothing.
+> #1054 page: "The strong claim that f(n)=o(n) was disproved by Tao in the comments to [468]".
+> Later: Kovač (2026-05-11) ≪ exp(−e^{(1/δ)^c}); Liam Price/GPT-5.5 Pro O_k(δ^k); jif (2026-04-16)
+> every n ≥ 6 representable (so the Romanov step is unnecessary); Principia Math (Jun–Jul 2026)
+> limsup f(N)/N = ∞ with full Lean formalisation. Evidence: forum/thread/1054, erdosproblems.com/1054.
+> What remains ours: an independent Lean formalisation in formal-conjectures' #468 form (PR #4076),
+> with explicit constant S = 2ζ(2)ζ(3). Marginal value at best.
+
+**Status (ours):** (superseded, see above) DISPROVED, "almost all N" version; Lean-verified, sorry-free.
 Literal "all N" version: DISPROVED on paper via Romanov's theorem. Lean proves it
 conditional only on "R has positive upper density" (explicit hypothesis, not an axiom).
 **Prize:** none.

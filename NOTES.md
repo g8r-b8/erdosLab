@@ -145,3 +145,10 @@ Prize triage result (agent, 2026-09-22): nothing quick.
 problems/<N>/README.md = status, prior work, results, files, next steps. All assets live there.
 - problems/468 — DONE (almost-all: Lean sorry-free; literal: Lean conditional on Romanov density).
 - problems/132 — IN PROGRESS (5-agent fanout).
+
+## ⚠ 2026-09-22: #468 result is NOT NEW
+Tao proved the δ² density bound on 2025-11-01 (comment moved from #468 to #1054 thread); #1054
+is the same f shifted by one. Later improvements (Kovač, Price), every n≥6 representable (jif),
+limsup=∞ fully Lean-formalised (Principia Math, Jul 2026). Our first triage agent even noted
+"1054: Tao handled the density part" but I failed to connect 1054 ↔ 468. Lesson baked into
+PROMPT.md rule 4: check all cross-referenced/sibling problems and their threads.
