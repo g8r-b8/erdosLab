@@ -45,7 +45,21 @@ n pairs? Must the number of such distances → ∞ (perhaps ≥ n^{1−o(1)})?
     N ≤ n+f(K)); Fishburn = K=0. Naive "contains regular (n−f(K))-gon" is FALSE.
     Plus extended Cap Lemma for gapped vertex subsets. Together ⇒ k ≥ n/2 − O_K(1).
   - Elementary; agent judges not prize-worthy alone. Next: stability for K = 1.
-- C: new classes beyond Thm 1.2/1.3  → `angle_C.md`
+- C: new classes beyond Thm 1.2/1.3  → `angle_C.md` (DONE, partial)
+  - Reformulation: CDL's 2|L1|+|L2| ≤ n ⇔ |L1| ≤ m₃ (#points at depth ≥ 3).
+  - Theorem A: μ(Δ₂) ≤ |L1|+|L2| + ½Σ_{p∈L1'}(deg_{G'}(p)−2) (G' = 2-core of Δ₂-graph; uses
+    Vesztergombi Prop 3 as cited by CDL).
+  - NEW Cor A1: if no hull vertex has 4 points at distance Δ₂ (e.g. no 4 concyclic) then
+    μ(Δ₂) ≤ (3/2)|L1|+|L2|, so the conjecture holds when |L1| ≤ 2m₃. Sharp; beats CDL e.g. at
+    |L1|=|L2|=0.4n.
+  - Lemma T: |ab|=|cd|=Δ, |ac|=|bd|=Δ₂ ⇒ a,b,c,d concyclic (extremal cores need concyclic quads).
+  - B1–B4 via counting lemma s' ≥ (n+1)(2D−n)/(2n): line with ≥⌊n/2⌋+2 pts; a point seeing
+    ≥⌊n/2⌋+1 distances; few isosceles triangles; B2 via Pach–de Zeeuw for points on algebraic
+    curves (≥ C_d n^{3/4} points on a curve ⇒ s' ≥ n/2).
+  - Negative: N1 triangle-free δ-graph still gives μ(Δ₂), μ(δ) ≈ 6n/5; N2 general position
+    doesn't force μ(Δ₂) ≤ n (n=6, μ(Δ₂)=7).
+  - Conjecture C1: no 4 concyclic ⇒ μ(Δ₂) ≤ n + O(1). Unproved.
+  - Checks were floating point (1e-9), not exact.
 - D: adversarial constructions / computation  → `angle_D.md` (DONE; code in `scripts/`)
   - No counterexample for n ≥ 5 (lattices Z[ω], Z[i], cyclotomic pools, n ≤ 60). Max of
     min non-diameter multiplicity M(X) equals n exactly, attained by the regular n-gon (and a
