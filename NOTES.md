@@ -17,6 +17,12 @@
 - 1210 — pairwise coprime A ⊆ [1,n), is Σ 1/(n−a) ≤ Σ_{p<n} 1/p + O(1)? 3 "looks tractable"
   votes. Open per site (checked 2026-09-22, last update 2026-04-08). Concern: needs sharp
   constant 1 on loglog n → sieve/parity issues. Not yet in Lean.
+  Own analysis (iter 3): write b = n−a. gcd(n−b, n−b') | (b−b'), so CRT constructions
+  (n ≡ c_q mod small q) reduce to: S ⊆ [1,k] missing one residue class mod each prime q<k;
+  best Σ1/b ≈ loglog k while n ≳ e^k, so constructions only give ~logloglog-scale vs loglog n
+  → no easy counterexample. Upper bound via dyadic blocks (π(2B) small-factor elements +
+  Brun–Titchmarsh count of rough ones) gives O(loglog n) but constant ≈ 2/log 2-ish, not 1.
+  Getting constant 1 looks like genuine sieve work → probably NOT an ASAP target.
 - 1209 — mostly resolved (counterexamples); only residual variants left. Low priority.
 
 ## Tried / dropped
