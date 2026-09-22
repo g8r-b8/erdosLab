@@ -36,6 +36,16 @@
   Nice forum contribution, NOT a resolution (needs Guth–Katz; not in Mathlib).
 - 1088, 1084: only partial/estimate improvements. Rest deep.
 
+## Triage batch 1093–1139 (agent, iter 7) — nothing quick
+- Claimed/resolved in 2026: 1112 (J. Land sorry-free Lean, Bloom confirmed 13 Jul), 1117 (Gu,
+  GPT-6 Astra, 5 Sep), 1122 (Gu, 8 Sep), 1133 (Chojecki/Yang), 1139 (GPT Pro, Jun), 1120 (→∞
+  proved, arXiv 2606.19178), 1101 Q2 (lipet2k, Apr).
+- 1110 weak candidate: density of representable ints for (p,q)=(5,2),(7,2),(9,2),(5,3) open.
+  Antichain-count exponent c>1 in those cases (1.263/1.127/1.045/1.034) so counting can't give
+  density 0. Bitset computation to 1.024e6: (5,2) fraction 0.79 rising; (7,2) ~0.22 flat;
+  (9,2) 0.11 falling; (5,3) 0.087 falling. Research-level. Scripts: scratchpad/e1110/.
+- 1100, 1101 Q1: hard growth questions. Rest deep (Collatz, Brocard-type, χ-boundedness...).
+
 ## Tried / dropped
 - 19, 475, 506, 551: decidable-but-infeasible finite checks.
 - 1218, 1220: large-cardinal set theory, not Mathlib-friendly.

@@ -9,6 +9,8 @@ MAX=${RALPH_MAX_ITERATIONS:-60}
 PROMISE='<promise>ERDOS_DONE</promise>'
 
 [ -f "$STATE" ] || exit 0
+# Pause (e.g. while background agents run; their notifications wake the session)
+[ -f "$DIR/.claude/ralph-loop.pause" ] && exit 0
 input=$(cat)
 transcript=$(echo "$input" | jq -r '.transcript_path // empty')
 
