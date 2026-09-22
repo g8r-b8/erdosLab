@@ -71,7 +71,44 @@ Acceptance: for `e ∣ n`, `0 < n`, `divisorPrefixSum n (n / e) ≤ n * T n e`.
 Depends on: nothing. -/
 theorem prefixSum_le (n e : ℕ) (hn : 0 < n) (he : e ∣ n) :
     (divisorPrefixSum n (n / e) : ℝ) ≤ n * T n e := by
-  sorry
+  classical
+  have he0 : 0 < e := Nat.pos_of_dvd_of_pos he hn
+  unfold divisorPrefixSum T
+  push_cast
+  rw [Finset.mul_sum]
+  set A := (Nat.divisors n).filter (fun d => 1 < d ∧ d ≤ n / e) with hA
+  set B := (Nat.divisors n).filter (e ≤ ·) with hB
+  have hmemA : ∀ d ∈ A, d ∣ n ∧ 1 < d ∧ d ≤ n / e := by
+    intro d hd
+    simp only [hA, Finset.mem_filter, Nat.mem_divisors] at hd
+    exact ⟨hd.1.1, hd.2⟩
+  have hinj : Set.InjOn (fun d => n / d) A := by
+    intro a ha b hb hab
+    obtain ⟨ha1, -, -⟩ := hmemA a ha
+    obtain ⟨hb1, -, -⟩ := hmemA b hb
+    simp only at hab
+    rw [← Nat.div_div_self ha1 hn.ne', hab, Nat.div_div_self hb1 hn.ne']
+  have himg : A.image (fun d => n / d) ⊆ B := by
+    intro x hx
+    obtain ⟨d, hd, rfl⟩ := Finset.mem_image.1 hx
+    obtain ⟨hd1, hd2, hd3⟩ := hmemA d hd
+    have hd0 : 0 < d := by omega
+    simp only [hB, Finset.mem_filter, Nat.mem_divisors]
+    refine ⟨⟨Nat.div_dvd_of_dvd hd1, hn.ne'⟩, ?_⟩
+    rw [Nat.le_div_iff_mul_le hd0]
+    have := (Nat.le_div_iff_mul_le he0).1 hd3
+    linarith [mul_comm d e]
+  calc ∑ d ∈ A, (d : ℝ) = ∑ d ∈ A, (n : ℝ) * (((n / d : ℕ) : ℝ))⁻¹ := by
+        refine Finset.sum_congr rfl (fun d hd => ?_)
+        obtain ⟨hd1, hd2, -⟩ := hmemA d hd
+        have hd0 : (d : ℝ) ≠ 0 := by exact_mod_cast (show d ≠ 0 by omega)
+        rw [Nat.cast_div hd1 hd0]
+        have hn0 : (n : ℝ) ≠ 0 := by exact_mod_cast hn.ne'
+        field_simp
+    _ = ∑ x ∈ A.image (fun d => n / d), (n : ℝ) * (x : ℝ)⁻¹ :=
+        (Finset.sum_image (f := fun x : ℕ => (n : ℝ) * (x : ℝ)⁻¹) hinj).symm
+    _ ≤ ∑ x ∈ B, (n : ℝ) * (x : ℝ)⁻¹ :=
+        Finset.sum_le_sum_of_subset_of_nonneg himg (fun _ _ _ => by positivity)
 
 /-! ### Step 2: covered values come from pairs `(n, e)` with `T n e ≥ K` -/
 
@@ -92,7 +129,15 @@ Depends on: `T` nonneg. -/
 theorem markov_divisors (n K : ℕ) :
     (K : ℝ) * ((Nat.divisors n).filter (fun e => (K : ℝ) ≤ T n e)).card ≤
       ∑ e ∈ Nat.divisors n, T n e := by
-  sorry
+  classical
+  have hT : ∀ e, 0 ≤ T n e := fun e => Finset.sum_nonneg (fun _ _ => by positivity)
+  calc (K : ℝ) * ((Nat.divisors n).filter (fun e => (K : ℝ) ≤ T n e)).card
+      = ∑ e ∈ (Nat.divisors n).filter (fun e => (K : ℝ) ≤ T n e), (K : ℝ) := by
+        rw [Finset.sum_const, nsmul_eq_mul, mul_comm]
+    _ ≤ ∑ e ∈ (Nat.divisors n).filter (fun e => (K : ℝ) ≤ T n e), T n e :=
+        Finset.sum_le_sum (fun e he => (Finset.mem_filter.1 he).2)
+    _ ≤ ∑ e ∈ Nat.divisors n, T n e :=
+        Finset.sum_le_sum_of_subset_of_nonneg (Finset.filter_subset _ _) (fun _ _ _ => hT _)
 
 /-! ### Step 4: the average of `∑_{e ∣ n} T n e` is bounded -/
 
@@ -101,7 +146,30 @@ Acceptance: `Summable (fun b => (harmonic b : ℝ) / b ^ 2)`.
 Depends on: `harmonic_le_one_add_log`, p-series. -/
 theorem summable_harmonic_div_sq :
     Summable (fun b : ℕ => (harmonic b : ℝ) / (b : ℝ) ^ 2) := by
-  sorry
+  have hs : Summable (fun b : ℕ => 2 * ((b : ℝ) ^ ((3 : ℝ) / 2))⁻¹) :=
+    (Real.summable_nat_rpow_inv.2 (by norm_num)).mul_left 2
+  have hHnn : ∀ b : ℕ, (0 : ℝ) ≤ harmonic b := fun b => by
+    unfold harmonic; push_cast; positivity
+  refine Summable.of_nonneg_of_le (fun b => div_nonneg (hHnn b) (by positivity)) (fun b => ?_) hs
+  rcases Nat.eq_zero_or_pos b with rfl | hb
+  · simp
+  have hb1 : (1 : ℝ) ≤ b := by exact_mod_cast hb
+  have hb0 : (0 : ℝ) < b := by linarith
+  have hH : (harmonic b : ℝ) ≤ 1 + Real.log b := harmonic_le_one_add_log b
+  have hlog : Real.log b ≤ 2 * Real.sqrt b - 2 := by
+    have := Real.log_le_sub_one_of_pos (Real.sqrt_pos.2 hb0)
+    rw [Real.log_sqrt hb0.le] at this
+    linarith
+  have hsq : (harmonic b : ℝ) ≤ 2 * Real.sqrt b := by linarith
+  have hpow : (b : ℝ) ^ 2 = (b : ℝ) ^ ((3 : ℝ) / 2) * Real.sqrt b := by
+    rw [Real.sqrt_eq_rpow, ← Real.rpow_add hb0]
+    norm_num
+  have hp0 : (0 : ℝ) < (b : ℝ) ^ ((3 : ℝ) / 2) := by positivity
+  rw [div_le_iff₀ (by positivity), hpow]
+  have : 2 * ((b : ℝ) ^ ((3 : ℝ) / 2))⁻¹ * ((b : ℝ) ^ ((3 : ℝ) / 2) * Real.sqrt b)
+      = 2 * Real.sqrt b := by field_simp
+  rw [this]
+  exact hsq
 
 /-- TODO: The key average bound.
 Acceptance: `∑_{n ∈ [1,Y]} ∑_{e ∣ n} T n e ≤ S * Y`.
