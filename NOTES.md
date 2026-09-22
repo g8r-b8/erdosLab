@@ -57,6 +57,26 @@
 - 1145 (Erdős–Sárközy a_n/b_n→1 bases): digit tilings can't give ratio→1; no counterexample.
 - 1188: estimate question. Rest deep (BES conjecture, box problem, ultraflat polys...).
 
+## Triage 950–1049 (agent, iter 8) — nothing quick
+- 968 secondary Q (u_n=p_n/n monotone triples infinitely often): answered YES by known results
+  (Maier 1981 chains of large gaps; Maynard/GPY small gaps) — literature note, main Q open.
+  Lean would need Maier/Maynard as axioms → not axiom-clean.
+- 985 (prime primitive root < p): GRH-level. 963: essentially solved (1−o(1))log2 n.
+
+## Site-wide scrape (agent): scratchpad/all.tsv + probs/<N>.html (all 1225 pages)
+- Format: (num, votes, voters, ?, STATUS, (comments, proof_claims)).
+- 590 OPEN; 461 open w/ 0 claims; 176 open w/ 0 claims & ≤1 comment → scratchpad/lowattn.txt.
+- Top tractable-voted: 689(5,claimed) 1038(5,3 claims) 1139 142 1210(3, no claim) 521 848.
+
+## #197 (partition N into 2 sets each permutable w/o monotone 3-AP) — iter 8
+- OPEN (checked 2026-09-22): 0 claims, 1 comment (wkasel 26 Aug 2026: SAT-assisted partial
+  result, dyadic-blocks partition can't work; github.com/Wkasel/erdos197). Formal stmt exists.
+- Literature: Geneson arXiv 1803.06334; LeSaulnier–Vijay 2011: α(3) ≥ 1/2, β(3) ≥ 1/4
+  (upper/lower density sup of permutable sets), conjectured tight → would give NO since need
+  α+β ≥ 1. No nontrivial upper bounds known.
+- Own: first element a forces chain a+2^k(b−a) to exit A (infinite descent) — only a
+  density-0 obstruction. Research-level. Dropped as ASAP target.
+
 ## Tried / dropped
 - 19, 475, 506, 551: decidable-but-infeasible finite checks.
 - 1218, 1220: large-cardinal set theory, not Mathlib-friendly.
