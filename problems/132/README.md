@@ -19,9 +19,23 @@ n pairs? Must the number of such distances → ∞ (perhaps ≥ n^{1−o(1)})?
 - Forum: ienjoymath, lower bound 9/7 for Problem 1.6 (upper 3/2). Proof claims for small n
   (Beller n=8, Lean but conditional; Marche 7–13; Chojecki n=8, flawed per ienjoymath).
 
+## Frontier summary (literature agent, 2026-09-22 — details in `frontier.md`)
+- No refereed progress beyond CDL; 0 citations of CDL. No statement by Bloom about what counts
+  for the prize; only Erdős's "any nontrivial result". Prize requires journal publication.
+- Small n: Rafik n=7 (+ n=8 reduced), Marchetto 7≤n≤13 (11,12 rely on Wei 2011), Beller n=8
+  (Lean, conditional). n=14 needs classification of 14-pt 7-distance sets (unknown).
+- Problem 1.6: lower 9/7 − 5√n/n (ienjoymath, 25 Jul 2026, conjectured optimal), upper 3/2.
+- Ranked open sub-questions: (1) count of ≤n distances → ∞ (or ≥3) for CONVEX sets — reduces to
+  stability of Altman/Fishburn: D = ⌊n/2⌋+K gives s ≥ K+1; (2) widen not-too-convex class;
+  (3) full two-distance for n ≥ n₀ via Vesztergombi rigidity; (4) 1.6 upper < 3/2;
+  (5) n ≥ 14 computational; (6) n^{1−o(1)} — out of reach.
+- Key tools: Vesztergombi 1985/87/96 (Δ₂ ≤ 3n/2 general, 4n/3 convex, m_k ≤ kn convex,
+  m₁+m₂ ≤ 2n convex), Morić–Pritchard levels lemma, Altman, Fishburn, Harborth penny bound,
+  Dumitrescu μ(δ)μ(Δ) ≤ 9n²/8+O(n).
+
 ## Attack angles (agents)
 - A: Problem 1.6 upper bound < 3/2  → `angle_A.md`
 - B: convex position, count of ≤n distances → ∞  → `angle_B.md`
 - C: new classes beyond Thm 1.2/1.3  → `angle_C.md`
 - D: adversarial constructions / computation  → `angle_D.md`
-- E: literature and claim audit  → `frontier.md`
+- E: literature and claim audit  → `frontier.md` (DONE)
