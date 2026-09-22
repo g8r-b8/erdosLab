@@ -14,6 +14,25 @@
   use these to rank candidates.
 - Recent problems (1050–1221) have had less attention → triage there first.
 
+## ★ ACTIVE TARGET: #468 — DISPROOF of "f(N)=o(N) (for almost all N)"
+Statement: D_n = {d1, d1+d2, ...} (1<d1<d2<... divisors of n); f(N) = min n with N ∈ D_n.
+Is f(N)=o(N)? Perhaps for almost all N?
+Open evidence (checked 2026-09-22): erdosproblems.com/468 OPEN, 0 proof claims, 1 comment
+(Vjeko_Kovac 14 Sep 2025: data suggests o(N) false; only trivial liminf f(N)/N=0 known).
+Not on Tao's AI-contributions wiki. formal-conjectures: only open PR #4076 (statement, May 2026).
+Web search: nothing else.
+
+THEOREM (ours): for all K≥1, X: #{N ≤ X : ∃ n, Kn ≤ N, N ∈ D_n} ≤ S·X/K², S ≤ ζ(2)·2ζ(3) ≈ 3.95.
+So f(N) > N/3 for ≥ 56% of N ≤ X (every X). Answer: NO, even for almost all N.
+Proof: N = prefix sum at divisor d=n/e, N ≤ Σ_{d'|n,d'≤d} d' = n·T_e(n), T_e(n)=Σ_{e'|n,e'≥e} 1/e'.
+So Kn ≤ N ⇒ T_e(n) ≥ K. Count ≤ Σ_{n≤X/K} #{e|n : T_e ≥ K} ≤ (1/K) Σ_{n≤X/K} Σ_{e|n} T_e(n).
+Σ_{n≤Y} Σ_{e|n} T_e(n) = Σ_{e≤e'} (1/e')·#{n≤Y: lcm(e,e')|n} ≤ Y·Σ_{e≤e'} gcd(e,e')/(e·e'^2)
+≤ Y·Σ_{e'} (1/e'^2)Σ_{g|e'} H(e'/g) = Y·ζ(2)·Σ_b H_b/b² = Y·ζ(2)·2ζ(3).
+Numerics (scratchpad/e468/check.py, X=2e5): covered fraction K=1 .319, K=2 .046, K=3 .004;
+pairs/X ≤ bound in all cases.
+Lean plan: prove ∃K, ∀X, covered(K,X) ≤ X/2 via summability (no explicit constants needed),
+then ¬(almost-all o(N)) as in PR #4076's Erdos468MinimalPreimageLittleOAlmostAll.
+
 ## Candidates (ranked; each needs open-verification evidence before work)
 - 1210 — pairwise coprime A ⊆ [1,n), is Σ 1/(n−a) ≤ Σ_{p<n} 1/p + O(1)? 3 "looks tractable"
   votes. Open per site (checked 2026-09-22, last update 2026-04-08). Concern: needs sharp
