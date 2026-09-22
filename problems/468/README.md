@@ -8,6 +8,8 @@
 > Later: Kovač (2026-05-11) ≪ exp(−e^{(1/δ)^c}); Liam Price/GPT-5.5 Pro O_k(δ^k); jif (2026-04-16)
 > every n ≥ 6 representable (so the Romanov step is unnecessary); Principia Math (Jun–Jul 2026)
 > limsup f(N)/N = ∞ with full Lean formalisation. Evidence: forum/thread/1054, erdosproblems.com/1054.
+> Full review: `NOVELTY.md`. Note: the Romanov hypothesis is unnecessary — jif's result makes
+> every N except 1, 4 reachable, so Tao + jif already disprove the literal version.
 > What remains ours: an independent Lean formalisation in formal-conjectures' #468 form (PR #4076),
 > with explicit constant S = 2ζ(2)ζ(3). Marginal value at best.
 
