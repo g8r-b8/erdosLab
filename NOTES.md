@@ -43,3 +43,8 @@
 
 ## Next step
 - Parallel triage of open problems 1050–1221 for tractability + open-status evidence.
+
+## Short-formal-statement older problems (iter 6, own check) — all dropped
+826, 943, 849, 383, 431, 396, 371, 479: short Lean statements but famous analytic-NT
+questions (divisor tails, powerful-number reps, binomial multiplicities, prime tuples,
+2^n ≡ k mod n). Short statement ≠ tractable. No quick handle.
