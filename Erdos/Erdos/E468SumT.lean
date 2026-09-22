@@ -84,7 +84,7 @@ lemma inner_count_le (Y e e' : ℕ) (he : 1 ≤ e) (he' : 1 ≤ e') :
           mul_le_mul_of_nonneg_right Nat.cast_div_le (by positivity)
       _ = _ := by
           have : (Nat.lcm e e' : ℝ) = e * e' / Nat.gcd e e' := by
-            field_simp; linarith
+            rw [eq_div_iff hGr.ne']; linarith
           rw [this]; field_simp
   · simp [hle]
 
@@ -94,7 +94,7 @@ lemma gcd_le_sum (e e' : ℕ) (he' : 0 < e') :
     Nat.mem_divisors.2 ⟨Nat.gcd_dvd_right _ _, he'.ne'⟩
   calc (Nat.gcd e e' : ℝ) / e
       = (if Nat.gcd e e' ∣ e then ((Nat.gcd e e' : ℕ) : ℝ) / e else 0) := by
-        rw [if_pos (Nat.gcd_dvd_left _ _)]
+        rw [ite_eq_left (Nat.gcd_dvd_left _ _)]
     _ ≤ _ := Finset.single_le_sum (f := fun g => if g ∣ e then (g : ℝ) / e else 0)
         (fun g _ => by split_ifs <;> positivity) hmem
 
@@ -156,8 +156,7 @@ lemma step5_pt (Y e' : ℕ) (he' : e' ∈ Icc 1 Y) :
     simp only [mem_Icc]
     exact ⟨Nat.div_pos (Nat.le_of_dvd (by omega) hgd) hg0, (Nat.div_le_self _ _).trans he'.2⟩
   refine le_trans (le_of_eq ?_) (single_le_sum (fun b _ => hnn g b) hb)
-  beta_reduce
-  rw [if_pos (Nat.mul_div_cancel' hgd)]
+  rw [ite_eq_left (Nat.mul_div_cancel' hgd)]
   have hgr : (g : ℝ) ≠ 0 := (Nat.cast_pos.2 hg0).ne'
   have her : (e' : ℝ) ≠ 0 := (Nat.cast_pos.2 (by omega : 0 < e')).ne'
   rw [Nat.cast_div hgd hgr]

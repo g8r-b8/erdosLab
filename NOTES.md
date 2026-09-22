@@ -110,3 +110,12 @@ then ¬(almost-all o(N)) as in PR #4076's Erdos468MinimalPreimageLittleOAlmostAl
 826, 943, 849, 383, 431, 396, 371, 479: short Lean statements but famous analytic-NT
 questions (divisor tails, powerful-number reps, binomial multiplicities, prime tuples,
 2^n ≡ k mod n). Short statement ≠ tractable. No quick handle.
+
+## Prize problems (user request, 2026-09-22)
+- Prizes now paid by the Combinatorics Foundation (Steve Butler). Require publication in a
+  reputable peer-reviewed journal + documentation that Erdős offered the amount. (erdosproblems.com/faq)
+- #468 has NO prize.
+- Open prize problems, smallest first (from all.tsv + problems.yaml): 470 $10 (odd weird),
+  1052 $10 (unitary perfect), 634 $25 (2 claims), 661 $50, then $100: 78 86 99 101 104 120
+  132(“any nontrivial result”, 1 claim) 241 588 708(1 claim) 1029; $250: 50 52 77 165 595 671...
+- Agent triaging 132, 634, 708, 104, 661, 99, 101, 588, 470, 86, 241, 120.
