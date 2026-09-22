@@ -140,3 +140,8 @@ Prize triage result (agent, 2026-09-22): nothing quick.
   full "find all N" far off. Beeson arXiv 2607.19572.
 - #708 ($100): Chen claim O(n log log n) unaccepted; prize needs (2+o(1))n.
 - 104, 661, 99, 101, 588, 470, 86, 241, 120: deep.
+
+## Layout (from 2026-09-22): one folder per attempted problem
+problems/<N>/README.md = status, prior work, results, files, next steps. All assets live there.
+- problems/468 — DONE (almost-all: Lean sorry-free; literal: Lean conditional on Romanov density).
+- problems/132 — IN PROGRESS (5-agent fanout).

@@ -43,9 +43,12 @@ Putting it together: `#{…} ≤ (1/K) · S · (X/K) = S X / K²`. ∎
 * On the literal "all `N`" reading: if `f(N) = o(N)` held along every `N` for which `f(N)` is
   defined, then the set `R` of such `N` would have density 0 (it would lie inside the covered set
   above for every `K`). So `f(N) = o(N)` fails unless `R` itself has density 0. Numerically `R`
-  has density ≈ 1: 99.985% of `N < 20000` lie in some `D_n` with `n ≤ 10⁶`. A rigorous proof
-  that `R` has positive upper density (e.g. via a Romanov-type sieve argument on the families
-  `N = σ(a) − 1 + p`) would settle the literal version too; we have not written this down.
+  has density ≈ 1: 99.985% of `N < 20000` lie in some `D_n` with `n ≤ 10⁶`. **Rigorous:** for `p > 2^k` prime, `p + 2^{k+1} − 2 ∈ D_{2^k p}`, so
+  `R ⊇ {m − 2 : m = p + 2^j, p > 2^{j−1}}`. The excluded representations reach `≪ X/log X` integers, so
+  `R` has lower density ≥ dens{p + 2^j} > 0.1076 (Romanov 1934; Elsholtz–Schlage-Puchta 2018).
+  With `K = 7` (`S/K² < 0.081`) the literal version is false. Lean: `not_erdos468MinimalPreimageLittleO_of_romanov`
+  (the density is an explicit hypothesis; a full Lean Romanov is estimated at 3–6k lines, since Mathlib's
+  Selberg sieve has no prime-pair application).
 * **Lean 4 / Mathlib formalisation:** `Erdos/Erdos/E468.lean` in this repo proves
   `card_covered_le : #covered(K, X) ≤ S·X/K²` and `not_erdos468AlmostAll`, which negates
   the "almost all" statement in the form used by google-deepmind/formal-conjectures PR #4076
