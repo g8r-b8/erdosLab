@@ -37,5 +37,13 @@ n pairs? Must the number of such distances → ∞ (perhaps ≥ n^{1−o(1)})?
 - A: Problem 1.6 upper bound < 3/2  → `angle_A.md`
 - B: convex position, count of ≤n distances → ∞  → `angle_B.md`
 - C: new classes beyond Thm 1.2/1.3  → `angle_C.md`
-- D: adversarial constructions / computation  → `angle_D.md`
+- D: adversarial constructions / computation  → `angle_D.md` (DONE; code in `scripts/`)
+  - No counterexample for n ≥ 5 (lattices Z[ω], Z[i], cyclotomic pools, n ≤ 60). Max of
+    min non-diameter multiplicity M(X) equals n exactly, attained by the regular n-gon (and a
+    sporadic 12-pt lattice set). Refined conjecture: M(X) ≤ n, equality only for R_n + sporadics.
+  - # rare (≤n) distances min found: 2 (n=5–7, also an n=8 Z[ζ₁₂] patch), 3 (8–16), 5 (20),
+    7 (30), 12 (40) — consistent with → ∞.
+  - Problem 1.6: nothing beats 9/7. Key reduction: 9/7 ⇔ μ(δ) + (4/3)μ(Δ₂) ≤ 3n + o(n);
+    ienjoymath's even-m ring is tight (= 3n exactly). Heuristic proof via Δ₂-points on thin
+    convex curve + Euler face-length deficit of the min-distance graph (2 per Δ₂ point).
 - E: literature and claim audit  → `frontier.md` (DONE)
