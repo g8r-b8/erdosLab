@@ -39,7 +39,7 @@ Representable N: 99.985% of N < 20000 (`scripts/rep.py`).
   `not_erdos468MinimalPreimageLittleO_of_romanov`.
   Axioms: propext, Classical.choice, Quot.sound.
 - `WRITEUP.md`: human-readable proof.
-- `FORUM_POST.md`: draft proof-claim post (needs links filled in; Romanov TODO).
+- `FORUM_POST.md`: draft proof-claim post (only the [LINK] placeholders left to fill).
 - `scripts/check.py`, `scripts/rep.py`, `scripts/romanov.py`: numerics (density of
   {p+2^{k+1}−2 : p>2^k} ≈ 0.455 at 10^7).
 
