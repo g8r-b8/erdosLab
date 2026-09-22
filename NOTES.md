@@ -46,6 +46,17 @@
   (9,2) 0.11 falling; (5,3) 0.087 falling. Research-level. Scripts: scratchpad/e1110/.
 - 1100, 1101 Q1: hard growth questions. Rest deep (Collatz, Brocard-type, χ-boundedness...).
 
+## Triage batch 1142–1188 (agent, iter 7) — nothing quick
+- KEY RESOURCE: Tao's wiki github.com/teorth/erdosproblems/wiki/AI-contributions-to-Erdős-problems
+  lists AI full/partial solutions per problem — check it for every candidate (site status lags!).
+- 1151: site says OPEN but effectively SOLVED (Chojecki + GPT-5.5 Pro, 30 Apr 2026, checked by
+  N. Sothanaphan; wiki "Full solution"). Partial Lean by AllenGrahamHart (Thm 1.1(a)); part (b)
+  needs Erdős 1941 divergence. Formalization-only opportunity, NOT an open problem.
+- 1183 (Erdős–Ulam union-closed): upper half done (subexponential, Mar 2026); lower bound
+  F(n) ≥ n^{ω(n)} open — tried grid/chain constructions, only polylog/O(m). Hard.
+- 1145 (Erdős–Sárközy a_n/b_n→1 bases): digit tilings can't give ratio→1; no counterexample.
+- 1188: estimate question. Rest deep (BES conjecture, box problem, ultraflat polys...).
+
 ## Tried / dropped
 - 19, 475, 506, 551: decidable-but-infeasible finite checks.
 - 1218, 1220: large-cardinal set theory, not Mathlib-friendly.
