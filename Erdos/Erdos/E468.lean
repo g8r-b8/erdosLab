@@ -119,7 +119,32 @@ Depends on: `prefixSum_le`. -/
 theorem card_covered_le_pairs (K X : ℕ) (hK : 1 ≤ K) :
     ((covered K X).card : ℝ) ≤
       ∑ n ∈ Icc 1 (X / K), (((Nat.divisors n).filter (fun e => (K : ℝ) ≤ T n e)).card : ℝ) := by
-  sorry
+  classical
+  set P := (Icc 1 (X / K)).sigma (fun n => (Nat.divisors n).filter (fun e => (K : ℝ) ≤ T n e))
+    with hP
+  have hsub : covered K X ⊆ P.image (fun p => divisorPrefixSum p.1 (p.1 / p.2)) := by
+    intro N hN
+    simp only [covered, mem_filter, mem_range] at hN
+    obtain ⟨hNX, n, hKn, hND⟩ := hN
+    simp only [D, mem_image, mem_filter, Nat.mem_divisors] at hND
+    obtain ⟨d, ⟨⟨hdn, hn0⟩, hd1⟩, rfl⟩ := hND
+    have hnpos : 0 < n := Nat.pos_of_ne_zero hn0
+    refine mem_image.2 ⟨⟨n, n / d⟩, ?_, ?_⟩
+    · simp only [hP, mem_sigma, mem_Icc, mem_filter, Nat.mem_divisors]
+      refine ⟨⟨hnpos, ?_⟩, ⟨Nat.div_dvd_of_dvd hdn, hn0⟩, ?_⟩
+      · rw [Nat.le_div_iff_mul_le (by omega), Nat.mul_comm]
+        omega
+      · have h1 := prefixSum_le n (n / d) hnpos (Nat.div_dvd_of_dvd hdn)
+        rw [Nat.div_div_self hdn hn0] at h1
+        have h2 : ((K * n : ℕ) : ℝ) ≤ divisorPrefixSum n d := by exact_mod_cast hKn
+        push_cast at h2
+        have hn' : (0 : ℝ) < n := by exact_mod_cast hnpos
+        exact le_of_mul_le_mul_left (by linarith) hn'
+    · simp [Nat.div_div_self hdn hn0]
+  calc ((covered K X).card : ℝ) ≤ (P.image (fun p => divisorPrefixSum p.1 (p.1 / p.2))).card := by
+        exact_mod_cast card_le_card hsub
+    _ ≤ P.card := by exact_mod_cast card_image_le
+    _ = _ := by rw [hP, card_sigma]; push_cast; rfl
 
 /-! ### Step 3: Markov -/
 
@@ -184,20 +209,91 @@ theorem sum_T_le (Y : ℕ) :
 Depends on: Steps 2–4. -/
 theorem card_covered_le (K X : ℕ) (hK : 1 ≤ K) :
     ((covered K X).card : ℝ) ≤ S * X / (K : ℝ) ^ 2 := by
-  sorry
+  have hK0 : (0 : ℝ) < K := by exact_mod_cast hK
+  have hS : 0 ≤ S := mul_nonneg (tsum_nonneg (fun _ => by positivity))
+    (tsum_nonneg (fun b => div_nonneg (by unfold harmonic; push_cast; positivity) (by positivity)))
+  calc ((covered K X).card : ℝ)
+      ≤ ∑ n ∈ Icc 1 (X / K), (((Nat.divisors n).filter (fun e => (K : ℝ) ≤ T n e)).card : ℝ) :=
+        card_covered_le_pairs K X hK
+    _ ≤ ∑ n ∈ Icc 1 (X / K), (K : ℝ)⁻¹ * ∑ e ∈ Nat.divisors n, T n e := by
+        refine sum_le_sum (fun n _ => ?_)
+        rw [inv_mul_eq_div, le_div_iff₀ hK0, mul_comm]
+        exact markov_divisors n K
+    _ = (K : ℝ)⁻¹ * ∑ n ∈ Icc 1 (X / K), ∑ e ∈ Nat.divisors n, T n e := by rw [mul_sum]
+    _ ≤ (K : ℝ)⁻¹ * (S * ((X / K : ℕ) : ℝ)) :=
+        mul_le_mul_of_nonneg_left (sum_T_le _) (by positivity)
+    _ ≤ (K : ℝ)⁻¹ * (S * ((X : ℝ) / K)) := by
+        gcongr
+        exact Nat.cast_div_le
+    _ = S * X / (K : ℝ) ^ 2 := by field_simp
 
 /-- TODO: For some `K`, at least half of all `N < X` are not covered: every `n` with `N ∈ D_n`
 has `N < K n`.
 Depends on: `card_covered_le`. -/
 theorem exists_K_half_uncovered :
     ∃ K : ℕ, 1 ≤ K ∧ ∀ X : ℕ, ((covered K X).card : ℝ) ≤ X / 2 := by
-  sorry
+  refine ⟨Nat.ceil (2 * S) + 1, by omega, fun X => ?_⟩
+  set K := Nat.ceil (2 * S) + 1 with hKdef
+  have hK1 : (1 : ℝ) ≤ K := by exact_mod_cast (show 1 ≤ K by omega)
+  have h2S : 2 * S ≤ K := by
+    have := Nat.le_ceil (2 * S)
+    have : ((Nat.ceil (2 * S) : ℕ) : ℝ) + 1 = K := by rw [hKdef]; push_cast; ring
+    linarith
+  have hKK : (K : ℝ) ≤ (K : ℝ) ^ 2 := by nlinarith
+  have hX : (0 : ℝ) ≤ X := by positivity
+  calc ((covered K X).card : ℝ) ≤ S * X / (K : ℝ) ^ 2 := card_covered_le K X (by omega)
+    _ ≤ X / 2 := by
+        rw [div_le_div_iff₀ (by positivity) (by norm_num)]
+        nlinarith
 
 /-! ### Step 6: answer to Erdős 468 -/
 
 /-- TODO: **Erdős 468, almost-all version, is false.**
 Depends on: `exists_K_half_uncovered`. -/
 theorem not_erdos468AlmostAll : ¬ Erdos468AlmostAll := by
-  sorry
+  classical
+  obtain ⟨K, hK1, hK⟩ := exists_K_half_uncovered
+  rintro ⟨f, hden, ho⟩
+  set s := {N | IsMinimalDPreimage N (f N)} with hs
+  have hK0 : (0 : ℝ) < K := by exact_mod_cast hK1
+  have hev := ho.def (show (0 : ℝ) < (K : ℝ)⁻¹ by positivity)
+  obtain ⟨N0, hN0⟩ := eventually_atTop.1 hev
+  have hev2 : ∀ᶠ X in atTop, partialDensity s X ∈ Set.Ioi ((3 : ℝ) / 4) :=
+    hden (Ioi_mem_nhds (by norm_num))
+  obtain ⟨X0, hX0⟩ := eventually_atTop.1 hev2
+  set X := max X0 (4 * N0 + 1) with hXdef
+  have h1 : (3 : ℝ) / 4 < partialDensity s X := hX0 X (le_max_left _ _)
+  have hXpos : 4 * N0 + 1 ≤ X := le_max_right _ _
+  have hsub : (range X).filter (· ∈ s) ⊆ range N0 ∪ covered K X := by
+    intro N hN
+    simp only [mem_filter, mem_range] at hN
+    obtain ⟨hNX, hNs⟩ := hN
+    rw [mem_union]
+    by_cases hlt : N < N0
+    · exact Or.inl (mem_range.2 hlt)
+    · right
+      have hb := hN0 N (by omega)
+      simp only [Real.norm_natCast] at hb
+      have hKf : K * f N ≤ N := by
+        have : (K : ℝ) * f N ≤ N := by
+          have := mul_le_mul_of_nonneg_left hb hK0.le
+          rwa [← mul_assoc, mul_inv_cancel₀ hK0.ne', one_mul] at this
+        exact_mod_cast this
+      simp only [covered, mem_filter, mem_range]
+      exact ⟨hNX, f N, hKf, hNs.1⟩
+  have hcard : (((range X).filter (· ∈ s)).card : ℝ) ≤ N0 + X / 2 := by
+    have := card_le_card hsub
+    have h2 := card_union_le (range N0) (covered K X)
+    rw [card_range] at h2
+    have h3 : (((range X).filter (· ∈ s)).card : ℝ) ≤ N0 + (covered K X).card := by
+      exact_mod_cast this.trans h2
+    linarith [hK X]
+  have hXr : (4 : ℝ) * N0 + 1 ≤ X := by exact_mod_cast hXpos
+  have hX0' : (0 : ℝ) < X := by linarith [show (0 : ℝ) ≤ N0 by positivity]
+  have : partialDensity s X ≤ 3 / 4 := by
+    unfold partialDensity
+    rw [div_le_iff₀ hX0']
+    linarith
+  linarith
 
 end Erdos468

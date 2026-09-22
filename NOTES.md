@@ -30,6 +30,8 @@ So Kn ≤ N ⇒ T_e(n) ≥ K. Count ≤ Σ_{n≤X/K} #{e|n : T_e ≥ K} ≤ (1/K
 ≤ Y·Σ_{e'} (1/e'^2)Σ_{g|e'} H(e'/g) = Y·ζ(2)·Σ_b H_b/b² = Y·ζ(2)·2ζ(3).
 Numerics (scratchpad/e468/check.py, X=2e5): covered fraction K=1 .319, K=2 .046, K=3 .004;
 pairs/X ≤ bound in all cases.
+Lean status (iter ~10): Erdos/Erdos/E468.lean — ALL lemmas proved except `sum_T_le`
+(delegated to agent, working in Erdos/Erdos/E468SumT.lean). Final theorem `not_erdos468AlmostAll`.
 Lean plan: prove ∃K, ∀X, covered(K,X) ≤ X/2 via summability (no explicit constants needed),
 then ¬(almost-all o(N)) as in PR #4076's Erdos468MinimalPreimageLittleOAlmostAll.
 
