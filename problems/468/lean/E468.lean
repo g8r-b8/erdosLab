@@ -646,7 +646,53 @@ theorem not_erdos468MinimalPreimageLittleO_of_romanov
 
 end Erdos468
 
+/-! ## Part III: matching formal-conjectures' density notion
+
+`Upstream.partialDensity` / `Upstream.HasDensity` are verbatim copies of
+`FormalConjecturesForMathlib/Data/Set/Density.lean` (google-deepmind/formal-conjectures).
+We show our notions coincide, so `not_erdos468AlmostAll` refutes the PR #4076 statement as written.
+(Bridge contributed by a parallel audit session.) -/
+
+namespace Upstream
+/-- Verbatim copy of formal-conjectures `Set.partialDensity`. -/
+noncomputable abbrev partialDensity {β : Type*} [Preorder β] [LocallyFiniteOrderBot β]
+    (S : Set β) (A : Set β := Set.univ) (b : β) : ℝ :=
+  ((S ∩ A) ∩ Set.Iio b).ncard / (A ∩ Set.Iio b).ncard
+
+/-- Verbatim copy of formal-conjectures `Set.HasDensity`. -/
+def HasDensity {β : Type*} [Preorder β] [LocallyFiniteOrderBot β]
+    (S : Set β) (α : ℝ) (A : Set β := Set.univ) : Prop :=
+  Tendsto (fun (b : β) => partialDensity S A b) atTop (nhds α)
+end Upstream
+
+namespace Erdos468
+
+theorem partialDensity_eq_upstream (s : Set ℕ) (X : ℕ) :
+    partialDensity s X = Upstream.partialDensity s Set.univ X := by
+  classical
+  unfold partialDensity Upstream.partialDensity
+  congr 2
+  · rw [Set.inter_univ, ← Set.ncard_coe_finset]
+    congr 1
+    ext N; simp [and_comm]
+  · simp [Set.ncard_eq_toFinset_card']
+
+theorem hasDensity_iff_upstream (s : Set ℕ) (a : ℝ) :
+    HasDensity s a ↔ Upstream.HasDensity s a := by
+  unfold HasDensity Upstream.HasDensity
+  simp only [← partialDensity_eq_upstream]
+
+/-- **Erdős 468 (almost-all version, exactly as in formal-conjectures PR #4076) is false.** -/
+theorem not_erdos468AlmostAll_upstream :
+    ¬ ∃ f : ℕ → ℕ, Upstream.HasDensity {N | IsMinimalDPreimage N (f N)} 1 ∧
+      (fun N : ℕ => (f N : ℝ)) =o[atTop] (fun N : ℕ => (N : ℝ)) := by
+  rintro ⟨f, hd, ho⟩
+  exact not_erdos468AlmostAll ⟨f, (hasDensity_iff_upstream _ _).2 hd, ho⟩
+
+end Erdos468
+
 #print axioms Erdos468.not_erdos468AlmostAll
 #print axioms Erdos468.card_covered_le
 #print axioms Erdos468.mem_D_two_pow_mul_prime
 #print axioms Erdos468.not_erdos468MinimalPreimageLittleO_of_romanov
+#print axioms Erdos468.not_erdos468AlmostAll_upstream

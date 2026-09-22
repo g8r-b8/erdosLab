@@ -36,7 +36,7 @@ Representable N: 99.985% of N < 20000 (`scripts/rep.py`).
 - `lean/E468.lean`: full Lean proof. Compile with
   `cd Erdos && lake env lean ../problems/468/lean/E468.lean`.
   Key theorems: `card_covered_le`, `not_erdos468AlmostAll`, `mem_D_two_pow_mul_prime`,
-  `not_erdos468MinimalPreimageLittleO_of_romanov`.
+  `not_erdos468MinimalPreimageLittleO_of_romanov`, `not_erdos468AlmostAll_upstream` (stated with formal-conjectures' own `Set.HasDensity`, verbatim copy; bridge Lean-checked).
   Axioms: propext, Classical.choice, Quot.sound.
 - `WRITEUP.md`: human-readable proof.
 - `FORUM_POST.md`: draft proof-claim post (only the [LINK] placeholders left to fill).
