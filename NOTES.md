@@ -1,7 +1,8 @@
 # erdosLab notes
 
 ## Status (iteration 1, 2026-09-22)
-- Lean: elan installed (~/.elan/bin). Mathlib project `Erdos/` being created + cache fetched (background).
+- Lean: elan installed (~/.elan/bin), Lean v4.35.0-rc2. Mathlib project `Erdos/` works
+  (`import Mathlib` test compiles, ~78s cold). Run with `cd Erdos && lake env lean <file>`.
 - Data: cloned teorth/erdosproblems (data/problems.yaml, updated 2026-09-22) and
   google-deepmind/formal-conjectures into the session scratchpad.
 - Site stats: 1221 problems; 593 with status exactly "open".
@@ -24,6 +25,16 @@
   Brun–Titchmarsh count of rough ones) gives O(loglog n) but constant ≈ 2/log 2-ish, not 1.
   Getting constant 1 looks like genuine sieve work → probably NOT an ASAP target.
 - 1209 — mostly resolved (counterexamples); only residual variants left. Low priority.
+
+## Triage batch 1052–1088 (agent, iter 4) — nothing quick
+- Region heavily worked by AI-assisted groups in 2026: 8/25 have proof claims.
+- Proof claims / solved-ish: 1054 (Principia Math, Lean, Jul 2026), 1059 (J. Land, Sep 2026),
+  1061 (E. Li, arXiv Li26), 1070 pt2 (Dúcz–Varga 2026), 1075 (Q. Gu disproof claim Sep 2026),
+  1083 d=3 (Tidor–Yu–Zakharov Aug 2026).
+- 1087 (0 votes/claims): reduction f(n) = Θ(n·I(n)) + O(n³ log n) where I(n) = max #isosceles
+  triangles ⇒ f(n) ≪ n^{3.137} via Pach–Tardos, and #1087 ⇔ Erdős–Purdy isosceles question.
+  Nice forum contribution, NOT a resolution (needs Guth–Katz; not in Mathlib).
+- 1088, 1084: only partial/estimate improvements. Rest deep.
 
 ## Tried / dropped
 - 19, 475, 506, 551: decidable-but-infeasible finite checks.
