@@ -35,7 +35,16 @@ n pairs? Must the number of such distances → ∞ (perhaps ≥ n^{1−o(1)})?
 
 ## Attack angles (agents)
 - A: Problem 1.6 upper bound < 3/2  → `angle_A.md`
-- B: convex position, count of ≤n distances → ∞  → `angle_B.md`
+- B: convex position, count of ≤n distances → ∞  → `angle_B.md` (DONE, partial)
+  - Proved: counting k ≥ D − ⌊n/2⌋ + 1 (convex); slack versions (≥ ~n/2 distances occur ≤ λn times
+    for λ>1); cocircular / max-equidistance-degree-2 ⇒ k = D ≥ ⌊n/2⌋.
+  - NEW Cap Lemma: regular a-gon (a ≥ 6) + one point q in strictly convex position ⇒ any chord
+    distance |q−x| is the longest (or one of two longest) chords. (Exact check a < 600.)
+  - NEW Theorem E: convex n-set containing a regular a-gon (a ≥ 6) has k ≥ a − (n+1)/2.
+  - Open: stability of Altman (D ≤ ⌊n/2⌋+K ⇒ all but f(K) points on one regular N-gon,
+    N ≤ n+f(K)); Fishburn = K=0. Naive "contains regular (n−f(K))-gon" is FALSE.
+    Plus extended Cap Lemma for gapped vertex subsets. Together ⇒ k ≥ n/2 − O_K(1).
+  - Elementary; agent judges not prize-worthy alone. Next: stability for K = 1.
 - C: new classes beyond Thm 1.2/1.3  → `angle_C.md`
 - D: adversarial constructions / computation  → `angle_D.md` (DONE; code in `scripts/`)
   - No counterexample for n ≥ 5 (lattices Z[ω], Z[i], cyclotomic pools, n ≤ 60). Max of
