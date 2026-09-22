@@ -70,7 +70,7 @@ lemma inner_count_le (Y e e' : ℕ) (he : 1 ≤ e) (he' : 1 ≤ e') :
     rw [← sum_filter, sum_const, nsmul_eq_mul]
     have hfilt : (Icc 1 Y).filter (fun n => Nat.lcm e e' ∣ n)
         = (Ioc 0 Y).filter (fun n => Nat.lcm e e' ∣ n) := by
-      congr 1; ext n; simp only [mem_Icc, mem_Ioc]; omega
+      congr 1
     rw [hfilt, Nat.Ioc_filter_dvd_card_eq_div]
     have hL : 0 < Nat.lcm e e' := Nat.lcm_pos he he'
     have hG : 0 < Nat.gcd e e' := Nat.gcd_pos_of_pos_left _ he

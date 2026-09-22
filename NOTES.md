@@ -119,3 +119,16 @@ questions (divisor tails, powerful-number reps, binomial multiplicities, prime t
   1052 $10 (unitary perfect), 634 $25 (2 claims), 661 $50, then $100: 78 86 99 101 104 120
   132(“any nontrivial result”, 1 claim) 241 588 708(1 claim) 1029; $250: 50 52 77 165 595 671...
 - Agent triaging 132, 634, 708, 104, 661, 99, 101, 588, 470, 86, 241, 120.
+
+## Submission requirements (checked 2026-09-22)
+erdosproblems.com forum rules:
+- AI assistance allowed but MUST be disclosed.
+- Poster must understand/verify the math themselves, OR provide a sorry-free, bug-free Lean formalisation.
+- Long proofs → external PDF (not inline). Short proofs must be detailed; harder problem = higher bar.
+- Status updates: comment under the problem, or email Bloom (site owner). Needs a forum account.
+- Prizes (not applicable to 468): journal publication + proof of Erdős's offer; Combinatorics
+  Foundation / Steve Butler.
+Plan for 468: (1) finish sorry-free Lean (sum_T_le pending), public repo with E468.lean;
+(2) PDF/markdown write-up (WRITEUP_468.md) incl. all-N via Romanov (agent working);
+(3) user posts a proof claim on forum/thread/468 with AI disclosure + links;
+(4) optionally comment on formal-conjectures PR #4076 offering the disproof; optional arXiv note.
