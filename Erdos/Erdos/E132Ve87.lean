@@ -129,14 +129,11 @@ theorem mid_pair_real {u0 u1 v0 v1 b0 b1 D : ℝ} (_hD : 1 < D)
 `a₁, a₂` strictly on one side of the line `pw`, `b` strictly on the other, and `b` after `a₁, a₂`
 in angular order.  Then `w` has at most one `Δ₂`-neighbour other than `p`.
 
-TODO: prove.
-What's missing: frame at `p` with axis `w` and second coordinate multiplied by `σ`;
-`lemmaF_real` puts every other neighbour strictly on the `a`-side, `lemmaM_real` (reflected)
-gives distance `Δ` to `b`, then `mid_pair_real`.
-Acceptance: no `sorry`.
-Depends on: `mid_pair_real`, `Erdos132Layer.lemmaF_real`, `Erdos132Layer.lemmaM_real`. -/
+Proof: frame at `p` with axis `w` and second coordinate multiplied by `σ`; `lemmaF_real` puts
+every other neighbour strictly on the `a`-side, `lemmaM_real` (reflected) gives distance `Δ` to
+`b`, then `mid_pair_real`. -/
 theorem mid_nbr_unique {X : Finset Pt} {Δ Δ₂ : ℝ} (hT : TwoLargest X Δ Δ₂) {σ : ℝ}
-    (hσ : σ = 1 ∨ σ = -1) {p w a₁ a₂ b : Pt}
+    (hσ : σ = 1 ∨ σ = -1) {p w a₁ a₂ b : Pt} (hp : p ∈ X)
     (hw : w ∈ X) (ha₁ : a₁ ∈ X) (ha₂ : a₂ ∈ X) (hb : b ∈ X)
     (dw : dist p w = Δ₂) (da₁ : dist p a₁ = Δ₂) (da₂ : dist p a₂ = Δ₂) (db : dist p b = Δ₂)
     (hna : a₁ ≠ a₂)
@@ -144,7 +141,86 @@ theorem mid_nbr_unique {X : Finset Pt} {Δ Δ₂ : ℝ} (hT : TwoLargest X Δ Δ
     (o₁ : 0 < σ * orient p a₁ b) (o₂ : 0 < σ * orient p a₂ b)
     {r s : Pt} (hr : r ∈ X) (hs : s ∈ X) (hrp : r ≠ p) (hsp : s ≠ p)
     (dr : dist w r = Δ₂) (ds : dist w s = Δ₂) : r = s := by
-  sorry
+  have hσ2 : σ ^ 2 = 1 := by rcases hσ with h | h <;> rw [h] <;> norm_num
+  have hσ0 : σ ≠ 0 := by rintro rfl; norm_num at hσ2
+  have hpos := hT.pos
+  have hs0 : 0 < Δ₂ ^ 2 := by positivity
+  have hne := ne_of_dist_snd hpos dw
+  have hsq : sqd p w = Δ₂ ^ 2 := (dist_eq_iff_sqd hpos.le).1 dw
+  have hwp := sqd_pos_of_ne hne
+  set U : Pt → ℝ := fun P => fx p w P with hU
+  set V : Pt → ℝ := fun P => σ * fy p w P with hV
+  have N : ∀ P Q, (U P - U Q) ^ 2 + (V P - V Q) ^ 2 = sqd P Q / Δ₂ ^ 2 := fun P Q => by
+    rw [← frame_nsq hne hsq P Q]; simp only [hU, hV]; linear_combination
+      (fy p w P - fy p w Q) ^ 2 * hσ2
+  have m0 : U w = 1 := (frame_axis hne).1
+  have m1 : V w = 0 := by simp only [hV, (frame_axis hne).2, mul_zero]
+  have z0 : U p = 0 := (frame_base p w).1
+  have z1 : V p = 0 := by simp only [hV, (frame_base p w).2, mul_zero]
+  have unit : ∀ P, dist p P = Δ₂ → U P ^ 2 + V P ^ 2 = 1 := fun P hP => by
+    have := N P p
+    rw [z0, z1, sub_zero, sub_zero, sqd_comm, (dist_eq_iff_sqd hpos.le).1 hP,
+      div_self hs0.ne'] at this
+    exact this
+  have gap : ∀ P ∈ X, ∀ Q ∈ X, (U P - U Q) ^ 2 + (V P - V Q) ^ 2 ≤ 1 ∨
+      (U P - U Q) ^ 2 + (V P - V Q) ^ 2 = Δ ^ 2 / Δ₂ ^ 2 :=
+    fun P hP Q hQ => by rw [N]; exact hT.ngap hP hQ
+  have mx : ∀ P ∈ X, ∀ Q ∈ X, (U P - U Q) ^ 2 + (V P - V Q) ^ 2 ≤ Δ ^ 2 / Δ₂ ^ 2 :=
+    fun P hP Q hQ => by rw [N]; exact hT.nle hP hQ
+  have gw : ∀ P ∈ X, (U P - 1) ^ 2 + V P ^ 2 ≤ 1 ∨ (U P - 1) ^ 2 + V P ^ 2 = Δ ^ 2 / Δ₂ ^ 2 :=
+    fun P hP => by have := gap P hP w hw; rw [m0, m1, sub_zero] at this; exact this
+  have side : ∀ P, V P = σ * orient p w P / sqd p w := fun P => by
+    simp only [hV, fy]; ring
+  have vneg : ∀ P, σ * orient p w P < 0 → V P < 0 := fun P h => by
+    rw [side]; exact div_neg_of_neg_of_pos h hwp
+  have vpos : ∀ P, 0 < σ * orient p w P → 0 < V P := fun P h => by
+    rw [side]; exact div_pos h hwp
+  have crpos : ∀ P Q, 0 < σ * orient p P Q → 0 < U P * V Q - V P * U Q := fun P Q h => by
+    have e : U P * V Q - V P * U Q = σ * (fx p w P * fy p w Q - fy p w P * fx p w Q) := by
+      simp only [hU, hV]; ring
+    rw [e, frame_cross hne, ← mul_div_assoc]; exact div_pos h hwp
+  -- every other neighbour of `w` is strictly on the `a`-side and at distance `Δ` from `b`
+  have below : ∀ r ∈ X, r ≠ p → dist w r = Δ₂ →
+      (U r - 1) ^ 2 + V r ^ 2 = 1 ∧ V r < 0 ∧
+        (U r - U b) ^ 2 + (V r - V b) ^ 2 = Δ ^ 2 / Δ₂ ^ 2 := by
+    intro r hr hrp dr
+    have hr1 : (U r - 1) ^ 2 + V r ^ 2 = 1 := by
+      have := N r w
+      rw [m0, m1, sub_zero, sqd_comm, (dist_eq_iff_sqd hpos.le).1 dr, div_self hs0.ne'] at this
+      exact this
+    have hr0 : 0 < U r ^ 2 + V r ^ 2 := by
+      have := N r p
+      rw [z0, z1, sub_zero, sub_zero] at this
+      rw [this]; exact div_pos (sqd_pos_of_ne hrp) hs0
+    have hyr : V r < 0 := by
+      by_contra hyr; push Not at hyr
+      exact lemmaF_real hT.one_lt (unit a₁ da₁) (unit a₂ da₂) (unit b db) (vneg a₁ oa₁)
+        (vneg a₂ oa₂) (vpos b ob)
+        (fun h => hna (by
+          refine by_contra fun hne' => frame_inj hne hne' ⟨h.1, ?_⟩
+          exact mul_left_cancel₀ hσ0 h.2))
+        (crpos a₁ b o₁) (crpos a₂ b o₂) hr1 hr0 hyr (gap r hr a₁ ha₁) (gap r hr a₂ ha₂)
+        (gw a₁ ha₁) (gw a₂ ha₂) (mx a₁ ha₁ b hb) (mx a₂ ha₂ b hb)
+    refine ⟨hr1, hyr, (gap r hr b hb).resolve_left fun hle => ?_⟩
+    have := lemmaM_real (xa := U b) (ya := -V b) (xr := U r) (yr := -V r)
+      (by rw [neg_sq]; exact unit b db) (by linarith [vpos b ob]) (by rw [neg_sq]; exact hr1)
+      (by linarith) (by rw [neg_sq]; exact hr0)
+    have e : (U r - U b) ^ 2 + (-V r - -V b) ^ 2 = (U r - U b) ^ 2 + (V r - V b) ^ 2 := by ring
+    linarith
+  obtain ⟨r1, rneg, rb⟩ := below r hr hrp dr
+  obtain ⟨s1, sneg, sb⟩ := below s hs hsp ds
+  have gp : ∀ P ∈ X, (1 + (U P - 1)) ^ 2 + V P ^ 2 ≤ 1 ∨
+      (1 + (U P - 1)) ^ 2 + V P ^ 2 = Δ ^ 2 / Δ₂ ^ 2 := fun P hP => by
+    have := gap P hP p hp
+    rw [z0, z1, sub_zero, sub_zero] at this
+    rw [show 1 + (U P - 1) = U P by ring]; exact this
+  have e1 : ∀ P, (1 + (U P - 1) - U b) ^ 2 = (U P - U b) ^ 2 := fun P => by ring
+  obtain ⟨h0, h1⟩ := mid_pair_real hT.one_lt r1 s1
+    (unit b db) rneg sneg (vpos b ob) (by rw [e1]; exact rb) (by rw [e1]; exact sb)
+    (gp r hr) (gp s hs)
+  by_contra hrs
+  exact frame_inj hne hrs ⟨by simp only [hU] at h0; linarith,
+    mul_left_cancel₀ hσ0 h1⟩
 
 /-! ## Angular order and core vertices of degree 4 -/
 
