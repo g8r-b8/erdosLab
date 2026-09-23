@@ -330,6 +330,59 @@ theorem mem_edges {z : Sym2 Pt} (hz : z ∈ edges X) : ¬ z.IsDiag ∧ ∀ p ∈
   simp only [mem_filter, mem_sym2_iff] at hz
   exact ⟨hz.1.2, hz.1.1⟩
 
+/-! ### The ball polygon `K`: convex, compact, interior, normals -/
+
+theorem mem_KBall {y : Pt} : y ∈ KBall X ↔ ∀ w ∈ X, dist y w ≤ dist2 X := by
+  unfold KBall; simp [Metric.mem_closedBall]
+
+theorem KBall_convex (X : Finset Pt) : Convex ℝ (KBall X) :=
+  convex_iInter₂ fun _ _ => convex_closedBall _ _
+
+theorem KBall_isCompact {X : Finset Pt} (hX : X.Nonempty) : IsCompact (KBall X) := by
+  obtain ⟨w, hw⟩ := hX
+  refine Metric.isCompact_of_isClosed_isBounded
+    (isClosed_biInter fun _ _ => Metric.isClosed_closedBall) ?_
+  exact (Metric.isBounded_closedBall (x := w) (r := dist2 X)).subset
+    (fun y hy => Metric.mem_closedBall.2 ((mem_KBall.1 hy) w hw))
+
+/-- Two distinct points of `K` give an interior point (their midpoint). -/
+theorem KBall_interior_nonempty {a b : Pt} (ha : a ∈ KBall X) (hb : b ∈ KBall X) (hab : a ≠ b) :
+    (interior (KBall X)).Nonempty := by
+  set m : Pt := (1 / 2 : ℝ) • (a + b)
+  have hsub : (⋂ w ∈ X, Metric.ball w (dist2 X)) ⊆ KBall X :=
+    Set.iInter₂_mono fun _ _ => Metric.ball_subset_closedBall
+  have hopen : IsOpen (⋂ w ∈ X, Metric.ball w (dist2 X)) :=
+    isOpen_biInter_finset fun _ _ => Metric.isOpen_ball
+  refine ⟨m, interior_mono hsub (hopen.interior_eq.symm ▸ ?_)⟩
+  simp only [Set.mem_iInter, Metric.mem_ball]
+  intro w hw
+  have h1 := (mem_KBall.1 ha) w hw
+  have h2 := (mem_KBall.1 hb) w hw
+  have hd : 0 < dist a b := dist_pos.2 hab
+  have hΔ : 0 ≤ dist2 X := dist2_nonneg X
+  have e1 := dist_sq_pt a w
+  have e2 := dist_sq_pt b w
+  have e3 := dist_sq_pt a b
+  have em : dist m w ^ 2 = (dist a w ^ 2 + dist b w ^ 2) / 2 - dist a b ^ 2 / 4 := by
+    rw [dist_sq_pt, e1, e2, e3]; simp only [m, PiLp.smul_apply, PiLp.add_apply, smul_eq_mul]; ring
+  have : dist m w ^ 2 < dist2 X ^ 2 := by
+    rw [em]; nlinarith [dist_nonneg (x := a) (y := w), dist_nonneg (x := b) (y := w)]
+  exact lt_of_pow_lt_pow_left₀ 2 hΔ this
+
+/-- `−(w − v)` is an outward normal of `K` at `v ∈ K` when `|vw| = Δ₂`, `w ∈ X`. -/
+theorem neg_mem_normalCone {v w : Pt} (hv : v ∈ KBall X) (hw : w ∈ X) (hvw : dist v w = dist2 X)
+    (c : ℝ) (hc : 0 ≤ c) : -(c • (w - v)) ∈ normalCone (KBall X) v := by
+  intro y hy
+  have h1 := (mem_KBall.1 hy) w hw
+  have h2 : dist y w ^ 2 ≤ dist v w ^ 2 := by
+    rw [hvw]; exact pow_le_pow_left₀ dist_nonneg h1 2
+  rw [dist_sq_pt, dist_sq_pt] at h2
+  rw [inner_neg_right, inner_smul_right, inner_pt]
+  simp only [PiLp.sub_apply]
+  have : 0 ≤ (y 0 - v 0) * (w 0 - v 0) + (y 1 - v 1) * (w 1 - v 1) := by
+    nlinarith [sq_nonneg (y 0 - v 0), sq_nonneg (y 1 - v 1)]
+  nlinarith
+
 /-! ## §6 Region I: `τ ≤ √3/2 − 2β` -/
 
 /-- **[C4]** the elevation window is `< 60°`: `arcsin(√3/2 − 2β) + arcsin β < π/3`.
@@ -630,6 +683,82 @@ theorem c5_mixed : 2 * π * 10 / 0.886 < 71 := by
   have hp := Real.pi_lt_d4
   rw [div_lt_iff₀ (by norm_num)]; linarith
 
+/-- `arcsin β < π/3`. -/
+theorem arcsin_beta_lt : Real.arcsin beta < π / 3 := by
+  have h3 : (1.7 : ℝ) < √3 := by rw [Real.lt_sqrt (by norm_num)]; norm_num
+  rw [Real.arcsin_lt_iff_lt_sin ⟨by unfold beta; norm_num, by unfold beta; norm_num⟩
+    ⟨by linarith [Real.pi_pos], by linarith [Real.pi_pos]⟩, Real.sin_pi_div_three]
+  unfold beta; linarith
+
+/-- **Grid packing**: `1`-separated points within distance `2` of `x` number at most `81`
+(cells of side `1/2`). -/
+theorem card_sep_le_81 {P : Finset Pt} (hP : ∀ a ∈ P, ∀ b ∈ P, a ≠ b → 1 ≤ dist a b) (x : Pt)
+    (hx : ∀ a ∈ P, dist a x ≤ 2) : P.card ≤ 81 := by
+  let f : Pt → ℤ × ℤ := fun a => (⌊2 * (a 0 - x 0)⌋, ⌊2 * (a 1 - x 1)⌋)
+  have hbox : ∀ a ∈ P, f a ∈ (Icc (-4 : ℤ) 4) ×ˢ (Icc (-4 : ℤ) 4) := by
+    intro a ha
+    have hd := hx a ha
+    have hsq := dist_sq_pt a x
+    have h4 : dist a x ^ 2 ≤ 4 := by nlinarith [dist_nonneg (x := a) (y := x)]
+    have b0 : |a 0 - x 0| ≤ 2 := by
+      rw [abs_le]; constructor <;> nlinarith [sq_nonneg (a 1 - x 1)]
+    have b1 : |a 1 - x 1| ≤ 2 := by
+      rw [abs_le]; constructor <;> nlinarith [sq_nonneg (a 0 - x 0)]
+    rw [abs_le] at b0 b1
+    simp only [f, mem_product, mem_Icc]
+    refine ⟨⟨?_, ?_⟩, ?_, ?_⟩
+    · rw [Int.le_floor]; push_cast; linarith
+    · rw [Int.floor_le_iff]; push_cast; linarith
+    · rw [Int.le_floor]; push_cast; linarith
+    · rw [Int.floor_le_iff]; push_cast; linarith
+  have := card_le_card_of_injOn f hbox (fun a ha b hb e => by
+    by_contra hab
+    have h1 := hP a ha b hb hab
+    simp only [f, Prod.mk.injEq] at e
+    have c0 := Int.floor_le (2 * (a 0 - x 0))
+    have c1 := Int.lt_floor_add_one (2 * (a 0 - x 0))
+    have c2 := Int.floor_le (2 * (b 0 - x 0))
+    have c3 := Int.lt_floor_add_one (2 * (b 0 - x 0))
+    have c4 := Int.floor_le (2 * (a 1 - x 1))
+    have c5 := Int.lt_floor_add_one (2 * (a 1 - x 1))
+    have c6 := Int.floor_le (2 * (b 1 - x 1))
+    have c7 := Int.lt_floor_add_one (2 * (b 1 - x 1))
+    rw [e.1] at c0 c1; rw [e.2] at c4 c5
+    have d0 : |a 0 - b 0| < 1 / 2 := by rw [abs_lt]; constructor <;> linarith
+    have d1 : |a 1 - b 1| < 1 / 2 := by rw [abs_lt]; constructor <;> linarith
+    have hsq := dist_sq_pt a b
+    have : dist a b ^ 2 < 1 := by
+      rw [hsq]
+      have := sq_abs (a 0 - b 0); have := sq_abs (a 1 - b 1)
+      nlinarith [abs_nonneg (a 0 - b 0), abs_nonneg (a 1 - b 1)]
+    nlinarith [dist_nonneg (x := a) (y := b)])
+  simpa using this
+
+/-- Data of a mixed T-edge. -/
+theorem mixedT_data {F : DirField X} {e : Sym2 Pt} (he : e ∈ mixedT X F) (h1 : minDist X = 1) :
+    ∃ v w, e = s(v, w) ∧ v ∈ Sset X ∧ v ∉ Dset X ∧ w ∈ Sset X ∧ w ∈ Dset X ∧ dist v w = 1 ∧
+      IsTEdge F v w ∧ ang (F.u v) (F.u w) ≤ beta := by
+  obtain ⟨hT, v, w, rfl, hvD, hwD⟩ := mem_filter.1 he
+  obtain ⟨hg, hTall⟩ := mem_filter.1 hT
+  obtain ⟨hee, hgood⟩ := mem_filter.1 hg
+  obtain ⟨-, hS⟩ := mem_edges hee
+  have hd : pairDist s(v, w) = minDist X := (mem_filter.1 hee).2
+  exact ⟨v, w, rfl, hS v (Sym2.mem_mk_left _ _), hvD, hS w (Sym2.mem_mk_right _ _), hwD,
+    by rw [← h1, ← hd]; rfl, hTall v w rfl, hgood v w rfl⟩
+
+/-- At most one T-neighbour on each side (elevation window `(0, β)`). -/
+theorem tnbr_unique (hX : Normal X) {F : DirField X} {v w₁ w₂ : Pt} (hv : v ∈ Sset X)
+    (hw₁ : w₁ ∈ Sset X) (hw₂ : w₂ ∈ Sset X) (d₁ : dist v w₁ = 1) (d₂ : dist v w₂ = 1)
+    (t₁ : IsTEdge F v w₁) (t₂ : IsTEdge F v w₂) {σ : ℝ}
+    (s₁ : 0 < σ * det2 (F.u v) (w₁ - v)) (s₂ : 0 < σ * det2 (F.u v) (w₂ - v)) : w₁ = w₂ := by
+  have n₁ : ‖w₁ - v‖ = 1 := by rw [← dist_eq_norm, dist_comm, d₁]
+  have n₂ : ‖w₂ - v‖ = 1 := by rw [← dist_eq_norm, dist_comm, d₂]
+  have hc := same_side_close (F.norm_u hv) n₁ n₂ s₁ s₂ (L := 0) (U := beta)
+    ⟨t₁.1.le, t₁.2.1.le⟩ ⟨t₂.1.le, t₂.2.1.le⟩
+    (by rw [Real.arcsin_zero, sub_zero]; exact arcsin_beta_lt)
+  rw [sub_sub_sub_cancel_right, ← dist_eq_norm] at hc
+  exact eq_of_dist_lt_one hX.minDist_eq (Sset_sub hw₁) (Sset_sub hw₂) hc
+
 /-- **Lemma 7.1**: for a T-edge `vz` with `v ∈ S ∖ D`, `z ∈ S ∩ D`, the boundary arc of `K` of
 length 2 from `v` on `z`'s side has turning `≥ t − arcsin β`.
 
@@ -647,15 +776,96 @@ theorem lemma71 (hX : Normal X) (F : DirField X) (hτ : √3 / 2 + 3 * beta ≤ 
       tgap X - Real.arcsin beta ≤ turning (KBall X) (γ '' Set.Icc 0 2) := by
   sorry
 
-/-- **Mixed T-edges** `< 71` in Region II (multiplicity `M ≤ 10`, Lemma 3.4).
+/-- **Mixed T-edges** `≤ 1200` in Region II.
 
-TODO: prove.
-Acceptance: no `sorry`.
-Depends on: `lemma71`, `turning_sum_le`, `card_le_arcLength`, `T1`, `c5_tgap`, `c5_mixed`.
-Difficulty M (given the lemmas). -/
+**Statement changed** (was `≤ 71`): the paper's `71` uses the arc-length multiplicity `M ≤ 10`
+(points of `S ∖ D` are `1`-separated in arc length along `∂K`), which needs an arc-length
+parametrisation of `∂K` that `lemma71`'s statement does not provide.  From `lemma71` as stated,
+the arc from `v` only gives `|x − v| ≤ 2` for `x` on it, and a grid packing gives
+multiplicity `≤ 81` K-ends per point, hence `#mixed ≤ 2 · 2π·81/0.886 < 1200`.  The constant is
+absorbed in `regionII_eS_le` (unchanged statement) using the explicit bad-edge constants.
+
+TODO: none (inherits `lemma71`, `turning_sum_le`).
+Acceptance: no `sorry` (inherits).
+Depends on: `lemma71`, `turning_sum_le`, `card_sep_le_81`, `tnbr_unique`, `c5_tgap`. -/
 theorem card_mixedT_le (hX : Normal X) (F : DirField X) (hτ : √3 / 2 + 3 * beta ≤ tau X) :
-    ((mixedT X F).card : ℝ) ≤ 71 := by
-  sorry
+    ((mixedT X F).card : ℝ) ≤ 1200 := by
+  classical
+  have h1 := hX.minDist_eq
+  let Dat : Sym2 Pt → Pt → Pt → Prop := fun e v w => e = s(v, w) ∧ v ∈ Sset X ∧ v ∉ Dset X ∧
+    w ∈ Sset X ∧ w ∈ Dset X ∧ dist v w = 1 ∧ IsTEdge F v w ∧ ang (F.u v) (F.u w) ≤ beta
+  let kend : Sym2 Pt → Pt := fun e => if h : ∃ v w, Dat e v w then h.choose else 0
+  have hk : ∀ e ∈ mixedT X F, ∃ w, Dat e (kend e) w := by
+    intro e he
+    have h : ∃ v w, Dat e v w := mixedT_data he h1
+    have : kend e = h.choose := dif_pos h
+    rw [this]; exact h.choose_spec
+  set A := (mixedT X F).image kend
+  -- step 1: at most two mixed edges per K-end
+  have hA : (mixedT X F).card ≤ 2 * A.card := by
+    refine card_le_mul_card_image_of_maps_to (fun e he => mem_image_of_mem _ he) 2 ?_
+    intro v _
+    set G := (mixedT X F).filter (fun e => kend e = v)
+    let P : ℝ → Sym2 Pt → Prop := fun σ e => ∃ w, Dat e v w ∧ 0 < σ * det2 (F.u v) (w - v)
+    have hsplit : G ⊆ G.filter (P 1) ∪ G.filter (P (-1)) := by
+      intro e he
+      obtain ⟨he', hkv⟩ := mem_filter.1 he
+      obtain ⟨w, hd⟩ := hk e he'
+      rw [hkv] at hd
+      obtain ⟨-, hv, -, -, -, hvw, hT, -⟩ := id hd
+      have n := inner_sq_add_det_sq (e := w - v) (F.norm_u hv)
+      rw [← dist_eq_norm, dist_comm, hvw] at n
+      have hne : det2 (F.u v) (w - v) ≠ 0 := by
+        intro h0; rw [h0] at n
+        have := hT.2.1; unfold beta at this; nlinarith [hT.1]
+      rcases hne.lt_or_gt with h | h
+      · exact mem_union.2 (Or.inr (mem_filter.2 ⟨he, w, hd, by linarith⟩))
+      · exact mem_union.2 (Or.inl (mem_filter.2 ⟨he, w, hd, by linarith⟩))
+    have hside : ∀ σ, (G.filter (P σ)).card ≤ 1 := by
+      intro σ
+      refine card_le_one.2 fun e₁ he₁ e₂ he₂ => ?_
+      obtain ⟨w₁, ⟨r₁, hv, -, hw₁, -, d₁, t₁, -⟩, s₁⟩ := (mem_filter.1 he₁).2
+      obtain ⟨w₂, ⟨r₂, -, -, hw₂, -, d₂, t₂, -⟩, s₂⟩ := (mem_filter.1 he₂).2
+      rw [r₁, r₂, tnbr_unique hX hv hw₁ hw₂ d₁ d₂ t₁ t₂ s₁ s₂]
+    calc G.card ≤ (G.filter (P 1) ∪ G.filter (P (-1))).card := card_le_card hsplit
+      _ ≤ (G.filter (P 1)).card + (G.filter (P (-1))).card := card_union_le _ _
+      _ ≤ 2 := by linarith [hside 1, hside (-1)]
+  -- step 2: the arcs of Lemma 7.1 and the multiplicity bound
+  let Arc : Pt → Prop := fun v => ∃ γ : ℝ → Pt, LipschitzWith 1 γ ∧ γ 0 = v ∧
+    γ '' Set.Icc 0 2 ⊆ frontier (KBall X) ∧
+    tgap X - Real.arcsin beta ≤ turning (KBall X) (γ '' Set.Icc 0 2)
+  have hArc : ∀ v ∈ A, Arc v ∧ v ∈ Sset X := by
+    intro v hv
+    obtain ⟨e, he, rfl⟩ := mem_image.1 hv
+    obtain ⟨w, -, hv, hvD, hw, hwD, hvw, hT, -⟩ := hk e he
+    exact ⟨lemma71 hX F hτ hv hvD hw hwD hvw hT, hv⟩
+  let Γ : Pt → Set Pt := fun v => if h : Arc v then h.choose '' Set.Icc 0 2 else ∅
+  have hΓ : ∀ v ∈ A, Γ v ⊆ frontier (KBall X) ∧ tgap X - Real.arcsin beta ≤ turning (KBall X) (Γ v)
+      ∧ ∀ x ∈ Γ v, dist v x ≤ 2 := by
+    intro v hv
+    have h := (hArc v hv).1
+    have e : Γ v = h.choose '' Set.Icc 0 2 := dif_pos h
+    obtain ⟨hL, h0, hsub, htu⟩ := h.choose_spec
+    rw [e]
+    refine ⟨hsub, htu, ?_⟩
+    rintro x ⟨σ, hσ, rfl⟩
+    have := hL.dist_le_mul σ 0
+    rw [h0, NNReal.coe_one, one_mul, Real.dist_eq, sub_zero, abs_of_nonneg hσ.1] at this
+    rw [dist_comm]; linarith [hσ.2]
+  obtain ⟨a, ha⟩ : X.Nonempty := card_pos.1 (by linarith [hX.four_le])
+  have hsum := turning_sum_le (KBall_convex X) (KBall_isCompact ⟨a, ha⟩) A Γ
+    (fun v hv => (hΓ v hv).1) 81 (fun x => by
+      refine card_sep_le_81 (fun a ha b hb hab => ?_) x (fun a ha => ?_)
+      · exact one_le_dist h1 (Sset_sub (hArc a (mem_filter.1 ha).1).2)
+          (Sset_sub (hArc b (mem_filter.1 hb).1).2) hab
+      · exact (hΓ a (mem_filter.1 ha).1).2.2 x (mem_filter.1 ha).2)
+  have hlow : ∑ v ∈ A, (0.886 : ℝ) ≤ ∑ v ∈ A, turning (KBall X) (Γ v) :=
+    sum_le_sum fun v hv => (c5_tgap hX hτ).trans (hΓ v hv).2.1
+  rw [sum_const, nsmul_eq_mul] at hlow
+  have hπ := Real.pi_lt_d4
+  have hAc : (A.card : ℝ) * 0.886 ≤ 2 * π * 81 := by push_cast at hsum; linarith
+  have hA' : ((mixedT X F).card : ℝ) ≤ 2 * A.card := by exact_mod_cast hA
+  nlinarith
 
 /-! ## §7.2 Region II -/
 
@@ -1254,13 +1464,6 @@ theorem tstep_flip {F : DirField X} {p q : Pt} (hp : p ∈ Sset X) (hq : q ∈ S
   rw [lt_abs] at hc
   rcases hc with hc | hc <;> nlinarith
 
-/-- `arcsin β < π/3`. -/
-theorem arcsin_beta_lt : Real.arcsin beta < π / 3 := by
-  have h3 : (1.7 : ℝ) < √3 := by rw [Real.lt_sqrt (by norm_num)]; norm_num
-  rw [Real.arcsin_lt_iff_lt_sin ⟨by unfold beta; norm_num, by unfold beta; norm_num⟩
-    ⟨by linarith [Real.pi_pos], by linarith [Real.pi_pos]⟩, Real.sin_pi_div_three]
-  unfold beta; linarith
-
 /-- The pure right-T-neighbour relation of a row. -/
 def RowR (F : DirField X) (a b : Pt) : Prop := IsSideT F (-1) a b ∧ (a ∈ Dset X ↔ b ∈ Dset X)
 
@@ -1460,12 +1663,12 @@ theorem ownership_res (hX : Normal X) (F : DirField X) (hτ₁ : Real.cos (beta 
   have : (3 : ℝ) * (goodPure X F).card ≤ 4 * (Sset X).card := by exact_mod_cast this
   linarith
 
-/-- Region II wiring: `e(S) ≤ goodPure + 71 + cBad`.
+/-- Region II wiring: `e(S) ≤ goodPure + 1200 + 1.837·10⁷ ≤ goodPure + cBad + 100`.
 
 TODO: none.
 Acceptance: no `sorry` (inherits).
 Depends on: `card_good_add_bad`, `card_good_le_pure_add_mixed`, `card_mixedT_le`,
-`card_bad_le`. -/
+`bad_subset`, `card_badKK_le`, `card_badDD_le`, `card_badC1_le`, `card_badC2_le`. -/
 theorem regionII_eS_le (hX : Normal X) (F : DirField X) (hτ : √3 / 2 + 3 * beta ≤ tau X) :
     (eS X : ℝ) ≤ (goodPure X F).card + (cBad + 100) := by
   have h1 : (eS X : ℝ) = (good X F).card + (bad X F).card := by
@@ -1473,7 +1676,19 @@ theorem regionII_eS_le (hX : Normal X) (F : DirField X) (hτ : √3 / 2 + 3 * be
   have h2 : ((good X F).card : ℝ) ≤ (goodPure X F).card + (mixedT X F).card := by
     exact_mod_cast card_good_le_pure_add_mixed F
   have h3 := card_mixedT_le hX F hτ
-  have h4 := card_bad_le hX F
+  -- the explicit bad-edge constants (as in `card_bad_le`), to absorb the mixed count
+  have h := card_le_card (bad_subset F)
+  have k1 := card_union_le (badKK X F ∪ badDD X F ∪ badC1 X F) (badC2 X F)
+  have k2 := card_union_le (badKK X F ∪ badDD X F) (badC1 X F)
+  have k3 := card_union_le (badKK X F) (badDD X F)
+  have e1 := card_badKK_le hX F
+  have e2 := card_badDD_le hX F
+  have e3 := card_badC1_le hX F
+  have e4 := card_badC2_le hX F
+  have h4 : ((bad X F).card : ℝ) ≤ (badKK X F).card + (badDD X F).card + (badC1 X F).card +
+      (badC2 X F).card := by
+    exact_mod_cast h.trans (k1.trans (by omega))
+  unfold cBad
   linarith
 
 /-- **Region II-rest**: `e(S) ≤ (5/4)|S| + C` (gives `36n/25`). -/
@@ -1643,59 +1858,6 @@ theorem corner_lemma (hX : Normal X) (F : DirField X) (hτ₁ : √3 / 2 - 2 * b
     have : Real.cos (3 * π / 14) < tau X := c62.trans hτ₁
     nlinarith
 
-
-/-! ### The ball polygon `K`: convex, compact, interior, normals -/
-
-theorem mem_KBall {y : Pt} : y ∈ KBall X ↔ ∀ w ∈ X, dist y w ≤ dist2 X := by
-  unfold KBall; simp [Metric.mem_closedBall]
-
-theorem KBall_convex (X : Finset Pt) : Convex ℝ (KBall X) :=
-  convex_iInter₂ fun _ _ => convex_closedBall _ _
-
-theorem KBall_isCompact {X : Finset Pt} (hX : X.Nonempty) : IsCompact (KBall X) := by
-  obtain ⟨w, hw⟩ := hX
-  refine Metric.isCompact_of_isClosed_isBounded
-    (isClosed_biInter fun _ _ => Metric.isClosed_closedBall) ?_
-  exact (Metric.isBounded_closedBall (x := w) (r := dist2 X)).subset
-    (fun y hy => Metric.mem_closedBall.2 ((mem_KBall.1 hy) w hw))
-
-/-- Two distinct points of `K` give an interior point (their midpoint). -/
-theorem KBall_interior_nonempty {a b : Pt} (ha : a ∈ KBall X) (hb : b ∈ KBall X) (hab : a ≠ b) :
-    (interior (KBall X)).Nonempty := by
-  set m : Pt := (1 / 2 : ℝ) • (a + b)
-  have hsub : (⋂ w ∈ X, Metric.ball w (dist2 X)) ⊆ KBall X :=
-    Set.iInter₂_mono fun _ _ => Metric.ball_subset_closedBall
-  have hopen : IsOpen (⋂ w ∈ X, Metric.ball w (dist2 X)) :=
-    isOpen_biInter_finset fun _ _ => Metric.isOpen_ball
-  refine ⟨m, interior_mono hsub (hopen.interior_eq.symm ▸ ?_)⟩
-  simp only [Set.mem_iInter, Metric.mem_ball]
-  intro w hw
-  have h1 := (mem_KBall.1 ha) w hw
-  have h2 := (mem_KBall.1 hb) w hw
-  have hd : 0 < dist a b := dist_pos.2 hab
-  have hΔ : 0 ≤ dist2 X := dist2_nonneg X
-  have e1 := dist_sq_pt a w
-  have e2 := dist_sq_pt b w
-  have e3 := dist_sq_pt a b
-  have em : dist m w ^ 2 = (dist a w ^ 2 + dist b w ^ 2) / 2 - dist a b ^ 2 / 4 := by
-    rw [dist_sq_pt, e1, e2, e3]; simp only [m, PiLp.smul_apply, PiLp.add_apply, smul_eq_mul]; ring
-  have : dist m w ^ 2 < dist2 X ^ 2 := by
-    rw [em]; nlinarith [dist_nonneg (x := a) (y := w), dist_nonneg (x := b) (y := w)]
-  exact lt_of_pow_lt_pow_left₀ 2 hΔ this
-
-/-- `−(w − v)` is an outward normal of `K` at `v ∈ K` when `|vw| = Δ₂`, `w ∈ X`. -/
-theorem neg_mem_normalCone {v w : Pt} (hv : v ∈ KBall X) (hw : w ∈ X) (hvw : dist v w = dist2 X)
-    (c : ℝ) (hc : 0 ≤ c) : -(c • (w - v)) ∈ normalCone (KBall X) v := by
-  intro y hy
-  have h1 := (mem_KBall.1 hy) w hw
-  have h2 : dist y w ^ 2 ≤ dist v w ^ 2 := by
-    rw [hvw]; exact pow_le_pow_left₀ dist_nonneg h1 2
-  rw [dist_sq_pt, dist_sq_pt] at h2
-  rw [inner_neg_right, inner_smul_right, inner_pt]
-  simp only [PiLp.sub_apply]
-  have : 0 ≤ (y 0 - v 0) * (w 0 - v 0) + (y 1 - v 1) * (w 1 - v 1) := by
-    nlinarith [sq_nonneg (y 0 - v 0), sq_nonneg (y 1 - v 1)]
-  nlinarith
 
 /-- **At most 6 corner vertices** (their normal cones of `K` are wider than `2π/7` and
 interior-disjoint).
