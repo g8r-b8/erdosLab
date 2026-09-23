@@ -102,7 +102,9 @@ n pairs? Must the number of such distances → ∞ (perhaps ≥ n^{1−o(1)})?
   Fishburn "Convex polygons with few intervertex distances" CGTA 5 (1995) 65–93 https://www.sciencedirect.com/science/article/pii/092577219400020V
 - Referee gaps closed → WRITEUP_A2.md + scripts/writeup_a2_checks.py — DONE (e76d1a7): all gaps closed, 58 exact
   interval checks pass, ~90% confidence; weakest spots §7.2 pairing and §8 Step 4. Referee's citation complaint was
-  wrong (CDL [23] = Ve87). Still needs an independent read and someone to see Ve87's original.
+  wrong (CDL [23] = Ve87). Second independent referee (REFEREE2_A2.md, 5b87a82): CORRECT — §7.2 exhaustively
+  checked (max exactly 4/3), §8 Step 4 adversarially tight (max μ(Δ₂)−n = 0), assembly exact. Ve87's 3n/2 corroborated
+  by Pach's Handbook ch. 1; original still unread (DOI 10.1016/0012-365X(87)90027-6 — ask the user for the PDF).
 - Convex n = 7 (and maybe 11) → angle_B3.md — DONE (f8b09f7). Convex n = 7 ⇒ k ≥ 3 (k = number of rare distances), proved two ways: from the literature
   ([EF95b] r₂ ≤ n plus Altman), and self-contained. **n = 11 ⇒ k ≥ 3: NEW, computer-assisted** — a SAT refutation of ordinal
   distance-rank colourings under the convex-quadrilateral inequality only, with the DRUP proof checked by our own RUP checker.
