@@ -310,26 +310,121 @@ theorem two_mul_le_dirMeasure_window {a : Pt} (ha : ‖a‖ = 1) {ε : ℝ} (hε
 /-- A unit vector in the cap of `(a, b)` (`det(a, b) > 0`) is between them. -/
 theorem det2_nonneg_of_mem_cap {a b m : Pt} (ha : ‖a‖ = 1) (hb : ‖b‖ = 1) (hm : ‖m‖ = 1)
     (hab : 0 < det2 a b) (h : m ∈ cap a b) : 0 ≤ det2 a m ∧ 0 ≤ det2 m b := by
-  sorry
+  have ha2 : a 0 ^ 2 + a 1 ^ 2 = 1 := by rw [← norm_sq_coord, ha]; norm_num
+  have hb2 : b 0 ^ 2 + b 1 ^ 2 = 1 := by rw [← norm_sq_coord, hb]; norm_num
+  have hm2 : m 0 ^ 2 + m 1 ^ 2 = 1 := by rw [← norm_sq_coord, hm]; norm_num
+  set D := det2 a b
+  set x := det2 m b
+  set y := det2 a m
+  set k := inner ℝ a b
+  have hcap : 1 + k ≤ inner ℝ m (a + b) := h
+  have E1 : D * inner ℝ m (a + b) = (x + y) * (1 + k) := by
+    simp only [D, x, y, k, det2, inner_coord, PiLp.add_apply]
+    linear_combination (m 0 * b 1 - m 1 * b 0) * ha2 + (a 0 * m 1 - a 1 * m 0) * hb2
+  have E2 : D ^ 2 = x ^ 2 + y ^ 2 + 2 * x * y * k := by
+    simp only [D, x, y, k, det2, inner_coord]
+    linear_combination (-(a 0 * b 1 - a 1 * b 0) ^ 2) * hm2 +
+      (m 0 * b 1 - m 1 * b 0) ^ 2 * ha2 + (a 0 * m 1 - a 1 * m 0) ^ 2 * hb2
+  have hl := lagrange b a
+  rw [ha, hb] at hl
+  have hk1 : k ^ 2 < 1 := by
+    have : inner ℝ b a = k := real_inner_comm a b
+    rw [this] at hl; nlinarith
+  have hk0 : 0 < 1 + k := by nlinarith
+  have hk2 : k < 1 := by nlinarith
+  have hxy : D ≤ x + y := by
+    have : D * (1 + k) ≤ (x + y) * (1 + k) := by rw [← E1]; exact mul_le_mul_of_nonneg_left hcap hab.le
+    exact le_of_mul_le_mul_right this hk0
+  have hxy2 : 0 ≤ x * y := by nlinarith
+  constructor
+  · show 0 ≤ y
+    by_contra hy; push Not at hy; nlinarith
+  · show 0 ≤ x
+    by_contra hx; push Not at hx; nlinarith
 
 /-- A unit vector between `a` and `b` (`det(a, b) > 0`) is in their cap. -/
 theorem mem_cap_of_det2 {a b m : Pt} (ha : ‖a‖ = 1) (hb : ‖b‖ = 1) (hm : ‖m‖ = 1)
     (hab : 0 < det2 a b) (h1 : 0 ≤ det2 a m) (h2 : 0 ≤ det2 m b) : m ∈ cap a b := by
-  sorry
+  have ha2 : a 0 ^ 2 + a 1 ^ 2 = 1 := by rw [← norm_sq_coord, ha]; norm_num
+  have hb2 : b 0 ^ 2 + b 1 ^ 2 = 1 := by rw [← norm_sq_coord, hb]; norm_num
+  have hm2 : m 0 ^ 2 + m 1 ^ 2 = 1 := by rw [← norm_sq_coord, hm]; norm_num
+  set D := det2 a b
+  set x := det2 m b
+  set y := det2 a m
+  set k := inner ℝ a b
+  have E1 : D * inner ℝ m (a + b) = (x + y) * (1 + k) := by
+    simp only [D, x, y, k, det2, inner_coord, PiLp.add_apply]
+    linear_combination (m 0 * b 1 - m 1 * b 0) * ha2 + (a 0 * m 1 - a 1 * m 0) * hb2
+  have E2 : D ^ 2 = x ^ 2 + y ^ 2 + 2 * x * y * k := by
+    simp only [D, x, y, k, det2, inner_coord]
+    linear_combination (-(a 0 * b 1 - a 1 * b 0) ^ 2) * hm2 +
+      (m 0 * b 1 - m 1 * b 0) ^ 2 * ha2 + (a 0 * m 1 - a 1 * m 0) ^ 2 * hb2
+  have hk : k ≤ 1 := by
+    have := real_inner_le_norm a b; rw [ha, hb] at this; linarith
+  have hl := lagrange b a
+  rw [ha, hb] at hl
+  have hk0 : 0 ≤ 1 + k := by
+    have : inner ℝ b a = k := real_inner_comm a b
+    rw [this] at hl; nlinarith
+  have hxy2 : D ^ 2 ≤ (x + y) ^ 2 := by nlinarith [mul_nonneg h2 h1]
+  have hxy : D ≤ x + y := (sq_le_sq₀ hab.le (by linarith)).1 hxy2
+  show 1 + k ≤ inner ℝ m (a + b)
+  have : D * (1 + k) ≤ D * inner ℝ m (a + b) := by rw [E1]; nlinarith
+  exact le_of_mul_le_mul_left this hab
 
 /-- Two unit vectors `u, w` on the clockwise side of `n`, with `u` closer to `n`: `u` is
 counter-clockwise from `w`. -/
 theorem det2_tail {u w n : Pt} (hu : ‖u‖ = 1) (hw : ‖w‖ = 1) (hn : ‖n‖ = 1)
-    (hun : 0 ≤ det2 u n) (hwn : 0 ≤ det2 w n) (huw : inner ℝ w n ≤ inner ℝ u n)
-    (hw1 : -1 < inner ℝ w n) : 0 ≤ det2 w u := by
-  sorry
+    (hun : 0 ≤ det2 u n) (hwn : 0 ≤ det2 w n) (huw : inner ℝ w n ≤ inner ℝ u n) :
+    0 ≤ det2 w u := by
+  have hl := lagrange u n
+  have hl' := lagrange w n
+  rw [hu, hn, det2_swap u n] at hl; rw [hw, hn, det2_swap w n] at hl'
+  set a1 := inner ℝ u n
+  set b1 := inner ℝ w n
+  set s := det2 u n
+  set t := det2 w n
+  have key : det2 w u = t * a1 - s * b1 := by
+    have hn2 : n 0 ^ 2 + n 1 ^ 2 = 1 := by rw [← norm_sq_coord, hn]; norm_num
+    simp only [a1, b1, s, t, det2, inner_coord]
+    linear_combination (-(w 0 * u 1 - w 1 * u 0)) * hn2
+  rw [key]
+  have hs1 : s ^ 2 = 1 - a1 ^ 2 := by linarith
+  have ht1 : t ^ 2 = 1 - b1 ^ 2 := by linarith
+  rcases le_or_gt 0 b1 with hb | hb
+  · have hst : s ≤ t := (sq_le_sq₀ hun hwn).1 (by nlinarith)
+    nlinarith
+  · rcases le_or_gt 0 a1 with ha' | ha'
+    · nlinarith
+    · have hst : t ≤ s := (sq_le_sq₀ hwn hun).1 (by nlinarith)
+      nlinarith
 
 /-- **Wedge separation.**  If `d · a ≤ 0 ≤ d · b` with `det(a, b) > 0` and both unit normals in
 the half-plane `{n · g ≥ c}`, then `d` makes a small angle with `g^⊥`: `c|d| ≤ det(g, d)`. -/
 theorem wedge_sep {a b g d : Pt} {c : ℝ} (ha : ‖a‖ = 1) (hb : ‖b‖ = 1) (hc : 0 ≤ c)
     (hag : c ≤ inner ℝ a g) (hbg : c ≤ inner ℝ b g) (hab : 0 < det2 a b)
     (hda : inner ℝ d a ≤ 0) (hdb : 0 ≤ inner ℝ d b) : c * ‖d‖ ≤ det2 g d := by
-  sorry
+  have ha2 : a 0 ^ 2 + a 1 ^ 2 = 1 := by rw [← norm_sq_coord, ha]; norm_num
+  have hb2 : b 0 ^ 2 + b 1 ^ 2 = 1 := by rw [← norm_sq_coord, hb]; norm_num
+  have hd2 := norm_sq_coord d
+  set D := det2 a b
+  have I1 : D * det2 g d = inner ℝ d b * inner ℝ a g - inner ℝ d a * inner ℝ b g := by
+    simp only [D, det2, inner_coord]; ring
+  have I2 : (inner ℝ d b - inner ℝ d a) ^ 2 - ‖d‖ ^ 2 * D ^ 2 =
+      -2 * (inner ℝ d a * inner ℝ d b) * (1 - inner ℝ a b) := by
+    rw [hd2]
+    simp only [D, det2, inner_coord]
+    linear_combination (-(d 0 * a 0 + d 1 * a 1) ^ 2) * hb2 + (-(d 0 * b 0 + d 1 * b 1) ^ 2) * ha2
+  have hk : inner ℝ a b ≤ 1 := by
+    have := real_inner_le_norm a b; rw [ha, hb] at this; linarith
+  have hprod : inner ℝ d a * inner ℝ d b ≤ 0 := mul_nonpos_of_nonpos_of_nonneg hda hdb
+  have hsq : (‖d‖ * D) ^ 2 ≤ (inner ℝ d b - inner ℝ d a) ^ 2 := by nlinarith
+  have hnd : ‖d‖ * D ≤ inner ℝ d b - inner ℝ d a :=
+    (sq_le_sq₀ (by positivity) (by linarith)).1 hsq
+  have h3 : c * (inner ℝ d b - inner ℝ d a) ≤ D * det2 g d := by
+    rw [I1]; nlinarith
+  have h4 : D * (c * ‖d‖) ≤ D * det2 g d := by nlinarith
+  exact le_of_mul_le_mul_left h4 hab
 
 /-! ## Separated reals -/
 
@@ -337,7 +432,27 @@ theorem wedge_sep {a b g d : Pt} {c : ℝ} (ha : ‖a‖ = 1) (hb : ‖b‖ = 1)
 theorem card_le_of_sep {c a : ℝ} (hc : 0 < c) (T : Finset ℝ) : ∀ b : ℝ, a ≤ b + c →
     (∀ x ∈ T, a ≤ x ∧ x ≤ b) → (∀ x ∈ T, ∀ y ∈ T, x ≠ y → c ≤ |x - y|) →
     (T.card : ℝ) ≤ (b - a) / c + 1 := by
-  sorry
+  induction T using Finset.induction_on_max with
+  | empty =>
+    intro b hb _ _
+    have : -1 ≤ (b - a) / c := by rw [le_div_iff₀ hc]; linarith
+    simp; linarith
+  | insert m T hlt ih =>
+    intro b hb hmem hsep
+    have hmT : m ∉ T := fun h => lt_irrefl _ (hlt m h)
+    have hm := hmem m (mem_insert_self _ _)
+    have hT : ∀ x ∈ T, a ≤ x ∧ x ≤ m - c := by
+      intro x hx
+      refine ⟨(hmem x (mem_insert_of_mem hx)).1, ?_⟩
+      have := hsep x (mem_insert_of_mem hx) m (mem_insert_self _ _) (hlt x hx).ne
+      rw [abs_of_neg (by linarith [hlt x hx])] at this; linarith
+    have h1 := ih (m - c) (by linarith [hm.1]) hT
+      (fun x hx y hy hxy => hsep x (mem_insert_of_mem hx) y (mem_insert_of_mem hy) hxy)
+    rw [card_insert_of_notMem hmT]; push_cast
+    have : (m - c - a) / c + 1 + 1 ≤ (b - a) / c + 1 := by
+      rw [div_add_one hc.ne', div_add_one hc.ne', div_add_one hc.ne', div_le_div_iff_of_pos_right hc]
+      linarith [hm.2]
+    linarith
 
 /-- One-sided count: `c`-separated values `s` on `G`, any two within `ℓ` when ordered. -/
 theorem card_le_of_oneSided {G : Finset Pt} (s : Pt → ℝ) {c ℓ : ℝ} (hc : 0 < c) (hℓ : 0 ≤ ℓ)
