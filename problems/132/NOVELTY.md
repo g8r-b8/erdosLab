@@ -231,3 +231,109 @@ classical papers (Altman, Fishburn, Morić–Pritchard 1103.0412, NPPZ 1207.1266
   - the #132 thread (anchor after post-8100);
   - https://github.com/mathematiclover1337/erdos-132-note, for the companion LP note;
   - arXiv listings for Clemen, Dumitrescu and D. Liu.
+
+## Audit 2 (A2 54/37, B2 Thm A)
+
+Checked 2026-09-23, after the first audit on the same day. This audit adds to the one above and does not
+repeat it. New raw material is in `novelty_sources/`:
+- `audit2_raw_log.txt`: arXiv and OpenAlex query output, plus the re-fetch diffs;
+- `forum1084.txt`, `forum958.txt`, `forum959.txt`;
+- `github_chojecki_agentic-erdos_ep132.md`, `github_l3afyb0y_132.md`.
+
+### Verdicts
+
+| Result | Verdict | Comment |
+|---|---|---|
+| **A2 Theorem:** min{μ(Δ₂), μ(δ)} ≤ (54/37)n + C₀ (CDL Problem 1.6) | **NEW** | No public upper bound below 3/2 exists anywhere. Every source still cites Ve87's 3/2 (CDL v5; ienjoymath note l.74). The only open risk is ienjoymath's unpublished "LP analysis" companion note. See below. |
+| A2 ingredients: (VS) (apply Ve87 to S), the exact rung identity (y−p)·u_p = −τ, no-three-parallel-rungs / 2θ₀ rhombus rigidity, degenerate regime μ(Δ₂) ≤ n+1 when Δ > 1.94Δ₂ | **NEW** (not found) | (VS) and Lemma 1.1 are one-line devices. Their novelty lies only in the combination. The degenerate-regime lemma is elementary. |
+| **B2 Theorem A:** convex, n even ≥ 6 ⇒ ≥ 3 distances of multiplicity ≤ n | **NEW** (not found), but a **minor sharpening of CDL's own proof** | This is CDL Thm 1.2's argument (Altman + Fishburn + pair counting) with a parity-sharp count. A referee will call it an immediate corollary. The n = 6 case is **UNCLEAR**: ErFi95 (the n = 5, 6 paper) is paywalled and might already record the hexagon profiles. |
+| B2 Theorem B (convex n = 9, k ≥ 3) | **NEW** (not found) | Immediate from Erdős–Fishburn 1996 (nonagons with 5 distances) plus counting. |
+| B2 Prop B (odd reduction: D = m+1, k = 2, a + b + Σe_d = m+2) | **NEW** (not found) | Elementary counting. The plain counting bridge "D > n/2 forces a 2nd rare distance" is already public (l3afyb0y note, JAgbanwa, CDL). |
+
+### What was re-checked (all accessed 2026-09-23)
+
+**erdosproblems.com, re-fetched and diffed word by word against the earlier dumps.**
+- **The following are identical, with no new comment, edit or moved post:**
+  - https://www.erdosproblems.com/forum/thread/132 (still 5 comments, the latest ienjoymath 25 Jul 2026);
+  - https://www.erdosproblems.com/forum/thread/132/proof-claims (still only Beller, n = 8);
+  - the pages and threads of **223, 756, 957, 97, 98 and 1082**.
+- **The see-also chain was followed further:**
+  - 132 → 223, 756, 957;
+  - 223 → 132, **1084**;
+  - 756 → 132, 957;
+  - 957 → 132, 756.
+- **Newly read:**
+  - #1084 thread: 5 comments, latest 02 Feb 2026, about minimum-distance-1 in R^d;
+  - #958 thread: 2 comments (CDL construction);
+  - #959 thread: 0 comments;
+  - #93 thread: Altman Lean formalisation, Feb 2026;
+  - #96 thread: latest 17 Jun 2026.
+- None of these mentions μ(Δ₂)/μ(δ), Problem 1.6, an upper bound below 3/2, or a count ≥ 3 of rare distances for convex sets.
+
+**Tao's AI-contributions wiki.**
+- Source: https://github.com/teorth/erdosproblems/wiki/AI-contributions-to-Erd%C5%91s-problems, raw markdown, 71.6 kB.
+- The wiki says it has not been updated since 30 Jun 2026.
+- #132 still does not appear.
+
+**ienjoymath companion note.**
+- Repo: https://github.com/mathematiclover1337/erdos-132-note.
+- `note.tex` is byte-identical to our copy.
+- The repo was last pushed 2026-07-25 and has 0 forks.
+- `RESULT3-upper-bound-program.md` and `NOTES.md` still return 404.
+- The user has no other repositories.
+- **The companion LP note has not appeared.**
+
+**GitHub.**
+- `gh search repos` for "erdos 132", "erdos132", "erdos-132" and "erdos problem 132" returns the same 10 repos as in Audit 1, with no push after 2026-09-10.
+- `gh search code "2505.04283"` turned up two notes Audit 1 did not list:
+  - **przchojecki/agentic-erdos `notes/ep132.md`** (last commit 2026-05-09): a copy of the forum text plus generic "heavy-tail" propositions. No overlap.
+  - **l3afyb0y/Erdos-Problems `problems/132.md`** (repo pushed 2026-08-31): an elementary counting bridge (D > n/2 ⇒ a 2nd rare distance; D ≥ n/2 + g ⇒ ~g rare distances), with the explicit disclaimer "no novelty claim is made".
+- The l3afyb0y bridge is the non-parity-sharp version of our B2 §1. It says nothing about Fishburn or the D = ⌊n/2⌋ case, so it does not give Theorem A.
+
+**arXiv.**
+- Queries run through https://export.arxiv.org/api/query; results are in `audit2_raw_log.txt`:
+  - "second largest distance" (only distance-eigenvalue graph papers);
+  - "minimum distance" together with "second largest";
+  - Clemen with Dumitrescu;
+  - Vesztergombi;
+  - convex position together with "n times";
+  - "problem 132";
+  - Altman together with distinct distances;
+  - "largest distances";
+  - Fishburn together with convex and distances;
+  - the author listings of Dumitrescu_Adrian (latest 2609.25288, Rado covering) and Clemen_Felix (latest 2608.14687, and 2606.05841 "Geometric Sidon Problems", which is about distinct-distance subsets).
+- **Nothing is on-topic.**
+- CDL is still at v5 (updated 2026-02-03).
+
+**Citations (OpenAlex).**
+- CDL (W4417084323 / W4416142823): 0 citers.
+- ErFi95 (W2040107129): 15 citers, the latest being CDL 2025. The rest are pre-2014 Fishburn-era papers, plus Morić 2013, "Small distances in convex polygons", which is about convex k-smallest distances and does not overlap.
+- Ve87 since 2023: only CDL and Sagdeev arXiv 2402.09131, "General penny graphs are at most 43/18-dense". Sagdeev bounds μ(δ) in general position, which is not our min{μ(Δ₂), μ(δ)} setting, so there is no overlap.
+- Ve96 since 2023: only CDL.
+- Semantic Scholar returned HTTP 429 and was not checked.
+
+**Web (WebSearch).**
+- Queries:
+  - CDL with second-largest/minimum-distance bounds;
+  - "Problem 1.6" with limsup;
+  - "9/7" with the LP companion note;
+  - erdosproblems 132 with 3/2 improvement;
+  - convex "at least three" distances "at most n times";
+  - Altman/Fishburn stability ("n/2+1" distances);
+  - Erdős–Fishburn "Multiplicities of interpoint distances" and "Intervertex distances in convex polygons".
+- Hits were only CDL, the #132 thread, ienjoymath's repo, classical papers, and erdos.vercel.app (a bounty-board stub with no content on #132).
+- Nothing states an Altman/Fishburn stability result for D = ⌊n/2⌋ + 1, or a count of rare distances ≥ 3 for convex sets.
+
+### Residual risks
+
+1. **ienjoymath's companion "LP analysis over Ve85/Ve87/Ve96"** is the only plausible pre-emption of A2.
+   - It is announced, not published. By its description it is aimed at showing 9/7 is optimal (an upper-bound programme).
+   - Our 54/37 uses geometric rung/rhombus lemmas and not only Vesztergombi's inequalities, so even a published LP note would likely overlap only in spirit.
+   - Re-check the repo and the #132 thread (anchor after post-8100) before posting.
+2. **Paywalled classical sources.** We could not read these:
+   - ErFi95 (DAM 60, 141–147);
+   - Erdős–Fishburn, "Intervertex distances in convex polygons" (DAM 60, 149–158). Its abstract concerns the *largest* multiplicities r₁(n), r₂(n), and says r₂(n) ≤ n for n ≤ 8;
+   - Fishburn, "Distances in convex polygons" (The Mathematics of Paul Erdős II).
+
+   Any of them might remark that convex n-gons have ≥ 3 distances with r ≤ n for small n, or might list the Fishburn hexagon profiles. That would affect B2 Theorem A only at n = 6 or as "folklore". It would not affect A2.
+3. **B2 Theorem A is a 5-line consequence of CDL's proof plus parity.** Present it as a remark or corollary ("CDL's argument, with parity-sharp counting, gives k ≥ 3 for even n"), not as a headline result.

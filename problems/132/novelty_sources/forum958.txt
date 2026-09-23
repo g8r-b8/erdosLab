@@ -1,0 +1,91 @@
+958 Discussion Thread | Erdős Problems
+Forum
+Inbox
+Favourites
+Tags
+More
+FAQ
+Prizes
+Problem Lists
+Definitions
+Links
+Forum
+Menu
+Inbox
+Favourites
+Tags
+FAQ
+Prizes
+Problem Lists
+Definitions
+Links
+Go
+Go
+Dual View
+Random Solved
+Random Open
+DISPROVED (LEAN)
+This has been solved in the negative and the proof verified in Lean.
+Let $A\subset \mathbb{R}^2$ be a finite set of size $n$, and let $\{d_1,\ldots,d_k\}$ be the set of distances determined by $A$. Let $f(d)$ be the multiplicity of $d$, that is, the number of ordered pairs from $A$ of distance $d$ apart.
+Is it true that $k=n-1$ and $\{f(d_i)\}=\{n-1,\ldots,1\}$ if and only if $A$ is a set of equidistant points on a line or a circle?
+#958 :  [Er84c]
+distances  |
+geometry
+Erdős conjectured that the answer is no, and other such configurations exist.
+This was proved by Clemen, Dumitrescu, and Liu  [CDL25] , who observed that equidistant points on a short circular arc on a circle of radius $1$, together with the centre, are also an example.
+Proof expositions (0)
+If you would like to contribute an exposition of a proof related to this problem, please message a moderator or leave your exposition as a comment.
+No proof expositions yet.
+Comments (2)
+Proof claims (0)
+More information and links
+( View history ) ( View the LaTeX source )
+When referring to this problem, please use the original sources of Erdős. If you wish to acknowledge this website, the recommended citation format is:
+T. F. Bloom, Erdős Problem #958, https://www.erdosproblems.com/958, accessed 2026-09-23
+From the  external database . (You can
+help update
+this.)
+Formalised statement?
+Yes
+Reactions
+Likes
+None
+Open to collaboration
+None
+Currently working on
+None
+Looks difficult
+None
+Looks tractable
+None
+Could be formalisable
+None
+Working on formalising
+None
+Order by
+oldest first  or
+newest first . (The most recent comments are highlighted in a red border.)
+[Priority note:  ByteDance Seed AI4Math  mentioned  (see the bottom of page 9) that Seed-Prover 1.5 solved problem 958.  I have not seen that proof.  I would be happy to see it posted here.]
+Aristotle  found  the simple counterexample $\{(0,0), (1,0), (0,1), (0,-1)\}$ by itself, which was also my personal "simplest example".   Type-check it online!
+Of course, one can play whack-a-mole with this question and add the configuration of "equally-spaced points on a circle, together with its center" as another family.
+(The site has been updated to address this comment.)
+BorisAlexeev
+—  12:07 on 27 Dec 2025
+👍
+1
+📝
+0
+🤖
+0
+This is similar to  [217] , but without the condition of no four points on a circle and no three on a line.
+DesmondWeisenberg
+—  04:13 on 04 Sep 2025
+👍
+0
+📝
+0
+🤖
+0
+All comments are the responsibility of the user. Comments appearing on this page are not verified for correctness. Please keep posts mathematical and on topic.
+Log in  to add a comment.
+Back to the forum
