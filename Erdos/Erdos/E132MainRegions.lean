@@ -1006,6 +1006,424 @@ theorem ownership_ratios :
   · rw [div_le_iff₀ (by linarith)]; linarith
   · rw [div_le_iff₀ (by linarith)]; linarith
 
+section Ownership
+
+variable {α : Type*} [DecidableEq α]
+
+/-- **Abstract ownership/pairing count** (§7.2), by local discharging.
+
+Rows: `K ⊆ V` (the `K`-row) and `V ∖ K` (the `D`-row).  `R a b`: `b` is the right (pure) T-neighbour
+of `a` — a partial injection preserving rows.  `M v z`: `(v, z)` is a (good) rung — a matching
+between the rows.  With (R2), (R2-sym) and no two consecutive rhombi (`hR3`):
+`#Redges + #rungs ≤ (4/3)|V|`, and `≤ (5/4)|V|` if there are no rhombi at all (`hgen`).
+
+Proof: every rung vertex set `{v, z}` is disjoint from the others; a non-rhombus rung with no
+sink has both right neighbours unmatched (by (R2)/(R2-sym)) and claims them; the successor of a
+rhombus rung is a non-rhombus rung (`hR3`), and the successor map is injective. -/
+theorem own_count_core (V K : Finset α) (R M : α → α → Prop) (hKV : K ⊆ V)
+    (hRV : ∀ a b, R a b → a ∈ V ∧ b ∈ V)
+    (hRfun : ∀ a b b', R a b → R a b' → b = b')
+    (hRinj : ∀ a a' b, R a b → R a' b → a = a')
+    (hRrow : ∀ a b, R a b → (a ∈ K ↔ b ∈ K))
+    (hMV : ∀ v z, M v z → v ∈ K ∧ z ∈ V ∧ z ∉ K)
+    (hMfun : ∀ v z z', M v z → M v z' → z = z')
+    (hMinj : ∀ v v' z, M v z → M v' z → v = v')
+    (hR2 : ∀ v₀ z₀ v₁ z₁ z', M v₀ z₀ → R v₀ v₁ → R z₀ z₁ → M v₁ z' → z' = z₁)
+    (hR2s : ∀ v₀ z₀ v₁ z₁ v', M v₀ z₀ → R v₀ v₁ → R z₀ z₁ → M v' z₁ → v' = v₁)
+    (hR3 : ∀ v₀ z₀ v₁ z₁ v₂ z₂, M v₀ z₀ → R v₀ v₁ → R z₀ z₁ → M v₁ z₁ → R v₁ v₂ →
+      R z₁ z₂ → ¬ M v₂ z₂) :
+    3 * ((V.filter (fun a => ∃ b, R a b)).card + (K.filter (fun v => ∃ z, M v z)).card) ≤
+        4 * V.card ∧
+      ((∀ v₀ z₀ v₁ z₁, M v₀ z₀ → R v₀ v₁ → R z₀ z₁ → ¬ M v₁ z₁) →
+        4 * ((V.filter (fun a => ∃ b, R a b)).card + (K.filter (fun v => ∃ z, M v z)).card) ≤
+          5 * V.card) := by
+  classical
+  -- choice functions
+  let rt : α → α := fun a => if h : ∃ b, R a b then h.choose else a
+  let mt : α → α := fun v => if h : ∃ z, M v z then h.choose else v
+  have hrt : ∀ a, (∃ b, R a b) → R a (rt a) := fun a h => by
+    simp only [rt, dif_pos h]; exact h.choose_spec
+  have hmt : ∀ v, (∃ z, M v z) → M v (mt v) := fun v h => by
+    simp only [mt, dif_pos h]; exact h.choose_spec
+  set Rs := V.filter (fun a => ∃ b, R a b)
+  set N := V.filter (fun a => ¬ ∃ b, R a b)
+  set Mv := K.filter (fun v => ∃ z, M v z)
+  set ZM := V.filter (fun z => ∃ v, M v z)
+  set A := V.filter (fun b => (∃ a, R a b ∧ ((∃ z, M a z) ∨ (∃ v, M v a))) ∧
+    (¬ ∃ z, M b z) ∧ (¬ ∃ v, M v b))
+  let sinkP : α → Prop := fun v => (¬ ∃ b, R v b) ∨ (¬ ∃ b, R (mt v) b)
+  let rhP : α → Prop := fun v => ∃ v₁ z₁, R v v₁ ∧ R (mt v) z₁ ∧ M v₁ z₁
+  set Ms := Mv.filter sinkP
+  set Mh := Mv.filter rhP
+  set Mo := Mv.filter (fun v => ¬ sinkP v ∧ ¬ rhP v)
+  have hMvM : ∀ v ∈ Mv, M v (mt v) := fun v hv => hmt v (mem_filter.1 hv).2
+  have hMvK : ∀ v ∈ Mv, v ∈ K := fun v hv => (mem_filter.1 hv).1
+  -- (vi)
+  have h6 : Rs.card + N.card = V.card := card_filter_add_card_filter_not _
+  -- (i) `2|Mv| + |A| ≤ |V|`
+  have hMZ : Mv.card ≤ ZM.card := by
+    refine card_le_card_of_injOn mt (fun v hv => ?_) (fun v hv v' hv' e => ?_)
+    · have := hMvM v hv
+      exact mem_filter.2 ⟨(hMV _ _ this).2.1, v, this⟩
+    · exact hMinj v v' (mt v) (hMvM v hv) (e ▸ hMvM v' hv')
+  have h1 : Mv.card + ZM.card + A.card ≤ V.card := by
+    have d1 : Disjoint Mv ZM := by
+      rw [disjoint_left]; intro v hv hz
+      obtain ⟨w, hw⟩ := (mem_filter.1 hz).2
+      exact (hMV _ _ hw).2.2 (hMvK v hv)
+    have d2 : Disjoint (Mv ∪ ZM) A := by
+      rw [disjoint_left]; intro b hb ha
+      obtain ⟨-, -, h1, h2⟩ := mem_filter.1 ha
+      rcases mem_union.1 hb with hb | hb
+      · exact h1 (mem_filter.1 hb).2
+      · exact h2 (mem_filter.1 hb).2
+    have hsub : Mv ∪ ZM ∪ A ⊆ V := by
+      intro b hb
+      rcases mem_union.1 hb with hb | hb
+      · rcases mem_union.1 hb with hb | hb
+        · exact hKV (hMvK b hb)
+        · exact (mem_filter.1 hb).1
+      · exact (mem_filter.1 hb).1
+    have := card_le_card hsub
+    rw [card_union_of_disjoint d2, card_union_of_disjoint d1] at this
+    exact this
+  -- non-sink, non-rhombus rungs have both right neighbours unmatched
+  have hMoA : ∀ v ∈ Mo, rt v ∈ A ∧ rt (mt v) ∈ A ∧ rt v ∈ K ∧ rt (mt v) ∉ K := by
+    intro v hv
+    obtain ⟨hv, hns, hnr⟩ := mem_filter.1 hv
+    have hM := hMvM v hv
+    have hvK := hMvK v hv
+    simp only [sinkP, not_or, not_not] at hns
+    have r1 := hrt v hns.1
+    have r2 := hrt (mt v) hns.2
+    have k1 : rt v ∈ K := (hRrow _ _ r1).1 hvK
+    have k2 : rt (mt v) ∉ K := fun h => (hMV _ _ hM).2.2 ((hRrow _ _ r2).2 h)
+    have u1 : ¬ ∃ z, M (rt v) z := by
+      rintro ⟨z', hz'⟩
+      have := hR2 _ _ _ _ _ hM r1 r2 hz'
+      exact hnr ⟨_, _, r1, r2, this ▸ hz'⟩
+    have u2 : ¬ ∃ w, M w (rt (mt v)) := by
+      rintro ⟨w, hw⟩
+      have := hR2s _ _ _ _ _ hM r1 r2 hw
+      exact hnr ⟨_, _, r1, r2, this ▸ hw⟩
+    refine ⟨mem_filter.2 ⟨(hRV _ _ r1).2, ⟨v, r1, Or.inl ⟨_, hM⟩⟩, u1, ?_⟩,
+      mem_filter.2 ⟨(hRV _ _ r2).2, ⟨mt v, r2, Or.inr ⟨v, hM⟩⟩, ?_, u2⟩, k1, k2⟩
+    · rintro ⟨w, hw⟩; exact (hMV _ _ hw).2.2 k1
+    · rintro ⟨z, hz⟩; exact k2 (hMV _ _ hz).1
+  -- (ii) `2|Mo| ≤ |A|`
+  have h2 : 2 * Mo.card ≤ A.card := by
+    have hMo : ∀ v ∈ Mo, v ∈ Mv ∧ (∃ b, R v b) ∧ (∃ b, R (mt v) b) := by
+      intro v hv
+      obtain ⟨hv, hns, -⟩ := mem_filter.1 hv
+      simp only [sinkP, not_or, not_not] at hns
+      exact ⟨hv, hns⟩
+    have i1 : (Mo.image rt).card = Mo.card := by
+      refine card_image_of_injOn fun v hv v' hv' e => ?_
+      obtain ⟨-, a, -⟩ := hMo v hv
+      obtain ⟨-, a', -⟩ := hMo v' hv'
+      exact hRinj _ _ _ (hrt v a) (e ▸ hrt v' a')
+    have i2 : (Mo.image (fun v => rt (mt v))).card = Mo.card := by
+      refine card_image_of_injOn fun v hv v' hv' e => ?_
+      obtain ⟨m, -, a⟩ := hMo v hv
+      obtain ⟨m', -, a'⟩ := hMo v' hv'
+      have := hRinj _ _ _ (hrt _ a) ((show rt (mt v) = rt (mt v') from e) ▸ hrt _ a')
+      exact hMinj _ _ _ (hMvM v m) (this ▸ hMvM v' m')
+    have d : Disjoint (Mo.image rt) (Mo.image (fun v => rt (mt v))) := by
+      rw [disjoint_left]; intro b hb hb'
+      obtain ⟨v, hv, rfl⟩ := mem_image.1 hb
+      obtain ⟨v', hv', e⟩ := mem_image.1 hb'
+      exact (hMoA v' hv').2.2.2 (e ▸ (hMoA v hv).2.2.1)
+    have hsub : Mo.image rt ∪ Mo.image (fun v => rt (mt v)) ⊆ A := by
+      intro b hb
+      rcases mem_union.1 hb with hb | hb
+      · obtain ⟨v, hv, rfl⟩ := mem_image.1 hb; exact (hMoA v hv).1
+      · obtain ⟨v, hv, rfl⟩ := mem_image.1 hb; exact (hMoA v hv).2.1
+    have := card_le_card hsub
+    rw [card_union_of_disjoint d, i1, i2] at this
+    omega
+  -- (iii) `|Ms| ≤ |N|`
+  have h3 : Ms.card ≤ N.card := by
+    let f : α → α := fun v => if ∃ b, R v b then mt v else v
+    refine card_le_card_of_injOn f (fun v hv => ?_) (fun v hv v' hv' e => ?_)
+    · obtain ⟨hv, hs⟩ := mem_filter.1 hv
+      by_cases h : ∃ b, R v b
+      · have hs' : ¬ ∃ b, R (mt v) b := by
+          rcases hs with hs | hs
+          · exact absurd h hs
+          · exact hs
+        simp only [f, if_pos h]
+        exact mem_filter.2 ⟨(hMV _ _ (hMvM v hv)).2.1, hs'⟩
+      · simp only [f, if_neg h]
+        exact mem_filter.2 ⟨hKV (hMvK v hv), h⟩
+    · have hv1 := (mem_filter.1 hv).1
+      have hv1' := (mem_filter.1 hv').1
+      simp only [f] at e
+      split_ifs at e with h h'
+      · exact hMinj _ _ _ (hMvM v hv1) (e ▸ hMvM v' hv1')
+      · exact absurd (e ▸ hMvK v' hv1') (hMV _ _ (hMvM v hv1)).2.2
+      · exact absurd (e.symm ▸ hMvK v hv1) (hMV _ _ (hMvM v' hv1')).2.2
+      · exact e
+  -- (iv) `|Mh| ≤ |Ms| + |Mo|`: the successor of a rhombus rung is not a rhombus rung
+  have h4 : Mh.card ≤ Ms.card + Mo.card := by
+    have hsub : Mh.image rt ⊆ Ms ∪ Mo := by
+      intro b hb
+      obtain ⟨v, hv, rfl⟩ := mem_image.1 hb
+      obtain ⟨hv, v₁, z₁, r1, r2, m1⟩ := mem_filter.1 hv
+      have e1 : rt v = v₁ := hRfun _ _ _ (hrt v ⟨_, r1⟩) r1
+      rw [e1]
+      have hv₁ : v₁ ∈ Mv := mem_filter.2 ⟨(hRrow _ _ r1).1 (hMvK v hv), _, m1⟩
+      have hnr : ¬ rhP v₁ := by
+        rintro ⟨v₂, z₂, r3, r4, m2⟩
+        have e2 : mt v₁ = z₁ := hMfun _ _ _ (hMvM v₁ hv₁) m1
+        rw [e2] at r4
+        exact hR3 _ _ _ _ _ _ (hMvM v hv) r1 r2 m1 r3 r4 m2
+      by_cases hs : sinkP v₁
+      · exact mem_union.2 (Or.inl (mem_filter.2 ⟨hv₁, hs⟩))
+      · exact mem_union.2 (Or.inr (mem_filter.2 ⟨hv₁, hs, hnr⟩))
+    have hinj : (Mh.image rt).card = Mh.card := by
+      refine card_image_of_injOn fun v hv v' hv' e => ?_
+      obtain ⟨-, v₁, -, r1, -⟩ := mem_filter.1 hv
+      obtain ⟨-, v₁', -, r1', -⟩ := mem_filter.1 hv'
+      exact hRinj _ _ _ (hrt v ⟨_, r1⟩) ((show rt v = rt v' from e) ▸ hrt v' ⟨_, r1'⟩)
+    have := (card_le_card hsub).trans (card_union_le _ _)
+    omega
+  -- (v) `|Mv| ≤ |Ms| + |Mh| + |Mo|`
+  have h5 : Mv.card ≤ Ms.card + Mh.card + Mo.card := by
+    have hsub : Mv ⊆ Ms ∪ Mh ∪ Mo := by
+      intro v hv
+      by_cases hs : sinkP v
+      · exact mem_union.2 (Or.inl (mem_union.2 (Or.inl (mem_filter.2 ⟨hv, hs⟩))))
+      by_cases hr : rhP v
+      · exact mem_union.2 (Or.inl (mem_union.2 (Or.inr (mem_filter.2 ⟨hv, hr⟩))))
+      · exact mem_union.2 (Or.inr (mem_filter.2 ⟨hv, hs, hr⟩))
+    have := (card_le_card hsub).trans (card_union_le _ _)
+    have := card_union_le Ms Mh
+    omega
+  refine ⟨by omega, fun hgen => ?_⟩
+  have h0 : Mh.card = 0 := by
+    rw [card_eq_zero, eq_empty_iff_forall_notMem]
+    intro v hv
+    obtain ⟨hv, v₁, z₁, r1, r2, m1⟩ := mem_filter.1 hv
+    exact hgen _ _ _ _ (hMvM v hv) r1 r2 m1
+  omega
+
+end Ownership
+
+/-! ### Geometric input for the ownership count -/
+
+theorem det2_eq_inner_perp (a b : Pt) : det2 a b = inner ℝ (perp a) b := by
+  rw [det2_pt, inner_pt]; simp; ring
+
+theorem abs_det2_le (a b : Pt) : |det2 a b| ≤ ‖a‖ * ‖b‖ := by
+  rw [det2_eq_inner_perp, ← norm_perp a]; exact abs_real_inner_le_norm _ _
+
+theorem det2_add_left (a b e : Pt) : det2 (a + b) e = det2 a e + det2 b e := by
+  simp only [det2_pt, PiLp.add_apply]; ring
+
+theorem det2_neg_right (a e : Pt) : det2 a (-e) = - det2 a e := by
+  simp only [det2_pt, PiLp.neg_apply]; ring
+
+/-- For a good T-step `p → q`, the side flips when seen from `q`:
+`det(u_q, p − q)` has the opposite sign of `det(u_p, q − p)`. -/
+theorem tstep_flip {F : DirField X} {p q : Pt} (hp : p ∈ Sset X) (hq : q ∈ Sset X)
+    (h1 : dist p q = 1) (hg : ang (F.u p) (F.u q) ≤ beta) (ha : 0 < inner ℝ (q - p) (F.u p))
+    (ha' : inner ℝ (q - p) (F.u p) < beta) :
+    det2 (F.u q) (p - q) * det2 (F.u p) (q - p) < 0 := by
+  have hup := F.norm_u hp
+  have huq := F.norm_u hq
+  have he : ‖q - p‖ = 1 := by rw [← dist_eq_norm, dist_comm, h1]
+  have n := inner_sq_add_det_sq (e := q - p) hup
+  rw [he] at n
+  have hw : ‖F.u q - F.u p‖ ≤ beta := by
+    rw [norm_sub_rev]; exact (norm_sub_le_ang hup huq).trans hg
+  have hd := abs_det2_le (F.u q - F.u p) (q - p)
+  rw [he, mul_one] at hd
+  have e : det2 (F.u q) (p - q) = -(det2 (F.u p) (q - p) + det2 (F.u q - F.u p) (q - p)) := by
+    rw [← neg_sub q p, det2_neg_right, ← det2_add_left]; congr 2; abel
+  rw [e]
+  have hb : beta = 1 / 100 := rfl
+  set c := det2 (F.u p) (q - p)
+  set w := det2 (F.u q - F.u p) (q - p)
+  rw [abs_le] at hd
+  rw [hb] at hw ha'
+  have hc : 99 / 100 < |c| := by
+    rw [lt_abs]
+    rcases le_or_gt 0 c with h | h
+    · left; nlinarith
+    · right; nlinarith
+  rw [lt_abs] at hc
+  rcases hc with hc | hc <;> nlinarith
+
+/-- `arcsin β < π/3`. -/
+theorem arcsin_beta_lt : Real.arcsin beta < π / 3 := by
+  have h3 : (1.7 : ℝ) < √3 := by rw [Real.lt_sqrt (by norm_num)]; norm_num
+  rw [Real.arcsin_lt_iff_lt_sin ⟨by unfold beta; norm_num, by unfold beta; norm_num⟩
+    ⟨by linarith [Real.pi_pos], by linarith [Real.pi_pos]⟩, Real.sin_pi_div_three]
+  unfold beta; linarith
+
+/-- The pure right-T-neighbour relation of a row. -/
+def RowR (F : DirField X) (a b : Pt) : Prop := IsSideT F (-1) a b ∧ (a ∈ Dset X ↔ b ∈ Dset X)
+
+/-- Good rungs, as a relation `K-end → D-end`. -/
+def RungM (X : Finset Pt) (F : DirField X) (v z : Pt) : Prop := IsRung F v z ∧ s(v, z) ∈ good X F
+
+theorem RungM.ang {F : DirField X} {v z : Pt} (h : RungM X F v z) : ang (F.u v) (F.u z) ≤ beta :=
+  (mem_filter.1 h.2).2 v z rfl
+
+/-- (T1) for right neighbours. -/
+theorem rowR_fun (hX : Normal X) {F : DirField X} {a b b' : Pt} (h : RowR F a b)
+    (h' : RowR F a b') : b = b' := by
+  obtain ⟨n₁, a₁, a₁', c₁⟩ := h.1.step
+  obtain ⟨n₂, a₂, a₂', c₂⟩ := h'.1.step
+  have hc := same_side_close (F.norm_u h.1.1) n₁ n₂ (σ := -1) (by linarith) (by linarith)
+    (L := 0) (U := beta) ⟨a₁.le, a₁'.le⟩ ⟨a₂.le, a₂'.le⟩
+    (by rw [Real.arcsin_zero, sub_zero]; exact arcsin_beta_lt)
+  rw [sub_sub_sub_cancel_right, ← dist_eq_norm] at hc
+  exact eq_of_dist_lt_one hX.minDist_eq (Sset_sub h.1.2.1) (Sset_sub h'.1.2.1) hc
+
+/-- (T2)-type injectivity: a vertex has at most one left neighbour. -/
+theorem rowR_inj (hX : Normal X) {F : DirField X} {a a' b : Pt} (h : RowR F a b)
+    (h' : RowR F a' b) : a = a' := by
+  have flip : ∀ {a : Pt}, RowR F a b → ‖a - b‖ = 1 ∧ 0 < inner ℝ (a - b) (F.u b) ∧
+      inner ℝ (a - b) (F.u b) < beta ∧ 0 < 1 * det2 (F.u b) (a - b) := by
+    intro a h
+    obtain ⟨ha, hb, h1, hg, ⟨x, y, z, w⟩, hs⟩ := h.1
+    have := tstep_flip ha hb h1 hg x y
+    refine ⟨by rw [← dist_eq_norm, h1], z, w, ?_⟩
+    have : det2 (F.u a) (b - a) < 0 := by linarith
+    nlinarith
+  obtain ⟨n₁, a₁, a₁', c₁⟩ := flip h
+  obtain ⟨n₂, a₂, a₂', c₂⟩ := flip h'
+  have hc := same_side_close (F.norm_u h.1.2.1) n₁ n₂ c₁ c₂
+    (L := 0) (U := beta) ⟨a₁.le, a₁'.le⟩ ⟨a₂.le, a₂'.le⟩
+    (by rw [Real.arcsin_zero, sub_zero]; exact arcsin_beta_lt)
+  rw [sub_sub_sub_cancel_right, ← dist_eq_norm] at hc
+  exact eq_of_dist_lt_one hX.minDist_eq (Sset_sub h.1.1) (Sset_sub h'.1.1) hc
+
+/-- No 2-cycles of right neighbours. -/
+theorem rowR_no_two_cycle {F : DirField X} {a b : Pt} (h : RowR F a b) (h' : RowR F b a) :
+    False := by
+  obtain ⟨ha, hb, h1, hg, ⟨x, y, -, -⟩, -⟩ := h.1
+  have := tstep_flip ha hb h1 hg x y
+  have s1 := h.1.2.2.2.2.2
+  have s2 := h'.1.2.2.2.2.2
+  nlinarith
+
+/-- A rhombus of a good rung, two pure right T-steps and a good rung forces parallel rungs. -/
+theorem rhombus_par {F : DirField X} {v₀ z₀ v₁ z₁ : Pt} (m₀ : RungM X F v₀ z₀)
+    (rv : RowR F v₀ v₁) (rz : RowR F z₀ z₁) (m₁ : RungM X F v₁ z₁) : z₀ - v₀ = z₁ - v₁ := by
+  refine R3_rhombus rv.1.2.2.1 m₁.1.2.2.2.2.1 (by rw [dist_comm]; exact rz.1.2.2.1)
+    (by rw [dist_comm]; exact m₀.1.2.2.2.2.1) ?_ ?_
+  · intro e; exact m₁.1.2.1 (e ▸ m₀.1.2.2.2.1)
+  · intro e; exact m₀.1.2.1 (e ▸ m₁.1.2.2.2.1)
+
+/-- The abstract ownership count, instantiated. -/
+theorem ownership_core (hX : Normal X) (F : DirField X) (hτ₁ : √3 / 2 + 3 * beta ≤ tau X)
+    (hτ₂ : tau X ≤ 1) :
+    3 * (((Sset X).filter (fun a => ∃ b, RowR F a b)).card +
+        (((Sset X).filter (fun v => v ∉ Dset X)).filter (fun v => ∃ z, RungM X F v z)).card) ≤
+        4 * (Sset X).card ∧
+      (tau X < Real.cos (beta / 2) →
+        4 * (((Sset X).filter (fun a => ∃ b, RowR F a b)).card +
+          (((Sset X).filter (fun v => v ∉ Dset X)).filter (fun v => ∃ z, RungM X F v z)).card) ≤
+          5 * (Sset X).card) := by
+  have core := own_count_core (Sset X) ((Sset X).filter (fun v => v ∉ Dset X)) (RowR F)
+    (RungM X F) (filter_subset _ _)
+    (fun a b h => ⟨h.1.1, h.1.2.1⟩)
+    (fun a b b' h h' => rowR_fun hX h h')
+    (fun a a' b h h' => rowR_inj hX h h')
+    (fun a b h => by
+      simp only [mem_filter]
+      exact ⟨fun ⟨_, hd⟩ => ⟨h.1.2.1, fun hb => hd (h.2.2 hb)⟩,
+        fun ⟨_, hd⟩ => ⟨h.1.1, fun ha => hd (h.2.1 ha)⟩⟩)
+    (fun v z h => ⟨mem_filter.2 ⟨h.1.1, h.1.2.1⟩, h.1.2.2.1,
+      fun hz => (mem_filter.1 hz).2 h.1.2.2.2.1⟩)
+    (fun v z z' h h' => R1_v hX F hτ₁ hτ₂ h.1 h'.1)
+    (fun v v' z h h' => R1_z hX F hτ₁ hτ₂ h.1 h'.1 h.ang h'.ang)
+    (fun v₀ z₀ v₁ z₁ z' m₀ rv rz m' => R2 hX F hτ₁ hτ₂ m₀.1 m₀.ang rv.1
+      (fun h => m₀.1.2.1 (rv.2.2 h)) rz.1 (rz.2.1 m₀.1.2.2.2.1) m'.1 m'.ang)
+    (fun v₀ z₀ v₁ z₁ v' m₀ rv rz m' => R2_sym hX F hτ₁ hτ₂ m₀.1 m₀.ang rv.1
+      (fun h => m₀.1.2.1 (rv.2.2 h)) rz.1 (rz.2.1 m₀.1.2.2.2.1) m'.1 m'.ang)
+    (fun v₀ z₀ v₁ z₁ v₂ z₂ m₀ r₀ s₀ m₁ r₁ s₁ m₂ => by
+      have p₁ := rhombus_par m₀ r₀ s₀ m₁
+      have p₂ := rhombus_par m₁ r₁ s₁ m₂
+      rcases R3_no_three_parallel F m₀.1 m₁.1 m₂.1 p₁ (p₁.trans p₂) with e | e | e
+      · have := r₀.1.2.2.1; rw [e, dist_self] at this; norm_num at this
+      · rw [e] at r₀; exact rowR_no_two_cycle r₀ r₁
+      · have := r₁.1.2.2.1; rw [e, dist_self] at this; norm_num at this)
+  refine ⟨core.1, fun hlt => core.2 fun v₀ z₀ v₁ z₁ m₀ r₀ s₀ m₁ => ?_⟩
+  have hpar := rhombus_par m₀ r₀ s₀ m₁
+  have hne : v₀ ≠ v₁ := by
+    intro e; have := r₀.1.2.2.1; rw [e, dist_self] at this; norm_num at this
+  exact absurd (R3_resonance F m₀.1 m₁.1 hpar hne r₀.1.2.2.2.1) (not_le.2 hlt)
+
+/-- Pure good edges are pure right-T-edges or good rungs:
+`#goodPure ≤ #{a : a has a pure right T-neighbour} + #{K-ends of good rungs}`. -/
+theorem card_goodPure_le (hX : Normal X) (F : DirField X) (hτ₁ : √3 / 2 + 3 * beta ≤ tau X)
+    (hτ₂ : tau X ≤ 1) :
+    (goodPure X F).card ≤ ((Sset X).filter (fun a => ∃ b, RowR F a b)).card +
+        (((Sset X).filter (fun v => v ∉ Dset X)).filter (fun v => ∃ z, RungM X F v z)).card := by
+  classical
+  have hτ : 2 * beta < tau X := by
+    have := Real.sqrt_nonneg 3; unfold beta at hτ₁ ⊢; linarith
+  set Rs := (Sset X).filter (fun a => ∃ b, RowR F a b)
+  set Mv := ((Sset X).filter (fun v => v ∉ Dset X)).filter (fun v => ∃ z, RungM X F v z)
+  let rt : Pt → Pt := fun a => if h : ∃ b, RowR F a b then h.choose else a
+  let mt : Pt → Pt := fun v => if h : ∃ z, RungM X F v z then h.choose else v
+  have hrt : ∀ a, (h : ∃ b, RowR F a b) → RowR F a (rt a) := fun a h => by
+    simp only [rt, dif_pos h]; exact h.choose_spec
+  have hmt : ∀ v, (h : ∃ z, RungM X F v z) → RungM X F v (mt v) := fun v h => by
+    simp only [mt, dif_pos h]; exact h.choose_spec
+  have hsub : goodPure X F ⊆ Rs.image (fun a => s(a, rt a)) ∪ Mv.image (fun v => s(v, mt v)) := by
+    intro e he
+    obtain ⟨heg, hem⟩ := mem_sdiff.1 he
+    rcases mem_union.1 (good_subset_T_union_rungs hX F hτ heg) with hT | hR
+    · obtain ⟨-, hTall⟩ := mem_filter.1 hT
+      have hge := heg
+      obtain ⟨hee, hgood⟩ := mem_filter.1 hge
+      obtain ⟨hnd, hS⟩ := mem_edges hee
+      have hd : pairDist e = minDist X := (mem_filter.1 hee).2
+      induction e using Sym2.ind with
+      | _ p q =>
+      have hp : p ∈ Sset X := hS p (Sym2.mem_mk_left _ _)
+      have hq : q ∈ Sset X := hS q (Sym2.mem_mk_right _ _)
+      have h1 : dist p q = 1 := by rw [← hX.minDist_eq, ← hd]; rfl
+      have hg : ang (F.u p) (F.u q) ≤ beta := hgood p q rfl
+      have hg' : ang (F.u q) (F.u p) ≤ beta := hgood q p Sym2.eq_swap
+      have hTpq := hTall p q rfl
+      have hTqp := hTall q p Sym2.eq_swap
+      have hrow : (p ∈ Dset X ↔ q ∈ Dset X) := by
+        constructor
+        · intro hpD; by_contra hqD
+          exact hem (mem_filter.2 ⟨hT, q, p, Sym2.eq_swap, hqD, hpD⟩)
+        · intro hqD; by_contra hpD
+          exact hem (mem_filter.2 ⟨hT, p, q, rfl, hpD, hqD⟩)
+      have hflip := tstep_flip hp hq h1 hg hTpq.1 hTpq.2.1
+      have n := inner_sq_add_det_sq (e := q - p) (F.norm_u hp)
+      rw [← dist_eq_norm, dist_comm, h1] at n
+      have hb : beta = 1 / 100 := rfl
+      have hne : det2 (F.u p) (q - p) ≠ 0 := by
+        intro h0; rw [h0] at n
+        obtain ⟨x1, x2, -, -⟩ := hTpq
+        rw [hb] at x2; nlinarith
+      refine mem_union.2 (Or.inl (mem_image.2 ?_))
+      rcases hne.lt_or_gt with hlt | hgt
+      · have hR : RowR F p q := ⟨⟨hp, hq, h1, hg, hTpq, by linarith⟩, hrow⟩
+        refine ⟨p, mem_filter.2 ⟨hp, q, hR⟩, ?_⟩
+        rw [rowR_fun hX (hrt p ⟨q, hR⟩) hR]
+      · have hlt : det2 (F.u q) (p - q) < 0 := by nlinarith
+        have hR : RowR F q p :=
+          ⟨⟨hq, hp, by rw [dist_comm]; exact h1, hg', hTqp, by linarith⟩, hrow.symm⟩
+        refine ⟨q, mem_filter.2 ⟨hq, p, hR⟩, ?_⟩
+        rw [rowR_fun hX (hrt q ⟨p, hR⟩) hR]; exact Sym2.eq_swap
+    · obtain ⟨hge, v, w, rfl, hr⟩ := mem_filter.1 hR
+      have hM : RungM X F v w := ⟨hr, hge⟩
+      refine mem_union.2 (Or.inr (mem_image.2 ⟨v, mem_filter.2 ⟨mem_filter.2 ⟨hr.1, hr.2.1⟩,
+        w, hM⟩, ?_⟩))
+      rw [R1_v hX F hτ₁ hτ₂ (hmt v ⟨w, hM⟩).1 hr]
+  exact (card_le_card hsub).trans ((card_union_le _ _).trans
+    (add_le_add card_image_le card_image_le))
+
 /-- **Ownership count, no rhombi** (`√3/2 + 3β ≤ τ < cos(β/2)`): pure good edges `≤ (5/4)|S|`.
 
 TODO: prove.
@@ -1018,7 +1436,12 @@ Depends on: `T1`, `T2`, `R1_v`, `R1_z`, `R2`, `R2_sym`, `R3_rhombus`, `R3_resona
 theorem ownership_rest (hX : Normal X) (F : DirField X) (hτ₁ : √3 / 2 + 3 * beta ≤ tau X)
     (hτ₂ : tau X < Real.cos (beta / 2)) :
     ((goodPure X F).card : ℝ) ≤ 5 / 4 * (Sset X).card := by
-  sorry
+  have hτ₂' : tau X ≤ 1 := hτ₂.le.trans (Real.cos_le_one _)
+  have h1 := (ownership_core hX F hτ₁ hτ₂').2 hτ₂
+  have h2 := card_goodPure_le hX F hτ₁ hτ₂'
+  have : 4 * (goodPure X F).card ≤ 5 * (Sset X).card := by omega
+  have : (4 : ℝ) * (goodPure X F).card ≤ 5 * (Sset X).card := by exact_mod_cast this
+  linarith
 
 /-- **Ownership + pairing** (`cos(β/2) ≤ τ ≤ 1`): pure good edges `≤ (4/3)|S|`.
 
@@ -1030,7 +1453,12 @@ Depends on: `ownership_rest` machinery, `R3_no_three_parallel`, `ownership_ratio
 Difficulty XL. -/
 theorem ownership_res (hX : Normal X) (F : DirField X) (hτ₁ : Real.cos (beta / 2) ≤ tau X)
     (hτ₂ : tau X ≤ 1) : ((goodPure X F).card : ℝ) ≤ 4 / 3 * (Sset X).card := by
-  sorry
+  have hτ₁' : √3 / 2 + 3 * beta ≤ tau X := c5_rhombus.le.trans hτ₁
+  have h1 := (ownership_core hX F hτ₁' hτ₂).1
+  have h2 := card_goodPure_le hX F hτ₁' hτ₂
+  have : 3 * (goodPure X F).card ≤ 4 * (Sset X).card := by omega
+  have : (3 : ℝ) * (goodPure X F).card ≤ 4 * (Sset X).card := by exact_mod_cast this
+  linarith
 
 /-- Region II wiring: `e(S) ≤ goodPure + 71 + cBad`.
 
