@@ -623,7 +623,108 @@ theorem NormalConfig.card_mul_le_of_edges (hV : NormalConfig V nrm) {E : Finset 
       κ ≤ ‖nrm p + nrm q‖)
     (hdeg : ∀ p, (E.filter (fun e => p ∈ e)).card ≤ D) (hβ₀ : 0 ≤ β₀) (hκ : 0 < κ)
     (hN : 2 / κ < N) : (E.card : ℝ) * β₀ ≤ 2 * π * (D * N) := by
-  sorry
+  set P := (V ×ˢ V).filter
+    (fun pq : Pt × Pt => s(pq.1, pq.2) ∈ E ∧ 0 < det2 (nrm pq.1) (nrm pq.2)) with hP_def
+  have hPmem : ∀ pq ∈ P, pq.1 ∈ V ∧ pq.2 ∈ V ∧ s(pq.1, pq.2) ∈ E ∧
+      0 < det2 (nrm pq.1) (nrm pq.2) := by
+    intro pq h
+    simp only [P, mem_filter, mem_product] at h
+    exact ⟨h.1.1, h.1.2, h.2.1, h.2.2⟩
+  -- every edge has exactly one positive orientation
+  have hEP : E ⊆ P.image (fun pq => s(pq.1, pq.2)) := by
+    intro e he
+    induction e using Sym2.ind with
+    | _ p q =>
+    obtain ⟨hp, hq, -, hang, hκp⟩ := hE p q he
+    have hne : det2 (nrm p) (nrm q) ≠ 0 := by
+      intro h0
+      rcases eq_or_eq_neg_of_det2_eq_zero (hV.unit p hp) (hV.unit q hq) h0 with h | h
+      · have hq0 : nrm q ≠ 0 := by
+          intro h'; have := hV.unit q hq; rw [h', norm_zero] at this; norm_num at this
+        rw [h, ang, InnerProductGeometry.angle_self hq0] at hang; linarith
+      · rw [h, neg_add_cancel, norm_zero] at hκp; linarith
+    rw [mem_image]
+    rcases lt_or_gt_of_ne hne with h | h
+    · refine ⟨(q, p), ?_, Sym2.eq_swap⟩
+      simp only [P, mem_filter, mem_product]
+      exact ⟨⟨hq, hp⟩, by rw [Sym2.eq_swap]; exact he, by rw [det2_swap]; linarith⟩
+    · exact ⟨(p, q), by simp only [P, mem_filter, mem_product]; exact ⟨⟨hp, hq⟩, he, h⟩, rfl⟩
+  have hcardE : (E.card : ℝ) ≤ P.card := by
+    exact_mod_cast (card_le_card hEP).trans card_image_le
+  -- each oriented edge owns a cap of measure `> β₀`
+  have hα : ∀ pq ∈ P, β₀ ≤ dirMeasure (cap (nrm pq.1) (nrm pq.2)) := by
+    intro pq hpq
+    obtain ⟨hp, hq, he, -⟩ := hPmem pq hpq
+    obtain ⟨-, -, -, hang, hκp⟩ := hE pq.1 pq.2 he
+    have ha := hV.unit pq.1 hp
+    have hb := hV.unit pq.2 hq
+    have h2 : ‖nrm pq.1 + nrm pq.2‖ ^ 2 = 2 + 2 * inner ℝ (nrm pq.1) (nrm pq.2) := by
+      rw [norm_add_sq_real, ha, hb]; ring
+    have : 0 < 1 + inner ℝ (nrm pq.1) (nrm pq.2) := by nlinarith
+    exact hang.le.trans (ang_le_dirMeasure_cap ha hb this)
+  -- multiplicity
+  have hM : ∀ θ : ℝ, (P.filter (fun pq => dirVec θ ∈ cap (nrm pq.1) (nrm pq.2))).card ≤
+      D * N := by
+    intro θ
+    have hm : ‖dirVec θ‖ = 1 := norm_dirVec θ
+    set m := dirVec θ
+    set F := P.filter (fun pq => m ∈ cap (nrm pq.1) (nrm pq.2)) with hF_def
+    have hfib : ∀ t ∈ F.image Prod.fst, (F.filter (fun pq => pq.1 = t)).card ≤ D := by
+      intro t _
+      refine le_trans ?_ (hdeg t)
+      refine card_le_card_of_injOn (fun pq => s(pq.1, pq.2)) (fun pq hpq => ?_) ?_
+      · obtain ⟨hpqF, rfl⟩ := mem_filter.1 hpq
+        refine mem_filter.2 ⟨(hPmem pq (mem_filter.1 hpqF).1).2.2.1, Sym2.mem_mk_left _ _⟩
+      · intro x hx y hy hxy
+        have hx1 := (mem_filter.1 hx).2
+        have hy1 := (mem_filter.1 hy).2
+        simp only at hxy
+        rcases Sym2.eq_iff.1 hxy with ⟨h1, h2⟩ | ⟨h1, h2⟩
+        · exact Prod.ext h1 h2
+        · exact Prod.ext (by rw [hx1, hy1]) (by rw [← h1, hx1, h2, hy1])
+    have hT : (F.image Prod.fst).card ≤ N := by
+      rcases F.eq_empty_or_nonempty with hF | hF
+      · rw [hF]; simp
+      obtain ⟨⟨p0, q0⟩, h0F, hmin⟩ := F.exists_min_image (fun pq => inner ℝ (nrm pq.1) m) hF
+      obtain ⟨h0P, h0m⟩ := mem_filter.1 h0F
+      obtain ⟨hp0, hq0, he0, hdet0⟩ := hPmem _ h0P
+      obtain ⟨-, -, hd0, -, hκ0⟩ := hE p0 q0 he0
+      refine le_trans (card_le_card ?_) (hV.card_cap_le hp0 hq0 hd0 hdet0 hκ hκ0 hN)
+      intro t ht
+      obtain ⟨⟨t', h⟩, htF, rfl⟩ := mem_image.1 ht
+      obtain ⟨htP, htm⟩ := mem_filter.1 htF
+      obtain ⟨htV, hhV, -, hdett⟩ := hPmem _ htP
+      simp only at htV hhV hdett htm ⊢
+      refine mem_filter.2 ⟨htV, ?_⟩
+      have hu := hV.unit t' htV
+      have hw := hV.unit p0 hp0
+      have hh1 := hV.unit q0 hq0
+      obtain ⟨ht1, -⟩ := det2_nonneg_of_mem_cap hu (hV.unit h hhV) hm hdett htm
+      obtain ⟨h01, h02⟩ := det2_nonneg_of_mem_cap hw hh1 hm hdet0 h0m
+      have hle : inner ℝ (nrm p0) m ≤ inner ℝ (nrm t') m := hmin (t', h) htF
+      have hwu : 0 ≤ det2 (nrm p0) (nrm t') := det2_tail hu hw hm ht1 h01 hle
+      have huh : 0 ≤ det2 (nrm t') (nrm q0) := by
+        rcases h01.lt_or_eq with hpos | hzero
+        · have hpl := plucker (nrm p0) (nrm t') m (nrm q0)
+          have : 0 ≤ det2 (nrm p0) m * det2 (nrm t') (nrm q0) := by
+            rw [hpl]; exact add_nonneg (mul_nonneg hwu h02) (mul_nonneg hdet0.le ht1)
+          exact (mul_nonneg_iff_of_pos_left hpos).1 this
+        · rcases eq_or_eq_neg_of_det2_eq_zero hw hm hzero.symm with hwm | hwm
+          · have h1 : 1 ≤ inner ℝ (nrm t') m := by
+              rw [hwm, real_inner_self_eq_norm_sq, hm] at hle; linarith
+            rw [eq_of_one_le_inner hu hm h1, ← hwm]; exact hdet0.le
+          · exfalso
+            have : det2 (nrm p0) (nrm q0) = - det2 m (nrm q0) := by
+              rw [hwm]; simp only [det2, PiLp.neg_apply]; ring
+            linarith
+      exact mem_cap_of_det2 hw hh1 hu hdet0 hwu huh
+    calc F.card ≤ D * (F.image Prod.fst).card := card_le_mul_card_image F D hfib
+      _ ≤ D * N := Nat.mul_le_mul_left D hT
+  have h := card_mul_le_of_dirMeasure P (fun pq => cap (nrm pq.1) (nrm pq.2))
+    (fun _ _ => isClosed_cap _ _) (D * N) hM hα
+  push_cast at h
+  calc (E.card : ℝ) * β₀ ≤ P.card * β₀ := mul_le_mul_of_nonneg_right hcardE hβ₀
+    _ ≤ 2 * π * (D * N) := h
 
 /-- The discrete walk: a window-neighbour `y` of `v` on the side away from `x` is within `412`
 of `v`. -/
