@@ -289,16 +289,61 @@ theorem exists_sorted {X : Finset Pt} {Δ₂ : ℝ} {p : Pt} (hp : IsExt X p) {S
 /-- A core vertex `p ∈ L₁` of core degree `4` has at least two core neighbours of core degree
 `2` (its two middle neighbours).
 
-TODO: prove.
-What's missing: sort the four neighbours `f 0, …, f 3`; apply `mid_nbr_unique` to `f 1`
-(`σ = −1`) and `f 2` (`σ = 1`); core degree `≥ 2` from `minDeg2_core`.
-Acceptance: no `sorry`.
-Depends on: `exists_sorted`, `mid_nbr_unique`. -/
+Proof: sort the four neighbours `f 0, …, f 3`; apply `mid_nbr_unique` to `f 1` (`σ = −1`) and
+`f 2` (`σ = 1`); core degree `≥ 2` from `minDeg2_core`. -/
 theorem two_le_mid {X : Finset Pt} {Δ Δ₂ : ℝ} (hT : TwoLargest X Δ Δ₂) {p : Pt}
     (hp : p ∈ L1 X) (h4 : (nbr (core (L1 X ∪ L2 X) Δ₂) Δ₂ p).card = 4) :
     2 ≤ ((nbr (core (L1 X ∪ L2 X) Δ₂) Δ₂ p).filter
       (fun w => (nbr (core (L1 X ∪ L2 X) Δ₂) Δ₂ w).card = 2)).card := by
-  sorry
+  set K := core (L1 X ∪ L2 X) Δ₂ with hKdef
+  have hKX : K ⊆ X := (core_subset _ _).trans (union_subset (L1_subset X) (L2_subset X))
+  have hpE : IsExt X p := mem_L1.1 hp
+  have hpX : p ∈ X := hpE.1
+  have hsub : nbr K Δ₂ p ⊆ X := fun x hx => hKX (mem_nbr.1 hx).1
+  obtain ⟨f, hfS, hfi, ord⟩ :=
+    exists_sorted hpE hsub (fun x hx => (mem_nbr.1 hx).2) hT.pos h4
+  have anti : ∀ x y, orient p y x = -orient p x y := fun x y => by simp only [orient]; ring
+  have fX : ∀ i, f i ∈ X := fun i => hsub (hfS i)
+  have fd : ∀ i, dist p (f i) = Δ₂ := fun i => (mem_nbr.1 (hfS i)).2
+  have fne : ∀ i j : Fin 4, i ≠ j → f i ≠ f j := fun i j h e => h (hfi e)
+  -- a vertex `w ∈ K` all of whose `Δ₂`-neighbours other than `p` coincide has core degree `2`
+  have deg2 : ∀ w ∈ nbr K Δ₂ p, (∀ r ∈ X, ∀ s ∈ X, r ≠ p → s ≠ p → dist w r = Δ₂ →
+      dist w s = Δ₂ → r = s) → (nbr K Δ₂ w).card = 2 := by
+    intro w hw huniq
+    have hwK := (mem_nbr.1 hw).1
+    have h2 : 2 ≤ (nbr K Δ₂ w).card := minDeg2_core _ _ w hwK
+    have h1 : ((nbr K Δ₂ w).erase p).card ≤ 1 := by
+      refine card_le_one.2 fun a ha b hb => ?_
+      obtain ⟨hap, ha'⟩ := mem_erase.1 ha
+      obtain ⟨hbp, hb'⟩ := mem_erase.1 hb
+      exact huniq a (hKX (mem_nbr.1 ha').1) b (hKX (mem_nbr.1 hb').1) hap hbp
+        (mem_nbr.1 ha').2 (mem_nbr.1 hb').2
+    have := pred_card_le_card_erase (s := nbr K Δ₂ w) (a := p)
+    omega
+  have o : ∀ i j : Fin 4, i < j → 0 < orient p (f i) (f j) := ord
+  have d2 : (nbr K Δ₂ (f 2)).card = 2 := deg2 _ (hfS 2) fun r hr s hs hrp hsp dr ds =>
+    mid_nbr_unique hT (σ := 1) (Or.inl rfl) hpX (fX 2) (fX 0) (fX 1) (fX 3) (fd 2) (fd 0) (fd 1)
+      (fd 3) (fne 0 1 (by decide))
+      (by rw [one_mul, anti]; linarith [o 0 2 (by decide)])
+      (by rw [one_mul, anti]; linarith [o 1 2 (by decide)])
+      (by rw [one_mul]; exact o 2 3 (by decide))
+      (by rw [one_mul]; exact o 0 3 (by decide))
+      (by rw [one_mul]; exact o 1 3 (by decide)) hr hs hrp hsp dr ds
+  have d1 : (nbr K Δ₂ (f 1)).card = 2 := deg2 _ (hfS 1) fun r hr s hs hrp hsp dr ds =>
+    mid_nbr_unique hT (σ := -1) (Or.inr rfl) hpX (fX 1) (fX 2) (fX 3) (fX 0) (fd 1) (fd 2) (fd 3)
+      (fd 0) (fne 2 3 (by decide))
+      (by linarith [o 1 2 (by decide)])
+      (by linarith [o 1 3 (by decide)])
+      (by rw [anti]; linarith [o 0 1 (by decide)])
+      (by rw [anti]; linarith [o 0 2 (by decide)])
+      (by rw [anti]; linarith [o 0 3 (by decide)]) hr hs hrp hsp dr ds
+  have hsub2 : ({f 1, f 2} : Finset Pt) ⊆ (nbr K Δ₂ p).filter (fun w => (nbr K Δ₂ w).card = 2) := by
+    intro x hx
+    rcases mem_insert.1 hx with rfl | hx
+    · exact mem_filter.2 ⟨hfS 1, d1⟩
+    · rw [mem_singleton.1 hx]; exact mem_filter.2 ⟨hfS 2, d2⟩
+  have := card_le_card hsub2
+  rwa [card_pair (fne 1 2 (by decide))] at this
 
 /-! ## Counting -/
 
