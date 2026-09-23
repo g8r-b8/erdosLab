@@ -107,7 +107,9 @@ n pairs? Must the number of such distances → ∞ (perhaps ≥ n^{1−o(1)})?
   by Pach's Handbook ch. 1; original READ (NOVELTY Audit 5): n₂ ≤ (3/2)n exactly, for all n, with no constant. 54/37 now has no unread dependencies.
   Cor A1 now UNCONDITIONAL (VERIFY_A1b.md): Prop 3 proved directly from Ve87 Cases 1–3 applied in the 2-core
   (no point deletion). All cases now exact (sympy + hand proofs + interval check, va1b_exact.py).
-  The unconditional min(h,4) form still needs Ve Props 5–8 (agent working → VERIFY_A1c.md).
+  Unconditional min(h,4) form also PROVED (VERIFY_A1c.md, 007b648): deg_{G′}(p) ≤ 4 on L₁′ via Lemma M/F
+  (a short exact proof; no point deletion), with sympy identities + ~3.2M exact lattice configs + ~81k sets, 0 violations.
+  Side effect: the Vesztergombi inputs to CDL Thm 1.3 are now independently proved.
 - Convex n = 7 (and maybe 11) → angle_B3.md — DONE (f8b09f7). Convex n = 7 ⇒ k ≥ 3 (k = number of rare distances), proved two ways: from the literature
   ([EF95b] r₂ ≤ n plus Altman), and self-contained. **n = 11 ⇒ k ≥ 3: NEW, computer-assisted** — a SAT refutation of ordinal
   distance-rank colourings under the convex-quadrilateral inequality only, with the DRUP proof checked by our own RUP checker.
