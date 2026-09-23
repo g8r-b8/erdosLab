@@ -115,6 +115,11 @@ then ¬(almost-all o(N)) as in PR #4076's Erdos468MinimalPreimageLittleOAlmostAl
   direction written up); brute-force certificate ~1e18 nodes → needs structural idea.
 - Triage 400–699 (→436) and 700–949 (→885 k=5, competitor active) found nothing quick.
 
+## Iteration 9 (2026-09-23)
+- Agents: novelty audit (convex n=11/13 → 132 NOVELTY Audit 4; Λ(5,3) → problems/436/NOVELTY.md),
+  second independent referee of WRITEUP_A2 (→ REFEREE2_A2.md), Lean scoping of convex n=7/11
+  (→ Erdos/Erdos/E132Convex.lean, problems/132/lean/README.md). Loop paused while they run.
+
 ## Next step
 - 132: novelty audit of convex n=11/13 result; independent read of WRITEUP_A2 §7.2 and §8 Step 4;
   scope a Lean formalisation of convex n=11 (quadrilateral lemma + verified encoder + LRAT).
