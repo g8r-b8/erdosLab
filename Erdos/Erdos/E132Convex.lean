@@ -29,6 +29,8 @@ Proof architecture (see `problems/132/lean/README.md`):
 
 open Finset
 
+set_option maxRecDepth 100000
+
 namespace Erdos132Convex
 
 /-! ## Geometry -/
@@ -322,15 +324,148 @@ def BVNoCE (n Dm : ℕ) (L : List (Fin n × Fin n)) (Qs : List (Fin n × Fin n �
   ∀ x : Fin n → Fin n → BitVec 3, (∀ e ∈ L, x e.1 e.2 < BitVec.ofNat 3 Dm) →
     (∀ q ∈ Qs, QBV x q) → rareSumBV L x Dm ≤ 2 → False
 
-/-- **Encoding correctness**: the `BitVec` statement implies the ordinal one.
-TODO: / What's missing: `toNat` of the fold sums = list counts = finset cards.
-/ Acceptance: sorry-free. / Depends on: —. -/
+/-- A fold of `0/1` indicators computes `countP`, as long as there is no overflow. -/
+theorem foldr_ite_toNat {α : Type*} (w : ℕ) (P : α → Prop) [DecidablePred P] (L : List α)
+    (h : L.length < 2 ^ w) :
+    (L.foldr (fun e acc => (if P e then (1 : BitVec w) else 0) + acc) 0).toNat =
+      L.countP (fun e => decide (P e)) := by
+  induction L with
+  | nil => simp
+  | cons a L ih =>
+    simp only [List.length_cons] at h
+    have hc := List.countP_le_length (p := fun e => decide (P e)) (l := L)
+    simp only [List.foldr_cons, BitVec.toNat_add, ih (by omega), List.countP_cons]
+    have hw : 2 ≤ 2 ^ w := by omega
+    have h1 : (1 : BitVec w).toNat = 1 := by
+      rw [show (1 : BitVec w) = BitVec.ofNat w 1 from rfl, BitVec.toNat_ofNat]
+      exact Nat.mod_eq_of_lt (by omega)
+    have h0 : (0 : BitVec w).toNat = 0 := by
+      rw [show (0 : BitVec w) = BitVec.ofNat w 0 from rfl, BitVec.toNat_ofNat, Nat.zero_mod]
+    by_cases hp : P a
+    · simp only [hp, ite_true, decide_true, h1]
+      rw [Nat.mod_eq_of_lt (by omega)]
+      omega
+    · simp only [hp, ite_false, decide_false, h0]
+      rw [Nat.mod_eq_of_lt (by omega)]
+      simp
+
+/-- `countP` over a duplicate-free list is a finset cardinality. -/
+theorem countP_eq_card {α : Type*} [DecidableEq α] (P : α → Prop) [DecidablePred P]
+    {M : List α} (hM : M.Nodup) :
+    M.countP (fun e => decide (P e)) = (M.toFinset.filter P).card := by
+  rw [List.countP_eq_length_filter, Finset.card_def, Finset.filter_val, List.toFinset_val,
+    List.dedup_eq_self.2 hM, Multiset.filter_coe, Multiset.coe_card]
+
+/-- 3-bit literals compare like naturals below `8`. -/
+theorem ofNat3_le_iff {a b : ℕ} (ha : a < 8) (hb : b < 8) :
+    BitVec.ofNat 3 a ≤ BitVec.ofNat 3 b ↔ a ≤ b := by
+  rw [BitVec.le_def, BitVec.toNat_ofNat, BitVec.toNat_ofNat,
+    Nat.mod_eq_of_lt (by simpa using ha), Nat.mod_eq_of_lt (by simpa using hb)]
+
+/-- 3-bit literals are equal iff the naturals are (below `8`). -/
+theorem ofNat3_eq_iff {a b : ℕ} (ha : a < 8) (hb : b < 8) :
+    BitVec.ofNat 3 a = BitVec.ofNat 3 b ↔ a = b := by
+  rw [← BitVec.toNat_inj, BitVec.toNat_ofNat, BitVec.toNat_ofNat,
+    Nat.mod_eq_of_lt (by simpa using ha), Nat.mod_eq_of_lt (by simpa using hb)]
+
+/-- All pairs `i < j` of `Fin n`, generated. -/
+def pairsGen (n : Nat) : List (Fin n × Fin n) :=
+  (List.finRange n).flatMap fun i => ((List.finRange n).filter (fun j => decide (i < j))).map (fun j => (i, j))
+
+/-- Membership in `pairsGen`. -/
+theorem mem_pairsGen {n : Nat} (e : Fin n × Fin n) : e ∈ pairsGen n ↔ e.1 < e.2 := by
+  obtain ⟨a, b⟩ := e
+  simp [pairsGen]
+
+/-- `pairsGen` has no duplicates. -/
+theorem nodup_pairsGen (n : Nat) : (pairsGen n).Nodup := by
+  unfold pairsGen
+  refine List.nodup_flatMap.2 ⟨fun i _ => ?_, ?_⟩
+  · exact ((List.nodup_finRange n).filter _).map (fun a b h => (Prod.ext_iff.1 h).2)
+  · refine (List.nodup_finRange n).pairwise_of_forall_ne fun i _ j _ hij => ?_
+    simp only [Function.onFun]
+    rw [List.disjoint_left]
+    intro e h1 h2
+    simp only [List.mem_map] at h1 h2
+    obtain ⟨_, _, rfl⟩ := h1
+    obtain ⟨_, _, h⟩ := h2
+    exact hij (Prod.ext_iff.1 h).1.symm
+
+
+/-- All quadruples `i < j < k < l` of `Fin n`, generated. -/
+def quadsGen (n : Nat) : List (Fin n × Fin n × Fin n × Fin n) :=
+  (pairsGen n).flatMap fun a => ((pairsGen n).filter (fun b => decide (a.2 < b.1))).map
+    (fun b => (a.1, a.2, b.1, b.2))
+
+/-- Members of `quadsGen` are increasing. -/
+theorem quadsGen_inc {n : Nat} (q) (h : q ∈ quadsGen n) :
+    q.1 < q.2.1 ∧ q.2.1 < q.2.2.1 ∧ q.2.2.1 < q.2.2.2 := by
+  simp only [quadsGen, List.mem_flatMap, List.mem_map, List.mem_filter, mem_pairsGen,
+    decide_eq_true_eq] at h
+  obtain ⟨a, ha, b, ⟨hb, hab⟩, rfl⟩ := h
+  exact ⟨ha, hab, hb⟩
+
+
+/-- **Encoding correctness**: the `BitVec` statement implies the ordinal one.  A `QOrd`
+colouring `c` gives the `BitVec` model `x i j = c i j` (as a 3-bit number); its class sizes and
+rare-class count are computed without overflow. -/
 theorem ordNoCE_of_bv {n Dm : ℕ} {L : List (Fin n × Fin n)}
     {Qs : List (Fin n × Fin n × Fin n × Fin n)}
-    (hL : ∀ e, e ∈ L ↔ e.1 < e.2) (hnd : L.Nodup) (hlen : L.length < 256) (hn : n < 256)
-    (hQ : ∀ q ∈ Qs, q.1 < q.2.1 ∧ q.2.1 < q.2.2.1 ∧ q.2.2.1 < q.2.2.2)
-    (hDm : Dm ≤ 8) (h : BVNoCE n Dm L Qs) : OrdNoCE n Dm := by
-  sorry
+    (hL' : L = pairsGen n) (hQs : Qs = quadsGen n) (hlen : L.length < 256) (hn : n < 256)
+    (hDm : Dm < 8) (h : BVNoCE n Dm L Qs) : OrdNoCE n Dm := by
+  classical
+  have hL : ∀ e, e ∈ L ↔ e.1 < e.2 := fun e => hL' ▸ mem_pairsGen e
+  have hnd : L.Nodup := hL' ▸ nodup_pairsGen n
+  have hQ : ∀ q ∈ Qs, q.1 < q.2.1 ∧ q.2.1 < q.2.2.1 ∧ q.2.2.1 < q.2.2.2 :=
+    fun q hq => quadsGen_inc q (hQs ▸ hq)
+  intro c hc hq
+  by_contra h3
+  have hc8 : ∀ i j : Fin n, i < j → c i j < 8 := fun i j hij => (hc i j hij).trans hDm
+  have hpairs : pairsF n = L.toFinset := by
+    ext e; simp [pairsF, hL]
+  let x : Fin n → Fin n → BitVec 3 := fun i j => BitVec.ofNat 3 (c i j)
+  -- class sizes
+  have hcnt : ∀ t, t < 8 → (cntBV L x (BitVec.ofNat 3 t)).toNat = cnt n c t := by
+    intro t ht
+    rw [cntBV, foldr_ite_toNat 8 _ L (by simpa using hlen), cnt, hpairs,
+      ← countP_eq_card _ hnd]
+    refine List.countP_congr fun e he => ?_
+    simp only [x, decide_eq_true_eq]
+    exact ofNat3_eq_iff (hc8 _ _ ((hL e).1 he)) ht
+  have hrare : ∀ t, t < 8 →
+      (rareBV L x (BitVec.ofNat 3 t) = true ↔ 1 ≤ cnt n c t ∧ cnt n c t ≤ n) := by
+    intro t ht
+    rw [← hcnt t ht]
+    simp only [rareBV, Bool.and_eq_true, bne_iff_ne, ne_eq, decide_eq_true_eq, BitVec.le_def,
+      BitVec.ofNat_eq_ofNat, BitVec.toNat_ofNat, ← BitVec.toNat_inj]
+    rw [Nat.mod_eq_of_lt (by omega)]
+    omega
+  refine h x (fun e he => ?_) (fun q hqm => ?_) ?_
+  · have := hc _ _ ((hL e).1 he)
+    rw [BitVec.lt_def, BitVec.toNat_ofNat, BitVec.toNat_ofNat,
+      Nat.mod_eq_of_lt (by simpa using this.trans hDm), Nat.mod_eq_of_lt (by simpa using hDm)]
+    exact this
+  · obtain ⟨h1, h2, h3⟩ := hQ q hqm
+    obtain ⟨⟨a1, a2⟩, ⟨b1, b2⟩⟩ := hq _ _ _ _ h1 h2 h3
+    have hik := h1.trans h2
+    have hjl := h2.trans h3
+    have hil := hik.trans h3
+    simp only [QBV, x, ofNat3_le_iff (hc8 _ _ hik) (hc8 _ _ h1),
+      ofNat3_le_iff (hc8 _ _ hik) (hc8 _ _ h3), ofNat3_le_iff (hc8 _ _ hik) (hc8 _ _ h2),
+      ofNat3_le_iff (hc8 _ _ hik) (hc8 _ _ hil), ofNat3_le_iff (hc8 _ _ hjl) (hc8 _ _ h1),
+      ofNat3_le_iff (hc8 _ _ hjl) (hc8 _ _ h3), ofNat3_le_iff (hc8 _ _ hjl) (hc8 _ _ h2),
+      ofNat3_le_iff (hc8 _ _ hjl) (hc8 _ _ hil)]
+    exact ⟨a1, a2, b1, b2⟩
+  · have hsum : (rareSumBV L x Dm).toNat =
+        ((range Dm).filter (fun t => 1 ≤ cnt n c t ∧ cnt n c t ≤ n)).card := by
+      rw [rareSumBV, foldr_ite_toNat 4 _ _ (by simp; omega), ← List.toFinset_range,
+        ← countP_eq_card _ (List.nodup_range)]
+      refine List.countP_congr fun t ht => ?_
+      simp only [decide_eq_true_eq]
+      exact hrare t ((List.mem_range.1 ht).trans hDm)
+    rw [BitVec.le_def, hsum]
+    simp only [BitVec.ofNat_eq_ofNat, BitVec.toNat_ofNat]
+    omega
 
 /-! ## Explicit pair and quadruple lists (generated) -/
 
@@ -419,38 +554,41 @@ def quads11 : List (Fin 11 × Fin 11 × Fin 11 × Fin 11) :=
 
 /-! ## The certificates (`bv_decide`) -/
 
-/-- `n = 7`: no ordinal counterexample with `≤ 4` colours.
-TODO: / What's missing: unfold with `simp`, then `bv_decide`. / Acceptance: sorry-free
-(auxiliary `bv_decide` axiom allowed and disclosed). / Depends on: —. -/
+/-- `n = 7`: no ordinal counterexample with `≤ 4` colours (`bv_decide`, ~1 s of SAT). -/
 theorem bvNoCE7 : BVNoCE 7 4 pairs7 quads7 := by
-  sorry
+  intro x h1 h2 h3
+  simp only [pairs7, quads7, List.forall_mem_cons, List.mem_nil_iff, false_imp_iff, implies_true,
+    QBV, rareSumBV, rareBV, cntBV, List.foldr_cons, List.foldr_nil, List.range_succ,
+    List.range_zero, List.nil_append, List.cons_append, and_true] at h1 h2 h3
+  bv_decide
 
-/-- `n = 11`: no ordinal counterexample with `≤ 6` colours.
-TODO: / What's missing: as for `bvNoCE7`. / Acceptance: as for `bvNoCE7`. / Depends on: —. -/
+/-- `n = 11`: no ordinal counterexample with `≤ 6` colours (`bv_decide`, ~20 s of SAT). -/
 theorem bvNoCE11 : BVNoCE 11 6 pairs11 quads11 := by
-  sorry
+  intro x h1 h2 h3
+  simp only [pairs11, quads11, List.forall_mem_cons, List.mem_nil_iff, false_imp_iff,
+    implies_true, QBV, rareSumBV, rareBV, cntBV, List.foldr_cons, List.foldr_nil, List.range_succ,
+    List.range_zero, List.nil_append, List.cons_append, and_true] at h1 h2 h3
+  bv_decide (config := { timeout := 3000 })
 
-/-- TODO: / Depends on: `ordNoCE_of_bv`, `bvNoCE7`. -/
-theorem ordNoCE7 : OrdNoCE 7 4 := by
-  sorry
+theorem ordNoCE7 : OrdNoCE 7 4 :=
+  ordNoCE_of_bv (by decide +kernel) (by decide +kernel) (by decide) (by decide) (by decide) bvNoCE7
 
-/-- TODO: / Depends on: `ordNoCE_of_bv`, `bvNoCE11`. -/
-theorem ordNoCE11 : OrdNoCE 11 6 := by
-  sorry
+theorem ordNoCE11 : OrdNoCE 11 6 :=
+  ordNoCE_of_bv (by decide +kernel) (by decide +kernel) (by decide) (by decide) (by decide) bvNoCE11
 
 /-! ## Main theorems -/
 
 /-- **Theorem 7.** A strictly convex 7-gon has at least three distances occurring at most 7
-times.  TODO: / Depends on: `main_of_ord`, `ordNoCE7`. -/
+times. -/
 theorem erdos132_convex7 (p : Fin 7 → Pt) (hp : StrictConvexPolygon p) :
-    3 ≤ (rareDists p).card := by
-  sorry
+    3 ≤ (rareDists p).card :=
+  main_of_ord (Dm := 4) hp (by decide) ordNoCE7
 
 /-- **Theorem 11.** A strictly convex 11-gon has at least three distances occurring at most 11
-times.  TODO: / Depends on: `main_of_ord`, `ordNoCE11`. -/
+times. -/
 theorem erdos132_convex11 (p : Fin 11 → Pt) (hp : StrictConvexPolygon p) :
-    3 ≤ (rareDists p).card := by
-  sorry
+    3 ≤ (rareDists p).card :=
+  main_of_ord (Dm := 6) hp (by decide) ordNoCE11
 
 end Erdos132Convex
 
