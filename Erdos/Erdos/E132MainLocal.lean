@@ -18,6 +18,141 @@ noncomputable section
 
 variable {X : Finset Pt}
 
+/-! ## Helpers: distances of `X`, the direction field, planar coordinates -/
+
+theorem mem_distSetS {x y : Pt} (hx : x ∈ X) (hy : y ∈ X) (hxy : x ≠ y) :
+    dist x y ∈ distSetS X := by
+  simp only [distSetS, pairsS, mem_image, mem_filter]
+  exact ⟨s(x, y), ⟨Finset.mk_mem_sym2_iff.2 ⟨hx, hy⟩, by simpa using hxy⟩, rfl⟩
+
+theorem nonneg_of_mem_distSetS {d : ℝ} (hd : d ∈ distSetS X) : 0 ≤ d := by
+  simp only [distSetS, mem_image] at hd
+  obtain ⟨z, -, rfl⟩ := hd
+  induction z using Sym2.ind with
+  | _ a b => exact (dist_nonneg : 0 ≤ dist a b)
+
+theorem diam_nonneg (X : Finset Pt) : 0 ≤ diam X := by
+  unfold diam; split_ifs with h
+  · exact nonneg_of_mem_distSetS (max'_mem _ h)
+  · exact le_rfl
+
+theorem dist2_nonneg (X : Finset Pt) : 0 ≤ dist2 X := by
+  unfold dist2; split_ifs with h
+  · exact nonneg_of_mem_distSetS (mem_of_mem_erase (max'_mem _ h))
+  · exact le_rfl
+
+theorem le_diam_of_mem {d : ℝ} (hd : d ∈ distSetS X) : d ≤ diam X := by
+  unfold diam; rw [dif_pos ⟨_, hd⟩]; exact le_max' _ _ hd
+
+theorem dist2_le_diam (X : Finset Pt) : dist2 X ≤ diam X := by
+  unfold dist2; split_ifs with h
+  · exact le_diam_of_mem (mem_of_mem_erase (max'_mem _ h))
+  · exact diam_nonneg X
+
+theorem dist_le_diam {x y : Pt} (hx : x ∈ X) (hy : y ∈ X) : dist x y ≤ diam X := by
+  by_cases hxy : x = y
+  · subst hxy; rw [dist_self]; exact diam_nonneg X
+  · exact le_diam_of_mem (mem_distSetS hx hy hxy)
+
+theorem dist_le_dist2 {x y : Pt} (hx : x ∈ X) (hy : y ∈ X) (hne : dist x y ≠ diam X) :
+    dist x y ≤ dist2 X := by
+  by_cases hxy : x = y
+  · subst hxy; rw [dist_self]; exact dist2_nonneg X
+  · have hm : dist x y ∈ (distSetS X).erase (diam X) := mem_erase.2 ⟨hne, mem_distSetS hx hy hxy⟩
+    unfold dist2; rw [dif_pos ⟨_, hm⟩]; exact le_max' _ _ hm
+
+theorem minDist_le_dist {x y : Pt} (hx : x ∈ X) (hy : y ∈ X) (hxy : x ≠ y) :
+    minDist X ≤ dist x y := by
+  have hm := mem_distSetS hx hy hxy
+  unfold minDist; rw [dif_pos ⟨_, hm⟩]; exact min'_le _ _ hm
+
+theorem mem_partners {d : ℝ} {p q : Pt} :
+    q ∈ partners X d p ↔ q ∈ X ∧ q ≠ p ∧ dist p q = d := by
+  simp [partners]
+
+theorem mem_of_mem_Sset {p : Pt} (hp : p ∈ Sset X) : p ∈ X := (mem_filter.1 hp).1
+
+theorem dist2_pos_of_mem_Sset {p : Pt} (hp : p ∈ Sset X) : 0 < dist2 X := by
+  obtain ⟨q, hq⟩ := (mem_filter.1 hp).2
+  obtain ⟨-, hqp, h⟩ := mem_partners.1 hq
+  rw [← h]; exact dist_pos.2 (Ne.symm hqp)
+
+theorem diam_pos_of_mem_Sset {p : Pt} (hp : p ∈ Sset X) : 0 < diam X :=
+  (dist2_pos_of_mem_Sset hp).trans_le (dist2_le_diam X)
+
+theorem mem_Dset_of {y q : Pt} (hy : y ∈ X) (hq : q ∈ X) (h : dist y q = diam X)
+    (hpos : 0 < diam X) : y ∈ Dset X := by
+  refine mem_filter.2 ⟨hy, q, mem_partners.2 ⟨hq, ?_, h⟩⟩
+  rintro rfl; rw [dist_self] at h; linarith
+
+theorem dist_ne_diam_of_not_mem_Dset {y q : Pt} (hy : y ∈ X) (hyD : y ∉ Dset X) (hq : q ∈ X)
+    (hqy : q ≠ y) : dist y q ≠ diam X := by
+  intro h
+  exact hyD (mem_filter.2 ⟨hy, q, mem_partners.2 ⟨hq, hqy, h⟩⟩)
+
+/-- The partner distance `|p x_p|` (`Δ₂` or `Δ`). -/
+theorem DirField.dist_partner (F : DirField X) {p : Pt} (hp : p ∈ Sset X) :
+    dist p (F.partner p) = if p ∈ Dset X then diam X else dist2 X := by
+  split_ifs with h
+  · exact F.partner_D p hp h
+  · exact F.partner_K p hp h
+
+theorem DirField.dist_partner_pos (F : DirField X) {p : Pt} (hp : p ∈ Sset X) :
+    0 < dist p (F.partner p) := by
+  rw [F.dist_partner hp]; split_ifs
+  · exact diam_pos_of_mem_Sset hp
+  · exact dist2_pos_of_mem_Sset hp
+
+/-- `u_p` is a unit vector for `p ∈ S` (local copy of `DirField.norm_u`, proved here so that
+this file does not depend on the `sorry` in `E132MainDefs`). -/
+theorem DirField.norm_u' (F : DirField X) {p : Pt} (hp : p ∈ Sset X) : ‖F.u p‖ = 1 := by
+  have h := F.dist_partner_pos hp
+  rw [DirField.u, norm_smul, Real.norm_eq_abs, abs_inv, abs_of_pos h, ← dist_eq_norm,
+    dist_comm (F.partner p) p, inv_mul_cancel₀ h.ne']
+
+theorem DirField.inner_u (F : DirField X) (p y : Pt) :
+    inner ℝ y (F.u p) = (dist p (F.partner p))⁻¹ * inner ℝ y (F.partner p - p) := by
+  rw [DirField.u, real_inner_smul_right]
+
+/-- Law of cosines in inner-product form. -/
+theorem two_inner_sub (y p w : Pt) :
+    2 * inner ℝ (y - p) (w - p) = dist y p ^ 2 + dist w p ^ 2 - dist y w ^ 2 := by
+  have h := norm_sub_sq_real (y - p) (w - p)
+  rw [show y - p - (w - p) = y - w by abel] at h
+  rw [dist_eq_norm y p, dist_eq_norm w p, dist_eq_norm y w]
+  linarith
+
+/-- Chord `≤` arc: `‖a − b‖ ≤ ∠(a, b)` for unit vectors. -/
+theorem norm_sub_le_ang {a b : Pt} (ha : ‖a‖ = 1) (hb : ‖b‖ = 1) : ‖a - b‖ ≤ ang a b := by
+  have hc := InnerProductGeometry.cos_angle_mul_norm_mul_norm a b
+  rw [ha, hb, mul_one, mul_one] at hc
+  have h1 := Real.one_sub_sq_div_two_le_cos (x := ang a b)
+  have h0 : 0 ≤ ang a b := InnerProductGeometry.angle_nonneg a b
+  have hsq : ‖a - b‖ ^ 2 ≤ ang a b ^ 2 := by
+    rw [norm_sub_sq_real, ha, hb, ← hc]; unfold ang at h1 h0 ⊢; nlinarith
+  nlinarith [norm_nonneg (a - b)] 
+
+theorem inner_coord (x y : Pt) : inner ℝ x y = x 0 * y 0 + x 1 * y 1 := by
+  simp [PiLp.inner_apply, Fin.sum_univ_two]; ring
+
+theorem norm_sq_coord (x : Pt) : ‖x‖ ^ 2 = x 0 ^ 2 + x 1 ^ 2 := by
+  rw [← real_inner_self_eq_norm_sq, inner_coord]; ring
+
+theorem det2_eq_inner_perp (u e : Pt) : det2 u e = inner ℝ e (perp u) := by
+  simp [det2, perp, inner_coord]; ring
+
+theorem lagrange (e u : Pt) : inner ℝ e u ^ 2 + det2 u e ^ 2 = ‖e‖ ^ 2 * ‖u‖ ^ 2 := by
+  rw [norm_sq_coord, norm_sq_coord, inner_coord, det2]; ring
+
+theorem decomp {u : Pt} (hu : ‖u‖ = 1) (e : Pt) :
+    e = inner ℝ e u • u + det2 u e • perp u := by
+  have h := norm_sq_coord u
+  rw [hu] at h
+  ext i; fin_cases i <;> simp [inner_coord, det2, perp]
+  · linear_combination (e 0) * h
+  · linear_combination (e 1) * h
+
+
 /-! ## §3 Ball polygon and exact identities -/
 
 /-- **Lemma 3.1(a)** `X ∖ D ⊆ K`.
@@ -28,7 +163,12 @@ What's missing: a non-diametral point has all its distances `≤ Δ₂` (no dist
 Acceptance: no `sorry`.
 Depends on: definitions. Difficulty S–M. -/
 theorem ball_polygon_a {y : Pt} (hy : y ∈ X) (hyD : y ∉ Dset X) : y ∈ KBall X := by
-  sorry
+  simp only [KBall, Set.mem_iInter, Metric.mem_closedBall]
+  intro w hw
+  rw [Finset.mem_coe] at hw
+  by_cases hwy : w = y
+  · subst hwy; rw [dist_self]; exact dist2_nonneg X
+  · exact dist_le_dist2 hy hw (dist_ne_diam_of_not_mem_Dset hy hyD hw hwy)
 
 /-- **Lemma 3.1(b)** `S ∖ D ⊆ ∂K`.
 
@@ -37,7 +177,16 @@ What's missing: `v ∈ K ∩ C(w, Δ₂)` with `K ⊆ D(w, Δ₂)` is not interi
 Acceptance: no `sorry`.
 Depends on: `ball_polygon_a`. Difficulty S–M. -/
 theorem ball_polygon_b {v : Pt} (hv : v ∈ Sset X) (hvD : v ∉ Dset X) : v ∈ frontier (KBall X) := by
-  sorry
+  have hK := ball_polygon_a (mem_of_mem_Sset hv) hvD
+  obtain ⟨w, hw⟩ := (mem_filter.1 hv).2
+  obtain ⟨hwX, -, hd⟩ := mem_partners.1 hw
+  have hpos := dist2_pos_of_mem_Sset hv
+  refine ⟨subset_closure hK, fun hint => ?_⟩
+  have hsub : KBall X ⊆ Metric.closedBall w (dist2 X) :=
+    Set.biInter_subset_of_mem (by simpa using hwX)
+  have := interior_mono hsub hint
+  rw [interior_closedBall w hpos.ne', Metric.mem_ball] at this
+  linarith
 
 /-- **Lemma 3.1(c)** `dist(z, K) ≥ t` for `z ∈ D`.
 
@@ -46,7 +195,12 @@ What's missing: `K ⊆ D(x, Δ₂)` for the diametral partner `x` of `z`; triang
 Acceptance: no `sorry`.
 Depends on: definitions. Difficulty S. -/
 theorem ball_polygon_c {z y : Pt} (hz : z ∈ Dset X) (hy : y ∈ KBall X) : tgap X ≤ dist z y := by
-  sorry
+  obtain ⟨x, hx⟩ := (mem_filter.1 hz).2
+  obtain ⟨hxX, -, hd⟩ := mem_partners.1 hx
+  have hy' : dist y x ≤ dist2 X := by
+    have := Set.mem_iInter₂.1 hy x (by simpa using hxX); simpa using this
+  have := dist_triangle z y x
+  unfold tgap; linarith
 
 /-- The direction field exists.
 
@@ -71,7 +225,14 @@ Acceptance: no `sorry`.
 Depends on: definitions. Difficulty S–M. -/
 theorem exact_identity_a (F : DirField X) {p y : Pt} (hp : p ∈ Sset X) (hpD : p ∈ Dset X)
     (hy : y ∈ X) : dist y p ^ 2 / (2 * diam X) ≤ inner ℝ (y - p) (F.u p) := by
-  sorry
+  have hΔ := F.partner_D p hp hpD
+  have hpos := diam_pos_of_mem_Sset hp
+  have hle := dist_le_diam hy (F.partner_mem p hp)
+  have key := two_inner_sub y p (F.partner p)
+  rw [dist_comm (F.partner p) p, hΔ] at key
+  have h2 : dist y (F.partner p) ^ 2 ≤ diam X ^ 2 := pow_le_pow_left₀ dist_nonneg hle 2
+  rw [F.inner_u, hΔ, inv_mul_eq_div, div_le_div_iff₀ (by positivity) hpos]
+  nlinarith
 
 /-- **Lemma 3.2(b)** For `p ∈ S ∖ D`: normal (`(y − p)·u_p ≥ |y − p|²/(2Δ₂)`) or exception
 (`|y w_p| = Δ`).
@@ -82,7 +243,17 @@ Depends on: definitions. Difficulty S–M. -/
 theorem exact_identity_b (F : DirField X) {p y : Pt} (hp : p ∈ Sset X) (hpD : p ∉ Dset X)
     (hy : y ∈ X) :
     dist y p ^ 2 / (2 * dist2 X) ≤ inner ℝ (y - p) (F.u p) ∨ dist y (F.partner p) = diam X := by
-  sorry
+  by_cases hexc : dist y (F.partner p) = diam X
+  · exact Or.inr hexc
+  left
+  have hΔ := F.partner_K p hp hpD
+  have hpos := dist2_pos_of_mem_Sset hp
+  have hle := dist_le_dist2 hy (F.partner_mem p hp) hexc
+  have key := two_inner_sub y p (F.partner p)
+  rw [dist_comm (F.partner p) p, hΔ] at key
+  have h2 : dist y (F.partner p) ^ 2 ≤ dist2 X ^ 2 := pow_le_pow_left₀ dist_nonneg hle 2
+  rw [F.inner_u, hΔ, inv_mul_eq_div, div_le_div_iff₀ (by positivity) hpos]
+  nlinarith
 
 /-- **Rung identity, algebra** [C2]: `(1 + Δ₂² − Δ²)/(2Δ₂) = −τ` with `t = Δ − Δ₂`.
 
@@ -133,7 +304,14 @@ Depends on: `rung_identity_alg`, `DirField.norm_u`. Difficulty M. -/
 theorem exact_identity_c (F : DirField X) {p y : Pt} (hp : p ∈ Sset X) (hpD : p ∉ Dset X)
     (hexc : dist y (F.partner p) = diam X) (h1 : dist y p = 1) :
     inner ℝ (y - p) (F.u p) = - tau X := by
-  sorry
+  have hΔ := F.partner_K p hp hpD
+  have hpos := dist2_pos_of_mem_Sset hp
+  have key := two_inner_sub y p (F.partner p)
+  rw [dist_comm (F.partner p) p, hΔ, hexc, h1] at key
+  have hr := rung_identity_alg (diam X) (dist2 X) hpos.ne'
+  rw [F.inner_u, hΔ, tau, tgap, ← hr, inv_mul_eq_div,
+    div_eq_div_iff hpos.ne' (by positivity)]
+  linear_combination (dist2 X) * key
 
 /-- Exceptions at distance 1 exist only when `τ ≤ 1` (Cauchy–Schwarz on 3.2(c)).
 
@@ -142,7 +320,10 @@ Acceptance: no `sorry`.
 Depends on: `exact_identity_c`, `DirField.norm_u`. Difficulty S. -/
 theorem tau_le_one_of_exception (F : DirField X) {p y : Pt} (hp : p ∈ Sset X) (hpD : p ∉ Dset X)
     (hexc : dist y (F.partner p) = diam X) (h1 : dist y p = 1) : tau X ≤ 1 := by
-  sorry
+  have h := exact_identity_c F hp hpD hexc h1
+  have hcs := abs_real_inner_le_norm (y - p) (F.u p)
+  rw [F.norm_u' hp, ← dist_eq_norm, h1, h, abs_neg, one_mul] at hcs
+  exact (le_abs_self _).trans hcs
 
 /-- **Rung offsets**: a rung `(v, z)` has `z − v = −τ u_v + σ s u_v^⊥` with `σ = ±1`,
 `s = √(1 − τ²)`.
@@ -153,7 +334,61 @@ Acceptance: no `sorry`.
 Depends on: `exact_identity_c`, `DirField.norm_u`. Difficulty M. -/
 theorem rung_offset (F : DirField X) {v z : Pt} (h : IsRung F v z) :
     ∃ σ : ℝ, (σ = 1 ∨ σ = -1) ∧ z - v = (-tau X) • F.u v + (σ * sOff X) • perp (F.u v) := by
-  sorry
+  obtain ⟨hv, hvD, -, -, h1, hexc⟩ := h
+  have hu := F.norm_u' hv
+  have ha := exact_identity_c F hv hvD hexc (by rw [dist_comm]; exact h1)
+  have hdec := decomp hu (z - v)
+  have hlag := lagrange (z - v) (F.u v)
+  rw [hu, ← dist_eq_norm, dist_comm, h1, ha] at hlag
+  rw [ha] at hdec
+  have hs : sOff X = |det2 (F.u v) (z - v)| := by
+    rw [sOff, ← Real.sqrt_sq_eq_abs]; congr 1; linarith
+  rcases abs_choice (det2 (F.u v) (z - v)) with hb | hb
+  · refine ⟨1, Or.inl rfl, ?_⟩; rw [hs, hb, one_mul]; exact hdec
+  · refine ⟨-1, Or.inr rfl, ?_⟩; rw [hs, hb, neg_one_mul, neg_neg]; exact hdec
+
+theorem abs_det2_le (w e : Pt) : |det2 w e| ≤ ‖e‖ * ‖w‖ := by
+  have h := lagrange e w
+  have h2 : det2 w e ^ 2 ≤ (‖e‖ * ‖w‖) ^ 2 := by nlinarith [sq_nonneg (inner ℝ e w)]
+  have := sq_le_sq.1 h2
+  rwa [abs_of_nonneg (by positivity : 0 ≤ ‖e‖ * ‖w‖)] at this
+
+theorem det2_sub_right (u x y : Pt) : det2 u (x - y) = det2 u x - det2 u y := by
+  simp only [det2, PiLp.sub_apply]; ring
+
+theorem det2_sub_left (u v e : Pt) : det2 (u - v) e = det2 u e - det2 v e := by
+  simp only [det2, PiLp.sub_apply]; ring
+
+theorem inner_sub_swap (p q w : Pt) : inner ℝ (p - q) w = - inner ℝ (q - p) w := by
+  rw [← neg_sub q p, inner_neg_left]
+
+/-- A point `y ≠ p` of `X` is seen from `p ∈ S` either strictly on the inner side
+(`(y − p)·u_p > 0`) or as an exception (then `p ∉ D` and `y ∈ D`). -/
+theorem inner_pos_or_exc (F : DirField X) {p y : Pt} (hp : p ∈ Sset X) (hy : y ∈ X)
+    (hyp : y ≠ p) :
+    0 < inner ℝ (y - p) (F.u p) ∨
+      (p ∉ Dset X ∧ dist y (F.partner p) = diam X ∧ y ∈ Dset X) := by
+  have hd : 0 < dist y p := dist_pos.2 hyp
+  by_cases hpD : p ∈ Dset X
+  · left
+    have hpos := diam_pos_of_mem_Sset hp
+    exact lt_of_lt_of_le (by positivity) (exact_identity_a F hp hpD hy)
+  · rcases exact_identity_b F hp hpD hy with h | h
+    · left
+      have hpos := dist2_pos_of_mem_Sset hp
+      exact lt_of_lt_of_le (by positivity) h
+    · exact Or.inr ⟨hpD, h, mem_Dset_of hy (F.partner_mem p hp) h (diam_pos_of_mem_Sset hp)⟩
+
+/-- `|(q − p)·u_p + (p − q)·u_q| ≤ |pq| ∠(u_p, u_q)`. -/
+theorem abs_inner_add_le (F : DirField X) {p q : Pt} (hp : p ∈ Sset X) (hq : q ∈ Sset X) :
+    |inner ℝ (q - p) (F.u p) + inner ℝ (p - q) (F.u q)| ≤ dist p q * ang (F.u p) (F.u q) := by
+  rw [inner_sub_swap p q, ← sub_eq_add_neg, ← inner_sub_right]
+  refine (abs_real_inner_le_norm _ _).trans ?_
+  rw [← dist_eq_norm, dist_comm]
+  exact mul_le_mul_of_nonneg_left (norm_sub_le_ang (F.norm_u' hp) (F.norm_u' hq)) dist_nonneg
+
+theorem IsTEdge.symm {F : DirField X} {p q : Pt} (h : IsTEdge F p q) : IsTEdge F q p :=
+  ⟨h.2.2.1, h.2.2.2, h.1, h.2.1⟩
 
 /-- **Lemma 3.3 (no common normal)**: distinct `p, q ∈ S ∖ D` have `u_p ≠ u_q`.
 
@@ -162,7 +397,14 @@ Acceptance: no `sorry`.
 Depends on: `exact_identity_b`. Difficulty S–M. -/
 theorem u_ne (F : DirField X) {p q : Pt} (hp : p ∈ Sset X) (hpD : p ∉ Dset X) (hq : q ∈ Sset X)
     (hqD : q ∉ Dset X) (hpq : p ≠ q) : F.u p ≠ F.u q := by
-  sorry
+  intro heq
+  have h1 := inner_pos_or_exc F hp (mem_of_mem_Sset hq) (Ne.symm hpq)
+  have h2 := inner_pos_or_exc F hq (mem_of_mem_Sset hp) hpq
+  rcases h1 with h1 | h1
+  · rcases h2 with h2 | h2
+    · rw [heq] at h1; rw [inner_sub_swap] at h2; linarith
+    · exact hpD h2.2.2
+  · exact hqD h1.2.2
 
 /-- **T-edge / rung dichotomy** (§3): if `τ > 2β` every good edge is a T-edge or a rung.
 
@@ -176,7 +418,16 @@ theorem good_dichotomy (hX : Normal X) (F : DirField X) (hτ : 2 * beta < tau X)
     (hp : p ∈ Sset X) (hq : q ∈ Sset X) (hpq : dist p q = 1)
     (hg : ang (F.u p) (F.u q) ≤ beta) :
     IsTEdge F p q ∨ IsRung F p q ∨ IsRung F q p := by
-  sorry
+  have hpq' : p ≠ q := by rintro rfl; simp at hpq
+  rcases inner_pos_or_exc F hp (mem_of_mem_Sset hq) hpq'.symm with ha | ⟨hpD, hexc, hqD⟩
+  · rcases inner_pos_or_exc F hq (mem_of_mem_Sset hp) hpq' with hb | ⟨hqD, hexc, hpD⟩
+    · left
+      have hsum := abs_inner_add_le F hp hq
+      rw [hpq, one_mul] at hsum
+      have := abs_le.1 (hsum.trans hg)
+      exact ⟨ha, by linarith, hb, by linarith⟩
+    · exact Or.inr (Or.inr ⟨hq, hqD, hp, hpD, by rw [dist_comm]; exact hpq, hexc⟩)
+  · exact Or.inr (Or.inl ⟨hp, hpD, hq, hqD, hpq, hexc⟩)
 
 /-- The far end of a good rung: `(v − z)·u_z ∈ [τ − β, τ + β]`.
 
@@ -186,7 +437,13 @@ Depends on: `exact_identity_c`. Difficulty S. -/
 theorem rung_far_end (F : DirField X) {v z : Pt} (h : IsRung F v z)
     (hg : ang (F.u v) (F.u z) ≤ beta) :
     tau X - beta ≤ inner ℝ (v - z) (F.u z) ∧ inner ℝ (v - z) (F.u z) ≤ tau X + beta := by
-  sorry
+  obtain ⟨hv, hvD, hz, -, h1, hexc⟩ := h
+  have ha := exact_identity_c F hv hvD hexc (by rw [dist_comm]; exact h1)
+  have ha' : inner ℝ (v - z) (F.u v) = tau X := by rw [inner_sub_swap, ha, neg_neg]
+  have hd := abs_inner_add_le F hv hz
+  rw [h1, one_mul, inner_sub_swap z v, ha'] at hd
+  have := abs_le.1 (hd.trans hg)
+  constructor <;> linarith
 
 /-- **(T1)** each `p` has at most one T-neighbour on each side of `ℝu_p`.
 
