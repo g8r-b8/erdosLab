@@ -35,7 +35,7 @@ Plan and difficulty estimates: `problems/132/lean/MAIN_PLAN.md`.
 -/
 
 open Finset Real
-open Erdos132Convex (Pt pairDist pairsS multS distSetS)
+open Erdos132Convex (Pt pairDist pairsS multS distSetS orient)
 open scoped Classical
 open Erdos132Layer (sqd dist_eq_iff_sqd dist_sq_eq_sqd dist_mem_distSetS pos_of_mem_distSetS)
 
@@ -301,6 +301,185 @@ theorem minDist_nonneg (X : Finset Pt) : 0 ≤ minDist X := by
   · exact (pos_of_mem_distSetS (min'_mem _ h)).le
   · exact le_rfl
 
+open Erdos132Layer in
+/-- Hopf–Pannwitz core step (frame at `q`, axis the middle neighbour `m`): if `x, y` are
+`D`-neighbours of `q` on opposite sides of the line `qm`, then no `r ≠ q` with `|rm| = D` lies
+within `D` of `q`, `x` and `y`. -/
+theorem hp_core {q m x y r : Pt} {D : ℝ} (hD : 0 < D)
+    (hm : sqd q m = D ^ 2) (hx : sqd q x = D ^ 2) (hy : sqd q y = D ^ 2)
+    (hopp : orient q m x * orient q m y < 0)
+    (hrm : sqd r m = D ^ 2) (hrx : sqd r x ≤ D ^ 2) (hry : sqd r y ≤ D ^ 2) (hr : r ≠ q) :
+    False := by
+  have hs0 : 0 < D ^ 2 := by positivity
+  have hne : q ≠ m := by
+    rintro rfl; have : sqd q q = 0 := by simp [sqd]
+    rw [this] at hm; linarith
+  obtain ⟨m0, m1⟩ := frame_axis hne
+  have N := frame_nsq hne hm
+  have Nn := frame_norm' hne hm
+  have ux : fx q m x ^ 2 + fy q m x ^ 2 = 1 := by rw [Nn, hx, div_self hs0.ne']
+  have uy : fx q m y ^ 2 + fy q m y ^ 2 = 1 := by rw [Nn, hy, div_self hs0.ne']
+  have ur : (fx q m r - 1) ^ 2 + fy q m r ^ 2 = 1 := by
+    have := N r m; rw [m0, m1, sub_zero] at this; rw [this, hrm, div_self hs0.ne']
+  have r0 : 0 < fx q m r ^ 2 + fy q m r ^ 2 := by
+    rw [Nn]; exact div_pos (sqd_pos_of_ne (Ne.symm hr)) hs0
+  have cx : (fx q m r - fx q m x) ^ 2 + (fy q m r - fy q m x) ^ 2 ≤ 1 := by
+    rw [N]; exact div_le_one_of_le₀ hrx hs0.le
+  have cy : (fx q m r - fx q m y) ^ 2 + (fy q m r - fy q m y) ^ 2 ≤ 1 := by
+    rw [N]; exact div_le_one_of_le₀ hry hs0.le
+  have hopp' : fy q m x * fy q m y < 0 := by
+    unfold fy; rw [div_mul_div_comm]
+    exact div_neg_of_neg_of_pos hopp (by have := sqd_pos_of_ne hne; positivity)
+  have rf : ∀ u v : ℝ, (-u - -v) ^ 2 = (u - v) ^ 2 := fun u v => by ring
+  have rf0 : ∀ u : ℝ, (-u) ^ 2 = u ^ 2 := fun u => by ring
+  -- `M a` : lemma M for a point `a` below the axis and `r` not below
+  have M : ∀ {xa ya xr yr : ℝ}, xa ^ 2 + ya ^ 2 = 1 → ya < 0 → (xr - 1) ^ 2 + yr ^ 2 = 1 →
+      0 ≤ yr → 0 < xr ^ 2 + yr ^ 2 → (xr - xa) ^ 2 + (yr - ya) ^ 2 ≤ 1 → False :=
+    fun ha hya hr hyr hr0 hc => by linarith [lemmaM_real ha hya hr hyr hr0]
+  rcases lt_or_gt_of_ne (show fy q m x ≠ 0 by rintro h; rw [h, zero_mul] at hopp'; linarith)
+    with hxn | hxp
+  · have hyp : 0 < fy q m y := by
+      by_contra hh; push Not at hh; linarith [mul_nonneg_of_nonpos_of_nonpos hxn.le hh]
+    rcases le_or_gt 0 (fy q m r) with hr' | hr'
+    · exact M ux hxn ur hr' r0 cx
+    · refine M (xa := fx q m y) (ya := -fy q m y) (xr := fx q m r) (yr := -fy q m r) (by rw [rf0]; exact uy) (by linarith)
+        (by rw [rf0]; exact ur) (by linarith) (by rw [rf0]; exact r0) (by rw [rf]; exact cy)
+  · have hyn : fy q m y < 0 := by
+      by_contra hh; push Not at hh; linarith [mul_nonneg hxp.le hh]
+    rcases le_or_gt 0 (fy q m r) with hr' | hr'
+    · exact M uy hyn ur hr' r0 cy
+    · refine M (xa := fx q m x) (ya := -fy q m x) (xr := fx q m r) (yr := -fy q m r) (by rw [rf0]; exact ux) (by linarith)
+        (by rw [rf0]; exact ur) (by linarith) (by rw [rf0]; exact r0) (by rw [rf]; exact cx)
+
+open Erdos132Layer in
+/-- Among three distinct points at distance `D` from `q`, pairwise within `D`, one separates the
+other two (as seen from `q`). -/
+theorem select_middle {q v₁ v₂ v₃ : Pt} {D : ℝ} (hD : 0 < D)
+    (h12 : v₁ ≠ v₂) (h13 : v₁ ≠ v₃) (h23 : v₂ ≠ v₃)
+    (d₁ : sqd q v₁ = D ^ 2) (d₂ : sqd q v₂ = D ^ 2) (d₃ : sqd q v₃ = D ^ 2)
+    (s12 : sqd v₁ v₂ ≤ D ^ 2) (s23 : sqd v₂ v₃ ≤ D ^ 2) :
+    orient q v₂ v₁ * orient q v₂ v₃ < 0 ∨ orient q v₁ v₂ * orient q v₁ v₃ < 0 ∨
+      orient q v₃ v₂ * orient q v₃ v₁ < 0 := by
+  have hs0 : 0 < D ^ 2 := by positivity
+  have hne : q ≠ v₂ := by
+    rintro rfl; have : sqd q q = 0 := by simp [sqd]
+    rw [this] at d₂; linarith
+  obtain ⟨m0, m1⟩ := frame_axis hne
+  have N := frame_nsq hne d₂
+  have Nn := frame_norm' hne d₂
+  have unit : ∀ P, sqd q P = D ^ 2 → fx q v₂ P ^ 2 + fy q v₂ P ^ 2 = 1 := fun P hP => by
+    rw [Nn, hP, div_self hs0.ne']
+  have close : ∀ P, sqd P v₂ ≤ D ^ 2 → (fx q v₂ P - 1) ^ 2 + fy q v₂ P ^ 2 ≤ 1 := fun P hP => by
+    have := N P v₂
+    rw [m0, m1, sub_zero] at this
+    rw [this]; exact div_le_one_of_le₀ hP hs0.le
+  have ha := unit v₁ d₁
+  have hc := unit v₃ d₃
+  have hab := close v₁ s12
+  have hcb := close v₃ (by rw [sqd_comm]; exact s23)
+  have ynz : ∀ P, P ≠ v₂ → fx q v₂ P ^ 2 + fy q v₂ P ^ 2 = 1 →
+      (fx q v₂ P - 1) ^ 2 + fy q v₂ P ^ 2 ≤ 1 → fy q v₂ P ≠ 0 := by
+    intro P hP hu hcl hy
+    rw [hy] at hu
+    have hx : fx q v₂ P = 1 := by nlinarith
+    have := N P v₂
+    rw [m0, m1, hx, hy, sub_self, sub_self] at this
+    have h0 : sqd P v₂ = 0 :=
+      (div_eq_zero_iff.1 (by rw [← this]; norm_num)).resolve_right hs0.ne'
+    exact (sqd_pos_of_ne hP).ne' h0
+  have ya := ynz v₁ h12 ha hab
+  have yc := ynz v₃ (Ne.symm h23) hc hcb
+  have O : ∀ P Q, orient q P Q = (fx q v₂ P * fy q v₂ Q - fy q v₂ P * fx q v₂ Q) * D ^ 2 :=
+    fun P Q => by rw [frame_cross hne, d₂, div_mul_cancel₀ _ hs0.ne']
+  have hpos := mul_pos hs0 hs0
+  rcases lt_trichotomy (fy q v₂ v₁ * fy q v₂ v₃) 0 with hopp | h0 | hsame
+  · left
+    rw [O, O, m0, m1]
+    have e : (1 * fy q v₂ v₁ - 0 * fx q v₂ v₁) * D ^ 2 * ((1 * fy q v₂ v₃ - 0 * fx q v₂ v₃) *
+        D ^ 2) = (fy q v₂ v₁ * fy q v₂ v₃) * (D ^ 2 * D ^ 2) := by ring
+    rw [e]; exact mul_neg_of_neg_of_pos hopp hpos
+  · exact absurd h0 (mul_ne_zero ya yc)
+  · have hne13 : ¬ (fx q v₂ v₁ = fx q v₂ v₃ ∧ fy q v₂ v₁ = fy q v₂ v₃) := by
+      rintro ⟨hx, hy⟩
+      have := N v₁ v₃
+      rw [hx, hy, sub_self, sub_self] at this
+      have h0 : sqd v₁ v₃ = 0 :=
+        (div_eq_zero_iff.1 (by rw [← this]; norm_num)).resolve_right hs0.ne'
+      exact (sqd_pos_of_ne h13).ne' h0
+    obtain ⟨-, hmid⟩ := case3_select_real ha hc hab hcb hsame hne13
+    rcases hmid with hmid | hmid
+    · right; left
+      rw [O, O, m0, m1]
+      have e : (fx q v₂ v₁ * 0 - fy q v₂ v₁ * 1) * D ^ 2 * ((fx q v₂ v₁ * fy q v₂ v₃ -
+          fy q v₂ v₁ * fx q v₂ v₃) * D ^ 2) = ((-fy q v₂ v₁) * (fx q v₂ v₁ * fy q v₂ v₃ -
+          fy q v₂ v₁ * fx q v₂ v₃)) * (D ^ 2 * D ^ 2) := by ring
+      rw [e]; exact mul_neg_of_neg_of_pos hmid hpos
+    · right; right
+      rw [O, O, m0, m1]
+      have e : (fx q v₂ v₃ * 0 - fy q v₂ v₃ * 1) * D ^ 2 * ((fx q v₂ v₃ * fy q v₂ v₁ -
+          fy q v₂ v₃ * fx q v₂ v₁) * D ^ 2) = ((-fy q v₂ v₃) * (fx q v₂ v₃ * fy q v₂ v₁ -
+          fy q v₂ v₃ * fx q v₂ v₁)) * (D ^ 2 * D ^ 2) := by ring
+      rw [e]; exact mul_neg_of_neg_of_pos hmid hpos
+
+/-- `Δ ≥ 0`. -/
+theorem diam_nonneg (Y : Finset Pt) : 0 ≤ diam Y := by
+  unfold diam
+  split_ifs with h
+  · exact (pos_of_mem_distSetS (max'_mem _ h)).le
+  · exact le_rfl
+
+/-- Every distance is `≤ Δ`. -/
+theorem le_diam {Y : Finset Pt} {d : ℝ} (hd : d ∈ distSetS Y) : d ≤ diam Y := by
+  have hne : (distSetS Y).Nonempty := ⟨_, hd⟩
+  rw [diam, dite_eq_left hne]; exact le_max' _ _ hd
+
+/-- Distances of points of `Y` are `≤ Δ`. -/
+theorem dist_le_diam {Y : Finset Pt} {x y : Pt} (hx : x ∈ Y) (hy : y ∈ Y) : dist x y ≤ diam Y := by
+  by_cases h : x = y
+  · rw [h, dist_self]; exact diam_nonneg Y
+  · exact le_diam (dist_mem_distSetS hx hy h)
+
+/-- Squared version of `dist_le_diam`. -/
+theorem sqd_le_diam {Y : Finset Pt} {x y : Pt} (hx : x ∈ Y) (hy : y ∈ Y) :
+    sqd x y ≤ diam Y ^ 2 := by
+  rw [← dist_sq_eq_sqd]; exact pow_le_pow_left₀ dist_nonneg (dist_le_diam hx hy) 2
+
+open Erdos132Layer in
+/-- In the 2-core of the diameter graph every vertex has degree `≤ 2`. -/
+theorem core_deg_le_two {Y : Finset Pt} (hD : 0 < diam Y) {v : Pt}
+    (hv : v ∈ core Y (diam Y)) : (nbr (core Y (diam Y)) (diam Y) v).card ≤ 2 := by
+  set D := diam Y
+  set C := core Y D
+  have hCY : C ⊆ Y := core_subset Y D
+  by_contra hcon
+  push Not at hcon
+  obtain ⟨a, ha, b, hb, c, hc, hab, hac, hbc⟩ := two_lt_card.1 hcon
+  have hmem : ∀ x ∈ nbr C D v, x ∈ Y ∧ sqd v x = D ^ 2 := fun x hx => by
+    obtain ⟨hxC, hd⟩ := mem_nbr.1 hx
+    exact ⟨hCY hxC, (dist_eq_iff_sqd hD.le).1 hd⟩
+  obtain ⟨haY, da⟩ := hmem a ha
+  obtain ⟨hbY, db⟩ := hmem b hb
+  obtain ⟨hcY, dc⟩ := hmem c hc
+  have hvY : v ∈ Y := hCY hv
+  -- the middle neighbour `m` has a second core neighbour `r ≠ v`
+  have finish : ∀ m x y, m ∈ nbr C D v → x ∈ Y → y ∈ Y → sqd v m = D ^ 2 → sqd v x = D ^ 2 →
+      sqd v y = D ^ 2 → orient v m x * orient v m y < 0 → False := by
+    intro m x y hm hx hy dm dx dy hopp
+    have hmC : m ∈ C := (mem_nbr.1 hm).1
+    have h2 : 2 ≤ (nbr C D m).card := minDeg2_core Y D m hmC
+    obtain ⟨r, hr, hrv⟩ := exists_mem_ne (by omega : 1 < (nbr C D m).card) v
+    obtain ⟨hrC, hdr⟩ := mem_nbr.1 hr
+    have hrY := hCY hrC
+    have hrm : sqd r m = D ^ 2 := by
+      rw [sqd_comm]; exact (dist_eq_iff_sqd hD.le).1 hdr
+    exact hp_core hD dm dx dy hopp hrm (sqd_le_diam hrY hx) (sqd_le_diam hrY hy) hrv
+  rcases select_middle hD hab hac hbc da db dc (sqd_le_diam haY hbY) (sqd_le_diam hbY hcY)
+    with h | h | h
+  · exact finish b a c hb haY hcY db da dc h
+  · exact finish a b c ha hbY hcY da db dc h
+  · exact finish c b a hc hbY haY dc db da h
+
+
 end Defs
 
 open Defs
@@ -317,6 +496,7 @@ Acceptance: no `sorry` (done). -/
 theorem vesztergombi87 (Y : Finset Pt) : (mult Y (dist2 Y) : ℝ) ≤ 3 / 2 * Y.card :=
   Erdos132Ve87.vesztergombi87 Y
 
+open Erdos132Layer in
 /-- **[HP]** Hopf–Pannwitz (1934): in every `m`-point planar set the diameter occurs at most
 `m` times.
 
@@ -326,7 +506,19 @@ What's missing: the crossing lemma and the counting (each vertex of degree ≥ 2
 Acceptance: no `sorry`.
 Depends on: nothing (planar geometry only). Difficulty L. -/
 theorem hopf_pannwitz (Y : Finset Pt) : mult Y (diam Y) ≤ Y.card := by
-  sorry
+  rcases (diam_nonneg Y).eq_or_lt with h0 | hD
+  · rw [← h0, mult_zero]; exact Nat.zero_le _
+  set D := diam Y
+  set C := core Y D
+  have h2 := two_mul_multS hD Y
+  have h3 : esum Y D ≤ esum C D + 2 * (Y \ C).card := esum_le_core hD.ne' Y
+  have h4 : esum C D ≤ 2 * C.card := by
+    unfold esum
+    calc ∑ v ∈ C, (nbr C D v).card ≤ ∑ _v ∈ C, 2 := sum_le_sum fun v hv => core_deg_le_two hD hv
+      _ = 2 * C.card := by rw [sum_const, smul_eq_mul, mul_comm]
+  have h5 : (Y \ C).card + C.card = Y.card := card_sdiff_add_card_eq_card (core_subset Y D)
+  have e : mult Y D = multS Y D := rfl
+  omega
 
 /-! ## Elementary counting -/
 
