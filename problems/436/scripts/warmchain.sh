@@ -12,8 +12,8 @@ for R in "$@"; do
   t0=$(date +%s)
   "$W/warmls" 5 3 "$R" "$map" "$model" "$W/$tag.map" "$W/$tag.model" "$PMIN" "$SEED" "$MAXSTEPS" "$NOISE" > "$log" 2>&1
   rc=$?; dt=$(( $(date +%s) - t0 ))
-  lim=$((2 * R + 100))
-  a=$("$HERE/lamenc" run 5 3 $lim "$W/$tag.map" "$W/$tag.model")
+  lim=$((R + 1000000))
+  while :; do a=$("$HERE/lamenc" run 5 3 $lim "$W/$tag.map" "$W/$tag.model"); case $a in NONE*) lim=$((lim * 2));; *) break;; esac; done
   b=$(python3 "$HERE/checkf.py" 5 3 $lim "$W/$tag.map" "$W/$tag.model")
   end=$(grep '^END' "$log")
   if [ $rc = 0 ]; then st=SAT; else st=UNSOLVED; fi

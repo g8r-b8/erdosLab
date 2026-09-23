@@ -30,9 +30,9 @@ typedef struct {
   int32_t *lpf;        // largest prime factor, lpf[n] for 2 <= n <= N
   uint8_t *f;          // f[n] in Z/K for 1 <= n <= N (f[1] = 0)
   int32_t *badlist;    // list of bad r (N < 2^31)
-  int32_t *badpos;     // position of r in badlist, or -1
+  int32_t *badpos;     // 1 + position of r in badlist, or 0 (calloc: pages touched lazily)
   long nbad;
-  uint32_t *w;         // breakout weight of window r (>= 1)
+  uint32_t *w;         // breakout weight of window r is 1 + w[r] (calloc: lazy)
   uint32_t *tabu;      // tabu[p] = step until which p may not be changed (indexed by prime)
   long pmin;
   uint64_t rng;
@@ -43,13 +43,13 @@ static int window_bad(const State *s, long r) {
   return 1;
 }
 static void bad_add(State *s, long r) {
-  if (s->badpos[r] >= 0) return;
-  s->badpos[r] = (int32_t)s->nbad; s->badlist[s->nbad++] = (int32_t)r;
+  if (s->badpos[r]) return;
+  s->badlist[s->nbad++] = (int32_t)r; s->badpos[r] = (int32_t)s->nbad;
 }
 static void bad_del(State *s, long r) {
-  long i = s->badpos[r]; if (i < 0) return;
+  long i = s->badpos[r] - 1; if (i < 0) return;
   long last = s->badlist[--s->nbad];
-  s->badlist[i] = (int32_t)last; s->badpos[last] = (int32_t)i; s->badpos[r] = -1;
+  s->badlist[i] = (int32_t)last; s->badpos[last] = (int32_t)(i + 1); s->badpos[r] = 0;
 }
 static uint64_t rnd(State *s) { s->rng ^= s->rng << 13; s->rng ^= s->rng >> 7; s->rng ^= s->rng << 17; return s->rng; }
 
@@ -128,12 +128,11 @@ static void compute_f(State *s) {
  * Depends on: compute_f.
  */
 static void init_bad(State *s) {
-  s->badpos = malloc((s->R + 1) * sizeof(int32_t));
+  s->badpos = calloc(s->R + 1, sizeof(int32_t));
   s->badlist = malloc((s->R + 1) * sizeof(int32_t));
   if (!s->badpos || !s->badlist) { perror("bad"); exit(4); }
   s->nbad = 0;
   for (long r = 1; r <= s->R; r++) {
-    s->badpos[r] = -1;
     if (window_bad(s, r)) bad_add(s, r);
   }
   long first = 0;
@@ -172,7 +171,7 @@ static void score_prime(State *s, long p, long gain[]) {
       unsigned mask = window_mask(s, r, p);
       int b0 = mask & 1;
       if (mask == 0 || mask == (1u << s->K) - 1) continue;
-      for (int d = 1; d < s->K; d++) { int x = (int)((mask >> d) & 1) - b0; gain[d] += x; gain[s->K + d] += x * (long)s->w[r]; }
+      for (int d = 1; d < s->K; d++) { int x = (int)((mask >> d) & 1) - b0; gain[d] += x; gain[s->K + d] += x * (1 + (long)s->w[r]); }
     }
     if (hi > last) last = hi;
   }
@@ -196,6 +195,16 @@ static void apply_move(State *s, long p, int d) {
   }
 }
 
+static void dump_window(const State *s, long r) {
+  fprintf(stderr, "bad r=%ld:", r);
+  for (long j = r; j < r + s->L; j++) {
+    fprintf(stderr, " %ld=", j); long n = j; int firstf = 1;
+    while (n > 1) { long q = s->lpf[n]; int e = 0; while (n % q == 0) { n /= q; e++; }
+      fprintf(stderr, "%s%ld^%d(f=%d)", firstf ? "" : "*", q, e, s->f[q]); firstf = 0; }
+  }
+  fputc('\n', stderr);
+}
+
 /* search
  * min-conflicts loop: pick a random bad r; candidate primes = distinct primes >= pmin dividing
  *       r..r+L-1 whose v_p is not divisible by K; score all (p, d); with probability noise pick a
@@ -207,8 +216,8 @@ static void apply_move(State *s, long p, int d) {
  */
 static int search(State *s, long maxsteps, int noise_permille) {
   s->tabu = calloc(s->N + 1, sizeof(uint32_t));
-  s->w = malloc((s->R + 1) * sizeof(uint32_t));
-  for (long r = 0; r <= s->R; r++) s->w[r] = 1;
+  s->w = calloc(s->R + 1, sizeof(uint32_t));
+  if (!s->w) { perror("w"); exit(4); }
   if (!s->tabu) { perror("tabu"); exit(4); }
   long best = s->nbad; time_t t0 = time(0), tl = t0;
   long cand[64]; long gain[32];
@@ -256,21 +265,13 @@ static int search(State *s, long maxsteps, int noise_permille) {
       long first = 0;
       for (long i = 0; i < s->nbad; i++) if (!first || s->badlist[i] < first) first = s->badlist[i];
       fprintf(stderr, "t=%lds step=%ld nbad=%ld best=%ld first_bad=%ld\n", (long)(tl - t0), step, s->nbad, best, first);
+      if (s->nbad <= 3) for (long i = 0; i < s->nbad; i++) dump_window(s, s->badlist[i]);
     }
   }
   long first = 0;
   for (long i = 0; i < s->nbad; i++) if (!first || s->badlist[i] < first) first = s->badlist[i];
   fprintf(stderr, "END t=%lds steps=%ld nbad=%ld best=%ld first_bad=%ld\n", (long)(time(0) - t0), step - 1, s->nbad, best, first);
-  for (long i = 0; i < s->nbad && i < 40; i++) {
-    long r = s->badlist[i];
-    fprintf(stderr, "bad r=%ld:", r);
-    for (long j = r; j < r + s->L; j++) {
-      fprintf(stderr, " %ld=", j); long n = j; int firstf = 1;
-      while (n > 1) { long q = s->lpf[n]; int e = 0; while (n % q == 0) { n /= q; e++; }
-        fprintf(stderr, "%s%ld^%d", firstf ? "" : "*", q, e); firstf = 0; }
-    }
-    fputc('\n', stderr);
-  }
+  for (long i = 0; i < s->nbad && i < 40; i++) dump_window(s, s->badlist[i]);
   return s->nbad == 0 ? 0 : 1;
 }
 
