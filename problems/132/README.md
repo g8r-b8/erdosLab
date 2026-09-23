@@ -125,6 +125,8 @@ n pairs? Must the number of such distances → ∞ (perhaps ≥ n^{1−o(1)})?
    Axioms: std 3 + one bv_decide certificate axiom each, to be disclosed like native_decide). DONE since: Finset form
    (E132ConvexFinset.lean, ConvexIndependent, bridge uses std axioms only), n=13 (E132Convex13.lean, ~9 min), n=7 LRAT pinned
    (bv_check). Left: kernel-checked certificate; n=11/13 LRAT too big to pin (23/97 MB); n≥15. See lean/README.md.
+   Cor A1 / Theorem A / Prop 3 / deg≤4 FORMALISED: E132Layer.lean, sorry-free, axioms = std 3 only (no bv_decide).
+   54/37: Lean skeleton E132Main*.lean (102 lemmas, 41 proved, 61 sorry; assembly proved), plan in lean/MAIN_PLAN.md.
 1. Rule-4 novelty audit of the 54/37 bound (A2) and B2 Theorem A.
 2. Close the REFEREE_A2 gaps → write-up of 54/37 (the strongest "nontrivial result" candidate for the prize).
 3. n = 7 convex k ≥ 3 by exact classification of 7-point convex 4-distance sets.
