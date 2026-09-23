@@ -266,3 +266,46 @@ PROMPT.md rule 4: check all cross-referenced/sibling problems and their threads.
   ≈ 1e18 nodes for k=5 (vs 3e4 for k=3): ~1e14 surviving assignments of primes ≤ 100 alone.
 - Verdict: brute-force finiteness certificate for Λ(5,3) infeasible; would need a structural idea.
   Openness rechecked 2026-09-23 (site, thread, fc issue #731 open/no file, Tao wiki, arXiv): open.
+
+## Triage batch 1–399 (agent, iter 9) — nothing quick; best lead #261(iii) (research-level)
+- problems.yaml (clone 2026-09-22): 187 status open + falsifiable 23/64/97/107/114/128/167/242/287/375/
+  398, verifiable 7/307/364/366, open(Lean) 390, decidable 19. Pages + threads fetched 2026-09-23 →
+  scratchpad/e001/ (p/<N>.html, f/<N>.html, summary.tsv = num/comments/claims/tractable/edited/stmt).
+- Region is the most famous + most worked: nearly every open item is a named conjecture (Sidon/B_h
+  asymptotics, Ramsey/Turán, prime gaps, irrationality, distinct distances, Erdős–Gyárfás 64, Grimm 375,
+  Erdős–Straus 242, powerful triples 364/366 = abc-level). 0-comment threads (39 40 41 50 60 62 70 84
+  87 89 99 101–103 111 112 131 159 172 177 187 195 200 201 212 222 247 295 319 340) all deep.
+- Occupied / done-ish: 117 (Lecomte claims h(n)^{1/n}→√2, Zenodo, Aug 2026); 389 (Kitamura/Jack
+  exact k(n) n≤29, Sep 2026); 393 (Turturean abc-conditional); 348 (m,n)=(2,3) actively searched
+  (SSD117/Sprite144/Woett); 341 ({1,4,9,16,25} period 224, Kitamura Jul 2026 — general Q open);
+  156 (cyclic data, veljjanoski Sep 2026); 160 (ruizshi N^{1/4} via arXiv 2607.20752); 272 (Szabo
+  conj., StijnC data N≤14); 273 (ideal_ombrer: needs p>877, Jul 2026); 302/361/357 bound-tweaking
+  threads; 354 Q2 Lean (Kitamura, Sep 2026); 260 claimed (Wang–Grau Ribas + Lean, Jul 2026, disputed).
+  112 k(n,m): k(2,m) = tournament TT_m Ramsey no. (m=7 open) → "determine" hopeless.
+- ★ #261(iii): is there rational x with ≥2^ℵ0 representations x=Σ_{a∈A} a/2^a (A infinite)?
+  Openness (checked 2026-09-23): site OPEN, last edited 1 Dec 2025, 0 proof claims; thread: Kovač
+  12 Aug 2025 "both questions still open", Rafik 27 Apr 2026 (two reps of 7/4 — trivial weak version),
+  Kovač 5 May 2026 ("2" believed misprint for 2^ℵ0); formal-conjectures 261.lean (main @ 2026-09-23):
+  parts.iii + two_representations tagged `research open`; not on Tao's AI wiki (frozen 30 Jun 2026);
+  see-also only #260 (checked thread); no OEIS link. BoLo90 abstract: "some numbers have a unique
+  representation, others have uncountably many" (not rationals); TUZ20 (arXiv 2008.01501): rationals
+  with ≥3 reps, infinitely many with ≥9 — so continuum-for-rational open in 2020 and since.
+  Own reduction (scratchpad/e001/e261/): s_a := 2^a·(remaining target before a) must stay in
+  [0,2a+2]; include a iff s≥a, exclude iff s≤a+2 ⇒ choice ONLY in window s∈[a,a+2]; map commutes
+  with s↦2a+2−s. BL identity n/2^n=Σ_{n<k≤n+m}k/2^k (n=2^{m+1}−m−2) = a diamond at ANY window
+  offset. For dyadic x: canonical e_{L+1}=min(2e_L, L+2−2e_L); #infinite non-cofinite reps =
+  2^{#{L: e_L=1}} ⇒ x has continuum reps ⇔ this integer orbit returns to 1 infinitely often.
+  x=1: returns at L=2,4,80,236,432,1504,2944,6060,6620,18912,54224,302467996,1772665632,
+  2148845168,5145362668 (none more to 2e10); orbits from many starts merge into this trunk.
+  Non-dyadic x (1/3,1/5,3/7,5/7): ≤10 live states, branches ~ c·log a, paths grow — heuristically
+  YES (hit rate ~1/a, Σ diverges) but a proof = controlling a non-autonomous tent-map orbit. Any
+  rational-x construction must fight rationality ⇒ gaps ≤ log₂a+O(1) (260 claim) vs gadget runs ≈ log₂a.
+  Lean fit would be excellent (FC statement exists; certificate = infinite family), but no proof idea.
+  Verdict: genuinely open + elementary, NOT quick. Record reformulation; revisit only with a new idea.
+- Drops (one line): 3/5/9/10/11/14/15/17/18/20/25/28/30/32/33/36/39–41/44/50–52/60–62/65/66/68/
+  70/75/77/78/80–82/84–87/89/91/96–104/107/108/111/114/120/122/124/128–131/137/138/141–143/145/148/
+  149/151/153/155/158/159/161/162/165/167–170/172–174/176/177/181/184/187/188/195–197/200/201/203/
+  208/212/213/217/218/222/233/234/236/238/241–244/247/249/251/252/254/256/257/263–265/267/269/271/
+  274/276/278/279/282/287–289/291/293/295/301/304/306/307/311–313/317/319/322–327/329/332/334–336/
+  338/340/342/345/349/352/359/364–368/371/373–377/382/383/385/386/388/390/394/396/398: deep
+  (asymptotic/conjecture-level), heavily worked in 2026, or need abc/Chebotarev-type input.
