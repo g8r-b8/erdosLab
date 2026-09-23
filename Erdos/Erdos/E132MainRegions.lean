@@ -72,7 +72,7 @@ theorem cos_ang_unit {a b : Pt} (ha : ‖a‖ = 1) (hb : ‖b‖ = 1) :
 theorem ang_comm (a b : Pt) : ang a b = ang b a := InnerProductGeometry.angle_comm a b
 
 /-- Chord `≤` arc for unit vectors. -/
-theorem norm_sub_le_ang {a b : Pt} (ha : ‖a‖ = 1) (hb : ‖b‖ = 1) : ‖a - b‖ ≤ ang a b := by
+theorem norm_sub_le_angR {a b : Pt} (ha : ‖a‖ = 1) (hb : ‖b‖ = 1) : ‖a - b‖ ≤ ang a b := by
   have h0 : 0 ≤ ang a b := InnerProductGeometry.angle_nonneg a b
   have hc := Real.one_sub_sq_div_two_le_cos (x := ang a b)
   rw [cos_ang_unit ha hb] at hc
@@ -97,7 +97,7 @@ theorem cos_le_inner_of_ang_le {a b : Pt} (ha : ‖a‖ = 1) (hb : ‖b‖ = 1) 
   exact Real.cos_le_cos_of_nonneg_of_le_pi (InnerProductGeometry.angle_nonneg a b) hπ h
 
 /-- Decomposition in the frame `(u, u^⊥)` of a unit `u`. -/
-theorem decomp {u : Pt} (hu : ‖u‖ = 1) (e : Pt) :
+theorem decompR {u : Pt} (hu : ‖u‖ = 1) (e : Pt) :
     e = inner ℝ e u • u + det2 u e • perp u := by
   have h := unit_sq hu
   rw [pt_ext_iff, inner_pt, det2_pt]; simp
@@ -155,7 +155,7 @@ theorem norm_tstep_sub {u₁ u₂ e₁ e₂ : Pt} (hu₁ : ‖u₁‖ = 1) (hu�
   rw [he₁] at n₁; rw [he₂] at n₂
   have E : e₁ - e₂ = (a₁ • (u₁ - u₂) + c₁ • perp (u₁ - u₂)) +
       ((a₁ - a₂) • u₂ + (c₁ - c₂) • perp u₂) := by
-    conv_lhs => rw [decomp hu₁ e₁, decomp hu₂ e₂]
+    conv_lhs => rw [decompR hu₁ e₁, decompR hu₂ e₂]
     rw [perp_sub, smul_sub, smul_sub, sub_smul, sub_smul]; abel
   rw [E]
   refine (norm_add_le _ _).trans ?_
@@ -180,7 +180,7 @@ theorem inner_two_sol {c u₁ u₂ : Pt} {τ : ℝ} (hc : ‖c‖ = 1) (h₁ : �
   rw [e₁, e₂, hc] at hL
   have hd : det2 c u₁ ≠ det2 c u₂ := by
     intro hd; apply hne
-    rw [decomp hc u₁, decomp hc u₂, real_inner_comm, e₁, real_inner_comm, e₂, hd]
+    rw [decompR hc u₁, decompR hc u₂, real_inner_comm, e₁, real_inner_comm, e₂, hd]
   have hd' : det2 c u₁ = - det2 c u₂ := by
     have : (det2 c u₁ - det2 c u₂) * (det2 c u₁ + det2 c u₂) = 0 := by linear_combination n₁ - n₂
     rcases mul_eq_zero.1 this with h | h
@@ -189,11 +189,11 @@ theorem inner_two_sol {c u₁ u₂ : Pt} {τ : ℝ} (hc : ‖c‖ = 1) (h₁ : �
   rw [hd'] at hL
   linear_combination -hL - n₂
 
-theorem det2_eq_inner_perp (a b : Pt) : det2 a b = inner ℝ (perp a) b := by
+theorem det2_eq_inner_perpR (a b : Pt) : det2 a b = inner ℝ (perp a) b := by
   rw [det2_pt, inner_pt]; simp; ring
 
-theorem abs_det2_le (a b : Pt) : |det2 a b| ≤ ‖a‖ * ‖b‖ := by
-  rw [det2_eq_inner_perp, ← norm_perp a]; exact abs_real_inner_le_norm _ _
+theorem abs_det2_leR (a b : Pt) : |det2 a b| ≤ ‖a‖ * ‖b‖ := by
+  rw [det2_eq_inner_perpR, ← norm_perp a]; exact abs_real_inner_le_norm _ _
 
 theorem det2_add_left (a b e : Pt) : det2 (a + b) e = det2 a e + det2 b e := by
   simp only [det2_pt, PiLp.add_apply]; ring
@@ -218,7 +218,7 @@ theorem pos_of_mem_distSetS' {d : ℝ} (hd : d ∈ distSetS X) : 0 < d := by
     have hab : a ≠ b := by simpa using (mem_filter.1 hz).2
     simpa [pairDist] using dist_pos.2 hab
 
-theorem minDist_le_dist {x y : Pt} (hx : x ∈ X) (hy : y ∈ X) (hxy : x ≠ y) :
+theorem minDist_le_distR {x y : Pt} (hx : x ∈ X) (hy : y ∈ X) (hxy : x ≠ y) :
     minDist X ≤ dist x y := by
   have hm := dist_mem_distSetS' hx hy hxy
   unfold minDist
@@ -226,13 +226,13 @@ theorem minDist_le_dist {x y : Pt} (hx : x ∈ X) (hy : y ∈ X) (hxy : x ≠ y)
   exact min'_le _ _ hm
 
 theorem one_le_dist (h1 : minDist X = 1) {x y : Pt} (hx : x ∈ X) (hy : y ∈ X) (hxy : x ≠ y) :
-    1 ≤ dist x y := h1 ▸ minDist_le_dist hx hy hxy
+    1 ≤ dist x y := h1 ▸ minDist_le_distR hx hy hxy
 
 theorem eq_of_dist_lt_one (h1 : minDist X = 1) {x y : Pt} (hx : x ∈ X) (hy : y ∈ X)
     (h : dist x y < 1) : x = y := by
   by_contra hxy; exact absurd (one_le_dist h1 hx hy hxy) (not_le.2 h)
 
-theorem dist2_nonneg (X : Finset Pt) : 0 ≤ dist2 X := by
+theorem dist2_nonnegR (X : Finset Pt) : 0 ≤ dist2 X := by
   unfold dist2
   split_ifs with h
   · exact (pos_of_mem_distSetS' (mem_of_mem_erase (max'_mem _ h))).le
@@ -270,7 +270,7 @@ theorem two_of_pos (h : 0 < dist2 X) : Two X := by
     · exact Or.inr hl
   · exact absurd h' (lt_irrefl 0)
 
-theorem mem_Dset_of {p q : Pt} (hp : p ∈ X) (hq : q ∈ X) (hpq : q ≠ p) (h : dist p q = diam X) :
+theorem mem_Dset_ofR {p q : Pt} (hp : p ∈ X) (hq : q ∈ X) (hpq : q ≠ p) (h : dist p q = diam X) :
     p ∈ Dset X := by
   unfold Dset partners
   exact mem_filter.2 ⟨hp, q, mem_filter.2 ⟨hq, hpq, h⟩⟩
@@ -307,19 +307,19 @@ theorem two (h : IsRung F v z) : Two X ∧ 1 ≤ dist2 X := by
   have hzX := Sset_sub hz
   have hvz : z ≠ v := by intro e; rw [e, dist_self] at h1; norm_num at h1
   have hpos : 0 < dist2 X := by
-    rcases (dist2_nonneg X).lt_or_eq with h' | h'
+    rcases (dist2_nonnegR X).lt_or_eq with h' | h'
     · exact h'
     · exfalso
       have hp := F.partner_K v hv hvD
       rw [← h', dist_eq_zero] at hp
       rw [← hp] at hex
       rw [dist_comm] at hex
-      exact hvD (mem_Dset_of hvX hzX hvz hex)
+      exact hvD (mem_Dset_ofR hvX hzX hvz hex)
   have hT := two_of_pos hpos
   refine ⟨hT, ?_⟩
   rcases hT.gap v hvX z hzX with h' | h'
   · linarith
-  · exact absurd (mem_Dset_of hvX hzX hvz h') hvD
+  · exact absurd (mem_Dset_ofR hvX hzX hvz h') hvD
 
 theorem tau_ge (h : IsRung F v z) : -(1 / 2) ≤ tau X := neg_half_le_tau h.two.1 h.two.2
 
@@ -371,7 +371,7 @@ theorem KBall_interior_nonempty {a b : Pt} (ha : a ∈ KBall X) (hb : b ∈ KBal
   have h1 := (mem_KBall.1 ha) w hw
   have h2 := (mem_KBall.1 hb) w hw
   have hd : 0 < dist a b := dist_pos.2 hab
-  have hΔ : 0 ≤ dist2 X := dist2_nonneg X
+  have hΔ : 0 ≤ dist2 X := dist2_nonnegR X
   have e1 := dist_sq_pt a w
   have e2 := dist_sq_pt b w
   have e3 := dist_sq_pt a b
@@ -476,7 +476,7 @@ theorem good_sum_le {F : DirField X} {p q : Pt} (hp : p ∈ Sset X) (hq : q ∈ 
   rw [e]
   refine (real_inner_le_norm _ _).trans ?_
   rw [← dist_eq_norm, dist_comm, h1, one_mul]
-  exact (norm_sub_le_ang (F.norm_u hp) (F.norm_u hq)).trans hg
+  exact (norm_sub_le_angR (F.norm_u hp) (F.norm_u hq)).trans hg
 
 /-- Positive elevation from `D`-ends and from normal points. -/
 theorem other_pos (hX : Normal X) (F : DirField X) {p q : Pt} (hp : p ∈ Sset X) (hpD : p ∉ Dset X)
@@ -490,7 +490,7 @@ theorem other_pos (hX : Normal X) (F : DirField X) {p q : Pt} (hp : p ∈ Sset X
   · rcases exact_identity_b F hq hqD (Sset_sub hp) with h | h
     · refine lt_of_lt_of_le ?_ h; rw [hq1]; apply div_pos one_pos; linarith
     · exfalso; apply hpD
-      refine mem_Dset_of (Sset_sub hp) (F.partner_mem q hq) ?_ h
+      refine mem_Dset_ofR (Sset_sub hp) (F.partner_mem q hq) ?_ h
       intro e; rw [e, dist_self] at h; linarith [hT.lt]
 
 theorem tau_ge_neg_beta (hX : Normal X) : -beta ≤ tau X := by
@@ -816,7 +816,7 @@ theorem vol_arc_ge (P : ℝ → Prop) {a L : ℝ} (_hL0 : 0 ≤ L) (hL : L ≤ 2
 @[simp] theorem dirVec_apply0 (θ : ℝ) : dirVec θ 0 = Real.cos θ := by simp [dirVec]
 @[simp] theorem dirVec_apply1 (θ : ℝ) : dirVec θ 1 = Real.sin θ := by simp [dirVec]
 
-theorem dirVec_add (θ ψ : ℝ) :
+theorem dirVec_addR (θ ψ : ℝ) :
     dirVec (θ + ψ) = Real.cos ψ • dirVec θ + Real.sin ψ • perp (dirVec θ) := by
   rw [pt_ext_iff]; simp [Real.cos_add, Real.sin_add]; constructor <;> ring
 
@@ -988,7 +988,7 @@ theorem lemma71 (hX : Normal X) (F : DirField X) (hτ : √3 / 2 + 3 * beta ≤ 
       linarith
   set e₀ : Pt := ς • perp u
   have hie : ∀ x, inner ℝ x e₀ = ς * det2 u x := by
-    intro x; rw [inner_smul_right, real_inner_comm, det2_eq_inner_perp]
+    intro x; rw [inner_smul_right, real_inner_comm, det2_eq_inner_perpR]
   have he₀ : ‖e₀‖ = 1 := by
     rw [norm_smul, norm_perp, hu, mul_one, Real.norm_eq_abs]
     simp only [ς]; split_ifs <;> norm_num
@@ -1042,7 +1042,7 @@ theorem lemma71 (hX : Normal X) (F : DirField X) (hτ : √3 / 2 + 3 * beta ≤ 
   have hς : ς = 1 ∨ ς = -1 := by simp only [ς]; split_ifs <;> simp
   have hdir : ∀ φ : ℝ, dirVec (θ₀ + (-ς * φ)) = Real.cos φ • (-u) + Real.sin φ • e₀ := by
     intro φ
-    rw [dirVec_add, hθ₀, perp_neg]
+    rw [dirVec_addR, hθ₀, perp_neg]
     simp only [e₀]
     rcases hς with h | h <;> rw [h] <;> simp [Real.cos_neg, Real.sin_neg] <;> module
   refine vol_arc_ge _ (a := if ς = 1 then θ₀ - Θ else θ₀) hΘ.le (by linarith) ?_
@@ -1069,9 +1069,9 @@ the arc from `v` only gives `|x − v| ≤ 2` for `x` on it, and a grid packing 
 multiplicity `≤ 81` K-ends per point, hence `#mixed ≤ 2 · 2π·81/0.886 < 1200`.  The constant is
 absorbed in `regionII_eS_le` (unchanged statement) using the explicit bad-edge constants.
 
-TODO: none (inherits `lemma71`, `turning_sum_le`).
+TODO: none (inherits `lemma71`, `turning_sum_le_closure`).
 Acceptance: no `sorry` (inherits).
-Depends on: `lemma71`, `turning_sum_le`, `card_sep_le_81`, `tnbr_unique`, `c5_tgap`. -/
+Depends on: `lemma71`, `turning_sum_le_closure`, `card_sep_le_81`, `tnbr_unique`, `c5_tgap`. -/
 theorem card_mixedT_le (hX : Normal X) (F : DirField X) (hτ : √3 / 2 + 3 * beta ≤ tau X) :
     ((mixedT X F).card : ℝ) ≤ 1200 := by
   classical
@@ -1132,12 +1132,15 @@ theorem card_mixedT_le (hX : Normal X) (F : DirField X) (hτ : √3 / 2 + 3 * be
     rw [e]
     exact ⟨hsub, htu, hd⟩
   obtain ⟨a, ha⟩ : X.Nonempty := card_pos.1 (by linarith [hX.four_le])
-  have hsum := turning_sum_le (KBall_convex X) (KBall_isCompact ⟨a, ha⟩) A Γ
+  have hsum := turning_sum_le_closure (KBall_convex X) (KBall_isCompact ⟨a, ha⟩) A Γ
     (fun v hv => (hΓ v hv).1) 81 (fun x => by
       refine card_sep_le_81 (fun a ha b hb hab => ?_) x (fun a ha => ?_)
       · exact one_le_dist h1 (Sset_sub (hArc a (mem_filter.1 ha).1).2)
           (Sset_sub (hArc b (mem_filter.1 hb).1).2) hab
-      · exact (hΓ a (mem_filter.1 ha).1).2.2 x (mem_filter.1 ha).2)
+      · have hsub : Γ a ⊆ Metric.closedBall a 2 := fun y hy => by
+          rw [Metric.mem_closedBall, dist_comm]; exact (hΓ a (mem_filter.1 ha).1).2.2 y hy
+        have hx := closure_minimal hsub Metric.isClosed_closedBall (mem_filter.1 ha).2
+        rw [Metric.mem_closedBall] at hx; rw [dist_comm]; exact hx)
   have hlow : ∑ v ∈ A, (0.886 : ℝ) ≤ ∑ v ∈ A, turning (KBall X) (Γ v) :=
     sum_le_sum fun v hv => (c5_tgap hX hτ).trans (hΓ v hv).2.1
   rw [sum_const, nsmul_eq_mul] at hlow
@@ -1248,8 +1251,8 @@ theorem R1_z (hX : Normal X) (F : DirField X) (hτ₁ : √3 / 2 + 3 * beta ≤ 
   have hd : ‖F.u v₂ - F.u v₁‖ ≤ 2 * beta := by
     have := norm_sub_le (F.u v₂ - F.u z) (F.u v₁ - F.u z)
     rw [sub_sub_sub_cancel_right] at this
-    have a₁ := norm_sub_le_ang hu₁ huz
-    have a₂ := norm_sub_le_ang hu₂ huz
+    have a₁ := norm_sub_le_angR hu₁ huz
+    have a₂ := norm_sub_le_angR hu₂ huz
     linarith
   have : |tau X| * ‖F.u v₂ - F.u v₁‖ ≤ 2 * beta :=
     (mul_le_of_le_one_left (norm_nonneg _) hτ0).trans hd
@@ -1269,8 +1272,8 @@ theorem norm_u_sub_le {a b c : Pt} (ha : ‖a‖ = 1) (hb : ‖b‖ = 1) (hc : �
     ‖a - c‖ ≤ ang a b + ang b c := by
   have := norm_sub_le (a - b) (c - b)
   rw [sub_sub_sub_cancel_right] at this
-  have h1 := norm_sub_le_ang ha hb
-  have h2 := norm_sub_le_ang hc hb
+  have h1 := norm_sub_le_angR ha hb
+  have h2 := norm_sub_le_angR hc hb
   rw [ang_comm c b] at h2
   linarith
 
@@ -1302,9 +1305,9 @@ theorem R2 (hX : Normal X) (F : DirField X) (hτ₁ : √3 / 2 + 3 * beta ≤ ta
   refine (norm_add_le _ _).trans_lt ?_
   have hE := norm_tstep_sub huv₀ huz₀ n₁ n₂ a₁ a₁' a₂ a₂' c₁ c₂
   have hO := norm_offset_sub huv₁ huv₀ hs0 hσ₁ hσ₀ (τ := tau X)
-  have h1 : ‖F.u v₀ - F.u z₀‖ ≤ beta := (norm_sub_le_ang huv₀ huz₀).trans hg₀
+  have h1 : ‖F.u v₀ - F.u z₀‖ ≤ beta := (norm_sub_le_angR huv₀ huz₀).trans hg₀
   have h2 : ‖F.u v₁ - F.u v₀‖ ≤ beta := by
-    rw [norm_sub_rev]; exact (norm_sub_le_ang huv₀ huv₁).trans hv.2.2.2.1
+    rw [norm_sub_rev]; exact (norm_sub_le_angR huv₀ huv₁).trans hv.2.2.2.1
   have h3 : |tau X| * ‖F.u v₁ - F.u v₀‖ ≤ beta :=
     (mul_le_of_le_one_left (norm_nonneg _) hτ0).trans h2
   have hs' : 2 * sOff X + 6 * beta < 1 := hs
@@ -1340,7 +1343,7 @@ theorem R2_sym (hX : Normal X) (F : DirField X) (hτ₁ : √3 / 2 + 3 * beta �
   have hE := norm_tstep_sub huv₀ huz₀ n₁ n₂ a₁ a₁' a₂ a₂' c₁ c₂
   rw [norm_sub_rev] at hE
   have hO := norm_offset_sub huv' huv₀ hs0 hσ₁ hσ₀ (τ := tau X)
-  have h1 : ‖F.u v₀ - F.u z₀‖ ≤ beta := (norm_sub_le_ang huv₀ huz₀).trans hg₀
+  have h1 : ‖F.u v₀ - F.u z₀‖ ≤ beta := (norm_sub_le_angR huv₀ huz₀).trans hg₀
   have h2 : ‖F.u v' - F.u v₀‖ ≤ 3 * beta := by
     have k1 := norm_u_sub_le huv' huz₁ huz₀
     have k2 := norm_sub_le (F.u v' - F.u z₀) (F.u v₀ - F.u z₀)
@@ -1372,7 +1375,7 @@ theorem R3_no_three_parallel (F : DirField X) {v₁ v₂ v₃ z₁ z₂ z₃ : P
     have n := inner_sq_add_det_sq (e := F.u v) hc
     rw [real_inner_comm, hi, hu] at n
     refine ⟨?_, by linarith⟩
-    conv_lhs => rw [decomp hc (F.u v)]
+    conv_lhs => rw [decompR hc (F.u v)]
     rw [real_inner_comm, hi]
   obtain ⟨k₁, d₁⟩ := key h₁ rfl
   obtain ⟨k₂, d₂⟩ := key h₂ e₁₂.symm
@@ -1714,8 +1717,8 @@ theorem tstep_flip {F : DirField X} {p q : Pt} (hp : p ∈ Sset X) (hq : q ∈ S
   have n := inner_sq_add_det_sq (e := q - p) hup
   rw [he] at n
   have hw : ‖F.u q - F.u p‖ ≤ beta := by
-    rw [norm_sub_rev]; exact (norm_sub_le_ang hup huq).trans hg
-  have hd := abs_det2_le (F.u q - F.u p) (q - p)
+    rw [norm_sub_rev]; exact (norm_sub_le_angR hup huq).trans hg
+  have hd := abs_det2_leR (F.u q - F.u p) (q - p)
   rw [he, mul_one] at hd
   have e : det2 (F.u q) (p - q) = -(det2 (F.u p) (q - p) + det2 (F.u q - F.u p) (q - p)) := by
     rw [← neg_sub q p, det2_neg_right, ← det2_add_left]; congr 2; abel
@@ -2156,7 +2159,7 @@ theorem card_cornerVerts_le (hX : Normal X) (F : DirField X) (hτ₁ : √3 / 2 
   have hγ : ∀ v, γ v = {v} := fun v => (Set.nonempty_Icc.2 le_rfl).image_const v
   have hsum := turning_sum_le hconv hcomp C γ
     (fun v hv => by rw [hγ]; exact Set.singleton_subset_iff.2 (ball_polygon_b (hmem v hv).1
-      (hmem v hv).2.1)) 1
+      (hmem v hv).2.1)) (fun v _ => by rw [hγ]; exact isClosed_singleton) 1
     (fun x => by
       refine card_le_one.2 fun v hv v' hv' => ?_
       have h1 := (mem_filter.1 hv).2
