@@ -89,7 +89,10 @@ n pairs? Must the number of such distances → ∞ (perhaps ≥ n^{1−o(1)})?
   case, Theorem D step 2).
 
 ## Iteration 8 (2026-09-23): 3 agents running
-- Novelty audit of A2 + B2 Thm A → NOVELTY.md "Audit 2"
+- Novelty audit of A2 + B2 Thm A → NOVELTY.md "Audit 2" — DONE (b8bb2ec): 54/37 NEW (still 3/2 everywhere);
+  B2 Thm A NEW as a statement but a parity-sharpened CDL Thm 1.2, so present it as a corollary. Risks: ienjoymath's
+  announced "LP analysis" note, which hasn't appeared yet (re-check before posting), and paywalled Erdős–Fishburn 1995 / Fishburn papers
+  that might cover convex n=6.
 - Referee gaps closed → WRITEUP_A2.md + scripts/writeup_a2_checks.py
 - Convex n = 7 (and maybe 11) → angle_B3.md
 
