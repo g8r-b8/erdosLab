@@ -208,7 +208,23 @@ TODO: prove (choose partners; `p ∈ S ∖ D` → a `Δ₂`-partner, `p ∈ S �
 Acceptance: no `sorry`.
 Depends on: definitions. Difficulty S. -/
 theorem dirField_nonempty (X : Finset Pt) : Nonempty (DirField X) := by
-  sorry
+  refine ⟨⟨(fun p => if h : (partners X (diam X) p).Nonempty then h.choose
+      else if h' : (partners X (dist2 X) p).Nonempty then h'.choose else p), ?_, ?_, ?_⟩⟩
+  · intro p hp
+    split_ifs with h h'
+    · exact (mem_partners.1 h.choose_spec).1
+    · exact (mem_partners.1 h'.choose_spec).1
+    · exact absurd (mem_filter.1 hp).2 h'
+  · intro p hp hpD
+    have h : ¬ (partners X (diam X) p).Nonempty := fun h =>
+      hpD (mem_filter.2 ⟨mem_of_mem_Sset hp, h⟩)
+    have h' := (mem_filter.1 hp).2
+    simp only [dif_neg h, dif_pos h']
+    exact (mem_partners.1 h'.choose_spec).2.2
+  · intro p _ hpD
+    have h := (mem_filter.1 hpD).2
+    simp only [dif_pos h]
+    exact (mem_partners.1 h.choose_spec).2.2
 
 /-- `u_p` is a unit vector for `p ∈ S`.
 
@@ -216,7 +232,7 @@ TODO: prove (`partner p ≠ p` since its distance is `Δ₂ > 0` or `Δ > 0`).
 Acceptance: no `sorry`.
 Depends on: definitions. Difficulty S. -/
 theorem DirField.norm_u (F : DirField X) {p : Pt} (hp : p ∈ Sset X) : ‖F.u p‖ = 1 := by
-  sorry
+  exact F.norm_u' hp
 
 /-- **Lemma 3.2(a)** For `p ∈ S ∩ D`: `(y − p)·u_p ≥ |y − p|²/(2Δ)`.
 
@@ -623,6 +639,25 @@ theorem turning_ge_angle {K : Set Pt} (hK : Convex ℝ K) (hKc : IsCompact K)
     (hn₂ : ν₂ ≠ 0) : ang ν₁ ν₂ ≤ turning K (γ '' Set.Icc a b) := by
   sorry
 
+/-- `1`-separated reals in `[a, b]` number at most `b − a + 1`. -/
+theorem card_le_of_sep_real {a : ℝ} (T : Finset ℝ) : ∀ b : ℝ, a ≤ b + 1 →
+    (∀ x ∈ T, a ≤ x ∧ x ≤ b) → (∀ x ∈ T, ∀ y ∈ T, x ≠ y → 1 ≤ |x - y|) →
+    (T.card : ℝ) ≤ b - a + 1 := by
+  induction T using Finset.induction_on_max with
+  | empty => intro b hb _ _; simp; linarith
+  | insert m T hlt ih =>
+    intro b hb hmem hsep
+    have hmT : m ∉ T := fun h => lt_irrefl _ (hlt m h)
+    have hm := hmem m (mem_insert_self _ _)
+    have hT : ∀ x ∈ T, a ≤ x ∧ x ≤ m - 1 := by
+      intro x hx
+      refine ⟨(hmem x (mem_insert_of_mem hx)).1, ?_⟩
+      have := hsep x (mem_insert_of_mem hx) m (mem_insert_self _ _) (hlt x hx).ne
+      rw [abs_of_neg (by linarith [hlt x hx])] at this; linarith
+    have h1 := ih (m - 1) (by linarith [hm.1]) hT
+      (fun x hx y hy hxy => hsep x (mem_insert_of_mem hx) y (mem_insert_of_mem hy) hxy)
+    rw [card_insert_of_notMem hmT]; push_cast; linarith [hm.2]
+
 /-- **Arc spacing**: `1`-separated points on a `1`-Lipschitz arc of length `ℓ` number `≤ ℓ + 1`.
 
 TODO: prove (pull back to parameters, which are pairwise `≥ 1` apart in `[a, b]`).
@@ -631,7 +666,21 @@ Depends on: nothing. Difficulty M. -/
 theorem card_le_arcLength {P : Finset Pt} (hP : ∀ x ∈ P, ∀ y ∈ P, x ≠ y → 1 ≤ dist x y)
     {γ : ℝ → Pt} (hγ : LipschitzWith 1 γ) {a b : ℝ} (hab : a ≤ b)
     (hsub : ∀ x ∈ P, x ∈ γ '' Set.Icc a b) : (P.card : ℝ) ≤ b - a + 1 := by
-  sorry
+  have hch : ∀ x ∈ P, ∃ s ∈ Set.Icc a b, γ s = x := fun x hx => hsub x hx
+  choose! t ht htγ using hch
+  have hinj : Set.InjOn t P := fun x hx y hy h => by rw [← htγ x hx, ← htγ y hy, h]
+  rw [← card_image_of_injOn hinj]
+  refine card_le_of_sep_real _ b (by linarith) ?_ ?_
+  · intro s hs; obtain ⟨x, hx, rfl⟩ := mem_image.1 hs; exact ht x hx
+  · intro s hs s' hs' hne
+    obtain ⟨x, hx, rfl⟩ := mem_image.1 hs
+    obtain ⟨y, hy, rfl⟩ := mem_image.1 hs'
+    have hxy : x ≠ y := fun h => hne (h ▸ rfl)
+    have h1 := hP x hx y hy hxy
+    have hl := hγ.dist_le_mul (t x) (t y)
+    rw [htγ x hx, htγ y hy] at hl
+    simp only [NNReal.coe_one, one_mul, Real.dist_eq] at hl
+    linarith
 
 /-! ## §5.1 Lens lemma -/
 
