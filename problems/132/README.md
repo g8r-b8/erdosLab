@@ -120,7 +120,10 @@ n pairs? Must the number of such distances → ∞ (perhaps ≥ n^{1−o(1)})?
   constraints from geometry (diagonals of a convex quadrilateral beat the opposite sides).
 
 ## Next steps
-0. B3: n=7,11,13 certified by drat-trim + lrat-check (DONE). Next: Lean formalisation (quadrilateral lemma, verified encoder, LRAT check); n=15 hard case.
+0. B3: n=7,11,13 certified by drat-trim + lrat-check (DONE). Lean: convex n=7 and n=11 sorry-free in
+   Erdos/Erdos/E132Convex.lean (Lemma Q, ordinal reduction and BitVec encoding proved in Lean; the core is closed by bv_decide.
+   Axioms: std 3 + one bv_decide certificate axiom each, to be disclosed like native_decide). Remaining: unordered-Finset form
+   (angular-sort lemma), n=13 in Lean, LRAT replay via bv_check, add the file to Erdos.lean. See lean/README.md.
 1. Rule-4 novelty audit of the 54/37 bound (A2) and B2 Theorem A.
 2. Close the REFEREE_A2 gaps → write-up of 54/37 (the strongest "nontrivial result" candidate for the prize).
 3. n = 7 convex k ≥ 3 by exact classification of 7-point convex 4-distance sets.

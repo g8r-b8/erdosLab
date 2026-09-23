@@ -129,6 +129,11 @@ then ¬(almost-all o(N)) as in PR #4076's Erdos468MinimalPreimageLittleOAlmostAl
   Brillhart–Lehmer–Lehmer 1964). Unread: Lehmer "Mechanized mathematics" (BAMS 1966), Lehmer–Lehmer
   "On runs of residues" (Proc AMS 1962), Mills' 1965 survey.
 
+## Lean milestone (2026-09-23)
+- #132 convex n=7, n=11 (≥3 rare distances) proved in Lean without sorry: Erdos/Erdos/E132Convex.lean. Axioms:
+  propext, Classical.choice, Quot.sound + bv_decide certificate axiom (disclose, like native_decide). This is a
+  partial result on an open problem, not a resolution, so it does NOT meet the ERDOS_DONE criterion.
+
 ## Next step
 - 132: novelty audit of convex n=11/13 result; independent read of WRITEUP_A2 §7.2 and §8 Step 4;
   scope a Lean formalisation of convex n=11 (quadrilateral lemma + verified encoder + LRAT).
