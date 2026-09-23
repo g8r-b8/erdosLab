@@ -495,6 +495,91 @@ theorem distSetS_mono {Y Z : Finset Pt} (h : Y ⊆ Z) {d : ℝ} (hd : d ∈ dist
   obtain ⟨x, hx, y, hy, hxy, rfl⟩ := mem_distSetS hd
   exact dist_mem_distSetS (h hx) (h hy) hxy
 
+/-- Scaling multiplies distances. -/
+theorem dist_smul_pos {c : ℝ} (hc : 0 < c) (x y : Pt) : dist (c • x) (c • y) = c * dist x y := by
+  rw [dist_smul₀, Real.norm_eq_abs, abs_of_pos hc]
+
+/-- Distances of a dilate. -/
+theorem distSetS_smul {c : ℝ} (hc : 0 < c) (X : Finset Pt) :
+    distSetS (X.image (c • ·)) = (distSetS X).image (c * ·) := by
+  ext d
+  rw [mem_image]
+  constructor
+  · intro hd
+    obtain ⟨x', hx', y', hy', hxy, rfl⟩ := mem_distSetS hd
+    obtain ⟨x, hx, rfl⟩ := mem_image.1 hx'
+    obtain ⟨y, hy, rfl⟩ := mem_image.1 hy'
+    refine ⟨dist x y, dist_mem_distSetS hx hy fun h => hxy (by rw [h]), ?_⟩
+    rw [dist_smul_pos hc]
+  · rintro ⟨e, he, rfl⟩
+    obtain ⟨x, hx, y, hy, hxy, rfl⟩ := mem_distSetS he
+    rw [← dist_smul_pos hc]
+    refine dist_mem_distSetS (mem_image_of_mem _ hx) (mem_image_of_mem _ hy) fun h => hxy ?_
+    exact smul_right_injective Pt hc.ne' h
+
+/-- Multiplicities of a dilate. -/
+theorem mult_smul {c : ℝ} (hc : 0 < c) (X : Finset Pt) (d : ℝ) :
+    mult (X.image (c • ·)) (c * d) = mult X d := by
+  have hinj : Function.Injective (fun x : Pt => c • x) := smul_right_injective Pt hc.ne'
+  rw [mult_eq_card, mult_eq_card]
+  have e : (pairsS (X.image (c • ·))).filter (fun z => pairDist z = c * d) =
+      ((pairsS X).filter (fun z => pairDist z = d)).image (Sym2.map (c • ·)) := by
+    ext z
+    rw [mem_image]
+    constructor
+    · intro hz
+      induction z using Sym2.ind with
+      | h a' b' =>
+        obtain ⟨ha', hb', hab, hd⟩ := mem_pairsAt.1 hz
+        obtain ⟨a, ha, rfl⟩ := mem_image.1 ha'
+        obtain ⟨b, hb, rfl⟩ := mem_image.1 hb'
+        refine ⟨s(a, b), mem_pairsAt.2 ⟨ha, hb, fun h => hab (by rw [h]), ?_⟩, rfl⟩
+        rw [dist_smul_pos hc] at hd
+        exact mul_left_cancel₀ hc.ne' hd
+    · rintro ⟨w, hw, rfl⟩
+      induction w using Sym2.ind with
+      | h a b =>
+        obtain ⟨ha, hb, hab, hd⟩ := mem_pairsAt.1 hw
+        rw [Sym2.map_mk]
+        refine mem_pairsAt.2 ⟨mem_image_of_mem _ ha, mem_image_of_mem _ hb,
+          fun h => hab (hinj h), ?_⟩
+        rw [dist_smul_pos hc, hd]
+  rw [e, card_image_of_injective _ (Sym2.map.injective hinj)]
+
+/-- `Δ` of a dilate. -/
+theorem diam_smul {c : ℝ} (hc : 0 < c) (X : Finset Pt) :
+    diam (X.image (c • ·)) = c * diam X := by
+  have hmono : Monotone (fun t : ℝ => c * t) := fun a b h => mul_le_mul_of_nonneg_left h hc.le
+  unfold diam
+  rw [distSetS_smul hc]
+  by_cases h : (distSetS X).Nonempty
+  · rw [dite_eq_left (h.image _), dite_eq_left h, max'_image hmono]
+  · rw [dite_eq_right (by rwa [image_nonempty]), dite_eq_right h, mul_zero]
+
+/-- `Δ₂` of a dilate. -/
+theorem dist2_smul {c : ℝ} (hc : 0 < c) (X : Finset Pt) :
+    dist2 (X.image (c • ·)) = c * dist2 X := by
+  have hmono : Monotone (fun t : ℝ => c * t) := fun a b h => mul_le_mul_of_nonneg_left h hc.le
+  have hinj : Function.Injective (fun t : ℝ => c * t) := fun a b h => mul_left_cancel₀ hc.ne' h
+  unfold dist2
+  rw [diam_smul hc, distSetS_smul hc]
+  have e : ((distSetS X).image (c * ·)).erase (c * diam X) =
+      ((distSetS X).erase (diam X)).image (c * ·) := (image_erase hinj _ _).symm
+  rw [e]
+  by_cases h : ((distSetS X).erase (diam X)).Nonempty
+  · rw [dite_eq_left (h.image _), dite_eq_left h, max'_image hmono]
+  · rw [dite_eq_right (by rwa [image_nonempty]), dite_eq_right h, mul_zero]
+
+/-- `δ` of a dilate. -/
+theorem minDist_smul {c : ℝ} (hc : 0 < c) (X : Finset Pt) :
+    minDist (X.image (c • ·)) = c * minDist X := by
+  have hmono : Monotone (fun t : ℝ => c * t) := fun a b h => mul_le_mul_of_nonneg_left h hc.le
+  unfold minDist
+  rw [distSetS_smul hc]
+  by_cases h : (distSetS X).Nonempty
+  · rw [dite_eq_left (h.image _), dite_eq_left h, min'_image hmono]
+  · rw [dite_eq_right (by rwa [image_nonempty]), dite_eq_right h, mul_zero]
+
 end Defs
 
 open Defs
@@ -883,7 +968,16 @@ Depends on: definitions. Difficulty M. -/
 theorem exists_normalize (hX : 2 ≤ X.card) :
     ∃ Y : Finset Pt, Y.card = X.card ∧ minDist Y = 1 ∧
       mult Y (dist2 Y) = mult X (dist2 X) ∧ mult Y (minDist Y) = mult X (minDist X) := by
-  sorry
+  obtain ⟨a, ha, b, hb, hab⟩ := one_lt_card.1 (by omega : 1 < X.card)
+  have hne : (distSetS X).Nonempty := ⟨_, dist_mem_distSetS ha hb hab⟩
+  have hδ : 0 < minDist X := by
+    rw [minDist, dite_eq_left hne]; exact pos_of_mem_distSetS (min'_mem _ _)
+  set c := (minDist X)⁻¹
+  have hc : 0 < c := inv_pos.2 hδ
+  refine ⟨X.image (c • ·), card_image_of_injective _ (smul_right_injective Pt hc.ne'), ?_, ?_, ?_⟩
+  · rw [minDist_smul hc, inv_mul_cancel₀ hδ.ne']
+  · rw [dist2_smul hc, mult_smul hc]
+  · rw [minDist_smul hc, mult_smul hc]
 
 /-- **[C11]** `(2 · 1.94·10⁴ + 1)² < N₀`.
 
