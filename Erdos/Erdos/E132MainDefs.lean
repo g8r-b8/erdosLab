@@ -196,6 +196,73 @@ def mixedT (X : Finset Pt) (F : DirField X) : Finset (Sym2 Pt) :=
 /-- Good edges that are not mixed T-edges (pure T-edges and rungs). -/
 def goodPure (X : Finset Pt) (F : DirField X) : Finset (Sym2 Pt) := good X F \ mixedT X F
 
+/-! ## Helper lemmas: pairs at a given distance
+
+Helpers live in the sub-namespace `Erdos132Main.Defs` (opened below) so that they cannot clash
+with helpers of the same name in the downstream files. -/
+
+namespace Defs
+
+/-- Membership of an unordered pair in `pairsS`. -/
+theorem mk_mem_pairsS {Y : Finset Pt} {a b : Pt} :
+    s(a, b) ∈ pairsS Y ↔ a ∈ Y ∧ b ∈ Y ∧ a ≠ b := by
+  unfold pairsS
+  rw [mem_filter, mk_mem_sym2_iff, Sym2.mk_isDiag_iff, and_assoc]
+
+/-- `pairDist` of an explicit pair. -/
+theorem pairDist_mk (a b : Pt) : pairDist s(a, b) = dist a b := rfl
+
+/-- `mult` as the card of an explicit filter. -/
+theorem mult_eq_card (Y : Finset Pt) (d : ℝ) :
+    mult Y d = ((pairsS Y).filter (fun z => pairDist z = d)).card := by
+  unfold mult multS; convert rfl
+
+/-- Membership in the pairs at distance `d`. -/
+theorem mem_pairsAt {Y : Finset Pt} {d : ℝ} {a b : Pt} :
+    s(a, b) ∈ (pairsS Y).filter (fun z => pairDist z = d) ↔
+      a ∈ Y ∧ b ∈ Y ∧ a ≠ b ∧ dist a b = d := by
+  rw [mem_filter, mk_mem_pairsS, pairDist_mk, and_assoc, and_assoc]
+
+/-- `mult` is monotone in the set. -/
+theorem mult_mono {Y Z : Finset Pt} (h : Y ⊆ Z) (d : ℝ) : mult Y d ≤ mult Z d := by
+  rw [mult_eq_card, mult_eq_card]
+  refine card_le_card fun z hz => ?_
+  induction z using Sym2.ind with
+  | h a b =>
+    obtain ⟨ha, hb, hab, hd⟩ := mem_pairsAt.1 hz
+    exact mem_pairsAt.2 ⟨h ha, h hb, hab, hd⟩
+
+/-- Membership in `partners`. -/
+theorem mem_partners {Y : Finset Pt} {d : ℝ} {p q : Pt} :
+    q ∈ partners Y d p ↔ q ∈ Y ∧ q ≠ p ∧ dist p q = d := by
+  unfold partners; rw [mem_filter]
+
+/-- Pairs of `Z` at distance `d` are those inside `Y` plus those meeting `Z \ Y`. -/
+theorem mult_le_add_sum (Y Z : Finset Pt) (d : ℝ) :
+    mult Z d ≤ mult Y d + ∑ x ∈ Z \ Y, (partners Z d x).card := by
+  rw [mult_eq_card, mult_eq_card]
+  have hsub : (pairsS Z).filter (fun z => pairDist z = d) ⊆
+      (pairsS Y).filter (fun z => pairDist z = d) ∪
+        (Z \ Y).biUnion (fun x => (partners Z d x).image (fun q => s(x, q))) := by
+    intro z hz
+    induction z using Sym2.ind with
+    | h a b =>
+      obtain ⟨ha, hb, hab, hd⟩ := mem_pairsAt.1 hz
+      rw [mem_union, mem_biUnion]
+      by_cases haY : a ∈ Y
+      · by_cases hbY : b ∈ Y
+        · exact Or.inl (mem_pairsAt.2 ⟨haY, hbY, hab, hd⟩)
+        · refine Or.inr ⟨b, mem_sdiff.2 ⟨hb, hbY⟩, mem_image.2 ⟨a, ?_, Sym2.eq_swap⟩⟩
+          exact mem_partners.2 ⟨ha, hab, by rw [dist_comm]; exact hd⟩
+      · refine Or.inr ⟨a, mem_sdiff.2 ⟨ha, haY⟩, mem_image.2 ⟨b, ?_, rfl⟩⟩
+        exact mem_partners.2 ⟨hb, Ne.symm hab, hd⟩
+  refine (card_le_card hsub).trans ((card_union_le _ _).trans (Nat.add_le_add_left ?_ _))
+  exact card_biUnion_le.trans (sum_le_sum fun x _ => card_image_le)
+
+end Defs
+
+open Defs
+
 /-! ## Cited results -/
 
 /-- **[Ve87]** Vesztergombi, *On large distances in planar sets*, Discrete Math. 67 (1987)
@@ -261,7 +328,29 @@ theorem two_mul_card_le_of_deg_le {V : Finset Pt} {E : Finset (Sym2 Pt)} {k : �
     (hE : ∀ z ∈ E, ¬ z.IsDiag ∧ ∀ p ∈ z, p ∈ V)
     (hdeg : ∀ p ∈ V, (E.filter (fun z => p ∈ z)).card ≤ k) :
     2 * E.card ≤ k * V.card := by
-  sorry
+  have h2 : ∀ z ∈ E, (V.filter (fun p => p ∈ z)).card = 2 := by
+    intro z hz
+    induction z using Sym2.ind with
+    | h a b =>
+      obtain ⟨hd, hV⟩ := hE _ hz
+      have hab : a ≠ b := by simpa using hd
+      have : V.filter (fun p => p ∈ s(a, b)) = {a, b} := by
+        ext x
+        simp only [mem_filter, Sym2.mem_iff, mem_insert, mem_singleton]
+        constructor
+        · exact fun h => h.2
+        · rintro (rfl | rfl)
+          · exact ⟨hV _ (Sym2.mem_mk_left _ _), Or.inl rfl⟩
+          · exact ⟨hV _ (Sym2.mem_mk_right _ _), Or.inr rfl⟩
+      rw [this, card_pair hab]
+  have hdc : ∑ z ∈ E, (V.filter (fun p => p ∈ z)).card =
+      ∑ p ∈ V, (E.filter (fun z => p ∈ z)).card := by
+    simp only [card_filter]; exact sum_comm
+  calc 2 * E.card = ∑ z ∈ E, (V.filter (fun p => p ∈ z)).card := by
+        rw [sum_congr rfl h2, sum_const, smul_eq_mul, mul_comm]
+    _ = ∑ p ∈ V, (E.filter (fun z => p ∈ z)).card := hdc
+    _ ≤ ∑ _p ∈ V, k := sum_le_sum hdeg
+    _ = k * V.card := by rw [sum_const, smul_eq_mul, mul_comm]
 
 /-- `μ(δ) ≤ 3n` (from the kissing bound).
 
@@ -293,7 +382,14 @@ What's missing: both ends of a `Δ₂`-pair have a `Δ₂`-partner, so are in `S
 Acceptance: no `sorry`.
 Depends on: definitions. Difficulty S. -/
 theorem mult_dist2_eq_S (X : Finset Pt) : mult X (dist2 X) = mult (Sset X) (dist2 X) := by
-  sorry
+  refine le_antisymm ?_ (mult_mono (filter_subset _ _) _)
+  refine (mult_le_add_sum (Sset X) _ _).trans (le_of_eq ?_)
+  rw [sum_eq_zero, add_zero]
+  intro x hx
+  obtain ⟨hxX, hxS⟩ := mem_sdiff.1 hx
+  rw [card_eq_zero, ← not_nonempty_iff_eq_empty]
+  intro hne
+  exact hxS (mem_filter.2 ⟨hxX, hne⟩)
 
 /-- **(VS)** `μ(Δ₂) ≤ (3/2)|S|`.
 
