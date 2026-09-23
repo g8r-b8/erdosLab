@@ -246,16 +246,72 @@ noncomputable def distSetS (S : Finset Pt) : Finset ℝ := by
 noncomputable def rareDistsS (S : Finset Pt) : Finset ℝ := by
   classical exact (distSetS S).filter (fun d => multS S d ≤ S.card)
 
+/-- A listing of `S` has length `#S`. -/
+theorem card_eq_of_listing {S : Finset Pt} {n : ℕ} {p : Fin n → Pt}
+    (hinj : Function.Injective p) (hrange : Set.range p = ↑S) : S.card = n := by
+  classical
+  have : S = univ.image p := by
+    apply coe_injective; rw [coe_image, coe_univ, Set.image_univ, hrange]
+  rw [this, card_image_of_injective _ hinj, card_univ, Fintype.card_fin]
+
 /-- For a listing `p` of `S`, the rare distances of `S` are those of `p`. -/
 theorem rareDistsS_eq {S : Finset Pt} {n : ℕ} {p : Fin n → Pt} (hinj : Function.Injective p)
     (hrange : Set.range p = ↑S) : rareDistsS S = rareDists p := by
-  sorry
+  classical
+  have hmemS : ∀ x, x ∈ S ↔ ∃ i, p i = x := fun x => by
+    rw [← mem_coe, ← hrange]; rfl
+  let φ : Fin n × Fin n → Sym2 Pt := fun e => s(p e.1, p e.2)
+  have hpairs : pairsS S = (pairsF n).image φ := by
+    ext z
+    induction z using Sym2.ind with
+    | _ x y =>
+    simp only [pairsS, mem_filter, Finset.mk_mem_sym2_iff, Sym2.mk_isDiag_iff, mem_image,
+      pairsF, mem_univ, true_and, φ, Sym2.eq_iff, Prod.exists]
+    constructor
+    · rintro ⟨⟨hx, hy⟩, hxy⟩
+      obtain ⟨i, rfl⟩ := (hmemS x).1 hx
+      obtain ⟨j, rfl⟩ := (hmemS y).1 hy
+      rcases lt_or_gt_of_ne (fun h : i = j => hxy (h ▸ rfl)) with h | h
+      · exact ⟨i, j, h, Or.inl ⟨rfl, rfl⟩⟩
+      · exact ⟨j, i, h, Or.inr ⟨rfl, rfl⟩⟩
+    · rintro ⟨i, j, hij, h⟩
+      rcases h with ⟨rfl, rfl⟩ | ⟨rfl, rfl⟩
+      · exact ⟨⟨(hmemS _).2 ⟨i, rfl⟩, (hmemS _).2 ⟨j, rfl⟩⟩, fun h => hij.ne (hinj h)⟩
+      · exact ⟨⟨(hmemS _).2 ⟨j, rfl⟩, (hmemS _).2 ⟨i, rfl⟩⟩, fun h => hij.ne' (hinj h)⟩
+  have hinjOn : Set.InjOn φ ↑(pairsF n) := by
+    rintro ⟨i, j⟩ hij ⟨k, l⟩ hkl h
+    simp only [pairsF, coe_filter, mem_univ, true_and, Set.mem_ofPred_eq] at hij hkl
+    rcases Sym2.eq_iff.1 h with ⟨h1, h2⟩ | ⟨h1, h2⟩
+    · have a1 : i = k := hinj h1
+      have a2 : j = l := hinj h2
+      rw [a1, a2]
+    · have a1 : i = l := hinj h1
+      have a2 : j = k := hinj h2
+      rw [a1, a2] at hij
+      exact absurd (hij.trans hkl) (lt_irrefl _)
+  have hdist : ∀ e, pairDist (φ e) = dist (p e.1) (p e.2) := fun e => rfl
+  have hD : distSetS S = distSet p := by
+    unfold distSetS distSet
+    rw [hpairs, image_image]
+    rfl
+  have hmult : ∀ d, multS S d = mult p d := by
+    intro d
+    unfold multS mult
+    rw [hpairs, filter_image, card_image_of_injOn (hinjOn.mono (coe_subset.2 (filter_subset _ _)))]
+    congr 1
+  unfold rareDistsS rareDists
+  rw [hD, card_eq_of_listing hinj hrange]
+  exact filter_congr fun d _ => by rw [hmult]
 
 /-- Main theorems for point sets: from the ordered version and the bridge. -/
 theorem finset_of_polygon {n : ℕ} (h : ∀ p : Fin n → Pt, StrictConvexPolygon p →
     3 ≤ (rareDists p).card) {S : Finset Pt} (hn : S.card = n)
     (hS : ConvexIndependent ℝ ((↑) : S → Pt)) : 3 ≤ (rareDistsS S).card := by
-  sorry
+  obtain ⟨m, p, hinj, hrange, hp⟩ :=
+    exists_strictConvexPolygon (notInHull_of_convexIndependent hS)
+  obtain rfl : m = n := (card_eq_of_listing hinj hrange).symm.trans hn
+  rw [rareDistsS_eq hinj hrange]
+  exact h p hp
 
 /-- **Theorem 7 (point sets).** Seven points in convex position determine at least three
 distances that each occur for at least one and at most 7 of the 21 pairs. -/
