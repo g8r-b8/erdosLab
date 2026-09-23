@@ -227,15 +227,64 @@ theorem mid_nbr_unique {X : Finset Pt} {Δ Δ₂ : ℝ} (hT : TwoLargest X Δ Δ
 /-- The `Δ₂`-neighbours (in a set `S` of size `k`) of an extreme point can be listed in strict
 angular order.
 
-TODO: prove.
-What's missing: the slope-function sort of `Erdos132Layer.exists_median`, for general `k`.
-Acceptance: no `sorry`.
-Depends on: `Erdos132Layer.eq_of_orient_zero`. -/
+Proof: the slope-function sort of `Erdos132Layer.exists_median`, for general `k`. -/
 theorem exists_sorted {X : Finset Pt} {Δ₂ : ℝ} {p : Pt} (hp : IsExt X p) {S : Finset Pt}
     (hSX : S ⊆ X) (hS : ∀ x ∈ S, dist p x = Δ₂) (hpos : 0 < Δ₂) {k : ℕ} (hk : S.card = k) :
     ∃ f : Fin k → Pt, (∀ i, f i ∈ S) ∧ Function.Injective f ∧
       ∀ i j, i < j → 0 < orient p (f i) (f j) := by
-  sorry
+  classical
+  obtain ⟨-, α, β, hαβ⟩ := hp
+  have hSp : ∀ x ∈ S, x ≠ p := fun x hx h => by
+    have := hS x hx; rw [h, dist_self] at this; linarith
+  have hN : ∀ x ∈ S, 0 < -(α * (x 0 - p 0) + β * (x 1 - p 1)) := fun x hx => by
+    linarith [hαβ x (hSX hx) (hSp x hx)]
+  set g : Pt → ℝ := fun x =>
+    (-α * (x 1 - p 1) + β * (x 0 - p 0)) / -(α * (x 0 - p 0) + β * (x 1 - p 1)) with hg
+  have anti : ∀ x y, orient p y x = -orient p x y := fun x y => by simp only [orient]; ring
+  by_cases hk0 : k = 0
+  · subst hk0
+    exact ⟨fun i => i.elim0, fun i => i.elim0, fun i => i.elim0, fun i => i.elim0⟩
+  have hn : 0 < α ^ 2 + β ^ 2 := by
+    obtain ⟨x, hx⟩ : S.Nonempty := card_pos.1 (by omega)
+    by_contra h; push Not at h
+    have ha : α = 0 := by nlinarith [sq_nonneg α, sq_nonneg β]
+    have hb : β = 0 := by nlinarith [sq_nonneg α, sq_nonneg β]
+    have := hN x hx; rw [ha, hb] at this; simp at this
+  have key : ∀ x ∈ S, ∀ y ∈ S, (0 < orient p x y ↔ g x < g y) := by
+    intro x hx y hy
+    have hx' := hN x hx
+    have hy' := hN y hy
+    have e : g y - g x = orient p x y * (α ^ 2 + β ^ 2) /
+        ((-(α * (x 0 - p 0) + β * (x 1 - p 1))) * (-(α * (y 0 - p 0) + β * (y 1 - p 1)))) := by
+      simp only [hg]
+      rw [div_sub_div _ _ hy'.ne' hx'.ne', div_eq_div_iff (mul_ne_zero hy'.ne' hx'.ne')
+        (mul_ne_zero hx'.ne' hy'.ne')]
+      simp only [orient]; ring
+    rw [← sub_pos (a := g y) (b := g x), e]
+    constructor
+    · intro h; exact div_pos (mul_pos h hn) (mul_pos hx' hy')
+    · intro h
+      exact (mul_pos_iff_of_pos_right hn).1 ((div_pos_iff_of_pos_right (mul_pos hx' hy')).1 h)
+  have inj : Set.InjOn g S := by
+    intro x hx y hy hxy
+    have ho : orient p x y = 0 := by
+      rcases lt_trichotomy (orient p x y) 0 with h | h | h
+      · have h' : 0 < orient p y x := by rw [anti]; linarith
+        have := (key y hy x hx).1 h'; rw [hxy] at this; exact absurd this (lt_irrefl _)
+      · exact h
+      · have := (key x hx y hy).1 h; rw [hxy] at this; exact absurd this (lt_irrefl _)
+    have hd : sqd p x = sqd p y := by
+      rw [(dist_eq_iff_sqd hpos.le).1 (hS x hx), (dist_eq_iff_sqd hpos.le).1 (hS y hy)]
+    exact eq_of_orient_zero hd ho (hN x hx) (hN y hy)
+  set T := S.image g with hT
+  have hTk : T.card = k := by rw [hT, card_image_of_injOn inj, hk]
+  set emb := T.orderEmbOfFin hTk with hemb
+  have pre : ∀ i : Fin k, ∃ x ∈ S, g x = emb i := fun i =>
+    mem_image.1 (orderEmbOfFin_mem T hTk i)
+  choose f hfS hfg using pre
+  refine ⟨f, hfS, fun i j h => ?_, fun i j hij =>
+    (key _ (hfS i) _ (hfS j)).2 (by rw [hfg, hfg]; exact emb.strictMono hij)⟩
+  have := congrArg g h; rw [hfg, hfg] at this; exact emb.injective this
 
 /-- A core vertex `p ∈ L₁` of core degree `4` has at least two core neighbours of core degree
 `2` (its two middle neighbours).
