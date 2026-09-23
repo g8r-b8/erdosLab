@@ -160,7 +160,7 @@ theorem decomp {u : Pt} (hu : ‖u‖ = 1) (e : Pt) :
 
 /-- **Lemma 3.1(a)** `X ∖ D ⊆ K`.
 
-TODO: prove.
+TODO: none — proved.
 What's missing: a non-diametral point has all its distances `≤ Δ₂` (no distance of `X` lies in
 `(Δ₂, Δ)`, by definition of `dist2` as a max of `distSet ∖ {Δ}`).
 Acceptance: no `sorry`.
@@ -175,7 +175,7 @@ theorem ball_polygon_a {y : Pt} (hy : y ∈ X) (hyD : y ∉ Dset X) : y ∈ KBal
 
 /-- **Lemma 3.1(b)** `S ∖ D ⊆ ∂K`.
 
-TODO: prove.
+TODO: none — proved.
 What's missing: `v ∈ K ∩ C(w, Δ₂)` with `K ⊆ D(w, Δ₂)` is not interior.
 Acceptance: no `sorry`.
 Depends on: `ball_polygon_a`. Difficulty S–M. -/
@@ -193,7 +193,7 @@ theorem ball_polygon_b {v : Pt} (hv : v ∈ Sset X) (hvD : v ∉ Dset X) : v ∈
 
 /-- **Lemma 3.1(c)** `dist(z, K) ≥ t` for `z ∈ D`.
 
-TODO: prove.
+TODO: none — proved.
 What's missing: `K ⊆ D(x, Δ₂)` for the diametral partner `x` of `z`; triangle inequality.
 Acceptance: no `sorry`.
 Depends on: definitions. Difficulty S. -/
@@ -207,7 +207,7 @@ theorem ball_polygon_c {z y : Pt} (hz : z ∈ Dset X) (hy : y ∈ KBall X) : tga
 
 /-- The direction field exists.
 
-TODO: prove (choose partners; `p ∈ S ∖ D` → a `Δ₂`-partner, `p ∈ S ∩ D` → a diametral one).
+TODO: none — proved.
 Acceptance: no `sorry`.
 Depends on: definitions. Difficulty S. -/
 theorem dirField_nonempty (X : Finset Pt) : Nonempty (DirField X) := by
@@ -231,7 +231,7 @@ theorem dirField_nonempty (X : Finset Pt) : Nonempty (DirField X) := by
 
 /-- `u_p` is a unit vector for `p ∈ S`.
 
-TODO: prove (`partner p ≠ p` since its distance is `Δ₂ > 0` or `Δ > 0`).
+TODO: none — proved.
 Acceptance: no `sorry`.
 Depends on: definitions. Difficulty S. -/
 theorem DirField.norm_u (F : DirField X) {p : Pt} (hp : p ∈ Sset X) : ‖F.u p‖ = 1 := by
@@ -239,7 +239,7 @@ theorem DirField.norm_u (F : DirField X) {p : Pt} (hp : p ∈ Sset X) : ‖F.u p
 
 /-- **Lemma 3.2(a)** For `p ∈ S ∩ D`: `(y − p)·u_p ≥ |y − p|²/(2Δ)`.
 
-TODO: prove (law of cosines, `|y − x_p| ≤ Δ`).
+TODO: none — proved.
 Acceptance: no `sorry`.
 Depends on: definitions. Difficulty S–M. -/
 theorem exact_identity_a (F : DirField X) {p y : Pt} (hp : p ∈ Sset X) (hpD : p ∈ Dset X)
@@ -256,7 +256,7 @@ theorem exact_identity_a (F : DirField X) {p y : Pt} (hp : p ∈ Sset X) (hpD : 
 /-- **Lemma 3.2(b)** For `p ∈ S ∖ D`: normal (`(y − p)·u_p ≥ |y − p|²/(2Δ₂)`) or exception
 (`|y w_p| = Δ`).
 
-TODO: prove (law of cosines; `|y w_p| ∈ [0, Δ₂] ∪ {Δ}`).
+TODO: none — proved.
 Acceptance: no `sorry`.
 Depends on: definitions. Difficulty S–M. -/
 theorem exact_identity_b (F : DirField X) {p y : Pt} (hp : p ∈ Sset X) (hpD : p ∉ Dset X)
@@ -316,7 +316,7 @@ theorem one_lt_tau_iff_alg {t Δ₂ : ℝ} (ht : 0 ≤ t) (hΔ : 0 < Δ₂) :
 
 /-- **Lemma 3.2(c)** Exception at distance 1: `(y − p)·u_p = −τ` **exactly**.
 
-TODO: prove.
+TODO: none — proved.
 What's missing: law of cosines in `y p w_p` plus `rung_identity_alg`.
 Acceptance: no `sorry`.
 Depends on: `rung_identity_alg`, `DirField.norm_u`. Difficulty M. -/
@@ -334,7 +334,7 @@ theorem exact_identity_c (F : DirField X) {p y : Pt} (hp : p ∈ Sset X) (hpD : 
 
 /-- Exceptions at distance 1 exist only when `τ ≤ 1` (Cauchy–Schwarz on 3.2(c)).
 
-TODO: prove.
+TODO: none — proved.
 Acceptance: no `sorry`.
 Depends on: `exact_identity_c`, `DirField.norm_u`. Difficulty S. -/
 theorem tau_le_one_of_exception (F : DirField X) {p y : Pt} (hp : p ∈ Sset X) (hpD : p ∉ Dset X)
@@ -347,7 +347,7 @@ theorem tau_le_one_of_exception (F : DirField X) {p y : Pt} (hp : p ∈ Sset X) 
 /-- **Rung offsets**: a rung `(v, z)` has `z − v = −τ u_v + σ s u_v^⊥` with `σ = ±1`,
 `s = √(1 − τ²)`.
 
-TODO: prove.
+TODO: none — proved.
 What's missing: decompose the unit vector `z − v` in the orthonormal basis `(u_v, u_v^⊥)`.
 Acceptance: no `sorry`.
 Depends on: `exact_identity_c`, `DirField.norm_u`. Difficulty M. -/
@@ -411,7 +411,7 @@ theorem IsTEdge.symm {F : DirField X} {p q : Pt} (h : IsTEdge F p q) : IsTEdge F
 
 /-- **Lemma 3.3 (no common normal)**: distinct `p, q ∈ S ∖ D` have `u_p ≠ u_q`.
 
-TODO: prove ((q − p)·u_p > 0 and (p − q)·u_q > 0 by 3.2(b), normal case).
+TODO: none — proved.
 Acceptance: no `sorry`.
 Depends on: `exact_identity_b`. Difficulty S–M. -/
 theorem u_ne (F : DirField X) {p q : Pt} (hp : p ∈ Sset X) (hpD : p ∉ Dset X) (hq : q ∈ Sset X)
@@ -427,7 +427,7 @@ theorem u_ne (F : DirField X) {p q : Pt} (hp : p ∈ Sset X) (hpD : p ∉ Dset X
 
 /-- **T-edge / rung dichotomy** (§3): if `τ > 2β` every good edge is a T-edge or a rung.
 
-TODO: prove.
+TODO: none — proved.
 What's missing: case analysis on 3.2(a)/(b); `|a + b| ≤ |u_p − u_q| ≤ ∠ ≤ β`; an exception
 target is in `D`, which sees everything as normal; an exception with the other end in `(0, β)`
 gives `|a + b| ≥ τ − β > β`.
@@ -450,7 +450,7 @@ theorem good_dichotomy (hX : Normal X) (F : DirField X) (hτ : 2 * beta < tau X)
 
 /-- The far end of a good rung: `(v − z)·u_z ∈ [τ − β, τ + β]`.
 
-TODO: prove (`|a + b| ≤ β` with `a = −τ`).
+TODO: none — proved.
 Acceptance: no `sorry`.
 Depends on: `exact_identity_c`. Difficulty S. -/
 theorem rung_far_end (F : DirField X) {v z : Pt} (h : IsRung F v z)
@@ -466,7 +466,7 @@ theorem rung_far_end (F : DirField X) {v z : Pt} (h : IsRung F v z)
 
 /-- **(T1)** each `p` has at most one T-neighbour on each side of `ℝu_p`.
 
-TODO: prove.
+TODO: none — proved.
 What's missing: two T-directions on one side have elevation in `(0, arcsin β)`, so are `< 60°`
 apart, but two points at distance 1 from `p` and `≥ 1` from each other are `≥ 60°` apart.
 Acceptance: no `sorry`.
@@ -508,7 +508,7 @@ theorem T1 (hX : Normal X) (F : DirField X) {σ : ℝ} {p q₁ q₂ : Pt} (hσ :
 
 /-- **(T2)** if `q` is the right T-neighbour of `p`, then `p` is the left T-neighbour of `q`.
 
-TODO: prove (`∠(u_p, u_q) ≤ β` and `q − p` nearly perpendicular to both).
+TODO: none — proved.
 Acceptance: no `sorry`.
 Depends on: `DirField.norm_u`. Difficulty M. -/
 theorem T2 (hX : Normal X) (F : DirField X) {p q : Pt} (h : IsSideT F (-1) p q) :
@@ -534,7 +534,7 @@ theorem T2 (hX : Normal X) (F : DirField X) {p q : Pt} (h : IsSideT F (-1) p q) 
 
 /-- T-edges number at most `|S|` (each vertex has `≤ 2` T-edges by (T1)).
 
-TODO: prove.
+TODO: none — proved.
 Acceptance: no `sorry`.
 Depends on: `T1`, `two_mul_card_le_of_deg_le`. Difficulty M. -/
 theorem card_tEdges_le (hX : Normal X) (F : DirField X) : (tEdges X F).card ≤ (Sset X).card := by
@@ -590,7 +590,7 @@ theorem card_good_add_bad (F : DirField X) : (good X F).card + (bad X F).card = 
 
 /-- For `τ > 2β`: `good ⊆ tEdges ∪ rungs`.
 
-TODO: prove from the dichotomy.
+TODO: none — proved.
 Acceptance: no `sorry`.
 Depends on: `good_dichotomy`. Difficulty S–M. -/
 theorem good_subset_T_union_rungs (hX : Normal X) (F : DirField X) (hτ : 2 * beta < tau X) :
@@ -820,6 +820,24 @@ theorem turning_sum_le {K : Set Pt} (hK : Convex ℝ K) (hKc : IsCompact K) {ι 
   rw [ENNReal.toReal_mul, ENNReal.toReal_natCast,
     ENNReal.toReal_ofReal (by positivity)] at h2
   linarith
+
+/-- `turning` is monotone in the set of boundary points. -/
+theorem turning_mono {K γ γ' : Set Pt} (h : γ ⊆ γ') : turning K γ ≤ turning K γ' := by
+  refine ENNReal.toReal_mono (ne_top_of_le_ne_top (by rw [Real.volume_Ico]; exact
+    ENNReal.ofReal_ne_top) (MeasureTheory.measure_mono (fun θ h => h.1)))
+    (MeasureTheory.measure_mono fun θ ⟨hθ, x, hx, hn⟩ => ⟨hθ, x, h hx, hn⟩)
+
+/-- **Lemma 3.4 for arbitrary sets**, with the multiplicity counted on closures:
+`Σ turning(γ_i) ≤ 2πM` if every point lies in at most `M` of the `closure (γ_i) ⊆ ∂K`.
+(Drop-in replacement for the pre-2026-09-23 form of `turning_sum_le`, which lacked the
+closedness hypothesis and was false.) -/
+theorem turning_sum_le_closure {K : Set Pt} (hK : Convex ℝ K) (hKc : IsCompact K) {ι : Type*}
+    (A : Finset ι) (γ : ι → Set Pt) (hγ : ∀ i ∈ A, γ i ⊆ frontier K) (M : ℕ)
+    (hM : ∀ x, (A.filter (fun i => x ∈ closure (γ i))).card ≤ M) :
+    ∑ i ∈ A, turning K (γ i) ≤ 2 * π * M := by
+  have h := turning_sum_le hK hKc A (fun i => closure (γ i))
+    (fun i hi => closure_minimal (hγ i hi) isClosed_frontier) (fun _ _ => isClosed_closure) M hM
+  exact (Finset.sum_le_sum fun i _ => turning_mono subset_closure).trans h
 
 /-! ### Turning at a single point -/
 
@@ -1148,7 +1166,7 @@ theorem exists_dirVec_pair {n₁ n₂ : Pt} (hn₁ : ‖n₁‖ = 1) (hn₂ : �
 /-- The turning of a connected boundary arc is at least the angle between (outward) normals at
 its ends.
 
-TODO: prove.
+TODO: none — proved.
 What's missing: normal-cone map is upper semicontinuous with arc values (nonempty interior),
 so the union over a connected arc is a connected subset of `S¹` containing both normals.
 Acceptance: no `sorry`.
@@ -1242,7 +1260,7 @@ theorem card_le_of_sep_real {a : ℝ} (T : Finset ℝ) : ∀ b : ℝ, a ≤ b + 
 
 /-- **Arc spacing**: `1`-separated points on a `1`-Lipschitz arc of length `ℓ` number `≤ ℓ + 1`.
 
-TODO: prove (pull back to parameters, which are pairwise `≥ 1` apart in `[a, b]`).
+TODO: none — proved.
 Acceptance: no `sorry`.
 Depends on: nothing. Difficulty M. -/
 theorem card_le_arcLength {P : Finset Pt} (hP : ∀ x ∈ P, ∀ y ∈ P, x ≠ y → 1 ≤ dist x y)
@@ -1470,7 +1488,7 @@ theorem lens_coord {R d xp yp xq yq : ℝ} (hd0 : 0 < d) (hd : d < 2 * R)
 `D(c₁,R) ∩ D(c₂,R)`, `|pq| ≤ 1`, and `R ≥ 2/(cos(φ₀/2) − cos φ₀)` ⇒ a common corner `c` within
 circular arc length `ρ₀` of both.
 
-TODO: prove.
+TODO: none — proved.
 What's missing: coordinates `c₁,₂ = (∓d/2, 0)`; (1) `|φ|, |ψ| > φ₀/2`; (2) MVT for `cos`,
 `R(φ₀ − |φ|) ≤ ρ₀`; (3) same-sign argument using `R ≥ 1/sin²(φ₀/2)`.
 Acceptance: no `sorry`.
@@ -1573,11 +1591,22 @@ theorem lens_corner {c₁ c₂ p q : Pt} {R : ℝ} (hd0 : 0 < dist c₁ c₂) (h
 5.1 with `|pq| = 1`, the boundary arc of `K'` from `p` to `q` on the corner's side has length
 `≤ 2ρ₀`.
 
-TODO: prove.
-What's missing: perimeter monotonicity for nested convex sets (not in Mathlib), applied to
-`K' ∩ H ⊆ Λ ∩ H`; parametrisation of `∂K'` by arc length.
+TODO: prove (open; needs convex-curve infrastructure that Mathlib lacks).
+What's missing:
+1. an arc-length parametrisation of `∂K'` for a compact convex planar `K'` (a closed
+   `1`-Lipschitz curve onto `∂K'`, or the segment case when `interior K' = ∅`);
+2. perimeter monotonicity for nested compact convex sets, applied to `K' ∩ H ⊆ Λ ∩ H`
+   (`H` the closed half-plane of line `pq` containing the corner `c`);
+3. `∂Λ ∩ H` is the circular arc `p → c → q`, of length `≤ 2ρ₀` by `lens_corner` (proved).
+STATEMENT NOTE (not changed): the conclusion — *some* `1`-Lipschitz path in `∂K'` of length
+`≤ 2ρ₀` — is true, but weaker than what `card_badKK_le` needs.  The multiplicity bound
+`M ≤ 6(4ρ₀ + 1)` needs `γ` to be a sub-arc of one fixed arc-length parametrisation `Γ` of `∂K`
+(so that the points of `S ∖ D` whose arcs pass through `y` lie on one boundary arc of length
+`4ρ₀`, and `card_le_arcLength` applies).  With only Euclidean information (`|p − y| ≤ 2ρ₀`) a
+packing bound gives `≈ 4.3·10⁶`, not `1.28·10⁵`.  Suggested strengthening once (1) exists:
+`∃ t₀ ℓ, ℓ ≤ 2ρ₀ ∧ Γ t₀ = p ∧ (Γ (t₀ + ℓ) = q ∨ Γ (t₀ - ℓ) = q)`.
 Acceptance: no `sorry`.
-Depends on: `lens_corner`; convex perimeter monotonicity. Difficulty XL. -/
+Depends on: `lens_corner` (proved); items 1–2 above. Difficulty XL. -/
 theorem lens_arc_length {c₁ c₂ p q : Pt} {R : ℝ} {K' : Set Pt} (hK' : Convex ℝ K')
     (hKc : IsCompact K') (hsub : K' ⊆ Metric.closedBall c₁ R ∩ Metric.closedBall c₂ R)
     (hd0 : 0 < dist c₁ c₂) (hd : dist c₁ c₂ < 2 * R)
@@ -1661,19 +1690,31 @@ theorem c9 :
 
 /-- **KK bound** `#KK-bad < 1.28·10⁵`.
 
-TODO: prove.
-What's missing: `w_p = w_q` ⇒ good ([C3]); else lens `Λ(w_p, w_q) ⊇ K`, Lemmas 5.1/5.2 give an
-arc `γ_pq ⊆ ∂K` of length `≤ 2ρ₀` with turning `> β` (`turning_ge_angle`); multiplicity
-`M ≤ 6(4ρ₀ + 1)` (`card_le_arcLength`, kissing); Lemma 3.4.  Small-perimeter case separately.
+TODO: prove (blocked on `lens_arc_length` and the boundary parametrisation, see there).
+Plan (available pieces marked ✓):
+* `w_p = w_q` ⇒ `∠(u_p, u_q) ≤ 2 arcsin(1/(2Δ₂)) < β` ([C3] `c3`), so the edge is good;
+* else `K ⊆ Λ(w_p, w_q)` (from `KBall`), `R = Δ₂`, `0 < d = |w_p w_q| ≤ Δ ≤ 1.94Δ₂`,
+  `cos φ₀ ≤ 0.97`, `ρ₀ ≤ 8.2` (`c7_kk` ✓), hypothesis `R ≥ 89` from `Δ₂ ≥ 10⁴`;
+* `lens_corner` ✓ + `lens_arc_length` give an arc `γ_pq ⊆ ∂K` of length `≤ 2ρ₀`;
+* `-u_p ∈ N_K(p)`, `-u_q ∈ N_K(q)` (as `hn2` in `card_badC1_le`), so `turning_ge_angle` ✓
+  gives turning `> β` (needs `interior K ≠ ∅`; otherwise `|S ∖ D| ≤ 1` and there is no edge);
+* multiplicity `M ≤ 6(4ρ₀ + 1)` via `card_le_arcLength` ✓ on the boundary parametrisation and
+  the kissing bound `card_partners_minDist_le`; `turning_sum_le` ✓ (arcs are compact);
+  small-perimeter case (`< 1202`) separately: `≤ 6·1203` edges.
 Acceptance: no `sorry`.
-Depends on: `lens_corner`, `lens_arc_length`, `turning_ge_angle`, `turning_sum_le`,
-`card_le_arcLength`, `card_partners_minDist_le`, `c3`, `c7_kk`, `c9`. Difficulty XL. -/
+Depends on: `lens_arc_length` (open) and a boundary arc-length parametrisation of `K`;
+`lens_corner`, `turning_ge_angle`, `turning_sum_le`, `card_le_arcLength`, `c3`, `c7_kk`, `c9`
+(proved). Difficulty XL. -/
 theorem card_badKK_le (hX : Normal X) (F : DirField X) : ((badKK X F).card : ℝ) ≤ 128000 := by
   sorry
 
 /-- **DD bound** `#DD-bad < 3.4·10⁴` (same argument on `∂P₁`, lens radius `Δ`, `ρ₀ ≤ 2`).
 
-TODO: prove.
+TODO: prove (blocked exactly as `card_badKK_le`).
+Plan: `P₁ = convexHull ℝ X` (compact, `mem_normalCone_convexHull` ✓ gives `-u_z ∈ N_{P₁}(z)`,
+`mem_frontier_of_normal` ✓ puts `z ∈ ∂P₁`); `x_p = x_q` ⇒ good (`< 2/Δ < β`); else lens
+`D(x_p, Δ) ∩ D(x_q, Δ) ⊇ P₁` with `d ≤ Δ`, `cos φ₀ ≤ 1/2`, `ρ₀ ≤ 2`, hypothesis `R ≥ 5.5`;
+then `lens_arc_length` + `turning_ge_angle` ✓ + multiplicity `6·9` + `turning_sum_le` ✓.
 Acceptance: no `sorry`.
 Depends on: as `card_badKK_le`, with `convexHull ℝ X` in place of `K`. Difficulty XL
 (shares the machinery with KK: L once KK is done). -/
@@ -1747,7 +1788,7 @@ theorem ang_small {v z w : Pt} {a b : ℝ} (ha : 10 ^ 4 ≤ a) (hb : a ≤ b) (h
 /-- **(c1) bound** `< 24π/β < 7600`: the normal cone of `P₁` at `z` has angle `> β/2`; normal
 cones are interior-disjoint.
 
-TODO: prove.
+TODO: none — proved.
 Acceptance: no `sorry`.
 Depends on: `turning_sum_le` (or a direct disjoint-cones count), `exact_identity_a`, `c3`, `c9`,
 kissing. Difficulty L. -/
@@ -1905,13 +1946,17 @@ theorem c8_walk {Δ₂ d₀ : ℝ} (h : 10 ^ 4 ≤ Δ₂) (h0 : 0 ≤ d₀) (h1 
 
 /-- **(c2) bound** `< 48π(2L + 1)/β < 1.82·10⁷` (`L = 600`).
 
-TODO: prove.
-What's missing: depth `d₀ ∈ [0, 1 − t]`; `α ∈ (β/2, 151.9°]` ([C8] `c8_cos`); walk along `∂K`
-with forward tangents within `β/4` of `e₀` leaves `D(x_z, Δ₂)` by `σ = L` (`c8_walk`), so
-`J_v` has turning `> β/4`; Lemma 3.4 with multiplicity `2L + 1`.
+TODO: prove (open; needs one-sided tangents / an arc-length walk along `∂K`).
+What's missing: depth `d₀ ∈ [0, 1 − t]`; `α ∈ (β/2, 151.9°]` ([C8] `c8_cos` ✓; the `β/2`
+lower bound as in `card_badC1_le` via `ang_small` ✓ and the angle triangle inequality); the
+walk along `∂K` from `v` with forward tangents within `β/4` of `e₀` leaves `D(x_z, Δ₂)` by
+`σ = L` (`c8_walk` ✓), so the arc `J_v` of length `L` has turning `> β/4` — this step needs an
+arc-length parametrisation of `∂K` with one-sided derivatives in the normal cones' orthogonal
+directions (not in Mathlib); then Lemma 3.4 (`turning_sum_le` ✓) with multiplicity `2L + 1`
+(`card_le_arcLength` ✓) and kissing.
 Acceptance: no `sorry`.
-Depends on: `turning_sum_le`, `card_le_arcLength`, `c8_cos`, `c8_walk`, `c9`, kissing;
-one-sided tangents of convex curves. Difficulty XL. -/
+Depends on: `turning_sum_le`, `card_le_arcLength`, `c8_cos`, `c8_walk`, `c9`, kissing (all
+available); one-sided tangents of convex curves (open). Difficulty XL. -/
 theorem card_badC2_le (hX : Normal X) (F : DirField X) : ((badC2 X F).card : ℝ) ≤ 18200000 := by
   sorry
 
