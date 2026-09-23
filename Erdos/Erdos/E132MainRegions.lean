@@ -554,6 +554,24 @@ theorem R1_z (hX : Normal X) (F : DirField X) (hτ₁ : √3 / 2 + 3 * beta ≤ 
   have hb : (0 : ℝ) < beta := by unfold beta; norm_num
   unfold sOff; linarith
 
+
+/-- Data of a right T-step `p → q`: unit step, elevation in `(0, β)`, on the right. -/
+theorem IsSideT.step {F : DirField X} {p q : Pt} (h : IsSideT F (-1) p q) :
+    ‖q - p‖ = 1 ∧ 0 < inner ℝ (q - p) (F.u p) ∧ inner ℝ (q - p) (F.u p) < beta ∧
+      det2 (F.u p) (q - p) < 0 := by
+  obtain ⟨-, -, h1, -, ⟨a, b, -, -⟩, hs⟩ := h
+  refine ⟨by rw [← dist_eq_norm, dist_comm]; exact h1, a, b, by linarith⟩
+
+/-- `|u_a − u_c| ≤ β₁ + β₂` from two angle bounds through `u_b`. -/
+theorem norm_u_sub_le {a b c : Pt} (ha : ‖a‖ = 1) (hb : ‖b‖ = 1) (hc : ‖c‖ = 1) :
+    ‖a - c‖ ≤ ang a b + ang b c := by
+  have := norm_sub_le (a - b) (c - b)
+  rw [sub_sub_sub_cancel_right] at this
+  have h1 := norm_sub_le_ang ha hb
+  have h2 := norm_sub_le_ang hc hb
+  rw [ang_comm c b] at h2
+  linarith
+
 /-- **(R2) proximity**: `(v₀, z₀)` a good rung, `v₁`/`z₁` the right pure T-neighbours of
 `v₀`/`z₀`; if `v₁` has a good rung `(v₁, z′)` then `z′ = z₁` (`|z′ − z₁| ≤ 2s + 2β + arcsin β`).
 
@@ -565,7 +583,30 @@ theorem R2 (hX : Normal X) (F : DirField X) (hτ₁ : √3 / 2 + 3 * beta ≤ ta
     (hv : IsSideT F (-1) v₀ v₁) (hv₁ : v₁ ∉ Dset X) (hz : IsSideT F (-1) z₀ z₁)
     (hz₁ : z₁ ∈ Dset X) (hr : IsRung F v₁ z') (hg : ang (F.u v₁) (F.u z') ≤ beta) :
     z' = z₁ := by
-  sorry
+  obtain ⟨σ₀, hσ₀, o₀⟩ := rung_offset F hr₀
+  obtain ⟨σ₁, hσ₁, o₁⟩ := rung_offset F hr
+  obtain ⟨n₁, a₁, a₁', c₁⟩ := hv.step
+  obtain ⟨n₂, a₂, a₂', c₂⟩ := hz.step
+  have huv₀ := F.norm_u hr₀.1
+  have huz₀ := F.norm_u hr₀.2.2.1
+  have huv₁ := F.norm_u hr.1
+  have hs := c5_sOff hτ₁ hτ₂
+  have hs0 : 0 ≤ sOff X := Real.sqrt_nonneg _
+  have hτ0 := abs_tau_le_one hτ₁ hτ₂
+  have hb : (0 : ℝ) < beta := by unfold beta; norm_num
+  refine eq_of_dist_lt_one hX.minDist_eq hr.memX.2 (Sset_sub hz.2.1) ?_
+  have e : z' - z₁ = ((v₁ - v₀) - (z₁ - z₀)) + ((z' - v₁) - (z₀ - v₀)) := by abel
+  rw [dist_eq_norm, e, o₀, o₁]
+  refine (norm_add_le _ _).trans_lt ?_
+  have hE := norm_tstep_sub huv₀ huz₀ n₁ n₂ a₁ a₁' a₂ a₂' c₁ c₂
+  have hO := norm_offset_sub huv₁ huv₀ hs0 hσ₁ hσ₀ (τ := tau X)
+  have h1 : ‖F.u v₀ - F.u z₀‖ ≤ beta := (norm_sub_le_ang huv₀ huz₀).trans hg₀
+  have h2 : ‖F.u v₁ - F.u v₀‖ ≤ beta := by
+    rw [norm_sub_rev]; exact (norm_sub_le_ang huv₀ huv₁).trans hv.2.2.2.1
+  have h3 : |tau X| * ‖F.u v₁ - F.u v₀‖ ≤ beta :=
+    (mul_le_of_le_one_left (norm_nonneg _) hτ0).trans h2
+  have hs' : 2 * sOff X + 6 * beta < 1 := hs
+  linarith
 
 /-- **(R2-sym) symmetric proximity**: same setting; if `z₁` has a good rung `(v′, z₁)` then
 `v′ = v₁` (`|v′ − v₁| ≤ 2s + 4β + arcsin β ≤ 2s + 6β < 1`).
@@ -578,7 +619,36 @@ theorem R2_sym (hX : Normal X) (F : DirField X) (hτ₁ : √3 / 2 + 3 * beta �
     (hg₀ : ang (F.u v₀) (F.u z₀) ≤ beta) (hv : IsSideT F (-1) v₀ v₁) (hv₁ : v₁ ∉ Dset X)
     (hz : IsSideT F (-1) z₀ z₁) (hz₁ : z₁ ∈ Dset X) (hr : IsRung F v' z₁)
     (hg : ang (F.u v') (F.u z₁) ≤ beta) : v' = v₁ := by
-  sorry
+  obtain ⟨σ₀, hσ₀, o₀⟩ := rung_offset F hr₀
+  obtain ⟨σ₁, hσ₁, o₁⟩ := rung_offset F hr
+  obtain ⟨n₁, a₁, a₁', c₁⟩ := hv.step
+  obtain ⟨n₂, a₂, a₂', c₂⟩ := hz.step
+  have huv₀ := F.norm_u hr₀.1
+  have huz₀ := F.norm_u hr₀.2.2.1
+  have huv' := F.norm_u hr.1
+  have huz₁ := F.norm_u hr.2.2.1
+  have hs := c5_sOff hτ₁ hτ₂
+  have hs0 : 0 ≤ sOff X := Real.sqrt_nonneg _
+  have hτ0 := abs_tau_le_one hτ₁ hτ₂
+  have hb : (0 : ℝ) < beta := by unfold beta; norm_num
+  refine eq_of_dist_lt_one hX.minDist_eq hr.memX.1 (Sset_sub hv.2.1) ?_
+  have e : v' - v₁ = ((z₁ - z₀) - (v₁ - v₀)) - ((z₁ - v') - (z₀ - v₀)) := by abel
+  rw [dist_eq_norm, e, o₀, o₁]
+  refine (norm_sub_le _ _).trans_lt ?_
+  have hE := norm_tstep_sub huv₀ huz₀ n₁ n₂ a₁ a₁' a₂ a₂' c₁ c₂
+  rw [norm_sub_rev] at hE
+  have hO := norm_offset_sub huv' huv₀ hs0 hσ₁ hσ₀ (τ := tau X)
+  have h1 : ‖F.u v₀ - F.u z₀‖ ≤ beta := (norm_sub_le_ang huv₀ huz₀).trans hg₀
+  have h2 : ‖F.u v' - F.u v₀‖ ≤ 3 * beta := by
+    have k1 := norm_u_sub_le huv' huz₁ huz₀
+    have k2 := norm_sub_le (F.u v' - F.u z₀) (F.u v₀ - F.u z₀)
+    rw [sub_sub_sub_cancel_right] at k2
+    have k3 : ang (F.u z₁) (F.u z₀) ≤ beta := by rw [ang_comm]; exact hz.2.2.2.1
+    linarith
+  have h3 : |tau X| * ‖F.u v' - F.u v₀‖ ≤ 3 * beta :=
+    (mul_le_of_le_one_left (norm_nonneg _) hτ0).trans h2
+  have hs' : 2 * sOff X + 6 * beta < 1 := hs
+  linarith
 
 /-- **(R3a) no three parallel rungs**: `u_v` solves `c·u = −τ`, which has two unit solutions,
 and K-ends have distinct normals (Lemma 3.3).
@@ -589,7 +659,73 @@ Depends on: `exact_identity_c`, `u_ne`, `DirField.norm_u`. Difficulty M. -/
 theorem R3_no_three_parallel (F : DirField X) {v₁ v₂ v₃ z₁ z₂ z₃ : Pt} (h₁ : IsRung F v₁ z₁)
     (h₂ : IsRung F v₂ z₂) (h₃ : IsRung F v₃ z₃) (e₁₂ : z₁ - v₁ = z₂ - v₂)
     (e₁₃ : z₁ - v₁ = z₃ - v₃) : v₁ = v₂ ∨ v₁ = v₃ ∨ v₂ = v₃ := by
-  sorry
+  have hc := h₁.norm_c
+  have key : ∀ {v z : Pt}, IsRung F v z → z - v = z₁ - v₁ →
+      F.u v = (- tau X) • (z₁ - v₁) + det2 (z₁ - v₁) (F.u v) • perp (z₁ - v₁) ∧
+      det2 (z₁ - v₁) (F.u v) ^ 2 = 1 - tau X ^ 2 := by
+    intro v z h e
+    have hi := h.inner_eq
+    rw [e] at hi
+    have hu := F.norm_u h.1
+    have n := inner_sq_add_det_sq (e := F.u v) hc
+    rw [real_inner_comm, hi, hu] at n
+    refine ⟨?_, by linarith⟩
+    conv_lhs => rw [decomp hc (F.u v)]
+    rw [real_inner_comm, hi]
+  obtain ⟨k₁, d₁⟩ := key h₁ rfl
+  obtain ⟨k₂, d₂⟩ := key h₂ e₁₂.symm
+  obtain ⟨k₃, d₃⟩ := key h₃ e₁₃.symm
+  have ne : ∀ {a b : Pt}, a ∈ Sset X → a ∉ Dset X → b ∈ Sset X → b ∉ Dset X →
+      F.u a = F.u b → a = b := by
+    intro a b ha haD hb hbD e
+    by_contra hab; exact u_ne F ha haD hb hbD hab e
+  set c := z₁ - v₁
+  have sq : ∀ x y : ℝ, x ^ 2 = y ^ 2 → x = y ∨ x = -y := fun x y h => by
+    have : (x - y) * (x + y) = 0 := by linear_combination h
+    rcases mul_eq_zero.1 this with h | h
+    · left; linarith
+    · right; linarith
+  rcases sq _ _ (d₁.trans d₂.symm) with e | e
+  · left; exact ne h₁.1 h₁.2.1 h₂.1 h₂.2.1 (by rw [k₁, k₂, e])
+  rcases sq _ _ (d₁.trans d₃.symm) with e' | e'
+  · right; left; exact ne h₁.1 h₁.2.1 h₃.1 h₃.2.1 (by rw [k₁, k₃, e'])
+  right; right
+  exact ne h₂.1 h₂.2.1 h₃.1 h₃.2.1 (by rw [k₂, k₃]; congr 2; linarith)
+
+
+/-- Planar core of (R3b): `x, y` two distinct common points of `C(0,1)` and `C(d,1)` ⇒ `x + y = d`. -/
+theorem rhombus_real {x0 x1 y0 y1 d0 d1 : ℝ} (hx : x0 ^ 2 + x1 ^ 2 = 1) (hy : y0 ^ 2 + y1 ^ 2 = 1)
+    (hxd : (d0 - x0) ^ 2 + (d1 - x1) ^ 2 = 1) (hyd : (d0 - y0) ^ 2 + (d1 - y1) ^ 2 = 1)
+    (hxy : ¬ (x0 = y0 ∧ x1 = y1)) (hd : ¬ (d0 = 0 ∧ d1 = 0)) :
+    x0 + y0 = d0 ∧ x1 + y1 = d1 := by
+  set w0 := x0 - y0
+  set w1 := x1 - y1
+  set b0 := x0 + y0 - d0
+  set b1 := x1 + y1 - d1
+  have hwd : w0 * d0 + w1 * d1 = 0 := by simp only [w0, w1]; linear_combination (hyd - hxd - hy + hx) / 2
+  have hwb : w0 * b0 + w1 * b1 = 0 := by
+    simp only [w0, w1, b0, b1]; linear_combination hx - hy - (hyd - hxd - hy + hx) / 2
+  have hbd : b0 * d0 + b1 * d1 = 0 := by
+    simp only [b0, b1]; linear_combination (hx - hxd + hy - hyd) / 2
+  have hw : 0 < w0 ^ 2 + w1 ^ 2 := by
+    by_contra h; push Not at h
+    apply hxy; constructor
+    · have : w0 = 0 := by nlinarith [sq_nonneg w0, sq_nonneg w1]
+      simp only [w0] at this; linarith
+    · have : w1 = 0 := by nlinarith [sq_nonneg w0, sq_nonneg w1]
+      simp only [w1] at this; linarith
+  have hd' : 0 < d0 ^ 2 + d1 ^ 2 := by
+    by_contra h; push Not at h
+    apply hd; constructor <;> nlinarith [sq_nonneg d0, sq_nonneg d1]
+  have hdet : (w0 * d1 - w1 * d0) ^ 2 = (w0 ^ 2 + w1 ^ 2) * (d0 ^ 2 + d1 ^ 2) := by
+    linear_combination (-(w0 * d0 + w1 * d1)) * hwd
+  have hdet0 : w0 * d1 - w1 * d0 ≠ 0 := by
+    intro h; rw [h] at hdet; nlinarith [mul_pos hw hd']
+  have e0 : (w0 * d1 - w1 * d0) * b0 = 0 := by linear_combination d1 * hwb - w1 * hbd
+  have e1 : (w0 * d1 - w1 * d0) * b1 = 0 := by linear_combination w0 * hbd - d0 * hwb
+  have := (mul_eq_zero.1 e0).resolve_left hdet0
+  have := (mul_eq_zero.1 e1).resolve_left hdet0
+  constructor <;> linarith
 
 /-- **(R3b) rhombi force parallel rungs**: a unit rhombus `v₀v₁z₁z₀` has `z₀ − v₀ = z₁ − v₁`
 (`v₁, z₀` are the two points of `C(v₀,1) ∩ C(z₁,1)`).
@@ -600,7 +736,20 @@ Depends on: planar circle intersection. Difficulty M. -/
 theorem R3_rhombus {v₀ v₁ z₀ z₁ : Pt} (h₀₁ : dist v₀ v₁ = 1) (h₁₁ : dist v₁ z₁ = 1)
     (h₁₀ : dist z₁ z₀ = 1) (h₀₀ : dist z₀ v₀ = 1) (hne : v₁ ≠ z₀) (hne' : v₀ ≠ z₁) :
     z₀ - v₀ = z₁ - v₁ := by
-  sorry
+  have dsq : ∀ a b : Pt, dist a b = 1 → (a 0 - b 0) ^ 2 + (a 1 - b 1) ^ 2 = 1 := by
+    intro a b h; rw [← dist_sq_pt, h, one_pow]
+  have k1 := dsq _ _ h₀₁
+  have k2 := dsq _ _ h₁₁
+  have k3 := dsq _ _ h₁₀
+  have k4 := dsq _ _ h₀₀
+  have r := rhombus_real (x0 := v₁ 0 - v₀ 0) (x1 := v₁ 1 - v₀ 1) (y0 := z₀ 0 - v₀ 0)
+    (y1 := z₀ 1 - v₀ 1) (d0 := z₁ 0 - v₀ 0) (d1 := z₁ 1 - v₀ 1)
+    (by linear_combination k1) (by linear_combination k4)
+    (by linear_combination k2) (by linear_combination k3)
+    (by rintro ⟨a, b⟩; exact hne (pt_ext_iff.2 ⟨by linarith, by linarith⟩))
+    (by rintro ⟨a, b⟩; exact hne' (pt_ext_iff.2 ⟨by linarith, by linarith⟩))
+  rw [pt_ext_iff]; simp only [PiLp.sub_apply]
+  constructor <;> linarith [r.1, r.2]
 
 /-- **(R3c) rhombi only near resonance**: two parallel rungs whose K-ends are joined by a good
 edge force `τ ≥ cos(β/2)` (their normals are exactly `2θ₀` apart, `θ₀ = arccos τ`).
@@ -611,7 +760,24 @@ Depends on: `exact_identity_c`, `u_ne`. Difficulty M. -/
 theorem R3_resonance (F : DirField X) {v₀ v₁ z₀ z₁ : Pt} (h₀ : IsRung F v₀ z₀)
     (h₁ : IsRung F v₁ z₁) (hpar : z₀ - v₀ = z₁ - v₁) (hne : v₀ ≠ v₁)
     (hg : ang (F.u v₀) (F.u v₁) ≤ beta) : Real.cos (beta / 2) ≤ tau X := by
-  sorry
+  have hc := h₀.norm_c
+  have hu₀ := F.norm_u h₀.1
+  have hu₁ := F.norm_u h₁.1
+  have i₀ := h₀.inner_eq
+  have i₁ := h₁.inner_eq
+  rw [← hpar] at i₁
+  have hne' : F.u v₀ ≠ F.u v₁ := u_ne F h₀.1 h₀.2.1 h₁.1 h₁.2.1 hne
+  have hi := inner_two_sol hc hu₀ hu₁ i₀ i₁ hne'
+  have hb : beta = 1 / 100 := rfl
+  have hπ : beta ≤ π := by rw [hb]; linarith [Real.pi_gt_three]
+  have hcos := cos_le_inner_of_ang_le hu₀ hu₁ hπ hg
+  rw [hi, show beta = 2 * (beta / 2) by ring, Real.cos_two_mul] at hcos
+  have hc2 := c5_rhombus
+  have h3 : (1.7 : ℝ) < √3 := by rw [Real.lt_sqrt (by norm_num)]; norm_num
+  have hτ := h₀.tau_ge
+  by_contra hlt; push Not at hlt
+  rw [hb] at hc2 hcos hlt
+  nlinarith [mul_pos (sub_pos.2 hlt) (show 0 < Real.cos (1 / 100 / 2) + tau X by linarith)]
 
 /-- **[C5] ownership ratios**: rhombus pairs `(4+m)/(2+m) ≤ 4/3` (`m ≥ 4`),
 `(3+m)/(2+m) ≤ 4/3` (`m ≥ 2`); both-reach gaps `(1+k+d)/(k+d) ≤ 5/4` (`k, d ≥ 2`).
