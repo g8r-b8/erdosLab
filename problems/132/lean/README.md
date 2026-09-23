@@ -1,4 +1,4 @@
-# Erdős #132, convex case: Lean formalisation of Theorems 7, 11 and 13 (angle B3)
+# Erdős #132: Lean formalisation (convex case n = 7, 11, 13; layer bound Theorem A / Cor A1)
 
 Files (in `Erdos/Erdos/`):
 
@@ -8,10 +8,11 @@ Files (in `Erdos/Erdos/`):
 | `E132ConvexFinset.lean` | point-set (`Finset`) versions for n = 7, 11; the bridge from convex position to an ordered polygon | ~60 s |
 | `E132Convex13.lean` | n = 13, both versions | ~9 min (CaDiCaL + LRAT check) |
 | `lrat/bvNoCE7.lrat` | pinned LRAT certificate for n = 7 (1.6 MB) | — |
+| `E132Layer.lean` | layer bound: location lemma, Prop 3, degree ≤ 4, Theorem A, Corollary A1 (paper §"A layer bound") | ~25 s |
 
-Check a single file with `cd Erdos && lake env lean Erdos/<file>`. `Erdos.lean` imports `E132Convex` and
-`E132ConvexFinset`, so a plain `lake build` checks them (measured: 2 min 17 s incremental, roughly 3–4 min
-from a clean E132 build). `E132Convex13` is **not** imported, because it adds about 9 minutes; build it with
+Check a single file with `cd Erdos && lake env lean Erdos/<file>`. `Erdos.lean` imports `E132Convex`,
+`E132ConvexFinset` and `E132Layer`, so a plain `lake build` checks them (measured before `E132Layer` was
+added: 2 min 17 s incremental, roughly 3–4 min from a clean E132 build; `E132Layer` adds about 25 s). `E132Convex13` is **not** imported, because it adds about 9 minutes; build it with
 `lake build Erdos.E132Convex13`.
 
 ## Status: all theorems are sorry-free
@@ -83,7 +84,103 @@ What is trusted: the Lean compiler and runtime, and the fact that the compiled `
 definition. What is **not** trusted: CaDiCaL, our CNF encoder `b3_sat.py`, and drat-trim. None of them
 is involved.
 
-## What is formalised
+## Sorry count per file
+
+`grep -c sorry Erdos/Erdos/<file>` (2026-09-23):
+
+| file | `sorry` |
+|---|---|
+| `E132Convex.lean` | 0 |
+| `E132ConvexFinset.lean` | 0 |
+| `E132Convex13.lean` | 0 |
+| `E132Layer.lean` | 0 |
+
+`E132Main.lean` and the `E132Main*.lean` companions (the 54/37 skeleton), together with `MAIN_PLAN.md`,
+are maintained by the separate Part 2 effort. They are scaffold files with `sorry` bodies by design;
+see `MAIN_PLAN.md` for their status.
+
+## The layer bound (`E132Layer.lean`): sorry-free
+
+This file formalises the section "A layer bound and a new class of sets" of `paper/paper.tex`
+(= `angle_C.md` Theorem A / Cor A1, `VERIFY_A1b.md` Prop 3, `VERIFY_A1c.md` Lemma M / Lemma F).
+Namespace `Erdos132Layer`, `Pt = EuclideanSpace ℝ (Fin 2)`, `μ(d) = multS X d` (unordered pairs, as in
+`E132ConvexFinset`). No `native_decide`, no `bv_decide`.
+
+### Definitions
+
+- `TwoLargest X Δ Δ₂`: `Δ` is the largest element of `distSetS X` and `Δ₂` the largest one below it
+  (`exists_twoLargest`: satisfiable as soon as `X` determines two distances).
+- `IsExt S p`: `p ∈ S` and an open half-plane bounded by a line through `p` contains `S \ {p}`.
+  `isExt_iff_notMem_convexHull`: for a finite set this is `p ∉ conv(S \ {p})` (Hahn–Banach), so
+  `L1 X` is the vertex set of `conv X`. `L2 X` = extreme points of `X \ L1 X`.
+- `nbr V d v` = `d`-neighbours of `v` inside `V`; `esum V d = Σ_{v ∈ V} deg_V v` (twice the edge count).
+- `core V d` (the 2-core): the union of all `S ⊆ V` in which every vertex has `≥ 2` neighbours inside
+  `S`. This is the largest such set, which is what repeated deletion of vertices of degree `< 2`
+  leaves. Instead of modelling the deletion process we prove its one consequence that is used,
+  `esum_le_core`: `esum V ≤ esum (core V) + 2·|V \ core V|` (strong induction, deleting a vertex of
+  degree `≤ 1` outside the core).
+
+### Main statements
+
+```
+theorem isExt_of_dist_max    (hT : TwoLargest X Δ Δ₂) (hp : p ∈ X) (hq : q ∈ X) (h : dist p q = Δ) : IsExt X p
+theorem dist_le_snd_of_not_isExt (hT) (hq : q ∈ X) (hqe : ¬ IsExt X q) (hx : x ∈ X) : dist q x ≤ Δ₂
+theorem mem_L1_or_of_dist_snd (hT) (hp) (hq) (h : dist p q = Δ₂) : p ∈ L1 X ∨ q ∈ L1 X
+theorem mem_L12_of_dist_snd   (hT) (hp) (hq) (h : dist p q = Δ₂) : p ∈ L1 X ∪ L2 X
+
+-- Prop 3 (VERIFY_A1b): core vertices of L₂ have core degree 2
+theorem deg_core_L2 (hT : TwoLargest X Δ Δ₂) (hq : q ∈ L2 X) (hK : q ∈ core (L1 X ∪ L2 X) Δ₂) :
+    (nbr (core (L1 X ∪ L2 X) Δ₂) Δ₂ q).card = 2
+-- degree ≤ 4 on L₁′ (VERIFY_A1c)
+theorem deg_core_L1_le_four (hT) (hp : p ∈ L1 X) (hK : p ∈ core (L1 X ∪ L2 X) Δ₂) :
+    (nbr (core (L1 X ∪ L2 X) Δ₂) Δ₂ p).card ≤ 4
+
+-- Theorem A (doubled, in ℕ; deg′ ≥ 2 on the core so the truncated subtraction is exact)
+theorem theoremA (hT : TwoLargest X Δ Δ₂) :
+    2 * multS X Δ₂ ≤ 2 * (L1 X).card + 2 * (L2 X).card +
+      ∑ p ∈ L1 X ∩ core (L1 X ∪ L2 X) Δ₂, ((nbr (core (L1 X ∪ L2 X) Δ₂) Δ₂ p).card - 2)
+-- Corollary A1, under (H3): no point of L₁ has ≥ 4 points at distance Δ₂
+theorem corA1 (hT) (hH3 : ∀ p ∈ L1 X, (nbr X Δ₂ p).card ≤ 3) :
+    2 * multS X Δ₂ ≤ 3 * (L1 X).card + 2 * (L2 X).card
+theorem corA1_le_card (hT) (hH3) (h : (L1 X).card ≤ 2 * (X.card - (L1 X).card - (L2 X).card)) :
+    multS X Δ₂ ≤ X.card
+-- unconditional form, h(p) = (nbr X Δ₂ p).card, (·)⁺ = truncated subtraction
+theorem corA1_uncond (hT) :
+    2 * multS X Δ₂ ≤ 2 * (L1 X).card + 2 * (L2 X).card + ∑ p ∈ L1 X, (min (nbr X Δ₂ p).card 4 - 2)
+theorem cdl_layer_bound (hT) : multS X Δ₂ ≤ 2 * (L1 X).card + (L2 X).card
+```
+
+`#print axioms` (at the end of the file) for `theoremA`, `corA1`, `corA1_uncond`, `cdl_layer_bound`,
+`corA1_le_card`, `deg_core_L2`, `deg_core_L1_le_four`, `isExt_iff_notMem_convexHull`,
+`exists_twoLargest`:
+
+```
+depends on axioms: [propext, Classical.choice, Quot.sound]
+```
+
+### Proof structure
+
+| paper step | Lean | notes |
+|---|---|---|
+| location lemma (i), (ii) | `isExt_of_disk`, `isExt_of_dist_max`, `dist_le_snd_of_not_isExt`, `mem_L1_or_of_dist_snd`, `mem_L12_of_dist_snd` | a boundary point of a disc containing the set is exposed (normal `q − c`) |
+| `G` contains every `Δ₂`-pair | `esum_eq_esum_L12`, `two_mul_multS` | handshake by a 2-to-1 fibre count onto `pairsS` |
+| pruning estimate | `esum_insert`, `esum_le_core` | |
+| **frames** | `fx`, `fy`, `frame_sqd`, `frame_cross`, `frame_dot` | frame at `q` with axis `v`, `v ↦ (1,0)`, squared distances divided by `sqd q v`; no square roots |
+| Prop 3, Case 3 | `case3_real`, `case3_real'`, `case3_select_real`, `circle3_real` → `prop3_case3_core`, `prop3_case3` | witness `t` from non-extremality; if `v₂` does not separate `v₁, v₃`, the one of them with smaller `|y|` does |
+| Prop 3, Case 2 | `case2_aux_real`, `case2_real` → `prop3_case2` | the identity `2(1+c)(1−ρ)(2−ρ) + 4c² − 3 = 0` forces `ρ = 1`, `c² = 3/4`, then the other distance is `2 ∈ (1, D)` |
+| Prop 3, Case 1 | `cand_real`, `case1_pair_real`, `far_real`, `case1_real` → `prop3_case1` | candidates `r = (ρ−2/3)A + (ρ−4/3)C`, `ρ² − 3ρ + 4/3 = 0` (coordinate-free, no explicit `√33`); incompatible pairs are at `4/3` or `3ρ` |
+| Prop 3 | `prop3_three`, `deg_core_L2` | 8-way split on which pairs are at `Δ` |
+| Lemma M, chord monotonicity | `lemmaM_real`, `chord_real` | `(A·W − A·B)(1 + W·B) = (W×B)(A×W + A×B)` |
+| Lemma F | `lemmaF_real`, `lemmaF_end_real` → `lemmaF` | `r ∥ a₁ + a₂` forces `x₁ + x₂ < 0` |
+| angular order | `eq_of_orient_zero`, `exists_median` | slope `g x = (n × (x−p)) / (n·(x−p))` w.r.t. the supporting half-plane; sort 5 values with `orderEmbOfFin` |
+| degree ≤ 4 | `deg_core_L1_le_four` | the hypothesis `p ∈ core` is not needed |
+| Theorem A, Cor A1, unconditional form, CDL bound | `theoremA`, `corA1`, `corA1_uncond`, `cdl_layer_bound`, `corA1_le_card` | |
+
+All planar case analyses reduce to lemmas about real numbers (suffix `_real`) closed by
+`linear_combination` / `linarith` / small `nlinarith` calls; the polynomial identities were
+cross-checked with sympy.
+
+## What is formalised (convex case)
 
 - `StrictConvexPolygon p`: `∀ i < j < k, 0 < orient (p i) (p j) (p k)`. The vertices of a strictly
   convex polygon are listed counter-clockwise, and *every* index-increasing triple is positively
