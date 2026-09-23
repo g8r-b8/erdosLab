@@ -137,3 +137,11 @@ Purpose: locate the SAT→hard transition. A quick SAT result raises the lower b
 
 - 2026-09-23 12:40: probe R=5,420,000 SAT in 27 s, first run 5,420,007 ⇒ **Λ(5,3) ≥ 5,420,007** (new best lower bound, via Chebotarev as before).
   R=5,795,000 had not returned after 17+ CPU-min (trend predicted ~75 s), so the transition lies in (5.42M, 5.795M]. Probe R=5,605,000: SAT in 23 s, first run 5,605,389 ⇒ **Λ(5,3) ≥ 5,605,389**. Bracket (5.605M, 5.795M]; probe R=5,700,000: SAT in 26 s ⇒ **Λ(5,3) ≥ 5,700,375**. Bracket (5.70M, 5.795M]; probes: R=5,750,000 and R=5,795,000 re-run with seed 7 (checking whether the 5.795M stall is a threshold or bad luck). R=5,750,000: SAT in 96 s (4× slower) ⇒ **Λ(5,3) ≥ 5,750,107**. Bracket (5.75M, 5.795M].
+- 2026-09-23 13:20 — **Caveat: the "transition" is a solver-heuristic artifact, not a hardness threshold.** Every SAT probe up to 5.75M
+  was solved by kissat's *lucky* phase ("lucky in forward setting literals to true") with **0 conflicts**: profiling shows 0.00 s in
+  search. The greedy forward-true assignment happens to satisfy S(R) for R ≤ 5.75M and fails just above that. Past that point, kissat spends
+  ~1050 s in the remaining lucky strategies ("inconsistency after 68715 conflicts backward assigning ... to true"). It then stalls in
+  preprocessing/probing on 6.8M variables and still has 0 search conflicts after 45 CPU-min (5.795M, 6.634M). So "SAT at 5.75M, stall at 5.795M"
+  says nothing about whether S(5.795M) is SAT or UNSAT. It is also not evidence that the smallest UNSAT R is near here. The seed
+  twins were exact duplicates (the lucky phase ignores the seed), so they were killed. Relaunched 5.7725M and 5.795M with
+  `KOPTS="--lucky=false --preprocess=false --sat"` (new `probe.sh` KOPTS/KTAG env, tag suffix `cd`) to get real CDCL search.

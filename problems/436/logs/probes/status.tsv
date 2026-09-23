@@ -23,3 +23,18 @@
 2026-09-23 12:44:06	R=5795000 seed=7	SOLVE	kissat -v pid=53251
 2026-09-23 12:44:18	R=5750000 seed=0	ENCODED	k=5 l=3 R=5750000 N=5750002 vars=6724599 clauses=36446351 primes_with_vars=208450 full_composites=30181 z_only=5322994
 2026-09-23 12:44:18	R=5750000 seed=0	SOLVE	kissat -v pid=53250
+2026-09-23 12:45:55	R=5750000 seed=0	SAT	solve=96s first_run=5750107 (Lambda_comb >= 5750107)
+2026-09-23 12:47:53	R=7593750	KILLED	freed RAM for midpoint probe (UNSAT at lower R dominates)
+2026-09-23 12:47:53	R=5772500	ENCODE	start
+2026-09-23 12:48:43	R=5772500	ENCODE	start
+2026-09-23 12:48:54	R=5772500	ENCODED	k=5 l=3 R=5772500 N=5772502 vars=6750470 clauses=36587444 primes_with_vars=209195 full_composites=30264 z_only=5343980
+2026-09-23 12:48:54	R=5772500	SOLVE	kissat -v pid=55191
+2026-09-23 12:49:07	R=5772500 seed=3	REUSE	808M cnf
+2026-09-23 12:49:07	R=5772500 seed=3	SOLVE	kissat -v pid=55294
+2026-09-23 13:20:22	R=5795000 seed=7	KILLED	duplicate: lucky phase is seed-independent (same trace as seed 0, just behind)
+2026-09-23 13:20:22	R=5772500 seed=3	KILLED	duplicate: lucky phase is seed-independent
+2026-09-23 13:20:23	R=5772500 opts=--lucky=false --preprocess=false --sat	REUSE	806M cnf
+2026-09-23 13:20:23	R=5795000 opts=--lucky=false --preprocess=false --sat	REUSE	809M cnf
+2026-09-23 13:20:23	R=5795000 opts=--lucky=false --preprocess=false --sat	SOLVE	kissat -v --lucky=false --preprocess=false --sat pid=60856
+2026-09-23 13:20:23	R=5772500 opts=--lucky=false --preprocess=false --sat	SOLVE	kissat -v --lucky=false --preprocess=false --sat pid=60855
+2026-09-23 13:20:23	R=5795000 seed=7	EXIT	rc=143 after 2177s
