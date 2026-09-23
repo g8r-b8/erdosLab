@@ -1,4 +1,5 @@
 import Erdos.E132ConvexFinset
+import Erdos.E132Ve87
 import Mathlib.Analysis.Real.Pi.Bounds
 import Mathlib.Geometry.Euclidean.Angle.Unoriented.Basic
 import Mathlib.MeasureTheory.Measure.Lebesgue.Basic
@@ -200,14 +201,12 @@ def goodPure (X : Finset Pt) (F : DirField X) : Finset (Sym2 Pt) := good X F \ m
 /-- **[Ve87]** Vesztergombi, *On large distances in planar sets*, Discrete Math. 67 (1987)
 191–198: in every `m`-point planar set the second-largest distance occurs at most `3m/2` times.
 
-**CITED RESULT — intended to remain a black box** (checked in the original: no threshold, no
-additive term; NOVELTY.md Audit 5).
-TODO: keep as `sorry` (or formalise Vesztergombi's paper separately).
-What's missing: the whole proof (Vesztergombi's structural propositions).
-Acceptance: either stays a flagged cited hypothesis, or a full proof.
-Depends on: nothing. -/
-theorem vesztergombi87 (Y : Finset Pt) : (mult Y (dist2 Y) : ℝ) ≤ 3 / 2 * Y.card := by
-  sorry
+Formerly a cited black box; now **proved** in `Erdos.E132Ve87` (2-core argument on the
+`Δ₂`-graph of `L₁ ∪ L₂`), whose `Erdos132Ve87.vesztergombi87` has this exact statement up to
+unfolding its local copies of `diam`/`dist2`.
+Acceptance: no `sorry` (done). -/
+theorem vesztergombi87 (Y : Finset Pt) : (mult Y (dist2 Y) : ℝ) ≤ 3 / 2 * Y.card :=
+  Erdos132Ve87.vesztergombi87 Y
 
 /-- **[HP]** Hopf–Pannwitz (1934): in every `m`-point planar set the diameter occurs at most
 `m` times.
