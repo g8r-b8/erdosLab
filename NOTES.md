@@ -144,7 +144,7 @@ Prize triage result (agent, 2026-09-22): nothing quick.
 ## Layout (from 2026-09-22): one folder per attempted problem
 problems/<N>/README.md = status, prior work, results, files, next steps. All assets live there.
 - problems/468 — DONE (almost-all: Lean sorry-free; literal: Lean conditional on Romanov density).
-- problems/132 — IN PROGRESS (5-agent fanout).
+- problems/132 — IN PROGRESS (iter 8: novelty audit A2/B2, A2 write-up, convex n=7 agents running).
 
 ## ⚠ 2026-09-22: #468 result is NOT NEW
 Tao proved the δ² density bound on 2025-11-01 (comment moved from #468 to #1054 thread); #1054

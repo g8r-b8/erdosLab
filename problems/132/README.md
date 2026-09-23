@@ -88,6 +88,11 @@ n pairs? Must the number of such distances → ∞ (perhaps ≥ n^{1−o(1)})?
 - B2 check → `VERIFY_B2.md`: all proved items VERIFIED; small gaps (Fishburn original, Cap Lemma on-circle
   case, Theorem D step 2).
 
+## Iteration 8 (2026-09-23): 3 agents running
+- Novelty audit of A2 + B2 Thm A → NOVELTY.md "Audit 2"
+- Referee gaps closed → WRITEUP_A2.md + scripts/writeup_a2_checks.py
+- Convex n = 7 (and maybe 11) → angle_B3.md
+
 ## Next steps
 1. Rule-4 novelty audit of the 54/37 bound (A2) and B2 Theorem A.
 2. Close the REFEREE_A2 gaps → write-up of 54/37 (the strongest "nontrivial result" candidate for the prize).
