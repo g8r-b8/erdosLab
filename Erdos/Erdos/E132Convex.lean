@@ -176,51 +176,117 @@ def OrdNoCE (n Dm : ℕ) : Prop :=
   ∀ c : Fin n → Fin n → ℕ, (∀ i j : Fin n, i < j → c i j < Dm) → QOrd n c →
     3 ≤ ((range Dm).filter (fun t => 1 ≤ cnt n c t ∧ cnt n c t ≤ n)).card
 
+/-- Rank of a real number `d` among the distinct distances: `#{d' ∈ distSet p : d' < d}`. -/
+noncomputable def rk {n : ℕ} (p : Fin n → Pt) (d : ℝ) : ℕ :=
+  ((distSet p).filter (· < d)).card
+
 /-- Rank of the distance of the pair `(i, j)` among all distinct distances. -/
 noncomputable def rank {n : ℕ} (p : Fin n → Pt) (i j : Fin n) : ℕ :=
-  ((distSet p).filter (· < dist (p i) (p j))).card
+  rk p (dist (p i) (p j))
 
-/-- Rank comparison is distance comparison.
-TODO: / What's missing: strict monotonicity of `card (filter (· < x))` on a finset.
-/ Acceptance: sorry-free. / Depends on: —. -/
-theorem rank_le_iff {n : ℕ} (p : Fin n → Pt) (i j k l : Fin n) :
-    rank p i j ≤ rank p k l ↔ dist (p i) (p j) ≤ dist (p k) (p l) := by
-  sorry
+/-- Pairs `i < j` realise elements of `distSet`. -/
+theorem dist_mem_distSet {n : ℕ} (p : Fin n → Pt) {i j : Fin n} (h : i < j) :
+    dist (p i) (p j) ∈ distSet p :=
+  mem_image.2 ⟨(i, j), by simp [pairsF, h], rfl⟩
 
-/-- Ranks of pairs are `< #distSet`.
-TODO: / Acceptance: sorry-free. / Depends on: —. -/
+/-- `rk` is an order embedding on `distSet`. -/
+theorem rk_le_iff {n : ℕ} (p : Fin n → Pt) {x y : ℝ} (hy : y ∈ distSet p) :
+    rk p x ≤ rk p y ↔ x ≤ y := by
+  constructor
+  · intro h
+    by_contra hxy
+    replace hxy := not_le.1 hxy
+    have : (distSet p).filter (· < y) ⊂ (distSet p).filter (· < x) := by
+      refine ⟨fun d hd => ?_, fun hsub => ?_⟩
+      · simp only [mem_filter] at hd ⊢; exact ⟨hd.1, hd.2.trans hxy⟩
+      · have := hsub (mem_filter.2 ⟨hy, hxy⟩)
+        simp at this
+    exact absurd (card_lt_card this) (not_lt.2 h)
+  · intro h
+    exact card_le_card (fun d hd => by
+      simp only [mem_filter] at hd ⊢; exact ⟨hd.1, hd.2.trans_le h⟩)
+
+/-- Rank comparison is distance comparison (for `k < l`). -/
+theorem rank_le_iff {n : ℕ} (p : Fin n → Pt) (i j : Fin n) {k l : Fin n} (hkl : k < l) :
+    rank p i j ≤ rank p k l ↔ dist (p i) (p j) ≤ dist (p k) (p l) :=
+  rk_le_iff p (dist_mem_distSet p hkl)
+
+/-- Ranks of pairs are `< #distSet`. -/
 theorem rank_lt_card {n : ℕ} (p : Fin n → Pt) {i j : Fin n} (h : i < j) :
     rank p i j < (distSet p).card := by
-  sorry
+  refine card_lt_card ⟨filter_subset _ _, fun hsub => ?_⟩
+  have := hsub (dist_mem_distSet p h)
+  simp at this
 
-/-- The rank colouring of a strictly convex polygon satisfies the ordinal Lemma Q.
-TODO: / Acceptance: sorry-free. / Depends on: `lemmaQ`, `rank_le_iff`. -/
+/-- The rank colouring of a strictly convex polygon satisfies the ordinal Lemma Q. -/
 theorem qord_rank {n : ℕ} {p : Fin n → Pt} (hp : StrictConvexPolygon p) : QOrd n (rank p) := by
-  sorry
+  intro i j k l hij hjk hkl
+  have hik := hij.trans hjk
+  have hjl := hjk.trans hkl
+  have hil := hik.trans hkl
+  obtain ⟨q1, q2⟩ := lemmaQ hp hij hjk hkl
+  simp only [Qc, rank_le_iff p _ _ hij, rank_le_iff p _ _ hkl, rank_le_iff p _ _ hjk,
+    rank_le_iff p _ _ hil]
+  refine ⟨⟨fun h => ?_, fun h => ?_⟩, ⟨fun h => ?_, fun h => ?_⟩⟩ <;> linarith [h.1, h.2]
 
-/-- The multiplicities sum to the number of pairs.
-TODO: / Acceptance: sorry-free. / Depends on: `Finset.card_eq_sum_card_image`. -/
+/-- The multiplicities sum to the number of pairs. -/
 theorem sum_mult {n : ℕ} (p : Fin n → Pt) : ∑ d ∈ distSet p, mult p d = (pairsF n).card := by
-  sorry
+  classical
+  rw [card_eq_sum_card_image (fun e : Fin n × Fin n => dist (p e.1) (p e.2)) (pairsF n)]
+  rfl
 
-/-- **Lemma R**: with at most two rare distances, `(D - 2)(n + 1) ≤ #pairs`.
-TODO: / Acceptance: sorry-free. / Depends on: `sum_mult`. -/
+/-- **Lemma R**: with at most two rare distances, `(D - 2)(n + 1) ≤ #pairs`. -/
 theorem lemmaR {n : ℕ} (p : Fin n → Pt) (h : (rareDists p).card ≤ 2) :
     ((distSet p).card - 2) * (n + 1) ≤ (pairsF n).card := by
-  sorry
+  classical
+  set S := distSet p
+  set NR := S.filter (fun d => ¬ mult p d ≤ n)
+  have hsplit : (rareDists p).card + NR.card = S.card := by
+    unfold rareDists; exact card_filter_add_card_filter_not _
+  have h1 : NR.card * (n + 1) ≤ ∑ d ∈ NR, mult p d := by
+    rw [← smul_eq_mul]
+    exact card_nsmul_le_sum _ _ _ (fun d hd => by
+      have := (mem_filter.1 hd).2; omega)
+  have h2 : ∑ d ∈ NR, mult p d ≤ ∑ d ∈ S, mult p d :=
+    sum_le_sum_of_subset (filter_subset _ _)
+  rw [sum_mult] at h2
+  calc (S.card - 2) * (n + 1) ≤ NR.card * (n + 1) := Nat.mul_le_mul_right _ (by omega)
+    _ ≤ _ := h1.trans h2
 
-/-- Transfer: if `D ≤ Dm` and there is no ordinal counterexample, there are `≥ 3` rare distances.
-TODO: / Acceptance: sorry-free. / Depends on: `qord_rank`, `rank_le_iff`, `rank_lt_card`. -/
+/-- Transfer: if `D ≤ Dm` and there is no ordinal counterexample, there are `≥ 3` rare
+distances.  Every rare colour `t` is the rank of a rare distance. -/
 theorem rare_of_ord {n Dm : ℕ} {p : Fin n → Pt} (hp : StrictConvexPolygon p)
     (hD : (distSet p).card ≤ Dm) (h : OrdNoCE n Dm) : 3 ≤ (rareDists p).card := by
-  sorry
+  classical
+  have h3 := h (rank p) (fun i j hij => (rank_lt_card p hij).trans_le hD) (qord_rank hp)
+  refine h3.trans ((card_le_card fun t ht => ?_).trans (card_image_le (f := rk p)))
+  obtain ⟨-, hc1, hcn⟩ := mem_filter.1 ht
+  obtain ⟨⟨i, j⟩, hij, rfl⟩ : ∃ e ∈ pairsF n, rank p e.1 e.2 = t := by
+    obtain ⟨e, he⟩ := card_pos.1 (by omega : 0 < cnt n (rank p) t)
+    exact ⟨e, (mem_filter.1 he).1, (mem_filter.1 he).2⟩
+  have hij' : i < j := (mem_filter.1 hij).2
+  refine mem_image.2 ⟨dist (p i) (p j), ?_, rfl⟩
+  refine mem_filter.2 ⟨dist_mem_distSet p hij', ?_⟩
+  have : (pairsF n).filter (fun e => dist (p e.1) (p e.2) = dist (p i) (p j)) =
+      (pairsF n).filter (fun e => rank p e.1 e.2 = rank p i j) := by
+    refine filter_congr fun e he => ?_
+    have he' : e.1 < e.2 := (mem_filter.1 he).2
+    rw [le_antisymm_iff, le_antisymm_iff, rank_le_iff p _ _ hij', rank_le_iff p _ _ he']
+  unfold mult
+  convert hcn using 1
+  rw [this]
+  rfl
 
-/-- Geometry + Lemma R + the ordinal statement give the theorem.
-TODO: / Acceptance: sorry-free. / Depends on: `lemmaR`, `rare_of_ord`. -/
+/-- Geometry + Lemma R + the ordinal statement give the theorem. -/
 theorem main_of_ord {n Dm : ℕ} {p : Fin n → Pt} (hp : StrictConvexPolygon p)
     (hDm : (pairsF n).card < (Dm - 1) * (n + 1)) (h : OrdNoCE n Dm) :
     3 ≤ (rareDists p).card := by
-  sorry
+  by_cases hD : (distSet p).card ≤ Dm
+  · exact rare_of_ord hp hD h
+  · by_contra h3
+    have := lemmaR p (by omega)
+    have := Nat.lt_of_mul_lt_mul_right (this.trans_lt hDm)
+    omega
 
 /-! ## The `BitVec` encoding
 
