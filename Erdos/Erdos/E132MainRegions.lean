@@ -1002,6 +1002,60 @@ theorem corner_lemma (hX : Normal X) (F : DirField X) (hτ₁ : √3 / 2 - 2 * b
     have : Real.cos (3 * π / 14) < tau X := c62.trans hτ₁
     nlinarith
 
+
+/-! ### The ball polygon `K`: convex, compact, interior, normals -/
+
+theorem mem_KBall {y : Pt} : y ∈ KBall X ↔ ∀ w ∈ X, dist y w ≤ dist2 X := by
+  unfold KBall; simp [Metric.mem_closedBall]
+
+theorem KBall_convex (X : Finset Pt) : Convex ℝ (KBall X) :=
+  convex_iInter₂ fun _ _ => convex_closedBall _ _
+
+theorem KBall_isCompact {X : Finset Pt} (hX : X.Nonempty) : IsCompact (KBall X) := by
+  obtain ⟨w, hw⟩ := hX
+  refine Metric.isCompact_of_isClosed_isBounded
+    (isClosed_biInter fun _ _ => Metric.isClosed_closedBall) ?_
+  exact (Metric.isBounded_closedBall (x := w) (r := dist2 X)).subset
+    (fun y hy => Metric.mem_closedBall.2 ((mem_KBall.1 hy) w hw))
+
+/-- Two distinct points of `K` give an interior point (their midpoint). -/
+theorem KBall_interior_nonempty {a b : Pt} (ha : a ∈ KBall X) (hb : b ∈ KBall X) (hab : a ≠ b) :
+    (interior (KBall X)).Nonempty := by
+  set m : Pt := (1 / 2 : ℝ) • (a + b)
+  have hsub : (⋂ w ∈ X, Metric.ball w (dist2 X)) ⊆ KBall X :=
+    Set.iInter₂_mono fun _ _ => Metric.ball_subset_closedBall
+  have hopen : IsOpen (⋂ w ∈ X, Metric.ball w (dist2 X)) :=
+    isOpen_biInter_finset fun _ _ => Metric.isOpen_ball
+  refine ⟨m, interior_mono hsub (hopen.interior_eq.symm ▸ ?_)⟩
+  simp only [Set.mem_iInter, Metric.mem_ball]
+  intro w hw
+  have h1 := (mem_KBall.1 ha) w hw
+  have h2 := (mem_KBall.1 hb) w hw
+  have hd : 0 < dist a b := dist_pos.2 hab
+  have hΔ : 0 ≤ dist2 X := dist2_nonneg X
+  have e1 := dist_sq_pt a w
+  have e2 := dist_sq_pt b w
+  have e3 := dist_sq_pt a b
+  have em : dist m w ^ 2 = (dist a w ^ 2 + dist b w ^ 2) / 2 - dist a b ^ 2 / 4 := by
+    rw [dist_sq_pt, e1, e2, e3]; simp only [m, PiLp.smul_apply, PiLp.add_apply, smul_eq_mul]; ring
+  have : dist m w ^ 2 < dist2 X ^ 2 := by
+    rw [em]; nlinarith [dist_nonneg (x := a) (y := w), dist_nonneg (x := b) (y := w)]
+  exact lt_of_pow_lt_pow_left₀ 2 hΔ this
+
+/-- `−(w − v)` is an outward normal of `K` at `v ∈ K` when `|vw| = Δ₂`, `w ∈ X`. -/
+theorem neg_mem_normalCone {v w : Pt} (hv : v ∈ KBall X) (hw : w ∈ X) (hvw : dist v w = dist2 X)
+    (c : ℝ) (hc : 0 ≤ c) : -(c • (w - v)) ∈ normalCone (KBall X) v := by
+  intro y hy
+  have h1 := (mem_KBall.1 hy) w hw
+  have h2 : dist y w ^ 2 ≤ dist v w ^ 2 := by
+    rw [hvw]; exact pow_le_pow_left₀ dist_nonneg h1 2
+  rw [dist_sq_pt, dist_sq_pt] at h2
+  rw [inner_neg_right, inner_smul_right, inner_pt]
+  simp only [PiLp.sub_apply]
+  have : 0 ≤ (y 0 - v 0) * (w 0 - v 0) + (y 1 - v 1) * (w 1 - v 1) := by
+    nlinarith [sq_nonneg (y 0 - v 0), sq_nonneg (y 1 - v 1)]
+  nlinarith
+
 /-- **At most 6 corner vertices** (their normal cones of `K` are wider than `2π/7` and
 interior-disjoint).
 
@@ -1010,7 +1064,67 @@ Acceptance: no `sorry`.
 Depends on: `corner_lemma`, `ball_polygon_b`, `turning_sum_le` (or disjoint cones). Difficulty M. -/
 theorem card_cornerVerts_le (hX : Normal X) (F : DirField X) (hτ₁ : √3 / 2 - 2 * beta < tau X)
     (hτ₂ : tau X < √3 / 2 + 3 * beta) : (cornerVerts X F).card ≤ 6 := by
-  sorry
+  by_contra hlt
+  push Not at hlt
+  set C := cornerVerts X F
+  have hmem : ∀ v ∈ C, v ∈ Sset X ∧ v ∉ Dset X ∧ (∃ z, IsRung F v z) ∧ deg2 X v ≠ 1 := by
+    intro v hv
+    obtain ⟨hv, hd⟩ := mem_filter.1 hv
+    obtain ⟨hv, hz⟩ := mem_filter.1 hv
+    exact ⟨(mem_sdiff.1 hv).1, (mem_sdiff.1 hv).2, hz, hd⟩
+  have hK : ∀ v ∈ C, v ∈ KBall X := fun v hv =>
+    ball_polygon_a (Sset_sub (hmem v hv).1) (hmem v hv).2.1
+  obtain ⟨a, ha, b, hb, hab⟩ := one_lt_card.1 (by omega : 1 < C.card)
+  have hint := KBall_interior_nonempty (hK a ha) (hK b hb) hab
+  have hXne : X.Nonempty := ⟨a, Sset_sub (hmem a ha).1⟩
+  have hconv := KBall_convex X
+  have hcomp := KBall_isCompact hXne
+  set γ : Pt → Set Pt := fun v => (fun _ : ℝ => v) '' Set.Icc 0 0
+  have hγ : ∀ v, γ v = {v} := fun v => (Set.nonempty_Icc.2 le_rfl).image_const v
+  have hsum := turning_sum_le hconv hcomp C γ
+    (fun v hv => by rw [hγ]; exact Set.singleton_subset_iff.2 (ball_polygon_b (hmem v hv).1
+      (hmem v hv).2.1)) 1
+    (fun x => by
+      refine card_le_one.2 fun v hv v' hv' => ?_
+      have h1 := (mem_filter.1 hv).2
+      have h2 := (mem_filter.1 hv').2
+      rw [hγ, Set.mem_singleton_iff] at h1 h2
+      rw [← h1, ← h2])
+  have hlow : ∀ v ∈ C, 2 * π / 7 < turning (KBall X) (γ v) := by
+    intro v hv
+    obtain ⟨hvS, hvD, ⟨z, hr⟩, hd⟩ := hmem v hv
+    have hpne : (partners X (dist2 X) v).Nonempty := (mem_filter.1 hvS).2
+    have h1 : 1 < (partners X (dist2 X) v).card := by
+      have := hpne.card_pos; unfold deg2 at hd; omega
+    obtain ⟨w', hw', hne⟩ := exists_mem_ne h1 (F.partner v)
+    obtain ⟨hw'X, -, hw'v⟩ := mem_filter.1 hw'
+    have hcor := corner_lemma hX F hτ₁ hτ₂ hr hw'X hw'v hne
+    have hpos := hX.dist2_pos
+    have hn₁ : -F.u v ∈ normalCone (KBall X) v := by
+      unfold DirField.u
+      exact neg_mem_normalCone (hK v hv) (F.partner_mem v hvS) (F.partner_K v hvS hvD) _
+        (inv_nonneg.2 dist_nonneg)
+    have hn₂ : -((dist2 X)⁻¹ • (w' - v)) ∈ normalCone (KBall X) v :=
+      neg_mem_normalCone (hK v hv) hw'X hw'v _ (inv_nonneg.2 hpos.le)
+    have hu := F.norm_u hvS
+    have hu' : ‖(dist2 X)⁻¹ • (w' - v)‖ = 1 := by
+      rw [norm_smul, ← dist_eq_norm, dist_comm, hw'v, Real.norm_eq_abs,
+        abs_of_pos (inv_pos.2 hpos), inv_mul_cancel₀ hpos.ne']
+    have hfr : γ v ⊆ frontier (KBall X) := by
+      rw [hγ]; exact Set.singleton_subset_iff.2 (ball_polygon_b hvS hvD)
+    have hta := turning_ge_angle hconv hcomp hint (γ := fun _ : ℝ => v) (le_refl (0 : ℝ))
+      continuousOn_const hfr hn₁ hn₂
+      (neg_ne_zero.2 (norm_ne_zero_iff.1 (by rw [hu]; norm_num)))
+      (neg_ne_zero.2 (norm_ne_zero_iff.1 (by rw [hu']; norm_num)))
+    unfold ang at hta hcor
+    rw [InnerProductGeometry.angle_neg_neg] at hta
+    exact hcor.trans_le hta
+  have := sum_lt_sum_of_nonempty ⟨a, ha⟩ hlow
+  rw [sum_const, nsmul_eq_mul] at this
+  have h7 : (7 : ℝ) ≤ C.card := by exact_mod_cast hlt
+  have hπ := Real.pi_pos
+  push_cast at hsum
+  nlinarith
 
 /-- A K-vertex has at most two rungs (the positions `v + o_±`), so `#rungs ≤ 2 #rungVerts`.
 
