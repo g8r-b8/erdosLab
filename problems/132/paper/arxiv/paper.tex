@@ -640,7 +640,7 @@ Variables $x_{e,c}$ say that pair $e$ has colour $c$; there are exactly-one cons
 \begin{itemize}[leftmargin=2em]
 \item \emph{DRAT/LRAT.} For every instance with $n=11$ and $n=13$ listed above, and for $(7,4,2)$, a DRUP proof produced by Glucose~4~\cite{glucose} was verified by \texttt{drat-trim}~\cite{drattrim}, which also emitted an LRAT proof that was re-verified by \texttt{lrat-check}~\cite{lrat}. The largest certificate, for $(13,7,5)$, has $446{,}686$ lemmas (a 37\,MB DRUP proof and an 82\,MB LRAT proof). For $n=13$ all instances were certified in the Q-only encoding. For $n=11$, $(11,6,4)$ was certified in the Q-only encoding ($35{,}510$ lemmas), and $(11,2..5,\cdot)$ in the encoding with Q and Lemma~T (Q-only is covered by the Lean proof below). A truncated proof is correctly rejected. On this route, the trusted components are the CNF encoder (a short Python program, cross-validated as in \cref{app:verification}) and the proof checkers.
 \item \emph{$n=7$ without SAT.} A plain backtracking enumeration of all colourings, with Q checked as soon as its pairs are assigned, finds no ordinal counterexample for $D=2,3,4$. For $D=4$ it does so with Lemma~T switched off.
-\item \emph{Lean~4.} The statements for $n=7$ and $n=11$ are formalised in Lean~4~\cite{lean4} with Mathlib~\cite{mathlib}; see below.
+\item \emph{Lean~4.} The statements for $n=7$, $11$ and $13$ are formalised in Lean~4~\cite{lean4} with Mathlib~\cite{mathlib}; see below.
 \end{itemize}
 
 \subsubsection*{The Lean formalisation ($n=7$, $11$, $13$)}
@@ -662,7 +662,7 @@ and the analogous \texttt{erdos132\_convex11} and \texttt{erdos132\_convex13} (f
 \end{center}
 with \texttt{mult X d} the number of unordered pairs of distinct points of $X$ at distance $d$, and \texttt{dist2}, \texttt{minDist} the second-largest and smallest distance. There is no \texttt{sorry}, and \texttt{\#print\allowbreak{} axioms} reports only \texttt{propext}, \texttt{Classical.choice} and \texttt{Quot.sound}. The formalisation also proves Vesztergombi's bound $\mult(\Dt)\le\frac32n$ and the Hopf--Pannwitz bound, so no result is used as a black box. In three places it takes a different route from the text: (a) Vesztergombi's bound is proved in the $2$-core (every degree-$4$ core vertex has two degree-$2$ core neighbours, then double counting), with no point deletion; (b) the bad-edge bounds of \cref{sec:bad} are obtained by counting over directions of outward normals instead of arc length, so Lemma~5.2 (lens arc length) is not needed; (c) the degenerate-regime incidence bound uses a local charging argument, and the mixed-$T$ bound of Lemma~7.1 is proved in a weaker form (at most $1200$ instead of $71$), which only changes the constant $C_0$.
 
-\emph{Limitations of the formalisation.} (i) The \texttt{bv\_decide} axiom described above remains. (ii) Only the $n=7$ LRAT certificate (1.6\,MB) is stored and replayed with \texttt{bv\_check}; for $n=11,13$ the certificates (23\,MB and 97\,MB) are not stored, so compilation re-runs CaDiCaL (about 40\,s and 9\,min respectively). (iii) The small-case, black-box and convex-position results are formalised as described; the main theorem is treated in the next paragraph.
+\emph{Limitations of the formalisation.} (i) The \texttt{bv\_decide} axiom described above remains. (ii) Only the $n=7$ LRAT certificate (1.6\,MB) is stored and replayed with \texttt{bv\_check}; for $n=11,13$ the certificates (23\,MB and 97\,MB) are not stored, so compilation re-runs CaDiCaL (about 40\,s and 4\,min respectively). (iii) The paper's Lemma~5.2 is not formalised; the formal proof of the main theorem does not need it (see above).
 
 \begin{remark}\label{rem:ordinal}
 \begin{enumerate}[leftmargin=2em,label=(\alph*)]
@@ -750,7 +750,7 @@ $(13,7,5)$ & Q & 446,686 & verified & verified\\
 \caption{Certified refutations for \cref{thm:1113}.}
 \end{table}
 
-\emph{Lean.} The files \texttt{E132Convex.lean}, \texttt{E132ConvexFinset.lean} and \texttt{E132Convex13.lean} in \texttt{Erdos/Erdos/} are checked with \texttt{lake env lean}; for example \texttt{Erdos/Erdos/E132Convex.lean} is checked with \texttt{lake env lean Erdos/Erdos/E132Convex.lean}. This takes about 75 seconds, most of it spent in the SAT solver inside \texttt{bv\_decide}. The toolchain is Lean \texttt{v4.35.0-rc2} with Mathlib.
+\emph{Lean.} The whole development (all \texttt{E132*.lean} files: the convex-position results, the layer bound, Vesztergombi's and Hopf--Pannwitz's bounds, and the main theorem) builds with \texttt{lake exe cache get} followed by \texttt{lake build}; on a laptop this takes about 6 minutes after the Mathlib cache is downloaded, of which about 4 minutes is \texttt{bv\_decide} for $n=13$. The toolchain is Lean \texttt{v4.35.0-rc2} with Mathlib.
 
 \bibliographystyle{amsplain}
 \bibliography{refs}
