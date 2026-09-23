@@ -163,3 +163,12 @@ Purpose: locate the SAT→hard transition. A quick SAT result raises the lower b
   SHA-256 of the uncompressed files: map 85e3c19a…, model 1bfef1c5… Method: WARMSTART.md. Every stall above 1.5e8 was a triple of 3000-smooth
   numbers. These were resolved by re-solving f on primes ≤ 3000 against all smooth triples up to X (`smoothfix.py`). **Open computational question for
   finiteness:** is F_y(∞) satisfiable for every y? A single UNSAT y proves Λ(5,3) < ∞. Local search cannot give an upper bound.
+- 2026-09-23 17:50 — **F_100(∞) is satisfiable.** Luca–Najman (Math. Comp. 80 (2011), doi:10.1090/S0025-5718-2010-02381-6; table at the end
+  of §4) list the largest run of k consecutive 100-smooth integers. For k = 3 it is x = 97,524. So every 100-smooth triple lies below
+  ~1e5, and the 2e9 witness restricted to primes ≤ 100 avoids all of them. Caveat: their erratum (doi:10.1090/S0025-5718-2013-02696-8, not
+  obtained; ResearchGate is behind a CAPTCHA) adds 49 missed pairs. The k=3 maximum should be re-checked against the corrected list before
+  it is cited. Consequence: a finiteness certificate via F_y(∞) needs y well above 100. Complete smooth-triple lists at that size need ~2^π(y) Pell equations
+  (y ≈ 500: ~2^95), which is infeasible.
+- References (DOIs checked on Crossref): Tschebotareff, Math. Ann. 95 (1926) 191–228, doi:10.1007/BF01206606 (GDZ scan in
+  novelty_sources/); Neukirch, ANT, doi:10.1007/978-3-662-03983-0; Lang, Algebra, doi:10.1007/978-1-4613-0041-0; LLMS 1962,
+  doi:10.1090/S0025-5718-1962-0162379-2; Conrey–Holmstrom–McLaughlin, "Smooth neighbors", Exp. Math. (2013), doi:10.1080/10586458.2013.768483.
