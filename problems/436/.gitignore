@@ -3,3 +3,4 @@ scripts/smooth3
 scripts/smoothruns
 __pycache__/
 scripts/sdfs
+logs/probes/*.log

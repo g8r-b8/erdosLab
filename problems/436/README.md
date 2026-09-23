@@ -121,3 +121,16 @@ UNKNOWN after ~7,850 s each (`logs/cubes_y1000_1e9.log`). Not restarted, given t
    `Std.Tactic.BVDecide.LRAT` checker. With ~10^7 clauses the check needs compiled evaluation
    (`native_decide` / `ofReduceBool`, as `bv_decide` itself uses) — must be disclosed per PROMPT.md;
    a kernel-only check is not realistic at this size.
+
+## Verbose probes (2026-09-23, parent session)
+The earlier `-q` runs gave no progress information, so they were stopped (S(7,593,750) after 3 h, and the y=1000 cubes after 2.2 h).
+Relaunched with `scripts/probe.sh` (kissat `-v`). Output goes to files only:
+- `logs/probes/<tag>.log`: the full kissat report.
+- `logs/probes/status.tsv`: one line per event.
+
+`scripts/status.sh` prints a compact summary: time, memory, conflicts, and remaining variables.
+Runs:
+- R = 7,593,750: the stalled instance.
+- R = 6,634,000 and R = 5,795,000: bisection probes, geometric between the last SAT R and 7.59M.
+
+Purpose: locate the SAT→hard transition. A quick SAT result raises the lower bound. A stall localises the smallest hard instance, which is the best target for an UNSAT proof. No proof is logged: an UNSAT result would be re-run with proof output (disk: about 10 GB free).
