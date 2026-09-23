@@ -1,0 +1,6 @@
+y=200 X=1e9: knuth probes=5000 est_nodes=9.956e+17 (sd of mean 1.02e+17) probes_reaching_leaf=2
+y=300 X=1e9: knuth probes=5000 est_nodes=1.018e+18 (sd of mean 1.03e+17) probes_reaching_leaf=0
+y=500 X=1e9: knuth probes=5000 est_nodes=1.018e+18 (sd of mean 1.03e+17) probes_reaching_leaf=0
+y=1000 X=1e9: knuth probes=3000 est_nodes=1.148e+18 (sd of mean 1.42e+17) probes_reaching_leaf=0
+y=1000 X=1e10: knuth probes=3000 est_nodes=8.835e+17 (sd of mean 1.16e+17) probes_reaching_leaf=0
+k=3 y=300 X=1e8: knuth probes=20000 est_nodes=3.199e+04 (sd of mean 5.99e+02) probes_reaching_leaf=0

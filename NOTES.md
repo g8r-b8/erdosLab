@@ -224,3 +224,17 @@ PROMPT.md rule 4: check all cross-referenced/sibling problems and their threads.
   870/873/875/876/881/883/949 additive-comb. asymptotics, most with 2026 AI/partial work;
   734 PBD construction for all n (Erdős: "probably not very difficult") — no finite core, open
   but not quick; 719 Erdős–Sauer needs Turán K4^3 values; 778 game for all n; 782 squares.
+
+## #436 SAT attack (agent, 2026-09-23) — see problems/436/README.md
+- Reduction pinned: Λ(k,l) ≤ Λ_comb(k,l) := max over completely additive f: N→Z/k of first zero
+  l-run (elementary: k-th power character mod p, all p); equality for odd k via Kummer/Chebotarev.
+  Λ_comb ≤ R ⇔ finite CNF S(R) UNSAT.
+- Validation: SAT search reproduces Λ(2..5,2) = 9, 77, 1224, 7888 and Λ(3,3) = 23532 (kissat 2 s,
+  DRAT checked by drat-trim).
+- k=5: full S(R) SAT up to R = 5,062,500 ⇒ **Λ(5,3) ≥ 5,062,794** (new lower bound); R = 7.59e6
+  kissat > 80 min (still running). Models: f(2)=0, f(3)=1, f=0 on most small primes.
+- Weakening F_y(X) (primes ≤ y, runs of y-smooth numbers; sound for UNSAT): k=3 refuted at y=300
+  (31k-node DFS); k=5 SAT up to y=500 (X=1e9); y=1000 open. Knuth estimate of the refutation tree
+  ≈ 1e18 nodes for k=5 (vs 3e4 for k=3): ~1e14 surviving assignments of primes ≤ 100 alone.
+- Verdict: brute-force finiteness certificate for Λ(5,3) infeasible; would need a structural idea.
+  Openness rechecked 2026-09-23 (site, thread, fc issue #731 open/no file, Tao wiki, arXiv): open.

@@ -1,6 +1,7 @@
 # Erdős Problem #436: consecutive k-th power residues (triples, k = 5)
 
-**Status (ours):** computational attack on the smallest open case Λ(5,3). No resolution yet.
+**Status (ours):** computational attack on the smallest open case Λ(5,3). No resolution.
+New: Λ(5,3) ≥ 5,062,794; brute-force finiteness certificate estimated at ~1e18 nodes (infeasible).
 **Site status:** OPEN (erdosproblems.com/436, rechecked 2026-09-23).
 
 ## Statement (erdosproblems.com/436, verbatim in substance)
@@ -63,6 +64,8 @@ so the model is only an upper bound there — but it still reproduces the known 
   model decoder; `scripts/drive.py` — exact / geometric search with kissat.
 - `scripts/smoothruns.c` — segmented sieve listing runs of l consecutive y-smooth numbers ≤ X.
 - `scripts/smooth_sat.py` — weakened instance F_y(X) (only primes ≤ y, only smooth runs).
+- `scripts/smooth_cnf.py` — compact streaming DIMACS for F_y(X) (+ cubes); `scripts/run_cubes.sh`,
+  `scripts/cubes.py` — cube-and-conquer; `scripts/sdfs.c` — direct DFS / Knuth tree-size estimator.
 - `logs/` — solver logs.
 
 ## Log (2026-09-23)
@@ -85,14 +88,31 @@ so the model is only an upper bound there — but it still reproduces the known 
   F_1000(1e9) (168 primes, 247,734 triples, 12.4M clauses): cube-and-conquer on f(2),f(3),f(5)
   running; f(2)=f(3)=0 cubes UNSAT in 4 s; f(2)=0,f(3)=1 cubes > 30 min each.
   Naive first-moment counts are useless here (they predict UNSAT for k=3, y=200, which is SAT).
+- **Direct DFS on F_y(X)** (`scripts/sdfs.c`: assign f(p) in increasing p, each smooth run forbids
+  ≤ 1 value of its largest prime): k=3, F_300(1e8) refuted with 31,538 nodes in 0.03 s (vs kissat
+  2 s) — a trivially checkable case tree. For k=5 Knuth's random-probe estimator
+  (`logs/knuth_estimates.log`) gives ≈ 1e18 nodes for every y ∈ {200,…,1000}, X ∈ {1e9,1e10}; the
+  tree is ≈1e14 wide already at depth 25 (primes ≤ 100), because the only constraints on the first
+  25 primes are the ~787 runs of 100-smooth numbers (a finite set, Størmer), each killing ≤ 1/125 of
+  assignments: 5^25·(124/125)^787 ≈ 1e14. Every probe dies by depth ≈ 47 (primes ≤ ~210) at
+  y=1000, so F_1000(1e10) may well be UNSAT, but any case-split proof that branches on small primes
+  needs ~1e14–1e18 leaves. **Verdict: a brute-force finiteness certificate for Λ(5,3) is out of
+  reach** (k=3 is 31k nodes; k=5 is ~13 orders of magnitude larger). CDCL cubes (f(2)=0, f(3)=1)
+  on F_1000(1e9) ran > 45 min each without result.
 - Counts of consecutive smooth triples: y=1000: 247,734 (X=1e9), 343,634 (X=1e10);
   y=2000: 1,031,687 (X=1e9).
 
 ## Next steps
-1. Finish F_1000(1e9) cubes; if UNSAT ⇒ Λ(5,3) ≤ 1e9 (finite!). Then re-run each cube with
-   `kissat --no-binary` proof output, check with drat-trim (→ LRAT), and record hashes.
-2. If SAT: hybrid instance = full S(N0) ∪ F_y(X) (still sound), or y=2000 (1.03M triples).
-3. Lean route (only if UNSAT): (a) elementary reduction (k-th power character ⇒ completely
+Background jobs left running at hand-off (stop with `pkill -f run_cubes.sh; pkill kissat`):
+full S(7,593,750) (`logs/k5l3_geom.log`) and F_1000(1e9) cubes (`logs/cubes_y1000_1e9.log`).
+1. Theory, not search: the obstruction is the huge solution space on small primes. Ideas: prove
+   f(2)=0 ⇒ … structural lemmas (models all have f(2)=0, f(3)≠0, f=0 on most p ≤ 100) to collapse
+   the top of the tree; or an algebraic (F_5-linear) refutation instead of case splits.
+2. Hybrid instance full S(N0) ∪ F_y(X) (sound) with cube-and-conquer on many cores/cloud;
+   Knuth-estimate first.
+3. If an UNSAT certificate ever appears: re-run cubes with `kissat --no-binary` proofs, drat-trim
+   → LRAT, record hashes.
+4. Lean route (only if UNSAT): (a) elementary reduction (k-th power character ⇒ completely
    additive F, as above) — Mathlib has ZMod units cyclic + orderOf; (b) a Lean function generating
    the same CNF from the list of smooth runs, with a soundness lemma (any f ⇒ satisfying
    assignment); the list of runs itself needs no completeness proof, only that each listed r has
