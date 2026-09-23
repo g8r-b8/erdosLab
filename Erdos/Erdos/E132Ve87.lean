@@ -350,17 +350,56 @@ theorem two_le_mid {X : Finset Pt} {Δ Δ₂ : ℝ} (hT : TwoLargest X Δ Δ₂)
 /-- **Double count.**  In a graph with all degrees in `[2, 4]` in which every vertex of degree
 `4` has two neighbours of degree `2`, the degree sum is at most `3 |K|`.
 
-TODO: prove.
-What's missing: count pairs (degree-4 vertex, adjacent degree-2 vertex) both ways:
-`2 #{deg 4} ≤ … ≤ 2 #{deg 2}`; then `deg v + [deg v = 2] ≤ 3 + [deg v = 4]` pointwise.
-Acceptance: no `sorry`.
-Depends on: nothing. -/
+Proof: count pairs (degree-4 vertex, adjacent degree-2 vertex) both ways:
+`2 #{deg 4} ≤ … ≤ 2 #{deg 2}`; then `2 deg v + 2[deg v = 2] ≤ 6 + 2[deg v = 4]` pointwise. -/
 theorem esum_le_three {K : Finset Pt} {d : ℝ}
     (hlo : ∀ v ∈ K, 2 ≤ (nbr K d v).card) (hhi : ∀ v ∈ K, (nbr K d v).card ≤ 4)
     (h4 : ∀ v ∈ K, (nbr K d v).card = 4 →
       2 ≤ ((nbr K d v).filter (fun w => (nbr K d w).card = 2)).card) :
     esum K d ≤ 3 * K.card := by
-  sorry
+  classical
+  let deg : Pt → ℕ := fun v => (nbr K d v).card
+  set I : Pt → Pt → ℕ := fun v w => if dist v w = d ∧ deg v = 4 ∧ deg w = 2 then 1 else 0
+    with hI
+  have hlow : ∀ v ∈ K, (if deg v = 4 then 2 else 0) ≤ ∑ w ∈ K, I v w := by
+    intro v hv
+    split_ifs with h
+    · have hc : ∑ w ∈ K, I v w =
+          (K.filter (fun w => dist v w = d ∧ deg v = 4 ∧ deg w = 2)).card := by
+        rw [card_filter]
+      rw [hc]
+      refine (h4 v hv h).trans (card_le_card fun w hw => ?_)
+      obtain ⟨hw1, hw2⟩ := mem_filter.1 hw
+      obtain ⟨hwK, hwd⟩ := mem_nbr.1 hw1
+      exact mem_filter.2 ⟨hwK, hwd, h, hw2⟩
+    · exact Nat.zero_le _
+  have hup : ∀ w ∈ K, ∑ v ∈ K, I v w ≤ if deg w = 2 then 2 else 0 := by
+    intro w _
+    have hc : ∑ v ∈ K, I v w =
+        (K.filter (fun v => dist v w = d ∧ deg v = 4 ∧ deg w = 2)).card := by
+      rw [card_filter]
+    rw [hc]
+    split_ifs with h
+    · refine (card_le_card fun v hv => ?_).trans (le_of_eq h)
+      obtain ⟨hvK, hvd, -⟩ := mem_filter.1 hv
+      exact mem_nbr.2 ⟨hvK, by rw [dist_comm]; exact hvd⟩
+    · rw [Nat.le_zero, card_eq_zero, filter_eq_empty_iff]
+      exact fun v _ hv => h hv.2.2
+  have hA : ∑ v ∈ K, (if deg v = 4 then 2 else 0) ≤ ∑ w ∈ K, (if deg w = 2 then 2 else 0) :=
+    calc _ ≤ ∑ v ∈ K, ∑ w ∈ K, I v w := sum_le_sum hlow
+      _ = ∑ w ∈ K, ∑ v ∈ K, I v w := sum_comm
+      _ ≤ _ := sum_le_sum hup
+  have hpt : ∀ v ∈ K, 2 * deg v + (if deg v = 2 then 2 else 0) ≤
+      6 + (if deg v = 4 then 2 else 0) := by
+    intro v hv
+    have := hlo v hv
+    have := hhi v hv
+    simp only [deg]
+    split_ifs <;> omega
+  have hsum := sum_le_sum hpt
+  rw [sum_add_distrib, sum_add_distrib, ← mul_sum, sum_const, smul_eq_mul] at hsum
+  have he : esum K d = ∑ v ∈ K, deg v := rfl
+  omega
 
 /-- **Vesztergombi 1987** (for the two largest distances `Δ > Δ₂`): `2 μ(Δ₂) ≤ 3 |X|`.
 
