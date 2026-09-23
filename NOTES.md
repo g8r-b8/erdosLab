@@ -120,6 +120,15 @@ then ¬(almost-all o(N)) as in PR #4076's Erdos468MinimalPreimageLittleOAlmostAl
   second independent referee of WRITEUP_A2 (→ REFEREE2_A2.md), Lean scoping of convex n=7/11
   (→ Erdos/Erdos/E132Convex.lean, problems/132/lean/README.md). Loop paused while they run.
 
+## Iteration 9 results so far
+- 54/37: second independent referee CORRECT (REFEREE2_A2.md). Only the original Ve87 paper remains unread.
+- Audit 4: convex n=11,13 k≥3 NEW (the Marchetto/Rafik/Beller forum claims are ≥2 rare distances for general sets,
+  so they don't cover this). Q-ORD method: prior art Morić–Pritchard arXiv:1103.0412 (abstract convex polygons
+  + quadrilateral inequality), which must be cited. Related: lyfar/rare-distance-fields (GitHub).
+- 436: Λ(5,3) ≥ 5,062,794 NEW (no table for k≥5, l=3). The reduction is KNOWN (Lehmer–Lehmer–Mills case vectors;
+  Brillhart–Lehmer–Lehmer 1964). Unread: Lehmer "Mechanized mathematics" (BAMS 1966), Lehmer–Lehmer
+  "On runs of residues" (Proc AMS 1962), Mills' 1965 survey.
+
 ## Next step
 - 132: novelty audit of convex n=11/13 result; independent read of WRITEUP_A2 §7.2 and §8 Step 4;
   scope a Lean formalisation of convex n=11 (quadrilateral lemma + verified encoder + LRAT).
