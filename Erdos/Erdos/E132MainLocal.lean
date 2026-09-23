@@ -10,6 +10,10 @@ import Mathlib.Analysis.InnerProductSpace.Dual
 Lemmas 3.1–3.4, the rung identity, the T-edge/rung dichotomy, (T1), (T2), arc spacing,
 turning along an arc; the lens lemma 5.1, lens-corner arc length 5.2, and the bad-edge counts
 KK, DD, (c1), (c2).  See `E132MainDefs.lean` for the conventions.
+
+The counts KK, DD and (c2) do not use arc length along `∂K` (the paper's Lemma 5.2 and walk):
+they integrate over directions with the outward normals of `S ∖ D` / `S ∩ D`
+(`E132ConvexCurve.lean`).  `lens_arc_length` (Lemma 5.2) is consequently unused.
 -/
 
 open Finset Real
@@ -1592,20 +1596,17 @@ theorem lens_corner {c₁ c₂ p q : Pt} {R : ℝ} (hd0 : 0 < dist c₁ c₂) (h
 5.1 with `|pq| = 1`, the boundary arc of `K'` from `p` to `q` on the corner's side has length
 `≤ 2ρ₀`.
 
-TODO: prove (open; needs convex-curve infrastructure that Mathlib lacks).
+NOT USED (2026-09-23): off the critical path.  `card_badKK_le` / `card_badDD_le` are now proved
+without arc length (direction-measure caps, `E132ConvexCurve.lean`), so nothing depends on this
+lemma; it is kept only as a record of the paper's Lemma 5.2 and may be deleted.
+TODO (only if wanted for its own sake; multi-day): prove it.
 What's missing:
 1. an arc-length parametrisation of `∂K'` for a compact convex planar `K'` (a closed
    `1`-Lipschitz curve onto `∂K'`, or the segment case when `interior K' = ∅`);
 2. perimeter monotonicity for nested compact convex sets, applied to `K' ∩ H ⊆ Λ ∩ H`
    (`H` the closed half-plane of line `pq` containing the corner `c`);
 3. `∂Λ ∩ H` is the circular arc `p → c → q`, of length `≤ 2ρ₀` by `lens_corner` (proved).
-STATEMENT NOTE (not changed): the conclusion — *some* `1`-Lipschitz path in `∂K'` of length
-`≤ 2ρ₀` — is true, but weaker than what `card_badKK_le` needs.  The multiplicity bound
-`M ≤ 6(4ρ₀ + 1)` needs `γ` to be a sub-arc of one fixed arc-length parametrisation `Γ` of `∂K`
-(so that the points of `S ∖ D` whose arcs pass through `y` lie on one boundary arc of length
-`4ρ₀`, and `card_le_arcLength` applies).  With only Euclidean information (`|p − y| ≤ 2ρ₀`) a
-packing bound gives `≈ 4.3·10⁶`, not `1.28·10⁵`.  Suggested strengthening once (1) exists:
-`∃ t₀ ℓ, ℓ ≤ 2ρ₀ ∧ Γ t₀ = p ∧ (Γ (t₀ + ℓ) = q ∨ Γ (t₀ - ℓ) = q)`.
+The statement is true as it stands.
 Acceptance: no `sorry`.
 Depends on: `lens_corner` (proved); items 1–2 above. Difficulty XL. -/
 theorem lens_arc_length {c₁ c₂ p q : Pt} {R : ℝ} {K' : Set Pt} (hK' : Convex ℝ K')
@@ -2070,21 +2071,189 @@ theorem c8_walk {Δ₂ d₀ : ℝ} (h : 10 ^ 4 ≤ Δ₂) (h0 : 0 ≤ d₀) (h1 
   norm_num [beta]
   nlinarith
 
-/-- **(c2) bound** `< 48π(2L + 1)/β < 1.82·10⁷` (`L = 600`).
+/-- `ang_small` with the weaker hypothesis `a ≥ 9999`. -/
+theorem ang_small' {v z w : Pt} {a b : ℝ} (ha : 9999 ≤ a) (hb : a ≤ b) (hv : dist v w = a)
+    (hz : dist z w = b) (h1 : dist v z = 1) : ang (v - w) (z - w) ≤ 1 / 200 := by
+  set θ := ang (v - w) (z - w)
+  have hθ0 : 0 ≤ θ := InnerProductGeometry.angle_nonneg _ _
+  have hθπ : θ ≤ π := InnerProductGeometry.angle_le_pi _ _
+  have hc := InnerProductGeometry.cos_angle_mul_norm_mul_norm (v - w) (z - w)
+  rw [← dist_eq_norm, ← dist_eq_norm, hv, hz] at hc
+  have key := two_inner_sub v w z
+  rw [hv, hz, h1] at key
+  have h1c : a * b * (1 - Real.cos θ) ≤ 1 / 2 := by
+    change Real.cos θ * (a * b) = _ at hc
+    nlinarith [sq_nonneg (b - a)]
+  have hcos2 := Real.cos_two_mul (θ / 2)
+  rw [show 2 * (θ / 2) = θ by ring] at hcos2
+  have hsc := Real.sin_sq_add_cos_sq (θ / 2)
+  have hjordan := Real.mul_le_sin (x := θ / 2) (by positivity) (by linarith)
+  have hpi := Real.pi_pos
+  have hpi4 := Real.pi_lt_d4
+  set q := 2 / π * (θ / 2)
+  have hq0 : 0 ≤ q := by positivity
+  have h2 : 2 * q ^ 2 ≤ 1 - Real.cos θ := by nlinarith
+  have hab : (9999 : ℝ) ^ 2 ≤ a * b := by nlinarith
+  have h3 : a * b * (2 * q ^ 2) ≤ 1 / 2 :=
+    le_trans (mul_le_mul_of_nonneg_left h2 (by positivity)) h1c
+  have hq : q ≤ 1 / 10 ^ 4 := by nlinarith
+  have hθq : θ = π * q := by simp only [q]; field_simp
+  rw [hθq]
+  nlinarith
 
-TODO: prove (open; needs one-sided tangents / an arc-length walk along `∂K`).
-What's missing: depth `d₀ ∈ [0, 1 − t]`; `α ∈ (β/2, 151.9°]` ([C8] `c8_cos` ✓; the `β/2`
-lower bound as in `card_badC1_le` via `ang_small` ✓ and the angle triangle inequality); the
-walk along `∂K` from `v` with forward tangents within `β/4` of `e₀` leaves `D(x_z, Δ₂)` by
-`σ = L` (`c8_walk` ✓), so the arc `J_v` of length `L` has turning `> β/4` — this step needs an
-arc-length parametrisation of `∂K` with one-sided derivatives in the normal cones' orthogonal
-directions (not in Mathlib); then Lemma 3.4 (`turning_sum_le` ✓) with multiplicity `2L + 1`
-(`card_le_arcLength` ✓) and kissing.
+/-- [C8] real core: `cos α ∈ [−0.8821, cos(1/200))` ⇒ `cos² α ≤ 1 − 1/201²`. -/
+theorem c8_cos_sq {c : ℝ} (hlo : -0.8821 ≤ c) (hhi : c < Real.cos (1 / 200)) :
+    c ^ 2 ≤ 1 - (1 / 201) ^ 2 := by
+  have hsin := Real.sin_gt_sub_cube (x := 1 / 200) (by norm_num)
+  have hsc := Real.sin_sq_add_cos_sq (1 / 200 : ℝ)
+  have hsin' : (1 / 201 : ℝ) ≤ Real.sin (1 / 200) := by norm_num at hsin ⊢; linarith
+  have hs2 : (1 / 201 : ℝ) ^ 2 ≤ Real.sin (1 / 200) ^ 2 := pow_le_pow_left₀ (by norm_num) hsin' 2
+  have hcc : Real.cos (1 / 200) ^ 2 ≤ 1 - (1 / 201) ^ 2 := by linarith
+  rcases le_or_gt 0 c with h | h
+  · have : c ^ 2 ≤ Real.cos (1 / 200) ^ 2 := pow_le_pow_left₀ h hhi.le 2
+    linarith
+  · nlinarith
+
+/-- [C8] law-of-cosines bound: `2I = Δ₂² + ρ² − D²`, `D ≤ 1.94Δ₂`, `ρ ≥ Δ₂ − 1` ⇒
+`I ≥ −0.8821 Δ₂ ρ`. -/
+theorem c8_inner {Δ₂ ρ D I : ℝ} (hΔ₂ : 10 ^ 4 ≤ Δ₂) (h1 : Δ₂ - 1 ≤ ρ)
+    (hD : D ≤ 1.94 * Δ₂) (hD0 : 0 ≤ D) (key : 2 * I = Δ₂ ^ 2 + ρ ^ 2 - D ^ 2) :
+    Δ₂ * (-0.8821 * ρ) ≤ I := by
+  have hD2 : D ^ 2 ≤ (1.94 * Δ₂) ^ 2 := pow_le_pow_left₀ hD0 hD 2
+  nlinarith [mul_nonneg (show 0 ≤ ρ - (Δ₂ - 1) by linarith)
+    (show 0 ≤ ρ + Δ₂ - 1 + 1.7642 * Δ₂ by linarith),
+    mul_nonneg (show 0 ≤ Δ₂ by linarith) (show 0 ≤ 0.0006 * Δ₂ - 3.7642 by linarith)]
+
+/-- `i² + d² = ρ²`, `i² ≤ ρ²(1 − 1/201²)` ⇒ `|d| ≥ ρ/201`. -/
+theorem abs_ge_of_sq {ρ i d : ℝ} (hρ : 0 ≤ ρ) (hl : i ^ 2 + d ^ 2 = ρ ^ 2)
+    (hi : i ^ 2 ≤ ρ ^ 2 * (1 - (1 / 201) ^ 2)) : ρ / 201 ≤ |d| := by
+  have h : (ρ / 201) ^ 2 ≤ |d| ^ 2 := by rw [sq_abs]; nlinarith
+  exact (sq_le_sq₀ (by positivity) (abs_nonneg _)).1 h
+
+/-- The geometric input of (c2) at `v`: with `x = x_z`, `|det(u_v, x − v)| ≥ |vx|/201`. -/
+theorem c2_det_bound (hX : Normal X) (F : DirField X) {v z : Pt} (hvS : v ∈ Sset X)
+    (hvD : v ∉ Dset X) (hzS : z ∈ Sset X) (hzD : z ∈ Dset X) (hvz : dist v z = 1)
+    (hang : beta < ang (F.u v) (F.u z)) (hvx : dist v (F.partner z) ≤ dist2 X)
+    (hρ1 : dist2 X - 1 ≤ dist v (F.partner z)) :
+    dist v (F.partner z) / 201 ≤ |det2 (-F.u v) (F.partner z - v)| := by
+  have hxX : F.partner z ∈ X := F.partner_mem z hzS
+  have hzx : dist z (F.partner z) = diam X := F.partner_D z hzS hzD
+  have hΔ₂ := hX.large
+  have hΔ := dist2_le_diam X
+  set x := F.partner z with hx_def
+  set ρ := dist v x with hρ_def
+  have hρ0 : 9999 ≤ ρ := by linarith
+  set e := x - v with he_def
+  have he : ‖e‖ = ρ := by rw [he_def, ← dist_eq_norm, dist_comm]
+  have hu := F.norm_u' hvS
+  -- `α = ∠(u_v, x − v) > 1/200`
+  have hsmall : ang (F.u z) e ≤ 1 / 200 := by
+    rw [ang, DirField.u, ← hx_def, hzx,
+      InnerProductGeometry.angle_smul_left_of_pos _ _ (inv_pos.2 (by linarith)), he_def,
+      ← InnerProductGeometry.angle_neg_neg, neg_sub, neg_sub, InnerProductGeometry.angle_comm]
+    exact ang_small' hρ0 (hvx.trans hΔ) rfl hzx hvz
+  have htri := InnerProductGeometry.angle_le_angle_add_angle (F.u v) e (F.u z)
+  have hα : 1 / 200 < InnerProductGeometry.angle (F.u v) e := by
+    have hβ : beta = 1 / 100 := rfl
+    rw [hβ] at hang
+    unfold ang at hang hsmall
+    rw [InnerProductGeometry.angle_comm e (F.u z)] at htri
+    linarith
+  have hαπ := InnerProductGeometry.angle_le_pi (F.u v) e
+  have hcos : inner ℝ (F.u v) e = ρ * Real.cos (InnerProductGeometry.angle (F.u v) e) := by
+    have := InnerProductGeometry.cos_angle_mul_norm_mul_norm (F.u v) e
+    rw [hu, he] at this; rw [← this]; ring
+  have hcos_hi : Real.cos (InnerProductGeometry.angle (F.u v) e) < Real.cos (1 / 200) :=
+    Real.cos_lt_cos_of_nonneg_of_le_pi (by norm_num) hαπ hα
+  -- `cos α ≥ −0.8821` ([C8])
+  have hwX := F.partner_mem v hvS
+  have hvw : dist v (F.partner v) = dist2 X := F.partner_K v hvS hvD
+  have key := two_inner_sub (F.partner v) v x
+  rw [dist_comm (F.partner v) v, hvw, dist_comm x v] at key
+  have hinner : inner ℝ (F.u v) e = (dist2 X)⁻¹ * inner ℝ (F.partner v - v) e := by
+    rw [DirField.u, hvw, real_inner_smul_left]
+  have hlo : -0.8821 * ρ ≤ inner ℝ (F.u v) e := by
+    rw [hinner, le_inv_mul_iff₀ (by linarith)]
+    exact c8_inner hΔ₂ hρ1 ((dist_le_diam hwX hxX).trans hX.nondeg) dist_nonneg key
+  have hclo : -0.8821 ≤ Real.cos (InnerProductGeometry.angle (F.u v) e) := by
+    rw [hcos] at hlo
+    by_contra h; push Not at h
+    have : ρ * Real.cos (InnerProductGeometry.angle (F.u v) e) < ρ * (-0.8821) :=
+      mul_lt_mul_of_pos_left h (by linarith)
+    linarith
+  have hcos2 := c8_cos_sq hclo hcos_hi
+  -- `|det(u_v, x − v)| ≥ ρ/201`
+  have hl := lagrange e (F.u v)
+  rw [he, hu, real_inner_comm (F.u v) e, hcos, one_pow, mul_one] at hl
+  have hi : (ρ * Real.cos (InnerProductGeometry.angle (F.u v) e)) ^ 2 ≤
+      ρ ^ 2 * (1 - (1 / 201) ^ 2) := by
+    rw [mul_pow]; exact mul_le_mul_of_nonneg_left hcos2 (sq_nonneg ρ)
+  have hdet := abs_ge_of_sq (by linarith) hl hi
+  have hneg : det2 (-F.u v) e = - det2 (F.u v) e := by
+    simp only [det2, PiLp.neg_apply]; ring
+  rw [hneg, abs_neg]
+  exact hdet
+
+/-- **(c2) bound** `< 48π(2L + 1)/β < 1.82·10⁷` (proved: `≤ 4003200π < 1.26·10⁷`).
+
+TODO: none — proved.
+Proof (a discrete form of the paper's walk, no arc length): for a (c2) edge `zv` put `x = x_z`;
+all of `S ∖ D` lies in `D(x, Δ₂)` and `v` is at depth `≤ 1` (`|vx| ≥ Δ − 1`); the angle
+`α = ∠(u_v, x − v)` satisfies `α > β − 1/200 = 1/200` (`ang_small'`) and `cos α ≥ −0.8821`
+([C8] law of cosines), hence `|det(u_v, x − v)| ≥ |x − v|/201` (`c2_det_bound`).  Then
+`Curve.NormalConfig.card_walk_mul_le` (windows of half-width `1/800` around the normals; a
+window-neighbour of `v` on the side away from `x` is within `412` of `v`, or it would leave
+`D(x, Δ₂)`) gives `#{v} / 400 ≤ 2π·834`, and each `v` has `≤ 6` (c2) edges.
 Acceptance: no `sorry`.
-Depends on: `turning_sum_le`, `card_le_arcLength`, `c8_cos`, `c8_walk`, `c9`, kissing (all
-available); one-sided tangents of convex curves (open). Difficulty XL. -/
+Depends on: `Curve.NormalConfig.card_walk_mul_le`, `normalConfig_K`, `c2_det_bound`, kissing. -/
 theorem card_badC2_le (hX : Normal X) (F : DirField X) : ((badC2 X F).card : ℝ) ≤ 18200000 := by
-  sorry
+  have hV := normalConfig_K hX F
+  set V := (Sset X).filter (fun p => p ∉ Dset X) with hV_def
+  set W := V.filter (fun v => ∃ z, z ∈ Sset X ∧ z ∈ Dset X ∧ dist v z = 1 ∧
+    dist z (F.partner v) ≠ diam X ∧ beta < ang (F.u v) (F.u z)) with hW_def
+  -- step 1: each (c2) edge is a `δ`-edge at its `S ∖ D` end `v ∈ W`
+  have hsub : badC2 X F ⊆
+      W.biUnion (fun v => (partners X (minDist X) v).image (fun z => s(v, z))) := by
+    intro e he
+    obtain ⟨hbad, v, z, rfl, hvD, hzD, hne⟩ := mem_filter.1 he
+    obtain ⟨hv, hz, hvz, hd⟩ := mem_edges_mk (mem_filter.1 hbad).1
+    have hd1 : dist v z = 1 := by rw [hd, hX.minDist_eq]
+    rw [mem_biUnion]
+    exact ⟨v, mem_filter.2 ⟨mem_filter.2 ⟨hv, hvD⟩, z, hz, hzD, hd1, hne, lt_ang_of_bad F hbad⟩,
+      mem_image.2 ⟨z, mem_partners.2 ⟨mem_of_mem_Sset hz, Ne.symm hvz, hd⟩, rfl⟩⟩
+  have hcount : ((badC2 X F).card : ℝ) ≤ 6 * W.card := by
+    have h1 := (card_le_card hsub).trans card_biUnion_le
+    have h2 : ∑ v ∈ W, ((partners X (minDist X) v).image (fun z => s(v, z))).card ≤
+        ∑ _v ∈ W, 6 :=
+      sum_le_sum fun v _ => card_image_le.trans (card_partners_minDist_le X v)
+    rw [sum_const, smul_eq_mul] at h2
+    have : (badC2 X F).card ≤ 6 * W.card := by have := h1.trans h2; omega
+    exact_mod_cast this
+  -- step 2: the walk hypothesis at each `v ∈ W`
+  have hwalk : ∀ v ∈ W, ∃ x : Pt, (∀ y ∈ V, dist y x ≤ dist2 X) ∧ dist2 X - 1 ≤ dist v x ∧
+      dist v x / 201 ≤ |det2 (-F.u v) (x - v)| := by
+    intro v hvW
+    obtain ⟨hvV, z, hzS, hzD, hvz, -, hang⟩ := mem_filter.1 hvW
+    obtain ⟨hvS, hvD⟩ := mem_filter.1 hvV
+    have hxX : F.partner z ∈ X := F.partner_mem z hzS
+    have hzx : dist z (F.partner z) = diam X := F.partner_D z hzS hzD
+    have hΔ₂ := hX.large
+    have hK : ∀ y ∈ V, dist y (F.partner z) ≤ dist2 X := by
+      intro y hy
+      obtain ⟨hyS, hyD⟩ := mem_filter.1 hy
+      by_cases h : y = F.partner z
+      · rw [h, dist_self]; linarith
+      · exact dist_le_dist2 (mem_of_mem_Sset hyS) hxX
+          (dist_ne_diam_of_not_mem_Dset (mem_of_mem_Sset hyS) hyD hxX (Ne.symm h))
+    have hρ1 : dist2 X - 1 ≤ dist v (F.partner z) := by
+      have := dist_triangle z v (F.partner z)
+      have := dist2_le_diam X
+      rw [dist_comm z v, hvz, hzx] at *; linarith
+    exact ⟨F.partner z, hK, hρ1,
+      c2_det_bound hX F hvS hvD hzS hzD hvz hang (hK v hvV) hρ1⟩
+  have hW := hV.card_walk_mul_le (W := W) (filter_subset _ _) hX.large hwalk
+  have hpi := Real.pi_lt_d4
+  nlinarith
 
 /-- **Total bad edges** `≤ cBad`.
 
