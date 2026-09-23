@@ -729,51 +729,96 @@ theorem deg_core_L1_le_four {X : Finset Pt} {Δ Δ₂ : ℝ} (hT : TwoLargest X 
 
 /-! ## Theorem A and Corollary A1 -/
 
-/-- TODO: prove.
-What's missing: `2μ = esum X = esum (L₁ ∪ L₂) ≤ esum K + 2|(L₁ ∪ L₂) \ K|`; split `esum K` over
-`K ∩ L₁` and `K ∩ L₂` and use `deg_core_L2`.
-Acceptance: **Theorem A** (doubled): `2μ(Δ₂) ≤ 2|L₁| + 2|L₂| + Σ_{p ∈ L₁′} (deg′ p − 2)`.
-Depends on: `two_mul_multS`, `esum_eq_esum_L12`, `esum_le_core`, `deg_core_L2`, `minDeg2_core`. -/
+/-- **Theorem A** (doubled): `2μ(Δ₂) ≤ 2|L₁| + 2|L₂| + Σ_{p ∈ L₁′} (deg′ p − 2)`.
+Here `L₁′ = L₁ ∩ V(G′)` and `deg′ p ≥ 2` on `V(G′)`, so the truncated subtraction is exact. -/
 theorem theoremA {X : Finset Pt} {Δ Δ₂ : ℝ} (hT : TwoLargest X Δ Δ₂) :
     2 * multS X Δ₂ ≤ 2 * (L1 X).card + 2 * (L2 X).card +
       ∑ p ∈ L1 X ∩ core (L1 X ∪ L2 X) Δ₂, ((nbr (core (L1 X ∪ L2 X) Δ₂) Δ₂ p).card - 2) := by
-  sorry
+  set W := L1 X ∪ L2 X with hW
+  set K := core W Δ₂ with hK
+  have hd : Δ₂ ≠ 0 := hT.pos.ne'
+  have hKW : K ⊆ W := core_subset W Δ₂
+  have e1 : 2 * multS X Δ₂ = esum W Δ₂ := by rw [two_mul_multS hT.pos, esum_eq_esum_L12 hT]
+  have e2 : esum W Δ₂ ≤ esum K Δ₂ + 2 * (W \ K).card := esum_le_core hd W
+  have hsplit : K.filter (· ∈ L1 X) = L1 X ∩ K := by rw [filter_mem_eq_inter, inter_comm]
+  have e3 : esum K Δ₂ = ∑ p ∈ L1 X ∩ K, (nbr K Δ₂ p).card +
+      2 * (K.filter (· ∉ L1 X)).card := by
+    unfold esum
+    rw [← sum_filter_add_sum_filter_not K (· ∈ L1 X), hsplit]
+    congr 1
+    rw [sum_const_nat (m := 2) (fun v hv => ?_), mul_comm]
+    obtain ⟨hvK, hv1⟩ := mem_filter.1 hv
+    have hv2 : v ∈ L2 X := by
+      rcases mem_union.1 (hKW hvK) with h | h
+      · exact absurd h hv1
+      · exact h
+    exact deg_core_L2 hT hv2 hvK
+  have e4 : ∑ p ∈ L1 X ∩ K, (nbr K Δ₂ p).card =
+      ∑ p ∈ L1 X ∩ K, ((nbr K Δ₂ p).card - 2) + 2 * (L1 X ∩ K).card := by
+    rw [mul_comm, ← smul_eq_mul, ← sum_const, ← sum_add_distrib]
+    refine sum_congr rfl fun p hp => ?_
+    have : 2 ≤ (nbr K Δ₂ p).card := minDeg2_core W Δ₂ p (mem_inter.1 hp).2
+    omega
+  have e5 : (W \ K).card + K.card = (L1 X).card + (L2 X).card := by
+    rw [card_sdiff_add_card_eq_card hKW, hW, card_union_of_disjoint (disjoint_L1_L2 X)]
+  have e6 : (L1 X ∩ K).card + (K.filter (· ∉ L1 X)).card = K.card := by
+    rw [← hsplit]; exact card_filter_add_card_filter_not _
+  omega
 
-/-- TODO: prove.
-What's missing: `deg_{G′} p ≤ deg_X p ≤ 3`, so each summand of Theorem A is `≤ 1`.
-Acceptance: **Corollary A1**: under (H3), `2μ(Δ₂) ≤ 3|L₁| + 2|L₂|`.
-Depends on: `theoremA`, `nbr_mono`, `core_subset`. -/
+/-- **Corollary A1**: under (H3) (no point of `L₁` has `≥ 4` points at distance `Δ₂`),
+`2μ(Δ₂) ≤ 3|L₁| + 2|L₂|`. -/
 theorem corA1 {X : Finset Pt} {Δ Δ₂ : ℝ} (hT : TwoLargest X Δ Δ₂)
     (hH3 : ∀ p ∈ L1 X, (nbr X Δ₂ p).card ≤ 3) :
     2 * multS X Δ₂ ≤ 3 * (L1 X).card + 2 * (L2 X).card := by
-  sorry
+  have hA := theoremA hT
+  have hKX : core (L1 X ∪ L2 X) Δ₂ ⊆ X :=
+    (core_subset _ _).trans (union_subset (L1_subset X) (L2_subset X))
+  have hs : ∑ p ∈ L1 X ∩ core (L1 X ∪ L2 X) Δ₂,
+      ((nbr (core (L1 X ∪ L2 X) Δ₂) Δ₂ p).card - 2) ≤ (L1 X).card := by
+    calc _ ≤ ∑ p ∈ L1 X ∩ core (L1 X ∪ L2 X) Δ₂, 1 := sum_le_sum fun p hp => by
+            have h1 := card_le_card (nbr_mono hKX Δ₂ p)
+            have h2 := hH3 p (mem_inter.1 hp).1
+            omega
+      _ = (L1 X ∩ core (L1 X ∪ L2 X) Δ₂).card := by rw [card_eq_sum_ones]
+      _ ≤ (L1 X).card := card_le_card inter_subset_left
+  omega
 
-/-- TODO: prove.
-What's missing: `deg′ p ≤ min(h p, 4)` (`nbr_mono`, `deg_core_L1_le_four`); extend the sum from
-`L₁′` to `L₁` (nonnegative summands).
-Acceptance: **unconditional form**:
-`2μ(Δ₂) ≤ 2|L₁| + 2|L₂| + Σ_{p ∈ L₁} (min(h p, 4) − 2)` (truncated subtraction = `(·)⁺`).
-Depends on: `theoremA`, `deg_core_L1_le_four`. -/
+/-- **Unconditional form**: `2μ(Δ₂) ≤ 2|L₁| + 2|L₂| + Σ_{p ∈ L₁} (min(h p, 4) − 2)`, where
+`h p = #{x ∈ X : |px| = Δ₂}` and the truncated subtraction is `(·)⁺`. -/
 theorem corA1_uncond {X : Finset Pt} {Δ Δ₂ : ℝ} (hT : TwoLargest X Δ Δ₂) :
     2 * multS X Δ₂ ≤ 2 * (L1 X).card + 2 * (L2 X).card +
       ∑ p ∈ L1 X, (min (nbr X Δ₂ p).card 4 - 2) := by
-  sorry
+  have hA := theoremA hT
+  have hKX : core (L1 X ∪ L2 X) Δ₂ ⊆ X :=
+    (core_subset _ _).trans (union_subset (L1_subset X) (L2_subset X))
+  have hs : ∑ p ∈ L1 X ∩ core (L1 X ∪ L2 X) Δ₂,
+      ((nbr (core (L1 X ∪ L2 X) Δ₂) Δ₂ p).card - 2) ≤
+      ∑ p ∈ L1 X, (min (nbr X Δ₂ p).card 4 - 2) := by
+    calc _ ≤ ∑ p ∈ L1 X ∩ core (L1 X ∪ L2 X) Δ₂, (min (nbr X Δ₂ p).card 4 - 2) :=
+          sum_le_sum fun p hp => by
+            have h1 := card_le_card (nbr_mono hKX Δ₂ p)
+            have h2 := deg_core_L1_le_four hT (mem_inter.1 hp).1 (mem_inter.1 hp).2
+            omega
+      _ ≤ _ := sum_le_sum_of_subset inter_subset_left
+  omega
 
-/-- TODO: prove.
-What's missing: each summand of `corA1_uncond` is `≤ 2`.
-Acceptance: CDL's layer bound `μ(Δ₂) ≤ 2|L₁| + |L₂|`.
-Depends on: `corA1_uncond`. -/
+/-- CDL's layer bound `μ(Δ₂) ≤ 2|L₁| + |L₂|` (CDL Theorem 1.3, first bound). -/
 theorem cdl_layer_bound {X : Finset Pt} {Δ Δ₂ : ℝ} (hT : TwoLargest X Δ Δ₂) :
     multS X Δ₂ ≤ 2 * (L1 X).card + (L2 X).card := by
-  sorry
+  have h := corA1_uncond hT
+  have hs : ∑ p ∈ L1 X, (min (nbr X Δ₂ p).card 4 - 2) ≤ 2 * (L1 X).card := by
+    calc _ ≤ ∑ p ∈ L1 X, 2 := sum_le_sum fun p _ => by omega
+      _ = 2 * (L1 X).card := by rw [sum_const, smul_eq_mul, mul_comm]
+  omega
 
-/-- TODO: prove.
-What's missing: `|L₁| + |L₂| ≤ |X|` (disjoint subsets) and arithmetic.
-Acceptance: under (H3), `|L₁| ≤ 2 m₃` (with `m₃ = |X| − |L₁| − |L₂|`) implies `μ(Δ₂) ≤ |X|`.
-Depends on: `corA1`, `disjoint_L1_L2`, `L1_subset`, `L2_subset`. -/
+/-- Under (H3), `|L₁| ≤ 2 m₃` (with `m₃ = |X| − |L₁| − |L₂|`) implies `μ(Δ₂) ≤ |X|`. -/
 theorem corA1_le_card {X : Finset Pt} {Δ Δ₂ : ℝ} (hT : TwoLargest X Δ Δ₂)
     (hH3 : ∀ p ∈ L1 X, (nbr X Δ₂ p).card ≤ 3)
     (h : (L1 X).card ≤ 2 * (X.card - (L1 X).card - (L2 X).card)) : multS X Δ₂ ≤ X.card := by
-  sorry
+  have h1 := corA1 hT hH3
+  have h2 : (L1 X).card + (L2 X).card ≤ X.card := by
+    rw [← card_union_of_disjoint (disjoint_L1_L2 X)]
+    exact card_le_card (union_subset (L1_subset X) (L2_subset X))
+  omega
 
 end Erdos132Layer
