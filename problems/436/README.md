@@ -134,3 +134,6 @@ Runs:
 - R = 6,634,000 and R = 5,795,000: bisection probes, geometric between the last SAT R and 7.59M.
 
 Purpose: locate the SAT→hard transition. A quick SAT result raises the lower bound. A stall localises the smallest hard instance, which is the best target for an UNSAT proof. No proof is logged: an UNSAT result would be re-run with proof output (disk: about 10 GB free).
+
+- 2026-09-23 12:40: probe R=5,420,000 SAT in 27 s, first run 5,420,007 ⇒ **Λ(5,3) ≥ 5,420,007** (new best lower bound, via Chebotarev as before).
+  R=5,795,000 had not returned after 17+ CPU-min (trend predicted ~75 s), so the transition lies in (5.42M, 5.795M]. Probe R=5,605,000 launched.
