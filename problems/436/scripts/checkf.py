@@ -13,18 +13,16 @@ import numpy as np
 
 
 def spf_sieve(n: int) -> np.ndarray:
-    """smallest prime factor array spf[0..n] (spf[p] == p for primes).
-    What's missing: body (numpy sieve, int32).
-    Acceptance: spf[12] == 2, spf[35] == 5, spf[p] == p for primes.
+    """smallest prime factor array spf[0..n] as uint16 (n < 65536**2); spf[p] == 0 for primes.
+    Acceptance: spf[12] == 2, spf[35] == 5, spf[p] == 0 for primes.
     Depends on: nothing.
     """
-    spf = np.zeros(n + 1, dtype=np.int32)
+    assert n < 65536 ** 2
+    spf = np.zeros(n + 1, dtype=np.uint16)
     for p in range(2, int(n ** 0.5) + 1):
         if spf[p] == 0:
             seg = spf[p * p::p]
             seg[seg == 0] = p
-    idx = np.nonzero(spf == 0)[0]
-    spf[idx] = idx  # primes (and 0, 1: unused)
     return spf
 
 
@@ -73,7 +71,9 @@ def compute_f(k: int, n: int, spf: np.ndarray, pv: dict) -> np.ndarray:
             live = rem > 1
             if not live.any():
                 break
-            q = spf[rem[live]]
+            r = rem[live]
+            q = spf[r].astype(np.int32)
+            q[q == 0] = r[q == 0]  # r is prime
             acc[live] = (acc[live] + val[q]) % k
             rem[live] //= q
         f[lo:lo + len(rem)] = acc
@@ -86,12 +86,17 @@ def first_run(f: np.ndarray, l: int, lim: int):
     Acceptance: agrees with `lamenc run` on the 5.75M model (5,750,107).
     Depends on: compute_f.
     """
-    z = f[1:lim + l] == 0  # z[i] <-> f(i+1) == 0
-    run = z[:lim].copy()
-    for j in range(1, l):
-        run &= z[j:lim + j]
-    hit = np.nonzero(run)[0]
-    return int(hit[0]) + 1 if len(hit) else None
+    chunk = 1 << 24
+    for lo in range(1, lim + 1, chunk):  # r in [lo, hi)
+        hi = min(lim + 1, lo + chunk)
+        z = f[lo:hi + l - 1] == 0
+        run = z[:hi - lo].copy()
+        for j in range(1, l):
+            run &= z[j:hi - lo + j]
+        hit = np.nonzero(run)[0]
+        if len(hit):
+            return lo + int(hit[0])
+    return None
 
 
 def main() -> None:
