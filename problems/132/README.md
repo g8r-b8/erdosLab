@@ -106,14 +106,14 @@ n pairs? Must the number of such distances → ∞ (perhaps ≥ n^{1−o(1)})?
 - Convex n = 7 (and maybe 11) → angle_B3.md — DONE (f8b09f7). Convex n = 7 ⇒ k ≥ 3 (k = number of rare distances), proved two ways: from the literature
   ([EF95b] r₂ ≤ n plus Altman), and self-contained. **n = 11 ⇒ k ≥ 3: NEW, computer-assisted** — a SAT refutation of ordinal
   distance-rank colourings under the convex-quadrilateral inequality only, with the DRUP proof checked by our own RUP checker.
-  n = 13: everything certified except (13,7,5), which is solver-only. n = 15: hard case unresolved.
+  n = 13: now fully certified (drat-trim + lrat-check, incl. (13,7,5)). n = 15: hard case unresolved.
   Conjecture Q-ORD: for n ≥ 7, the ordinal quadrilateral inequality alone forces k ≥ 3.
   Why it matters for PROMPT.md's Lean goal: the n = 11 statement is purely finite, so it is a candidate
   for a Lean-verified certificate (LRAT via Lean's bv_decide/LRAT checker), plus a small Lean lemma deriving the ordinal
   constraints from geometry (diagonals of a convex quadrilateral beat the opposite sides).
 
 ## Next steps
-0. B3: re-check the n = 11 and (13,7,5) proofs with drat-trim (install via brew); save the CNFs; then a Lean LRAT check.
+0. B3: n=7,11,13 certified by drat-trim + lrat-check (DONE). Next: Lean formalisation (quadrilateral lemma, verified encoder, LRAT check); n=15 hard case.
 1. Rule-4 novelty audit of the 54/37 bound (A2) and B2 Theorem A.
 2. Close the REFEREE_A2 gaps → write-up of 54/37 (the strongest "nontrivial result" candidate for the prize).
 3. n = 7 convex k ≥ 3 by exact classification of 7-point convex 4-distance sets.

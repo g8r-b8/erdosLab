@@ -9,7 +9,7 @@
 |---|---|---|
 | 1 | **Thm 7.** Every strictly convex 7-set has k ≥ 3. | **proved, twice**: (a) corollary of published results (Altman + Erdős–Fishburn 1995 §3, which quotes Fishburn's DIMACS report 92-17); (b) independent computer proof from counting + the quadrilateral inequality only. Proof (b) has an exhaustive pure-Python search and a checked DRUP refutation. |
 | 2 | **Thm 11.** Every strictly convex 11-set has k ≥ 3. | **proved (computer-assisted)**: counting + quadrilateral inequality + a SAT refutation. The refutation is found by 4 solvers and checked by our own RUP checker (§4). **Not implied by the literature**: r₂⁽ⁿ⁾ is unknown for n ≥ 9. |
-| 3 | **Thm 13.** Every strictly convex 13-set has k ≥ 3. | **proved modulo trusting the solver on one instance**. Everything is certified except (13,7,5), which CaDiCaL and Glucose both report UNSAT; its DRUP check was stopped unfinished (Python checker too slow; needs drat-trim). |
+| 3 | **Thm 13.** Every strictly convex 13-set has k ≥ 3. | **proved (computer-assisted), fully certified**: every case, including (13,7,5), passes drat-trim + lrat-check (§7). |
 | 4 | n = 15 | D ≤ 7 cases refuted (CaDiCaL). The hard case (15,8,6) was unresolved after more than 20 min of CaDiCaL at commit time. |
 | 5 | **Ordinal phenomenon.** For 7 ≤ n ≤ 13 the whole statement follows from the *ordinal* quadrilateral inequality alone. No circle/triangle rigidity and no Altman/Fishburn is needed. It also reproves Altman's D ≥ ⌊n/2⌋ ordinally for n ≤ 15. It fails at n = 5, 6: ordinal counterexample colourings exist there, and geometry must be used. | computational observation; Conjecture Q-ORD (§5) |
 | 6 | Reconfirmations without the Fishburn / Erdős–Fishburn classifications: n = 9 (B2 Thm B), and even n = 8, 10, 12 (B2 Thm A). | computer (SAT; n = 9 also DRUP-checked) |
@@ -249,3 +249,17 @@ infrastructure consumes.
 Negative control: a truncated (11,6,4) proof gives `s NOT VERIFIED`. So **Theorem 11 is certified by two
 independent checkers**, trusting only the encoder `b3_sat.build`. CNF, proof and LRAT files are regenerated
 deterministically by the script; they are not stored in git because of their size.
+
+**n = 13 (same pipeline, Q-only encoding, which is weaker, so UNSAT under Q implies UNSAT under TQ):**
+
+| instance | lemmas | drat-trim | lrat-check |
+|---|---|---|---|
+| (13,2,0) | 2 | s VERIFIED | VERIFIED |
+| (13,3,0) | 7 | s VERIFIED | VERIFIED |
+| (13,4,0) | 82 | s VERIFIED | VERIFIED |
+| (13,5,0) | 448 | s VERIFIED | VERIFIED |
+| (13,6,4) | 8,463 | s VERIFIED | VERIFIED |
+| (13,7,5) | 446,686 (37 MB DRUP, 82 MB LRAT) | s VERIFIED (128 s) | VERIFIED |
+
+So **Theorem 13 is now fully certified** (not only "modulo trusting the solver"). This supersedes the §0 row 3 status.
+Convex k ≥ 3 now holds for all 6 ≤ n ≤ 13 with certificates.
