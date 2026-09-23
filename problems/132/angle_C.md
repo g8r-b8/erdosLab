@@ -24,7 +24,7 @@ A reformulation that is useful: CDL's condition 2|L₁| + |L₂| ≤ n is the sa
 **Proof.**
 1. All Δ₂-pairs lie in L₁ ∪ L₂ (CDL observations (1) and (2)).
 2. Each deletion made while pruning to the 2-core removes at most one edge. So e(G) ≤ e(G') + |V(G) \ V(G')|.
-3. By [Ve96, Prop 3] (CDL obs. (4)), every q ∈ L₂' has degree exactly 2 in G'. Hence
+3. Every q ∈ L₂' has degree exactly 2 in G' ([Ve96, Prop 3] per CDL obs. (4); now proved directly in VERIFY_A1b.md from Ve87's inner-point argument). Hence
    e(G') = ½ Σ_{v∈G'} deg' = |V(G')| + ½ Σ_{p∈L₁'} (deg'(p) − 2).
 4. Adding the two estimates gives the bound. ∎
 
@@ -100,7 +100,7 @@ CDL use the bare case of this implicitly in the proof of their Theorem 1.2. Sinc
   - Given the conjecture's stronger form (O(1) degree-3 core vertices), Theorem A proves (a) for general-position sets with at least a constant number of points of depth ≥ 3.
   - Lemma T is the intended tool. A proof needs Vesztergombi's case analysis redone, and I have not done it.
 - **C1 evidence (iter 8, `scripts/c1_greedy.py`, floating point, tolerance 1e-9).** Greedy constructive search: Δ₂ = 1, Δ ∈ [1.02, 1.9]. New points go at unit ∩ unit, unit ∩ Δ, or random unit/Δ placements. Every candidate is rejected if it makes 4 points concyclic or creates a distance in (1, Δ). Over 7 seeds × 300 trials the best μ(Δ₂) − n was +1 (n = 8–11), dropping to ≤ 0 for n ≥ 12 and to −5 at n = 21. This is consistent with C1 but weak, because greedy search is myopic.
-- Theorem A relies on [Ve96, Prop 3], cited via CDL; I did not re-prove it. B2 relies on Pach–de Zeeuw, whose constants are not explicit.
+- Theorem A relied on [Ve96, Prop 3], cited via CDL; now proved directly (VERIFY_A1b.md, 2026-09-23), so Theorem A and Cor A1 are unconditional. B2 relies on Pach–de Zeeuw, whose constants are not explicit.
 - Convex layers in the scripts are computed with scipy in floating point; the equalities were checked with tolerance 1e-9.
 
 ## Novelty evidence
