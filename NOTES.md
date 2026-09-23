@@ -263,6 +263,16 @@ PROMPT.md rule 4: check all cross-referenced/sibling problems and their threads.
   734 PBD construction for all n (Erdős: "probably not very difficult") — no finite core, open
   but not quick; 719 Erdős–Sauer needs Turán K4^3 values; 778 game for all n; 782 squares.
 
+## #436 PARKED (2026-09-23, user's call; recorded from the #436 session)
+- Best bound: **Λ(5,3) ≥ 2,000,028,671**, from a warm-start local search plus a small-prime smooth fix. The witness is in
+  problems/436/logs/warmstart/ and was verified by 4 independent checkers (commits ee53d03..ba31de7).
+- It is not a resolution. The site says the problem "cannot be resolved with a finite computation". The witness analysis shows
+  f ≈ Ω(n) mod 5 (Liouville-like), so if Λ(5,3) is finite it is likely astronomically large. Finiteness reduces to
+  3-point log-Elliott correlations with exponent sum ≡ 0 mod 5 (problems/436/THEORY.md).
+- F_100(∞) is SAT: the Luca–Najman triple bound is 407,498,958, plus the erratum's extra triple 43,184,400.
+- There is no prize. Effort moves to #132 (the $100 prize for "any nontrivial result"). Full details: problems/436/README.md.
+- The earlier lines above quoting Λ(5,3) ≥ 5,062,794 are superseded.
+
 ## #436 SAT attack (agent, 2026-09-23) — see problems/436/README.md
 - Reduction pinned: Λ(k,l) ≤ Λ_comb(k,l) := max over completely additive f: N→Z/k of first zero
   l-run (elementary: k-th power character mod p, all p); equality for odd k via Kummer/Chebotarev.
