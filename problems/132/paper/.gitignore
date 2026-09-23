@@ -9,3 +9,7 @@
 *.synctex.gz
 *.toc
 build.log
+
+# arXiv bundle: keep the generated .bbl (arXiv needs it); ignore build output there
+!arxiv/paper.bbl
+arxiv/*.pdf

@@ -1,0 +1,109 @@
+\providecommand{\bysame}{\leavevmode\hbox to3em{\hrulefill}\thinspace}
+\providecommand{\MR}{\relax\ifhmode\unskip\space\fi MR }
+% \MRhref is called by the amsart/book/proc definition of \MR.
+\providecommand{\MRhref}[2]{%
+  \href{http://www.ams.org/mathscinet-getitem?mr=#1}{#2}
+}
+\providecommand{\href}[2]{#2}
+\begin{thebibliography}{10}
+
+\bibitem{Alt63}
+Edward Altman, \emph{On a problem of {P}.~{E}rd{\H{o}}s}, Amer. Math. Monthly
+  \textbf{70} (1963), 148--157.
+
+\bibitem{Alt72}
+\bysame, \emph{Some theorems on convex polygons}, Canad. Math. Bull.
+  \textbf{15} (1972), 329--340.
+
+\bibitem{glucose}
+Gilles Audemard and Laurent Simon, \emph{Predicting learnt clauses quality in
+  modern {SAT} solvers}, Proceedings of IJCAI 2009, 2009, pp.~399--404.
+
+\bibitem{EP132}
+Thomas~F. Bloom, \emph{Erd{\H{o}}s {P}roblem \#132},
+  \url{https://www.erdosproblems.com/132}, Accessed 23 September 2026. The page
+  records Erd{\H{o}}s's \$100 offer for ``any nontrivial result'' with the
+  reference key [Er97e].
+
+\bibitem{CDL25}
+Felix~Christian Clemen, Adrian Dumitrescu, and Dingyuan Liu, \emph{On
+  multiplicities of interpoint distances}, Acta Math. Hungar. \textbf{177}
+  (2025), 231--245, arXiv:2505.04283 (v5, 3 Feb 2026).
+
+\bibitem{lrat}
+Lu{\'\i}s Cruz-Filipe, Marijn J.~H. Heule, Jr. Hunt, Warren~A., Matt Kaufmann,
+  and Peter Schneider-Kamp, \emph{Efficient certified {RAT} verification},
+  Automated Deduction -- CADE 26, Lecture Notes in Comput. Sci., vol. 10395,
+  Springer, 2017, pp.~220--236.
+
+\bibitem{lean4}
+Leonardo de~Moura and Sebastian Ullrich, \emph{The {L}ean 4 theorem prover and
+  programming language}, Automated Deduction -- CADE 28, Lecture Notes in
+  Comput. Sci., vol. 12699, Springer, 2021, pp.~625--635.
+
+\bibitem{EF95b}
+Paul Erd{\H{o}}s and Peter Fishburn, \emph{Intervertex distances in convex
+  polygons}, Discrete Appl. Math. \textbf{60} (1995), 149--158.
+
+\bibitem{EF95a}
+\bysame, \emph{Multiplicities of interpoint distances in finite planar sets},
+  Discrete Appl. Math. \textbf{60} (1995), 141--147.
+
+\bibitem{EF96}
+\bysame, \emph{Convex nonagons with five intervertex distances}, Geom. Dedicata
+  \textbf{60} (1996), 317--332.
+
+\bibitem{forum132}
+\emph{Erd{\H{o}}s {P}roblem \#132 forum thread and proof claims},
+  \url{https://www.erdosproblems.com/forum/thread/132}, 2026, Comments by
+  Z.~Rafik (28 Jan 2026), J.~Marchetto (5 Jul 2026), ienjoymath (25 Jul 2026);
+  proof claim by E.~Beller (23 Aug 2026). Accessed 23 September 2026.
+
+\bibitem{Fi92}
+Peter Fishburn, \emph{Convex polygons with few vertices}, Tech. Report 92-17,
+  DIMACS, 1992.
+
+\bibitem{Fi95}
+\bysame, \emph{Convex polygons with few intervertex distances}, Comput. Geom.
+  \textbf{5} (1995), 65--93.
+
+\bibitem{HP34}
+Heinz Hopf and Erika Pannwitz, \emph{Aufgabe {N}r.~167}, Jahresber. Deutsch.
+  Math.-Verein. \textbf{43} (1934), 114.
+
+\bibitem{ienjoymath}
+{ienjoymath}, \emph{Comment on {E}rd{\H{o}}s {P}roblem \#132 (lower bound $9/7$
+  for {P}roblem 1.6 of {C}lemen--{D}umitrescu--{L}iu)}, Forum post,
+  \url{https://www.erdosproblems.com/forum/thread/132}, 25 July 2026; note at
+  \url{https://github.com/mathematiclover1337/erdos-132-note}, 2026.
+
+\bibitem{lyfar}
+{lyfar}, \emph{rare-distance-fields},
+  \url{https://github.com/lyfar/rare-distance-fields}, 2026, Lean project on
+  rare distances for point sets with coordinates in restricted fields; accessed
+  23 September 2026.
+
+\bibitem{MP11}
+Filip Mori\'c and David Pritchard, \emph{Counting large distances in convex
+  polygons: a computational approach}, arXiv:1103.0412, 2011.
+
+\bibitem{mathlib}
+{The mathlib Community}, \emph{The {L}ean mathematical library}, Proceedings of
+  the 9th ACM SIGPLAN International Conference on Certified Programs and Proofs
+  (CPP 2020), 2020, pp.~367--381.
+
+\bibitem{Ve87}
+Katalin Vesztergombi, \emph{On large distances in planar sets}, Discrete Math.
+  \textbf{67} (1987), 191--198.
+
+\bibitem{Ve96}
+\bysame, \emph{The two largest distances in finite planar sets}, Discrete Math.
+  \textbf{150} (1996), 379--386.
+
+\bibitem{drattrim}
+Nathan Wetzler, Marijn J.~H. Heule, and Jr. Hunt, Warren~A., \emph{{DRAT-trim}:
+  Efficient checking and trimming using expressive clausal proofs}, Theory and
+  Applications of Satisfiability Testing -- SAT 2014, Lecture Notes in Comput.
+  Sci., vol. 8561, Springer, 2014, pp.~422--429.
+
+\end{thebibliography}

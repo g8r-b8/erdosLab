@@ -1,70 +1,88 @@
 # Erdős #132 paper: submission checklist
 
-Status: the draft `paper.tex` / `paper.pdf` builds cleanly. **Nothing has been posted or submitted.**
+Status (2026-09-23):
+- The draft `paper.tex` / `paper.pdf` builds cleanly (21 pp.).
+- The main 54/37 theorem is **fully formalised in Lean**: sorry-free, standard axioms only (see `../lean/README.md`).
+- **Nothing has been posted, sent or submitted.**
 
-## 1. Before anything is public
+Legend:
+- [x] done or prepared
+- [ ] to do by the author
+- (P) a draft is prepared in this directory
 
-- [ ] **Human expert read.** A human expert in discrete geometry reads the whole proof. At minimum:
-  - Theorem 1 (§§2–7). The least standard parts are the ownership/pairing count (§5.2, Region II) and the incidence count (§6, Step 4).
-  - The layer bound (§8: Prop. 8.2, Lemma 8.4, Thms 8.5–8.6).
+## 0. Prepared artefacts
 
-  All checks so far are AI-driven: two adversarial referee passes plus scripts.
-- [ ] **Author's own verification statement.** Fill in the red placeholder under "Statement on AI assistance" in `paper.tex`, plus the author, affiliation and email placeholders.
-- [ ] **Re-check priority / novelty (same day as posting).**
-  - [ ] ienjoymath's announced "LP analysis" companion note: https://github.com/mathematiclover1337/erdos-132-note. At our last check (2026-09-23) `RESULT3-upper-bound-program.md` and `NOTES.md` returned 404, and the repo was last pushed 2026-07-25. If it has appeared, compare it with Theorem 1 and cite it.
-  - [ ] #132 forum thread (new comments after post-8100, 25 Jul 2026) and the proof-claims page.
-  - [ ] arXiv listings for Clemen, Dumitrescu, D. Liu, and a search for "second largest distance" / "Problem 1.6".
-  - [ ] Lean Pool / lyfar repos (very active) for convex-position rare-distance results.
-- [ ] **Bibliography details.**
-  - [ ] Confirm the exact reference behind erdosproblems.com's key [Er97e] (Erdős's \$100 offer), and cite it directly. It is currently cited via the website.
-  - [ ] Confirm the CDL journal details (Acta Math. Hungar. 177 (2025) 231–245) against the published version.
-  - [ ] Check Altman 1963/1972 statements against the originals (currently quoted via Fishburn 1995, Thm 1).
-- [ ] **Repository link.** Make the repo, or a trimmed copy with `problems/132/scripts/` and `Erdos/Erdos/E132Convex.lean`, public, and replace `[REPOSITORY URL]` in the paper and the forum draft. Do not publish the paywalled PDFs in `novelty_sources/`; they are gitignored.
-- [ ] **Reproducibility.** Optionally archive the DRUP/LRAT certificates (~120 MB for (13,7,5)) on Zenodo, since they are regenerated rather than stored.
+- [x] `PREFLIGHT.md`: novelty re-check of 2026-09-23. No red flags.
+- [x] `arxiv/`: clean arXiv source (`paper.tex`, `paper.bbl`, `refs.bib`) and `arxiv/arxiv-source.tar.gz`, verified to compile from a clean extract. The repository URL is still a TODO: `https://github.com/<user>/erdos132-lean`.
+- [x] `ARXIV_METADATA.md`: title, abstract (1368 chars), categories, comments, MSC, endorsement notes.
+- [x] `FORUM_POST_DRAFT.md`, updated for the full Lean formalisation.
+- [x] `EMAILS_DRAFT.md`: emails to Clemen / Dumitrescu / Dingyuan Liu and to T. Bloom.
 
-## 2. arXiv
+## 1. Ordered checklist
 
-- [ ] Primary class math.CO, cross-list math.MG.
-- [ ] Put the AI-assistance statement in the paper (already present) and in the arXiv comments field.
-- [ ] License: default arXiv licence or CC BY.
+1. [ ] **Independent kernel re-check of the Lean proofs.**
+   - Run `lean4checker` (built for the same toolchain, `v4.35.0-rc2`) on the modules `Erdos.E132Main`, `Erdos.E132Layer`, `Erdos.E132ConvexFinset` and `Erdos.E132Convex13`. For example, from `Erdos/`: `lake env lean4checker Erdos.E132Main`.
+   - Re-run `#print axioms Erdos132Main.erdos132_main` and confirm `[propext, Classical.choice, Quot.sound]`.
+   - Record the results (date, commit hash) in `../lean/README.md` and in the paper's appendix.
+2. [ ] **Human check of the Lean statement.**
+   - Read `E132MainDefs.lean` and confirm that `mult`, `dist2` and `minDist` mean what the paper says. In particular, check the behaviour for sets with fewer than 3 distinct distances, where `dist2` must be defined somehow.
+   - The formal proof is only as good as the statement.
+3. [ ] **Human expert read (strongly recommended, and required before journal submission).**
+   - Theorem 1, §§2–7: the ownership/pairing count (§5.2, Region II) and the incidence count (§6, Step 4). The Lean proof now covers the logic, but the exposition should still be readable and correct.
+   - The layer bound in §8.
+   - All checks so far are AI-driven: referee passes, scripts and Lean.
+4. [ ] **Fix small inconsistencies in `paper.tex`, then mirror them into `arxiv/paper.tex`:**
+   - The appendix item "*Lean 4.* The statements for n=7 and n=11 are formalised" should say n = 7, 11, 13.
+   - "Limitations of the formalisation (iii) … the main theorem is treated in the next paragraph": the main-theorem paragraph comes *before* it.
+   - The "*Lean.*" reproduction paragraph at the very end lists only the convex files. Add `lake build` for `E132Main*` / `E132Layer`, with timings.
+   - Optionally add "The main theorem is formalised in Lean 4" to the abstract (the arXiv abstract in `ARXIV_METADATA.md` already has it).
+   - Optionally add `\address` / `\email` (a public contact address) to the paper.
+5. [ ] **Bibliography details.**
+   - Confirm the source behind [Er97e] (Erdős's \$100 offer).
+   - Confirm the CDL journal details (Acta Math. Hungar. 177 (2025) 231–245; https://link.springer.com/article/10.1007/s10474-025-01562-y).
+   - Check the Altman 1963/1972 statements against the originals.
+6. [ ] **Publish the repository.**
+   - Make public a repo (or a trimmed copy) with `problems/132/scripts/`, `Erdos/` (the E132 files plus the lakefile/manifest) and `problems/132/lean/README.md`.
+   - Do **not** include the paywalled PDFs in `novelty_sources/`.
+   - Replace `https://github.com/<user>/erdos132-lean` in `arxiv/paper.tex` (and replace `\placeholder{REPOSITORY URL}` in `paper.tex`), `ARXIV_METADATA.md`, `FORUM_POST_DRAFT.md` and `EMAILS_DRAFT.md`.
+   - Rebuild the `.bbl` and tarball (commands in `ARXIV_METADATA.md`).
+   - Optionally put the DRUP/LRAT certificates (about 120 MB for (13,7,5)) on Zenodo.
+7. [ ] **Same-day novelty re-check.** Repeat the "Still to do" list in `PREFLIGHT.md`: the forum thread, ienjoymath's repo (the `RESULT3-upper-bound-program.md` / `NOTES.md` 404s), CDL citations, and the arXiv author listings.
+8. [ ] **arXiv endorsement and submission.**
+   - Get a math.CO endorsement (see `ARXIV_METADATA.md`).
+   - Upload `arxiv/arxiv-source.tar.gz`.
+   - Primary math.CO, cross-list math.MG, MSC 52C10 (68V20, 52A10), comments line as drafted.
+   - Check the arXiv PDF preview.
+9. [ ] **Forum post** (erdosproblems.com, thread 132).
+   - Only after the arXiv version exists and steps 1–2 are done.
+   - Use `FORUM_POST_DRAFT.md`, which includes the AI disclosure. The poster must be able to vouch for the post.
+   - Link the PDF; don't paste the proof.
+10. [ ] **Emails** (`EMAILS_DRAFT.md`).
+    - (a) CDL authors, after arXiv. Take the addresses from their public pages.
+    - (b) T. Bloom, after the forum post is live.
+    - Do not ask for an endorsement or mention the prize in the first emails.
+11. [ ] **Journal choice and submission.**
+    - Natural fit: *Acta Mathematica Hungarica*, where CDL appeared.
+    - Alternatives: *Discrete & Computational Geometry*, *European J. Combin.*, *Electronic J. Combin.* (open access), *Discrete Mathematics*, *Comput. Geom. Theory Appl.*, *Periodica Math. Hungarica*.
+    - Check the venue's policy on AI-assisted work and disclose accordingly.
+    - Possible referees: Vesztergombi, Swanepoel, Pach, or the CDL authors (if they have not collaborated with you). Avoid conflicts.
+    - The computer-assisted convex part could be split off, e.g. to *Experimental Mathematics*, if a referee objects.
+12. [ ] **Prize contact, only after journal publication.**
+    - Erdős offered \$100 for "any nontrivial result" [Er97e].
+    - Payment needs publication in a reputable journal, and it is handled by the **Combinatorics Foundation / Steve Butler**, not by erdosproblems.com.
+    - Send the journal reference and the [Er97e] documentation.
+    - Be realistic: 54/37 bounds CDL's Problem 1.6, which is related to #132 but does not answer either question of #132. Whether it counts is for the administrators to decide.
 
-## 3. Forum post (erdosproblems.com, thread 132)
+## 2. Known limitations to keep stated (do not upgrade)
 
-- [ ] Only after the arXiv version exists and the human read is done. Use `FORUM_POST_DRAFT.md`.
-- [ ] Mandatory AI-use disclosure, which is in the draft. The poster must understand and verify the math personally; there is no Lean proof of the main theorem.
-- [ ] Long proof, so link the PDF rather than pasting it.
-
-## 4. Journal (needed for the prize)
-
-Suitable venues for a discrete-geometry result of this size (~20 pages, one main theorem plus two side results):
-- *Discrete & Computational Geometry*
-- *Combinatorica* (a stretch)
-- *European Journal of Combinatorics*
-- *Electronic Journal of Combinatorics* (open access)
-- *Computational Geometry: Theory and Applications*
-- *Acta Mathematica Hungarica* (where CDL appeared)
-- *Discrete Mathematics*
-- *Periodica Mathematica Hungarica*
-
-The computer-assisted convex part might alternatively be split off to a journal that welcomes certified computation (e.g. *Experimental Mathematics*), or dropped from the main submission if a referee objects.
-
-- [ ] Choose a venue. Check its policy on AI-assisted work and disclose accordingly.
-- [ ] Suggested referees: authors of related work (e.g. CDL authors, Vesztergombi, Swanepoel, Pach). Avoid conflicts.
-
-## 5. Prize (\$100, "any nontrivial result", [Er97e])
-
-- [ ] Prize payment requires **publication in a reputable journal**. The site owner has no say in this.
-- [ ] Prizes are handled by the **Combinatorics Foundation / Steve Butler**. Contact them with:
-  - the journal reference;
-  - documentation of Erdős's offer, i.e. the [Er97e] source as cited on erdosproblems.com/132.
-- [ ] Be realistic. Whether 54/37 (a bound for CDL's Problem 1.6), the layer-bound class, or the convex n ≤ 13 results count as a "nontrivial result" on #132 is for the prize administrators to judge. Problem 1.6 is related to #132, but it does not by itself answer either question of #132.
-
-## 6. Known limitations to keep stated (do not upgrade)
-
-- Theorem 1: hand proof, not formalised. The constant C₀ = 3·1.51·10⁹ + 10⁸ is not optimised.
-- Cor. 8.7 (the A1 class) needs hypothesis (H3). The sharpness examples were checked only in floating point.
-- Convex position:
-  - n = 6, 7, 8 are literature corollaries (r₂ values from Fishburn's DIMACS report 92-17, as quoted in Erdős–Fishburn 1995).
+- **Theorem 1.**
+  - Hand proof, **and fully formalised in Lean** (sorry-free, standard axioms).
+  - The formal proof deviates from the text in three places (Ve87 via the 2-core; direction-counting instead of arc length, so Lemma 5.2 is unused; a weaker mixed-T bound, 1200 instead of 71, which only changes C₀).
+  - C₀ is not optimised, and the gap to 9/7 is open.
+- **Cor. 8.7 (the A1 class)** needs hypothesis (H3). The sharpness examples were checked only in floating point. It is formalised in `E132Layer.lean` with standard axioms.
+- **Convex position.**
+  - n = 6, 7, 8 are literature corollaries.
   - Even n ≥ 10 is a parity-sharp corollary of CDL's proof.
-  - n = 11, 13 trust the Python CNF encoder on the drat-trim route. The Lean route (n = 7, 11 only) trusts the compiled `bv_decide` checker and is stated for ordered polygons.
+  - n = 9 comes from Erdős–Fishburn.
+  - n = 11, 13 are SAT-certified (drat-trim/lrat-check, trusting the Python encoder) and in Lean via `bv_decide` (trusting compiled code). n = 7 is also in Lean.
   - n = 15 is open.

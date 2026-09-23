@@ -1,0 +1,74 @@
+# Email drafts (DRAFT: do not send)
+
+**Send these only after:**
+- the arXiv version exists, or you have decided to send the PDF privately;
+- the repository URL is real;
+- the same-day re-check in `PREFLIGHT.md` has been done.
+
+Fill in every `<…>` placeholder. Take recipient addresses from the authors' **own public pages** (links below). This file deliberately contains no addresses.
+
+---
+
+## (a) To Clemen, Dumitrescu and Liu
+
+**Recipients.** The affiliations are as given on arXiv:2505.04283v5 and on the authors' public pages, checked 2026-09-23. Confirm them before sending.
+- **Felix Christian Clemen**, PIMS Postdoctoral Fellow, University of Victoria. Public page: https://sites.google.com/view/felix-christian-clemen/
+- **Adrian Dumitrescu**, Algoresearch L.L.C., Milwaukee, WI. Use the address on his arXiv papers or homepage.
+- **Dingyuan Liu**, Karlsruhe Institute of Technology. Public pages: https://www.math.kit.edu/iag6/~d.liu/en and https://sites.google.com/view/liudyyy
+
+**To:** `<Clemen address>`, `<Dumitrescu address>`, `<Liu address>`
+**Subject:** An upper bound 54/37 for Problem 1.6 in "On multiplicities of interpoint distances"
+
+> Dear Dr Clemen, Dr Dumitrescu and Mr Liu,
+>
+> I have been working on Problem 1.6 of your paper "On multiplicities of interpoint distances" (arXiv:2505.04283; Acta Math. Hungar. 2025). It asks for
+> L = limsup_n max_{|X|=n} min{μ(Δ₂), μ(δ)}/n, and the known bounds were 9/7 ≤ L ≤ 3/2. The lower bound 9/7 is a construction posted by the user ienjoymath on the erdosproblems.com #132 forum thread; the upper bound is Vesztergombi's μ(Δ₂) ≤ 3n/2.
+>
+> I have written a paper proving that min{μ(Δ₂), μ(δ)} ≤ (54/37)n + C₀ for every n-point planar set, where C₀ is an absolute constant (not optimised). Hence L ≤ 54/37 ≈ 1.4595. In outline:
+> - apply Vesztergombi's bound to the set S of points having a Δ₂-partner;
+> - show that almost all δ-edges inside S join points of the "Δ₂-boundary" with nearly equal normals;
+> - bound the density of such edges by 4/3 through a rigidity/counting argument.
+>
+> The theorem is also fully formalised in Lean 4 with Mathlib. There is no `sorry`, and only the standard axioms are used. The formalisation includes Vesztergombi's and Hopf–Pannwitz's bounds, so no result is used as a black box.
+>
+> To be clear about scope: this is an upper bound for your Problem 1.6 only. It does not decide whether L = 9/7, and it does not resolve Erdős Problem #132. The paper also has two smaller results on #132:
+> - a layer condition under which Δ₂ occurs at most n times;
+> - for convex position, at least three distances of multiplicity in [1, n] for even n ≥ 6 and for n = 7, 9, 11, 13.
+>
+> The even case is a parity-sharp version of the argument in your Theorem 1.2.
+>
+> Preprint: <arXiv link or "attached">
+> Code, Lean files and certificates: <repository URL>
+>
+> I would be very grateful for any comments or corrections, and especially for pointers to related work I may have missed.
+>
+> AI disclosure: I used an AI assistant (Claude, Anthropic) for exploration, computation, formalisation and drafting; the paper describes the checks performed.
+>
+> With best regards,
+> Wingate Jones
+
+*Notes:*
+- Keep the email short. Do not ask for an arXiv endorsement in this first email. If they reply positively, a later email may ask.
+- "Mr Liu": Dingyuan Liu is listed as a PhD student at KIT. If in doubt, use "Dear Felix Clemen, Adrian Dumitrescu and Dingyuan Liu".
+
+---
+
+## (b) To Thomas Bloom (erdosproblems.com)
+
+**To:** `<contact address from https://www.erdosproblems.com (About/contact page)>`
+**Subject:** Erdős Problem #132: forum post on CDL Problem 1.6 (bound 54/37)
+
+> Dear Dr Bloom,
+>
+> I have posted a comment in the #132 forum thread: <link to forum comment>. It gives an upper bound (54/37)n + O(1) for min{μ(Δ₂), μ(δ)}, which is Problem 1.6 of Clemen–Dumitrescu–Liu, the extremal question discussed in that thread. This improves Vesztergombi's 3/2. The proof is in a preprint (<arXiv link>) and is fully formalised in Lean 4/Mathlib: sorry-free, standard axioms only (<repository URL>).
+>
+> This is partial progress related to #132, not a solution of either question in #132. I mention it in case it is useful for the page's references or the formalisation status.
+>
+> AI disclosure: I used an AI assistant (Claude, Anthropic) for exploration, computation, formalisation and drafting.
+>
+> Best wishes,
+> Wingate Jones
+
+*Notes:*
+- Send this only after the forum post is live.
+- Do not raise the prize here. Prize payment requires journal publication and goes through the Combinatorics Foundation, not the site (see `SUBMISSION_CHECKLIST.md`).
