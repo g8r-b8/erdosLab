@@ -1,4 +1,6 @@
-import Mathlib
+import Mathlib.Analysis.InnerProductSpace.PiL2
+import Mathlib.Analysis.Convex.StrictConvexBetween
+import Mathlib.Analysis.InnerProductSpace.Convex
 import Std.Tactic.BVDecide
 
 /-!
@@ -43,40 +45,98 @@ every index-increasing triple is positively oriented. -/
 def StrictConvexPolygon {n : ℕ} (p : Fin n → Pt) : Prop :=
   ∀ i j k : Fin n, i < j → j < k → 0 < orient (p i) (p j) (p k)
 
-/-- `orient` vanishes on a point of the line through `a, b`.
-TODO: / What's missing: coordinate computation. / Acceptance: sorry-free. / Depends on: — -/
-theorem orient_lineMap (a b : Pt) (u : ℝ) : orient a b (AffineMap.lineMap a b u) = 0 := by
-  sorry
+/-- Coordinates of a point of the line through `a, b`. -/
+theorem lineMap_apply' (a b : Pt) (u : ℝ) (i : Fin 2) :
+    (AffineMap.lineMap a b u : Pt) i = a i + u * (b i - a i) := by
+  rw [AffineMap.lineMap_apply]
+  simp [vsub_eq_sub, vadd_eq_add]
+  ring
 
-/-- `orient x y ·` is affine along a segment.
-TODO: / What's missing: coordinate computation. / Acceptance: sorry-free. / Depends on: — -/
+/-- `orient` vanishes on a point of the line through `a, b`. -/
+theorem orient_lineMap (a b : Pt) (u : ℝ) : orient a b (AffineMap.lineMap a b u) = 0 := by
+  simp only [orient, lineMap_apply']; ring
+
+/-- `orient x y ·` is affine along a segment. -/
 theorem orient_lineMap_right (x y a c : Pt) (t : ℝ) :
     orient x y (AffineMap.lineMap a c t) = (1 - t) * orient x y a + t * orient x y c := by
-  sorry
+  simp only [orient, lineMap_apply']; ring
 
-/-- Strict triangle inequality when `o` is not on the segment `ab`, detected by orientation.
-TODO: / What's missing: `dist_add_dist_eq_iff` + `orient_lineMap`. / Acceptance: sorry-free.
-/ Depends on: `orient_lineMap`. -/
+/-- Strict triangle inequality when `o` is not on the line `ab` (detected by orientation). -/
 theorem dist_lt_of_orient_ne {a b o : Pt} (h : orient a b o ≠ 0) :
     dist a b < dist a o + dist o b := by
-  sorry
+  refine lt_of_le_of_ne (dist_triangle a o b) (fun he => h ?_)
+  obtain ⟨u, -, hu⟩ := (dist_add_dist_eq_iff (a := a) (b := o) (c := b)).1 he.symm
+  rw [← hu, orient_lineMap]
+
+/-- A point of the segment `ab` splits `dist a b`. -/
+theorem dist_lineMap_add (a b : Pt) {t : ℝ} (h0 : 0 ≤ t) (h1 : t ≤ 1) :
+    dist a (AffineMap.lineMap a b t) + dist (AffineMap.lineMap a b t) b = dist a b :=
+  (dist_add_dist_eq_iff).2 ⟨t, ⟨h0, h1⟩, rfl⟩
 
 /-- **Quadrilateral inequality** for a positively oriented convex quadrilateral `ABCE`.
-TODO: / What's missing: intersection point `O = lineMap A C t` of the diagonals.
-/ Acceptance: sorry-free. / Depends on: `orient_lineMap_right`, `dist_lt_of_orient_ne`. -/
+The diagonals meet at `O = lineMap A C t = lineMap B E s` with `0 < s, t < 1`, and `O` lies on
+none of the four side lines. -/
 theorem quad_ineq {A B C E : Pt} (h1 : 0 < orient A B C) (h2 : 0 < orient A B E)
     (h3 : 0 < orient A C E) (h4 : 0 < orient B C E) :
     dist A B + dist C E < dist A C + dist B E ∧ dist B C + dist A E < dist A C + dist B E := by
-  sorry
+  set t := orient A B E / (orient A B E + orient B C E) with ht
+  set s := orient A B C / (orient A B C + orient A C E) with hs
+  have ht0 : 0 < t := div_pos h2 (by linarith)
+  have ht1 : t < 1 := (div_lt_one (by linarith)).2 (by linarith)
+  have hs0 : 0 < s := div_pos h1 (by linarith)
+  have hs1 : s < 1 := (div_lt_one (by linarith)).2 (by linarith)
+  set O := AffineMap.lineMap A C t with hO
+  have hO' : O = AffineMap.lineMap B E s := by
+    have hsum : orient A B E + orient B C E = orient A B C + orient A C E := by
+      simp only [orient]; ring
+    ext i
+    fin_cases i
+    all_goals
+      simp only [hO, lineMap_apply', ht, hs, Fin.zero_eta, Fin.mk_one]
+      rw [hsum]
+      field_simp
+      simp only [orient]
+      ring
+  have eAC := dist_lineMap_add A C ht0.le ht1.le
+  have eBE := dist_lineMap_add B E hs0.le hs1.le
+  rw [← hO'] at eBE
+  rw [← hO] at eAC
+  have sAB : dist A B < dist A O + dist O B := dist_lt_of_orient_ne (by
+    rw [hO, orient_lineMap_right]
+    have : orient A B A = 0 := by simp only [orient]; ring
+    rw [this]; positivity)
+  have sCE : dist C E < dist C O + dist O E := dist_lt_of_orient_ne (by
+    rw [hO, orient_lineMap_right]
+    have : orient C E C = 0 := by simp only [orient]; ring
+    have h' : orient C E A = orient A C E := by simp only [orient]; ring
+    rw [this, h']
+    have : 0 < 1 - t := by linarith
+    positivity)
+  have sBC : dist B C < dist B O + dist O C := dist_lt_of_orient_ne (by
+    rw [hO, orient_lineMap_right]
+    have : orient B C C = 0 := by simp only [orient]; ring
+    have h' : orient B C A = orient A B C := by simp only [orient]; ring
+    rw [this, h']
+    have : 0 < 1 - t := by linarith
+    positivity)
+  have sAE : dist A E < dist A O + dist O E := dist_lt_of_orient_ne (by
+    rw [hO, orient_lineMap_right]
+    have : orient A E A = 0 := by simp only [orient]; ring
+    have h' : orient A E C = - orient A C E := by simp only [orient]; ring
+    rw [this, h']
+    have : 0 < t * orient A C E := by positivity
+    linarith)
+  have d1 := dist_comm O B
+  have d2 := dist_comm C O
+  constructor <;> linarith
 
-/-- **Lemma Q** for a strictly convex polygon.
-TODO: / What's missing: instantiate `quad_ineq`. / Acceptance: sorry-free.
-/ Depends on: `quad_ineq`. -/
+/-- **Lemma Q** for a strictly convex polygon. -/
 theorem lemmaQ {n : ℕ} {p : Fin n → Pt} (hp : StrictConvexPolygon p) {i j k l : Fin n}
     (hij : i < j) (hjk : j < k) (hkl : k < l) :
     dist (p i) (p j) + dist (p k) (p l) < dist (p i) (p k) + dist (p j) (p l) ∧
-    dist (p j) (p k) + dist (p i) (p l) < dist (p i) (p k) + dist (p j) (p l) := by
-  sorry
+    dist (p j) (p k) + dist (p i) (p l) < dist (p i) (p k) + dist (p j) (p l) :=
+  quad_ineq (hp i j k hij hjk) (hp i j l hij (hjk.trans hkl)) (hp i k l (hij.trans hjk) hkl)
+    (hp j k l hjk hkl)
 
 /-! ## Distances, multiplicities, the target statement -/
 
