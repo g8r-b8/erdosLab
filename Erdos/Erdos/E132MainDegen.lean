@@ -22,23 +22,31 @@ variable {X : Finset Pt}
 
 /-- **[C10]** with `q = 1/1.94²`: `1 + 3q < 2`, `q < 2 − √3 = (2 sin 15°)²`, `q < 1/3`.
 
-TODO: fill (Phase 2 leaf).
+TODO: none — proved (Phase 2).
 Acceptance: no `sorry`.
 Depends on: nothing. Difficulty S. -/
 theorem c10 :
-    (1 : ℝ) + 3 * (1 / 1.94 ^ 2) < 2 ∧ (1 : ℝ) / 1.94 ^ 2 < 2 - √3 ∧ (1 : ℝ) / 1.94 ^ 2 < 1 / 3 := by
-  sorry
+    (1 : ℝ) + 3 * (1 / 1.94 ^ 2) < 2 ∧ (1 : ℝ) / 1.94 ^ 2 < 2 - √3 ∧
+      (1 : ℝ) / 1.94 ^ 2 < 1 / 3 := by
+  have h3 : √3 < 1.7321 := by rw [Real.sqrt_lt' (by norm_num)]; norm_num
+  refine ⟨by norm_num, ?_, by norm_num⟩
+  norm_num; linarith
 
 /-- Cross-distance identity (Step 1): `Σ|a − b|² = |xx′|² + |zz′|² + 4|m − m′|²`
 (written with `(x + x′) − (z + z′) = 2(m − m′)`).
 
-TODO: fill (Phase 2 leaf: coordinates, `EuclideanSpace.dist_eq`).
+TODO: none — proved (Phase 2).
 Acceptance: no `sorry`.
 Depends on: nothing. Difficulty S. -/
 theorem cross_dist_identity (x x' z z' : Pt) :
     dist x z ^ 2 + dist x z' ^ 2 + dist x' z ^ 2 + dist x' z' ^ 2 =
       dist x x' ^ 2 + dist z z' ^ 2 + dist (x + x') (z + z') ^ 2 := by
-  sorry
+  have key : ∀ a b : Pt, dist a b ^ 2 = (a 0 - b 0) ^ 2 + (a 1 - b 1) ^ 2 := by
+    intro a b
+    rw [EuclideanSpace.dist_eq, Real.sq_sqrt (by positivity), Fin.sum_univ_two]
+    simp [Real.dist_eq, sq_abs]
+  simp only [key, PiLp.add_apply]
+  ring
 
 /-- **Step 1**: no two disjoint diametral pairs when `Δ > 1.94Δ₂`.
 
