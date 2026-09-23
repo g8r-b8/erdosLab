@@ -146,9 +146,14 @@ def quads13 : List (Fin 13 × Fin 13 × Fin 13 × Fin 13) :=
     (7, 9, 11, 12), (7, 10, 11, 12), (8, 9, 10, 11), (8, 9, 10, 12), (8, 9, 11, 12), (8, 10, 11, 12),
     (9, 10, 11, 12)]
 
-/-- `n = 13`: no ordinal counterexample with `≤ 7` colours (`bv_decide`). -/
+/-- `n = 13`: no ordinal counterexample with `≤ 7` colours (`bv_decide`, ~8 min total; the
+trimmed LRAT proof is ~97 MB, so it is not pinned). -/
 theorem bvNoCE13 : BVNoCE 13 7 pairs13 quads13 := by
-  sorry
+  intro x h1 h2 h3
+  simp only [pairs13, quads13, List.forall_mem_cons, List.mem_nil_iff, false_imp_iff,
+    implies_true, QBV, rareSumBV, rareBV, cntBV, List.foldr_cons, List.foldr_nil, List.range_succ,
+    List.range_zero, List.nil_append, List.cons_append, and_true] at h1 h2 h3
+  bv_decide (config := { timeout := 2700 })
 
 theorem ordNoCE13 : OrdNoCE 13 7 :=
   ordNoCE_of_bv (by decide +kernel) (by decide +kernel) (by decide) (by decide) (by decide)
