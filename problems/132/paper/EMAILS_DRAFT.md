@@ -1,9 +1,9 @@
 # Email drafts (DRAFT: do not send)
 
-**Send these only after:**
-- the arXiv version exists, or you have decided to send the PDF privately;
-- the repository URL is real;
-- the same-day re-check in `PREFLIGHT.md` has been done.
+**Before sending:**
+- Email (a) goes out *before* the arXiv submission: it attaches the PDF and asks for an arXiv endorsement. Get your endorsement code first by starting a math.CO submission on arXiv.
+- Email (b) goes out after the forum post.
+- Do the same-day re-check in `PREFLIGHT.md` first.
 
 Fill in every `<…>` placeholder. Take recipient addresses from the authors' **own public pages** (links below). This file deliberately contains no addresses.
 
@@ -37,10 +37,12 @@ Fill in every `<…>` placeholder. Take recipient addresses from the authors' **
 >
 > The even case is a parity-sharp version of the argument in your Theorem 1.2.
 >
-> Preprint: <arXiv link or "attached">
-> Code, Lean files and certificates: <repository URL>
+> Preprint: attached (paper.pdf)
+> Code, Lean files and certificates: https://github.com/g8r-b8/erdos132-lean
 >
 > I would be very grateful for any comments or corrections, and especially for pointers to related work I may have missed.
+>
+> I would also like to post the paper on arXiv (math.CO), and as a first-time submitter I need an endorsement. If one of you would be willing to endorse me, the endorsement code is <ENDORSEMENT CODE>, and it can be entered at https://arxiv.org/auth/endorse. An endorsement only confirms that the paper is appropriate for math.CO, not that it is correct. Of course, please don't feel any obligation.
 >
 > AI disclosure: I used an AI assistant (Claude, Anthropic) for exploration, computation, formalisation and drafting; the paper describes the checks performed.
 >
@@ -48,7 +50,9 @@ Fill in every `<…>` placeholder. Take recipient addresses from the authors' **
 > Wingate Jones
 
 *Notes:*
-- Keep the email short. Do not ask for an arXiv endorsement in this first email. If they reply positively, a later email may ask.
+- Keep the email short.
+- **Endorsement:** arXiv issues the code when you start a submission from your account. Check that at least one of the three qualifies: on https://arxiv.org/abs/2505.04283, click "Which authors of this paper are endorsers?". If none does, remove that paragraph and ask someone else (e.g. Thomas Bloom).
+- Attach `paper.pdf` (from the repo or `problems/132/paper/`).
 - "Mr Liu": Dingyuan Liu is listed as a PhD student at KIT. If in doubt, use "Dear Felix Clemen, Adrian Dumitrescu and Dingyuan Liu".
 
 ---
