@@ -13,22 +13,18 @@ def dists(x):
     P=x.reshape(n,2); return np.linalg.norm(P[I]-P[J],axis=1)
 def best_partition(d):
     o=np.argsort(d); s=d[o]
-    # DP: cost of segment [a,b)
     cs=np.concatenate([[0],np.cumsum(s)]); cs2=np.concatenate([[0],np.cumsum(s*s)])
-    def cost(a,b):
-        k=b-a; m=(cs[b]-cs[a])/k; return (cs2[b]-cs2[a])-k*m*m
-    INF=1e18
-    f=np.full((D+1,NP+1),INF); arg=np.zeros((D+1,NP+1),int); f[0,0]=0
+    A=np.arange(NP+1)[:,None]; B=np.arange(NP+1)[None,:]
+    K=np.maximum(B-A,1)
+    C=(cs2[B]-cs2[A])-(cs[B]-cs[A])**2/K
+    C=np.where(B>A,C,np.inf)
+    f=np.full(NP+1,np.inf); f[0]=0; args=[]
     for g in range(1,D+1):
-        for b in range(g,NP+1):
-            best=INF;ba=0
-            for a in range(g-1,b):
-                v=f[g-1,a]+cost(a,b)
-                if v<best: best=v;ba=a
-            f[g,b]=best;arg[g,b]=ba
+        M=f[:,None]+C
+        a=np.argmin(M,axis=0); f=M[a,np.arange(NP+1)]; args.append(a)
     lab=np.zeros(NP,int); b=NP
     for g in range(D,0,-1):
-        a=arg[g,b]; lab[o[a:b]]=g-1; b=a
+        a=args[g-1][b]; lab[o[a:b]]=g-1; b=a
     return lab
 def cross_res(x,eps=1e-3):
     P=x.reshape(n,2)
@@ -47,7 +43,34 @@ def run(x):
                 k0=np.where((I==0)&(J==n-1))[0][0]
                 extra=np.minimum(dd[k0]-dd,0)*10
             return np.concatenate([dd-c[lab], cross_res(xx), [ (dd.max()-1.0) ], extra])
-        sol=least_squares(res,np.concatenate([x,c0]),xtol=1e-15,ftol=1e-15,gtol=1e-15,max_nfev=2000)
+        def jac(z):
+            xx=z[:2*n]; P=xx.reshape(n,2)
+            diff=P[I]-P[J]; dd=np.maximum(np.linalg.norm(diff,axis=1),1e-9); u=diff/dd[:,None]
+            Jd=np.zeros((NP,2*n))
+            ar=np.arange(NP)
+            Jd[ar,2*I]=u[:,0]; Jd[ar,2*I+1]=u[:,1]; Jd[ar,2*J]=-u[:,0]; Jd[ar,2*J+1]=-u[:,1]
+            rows=[np.hstack([Jd,-np.eye(D)[lab]])]
+            A=P; B=np.roll(P,-1,0); C=np.roll(P,-2,0)
+            cr=(B-A)[:,0]*(C-B)[:,1]-(B-A)[:,1]*(C-B)[:,0]
+            act=(cr-1e-3)<0
+            Jc=np.zeros((n,2*n+D))
+            for i in range(n):
+                if not act[i]: continue
+                a,b,cc=i,(i+1)%n,(i+2)%n
+                ax,ay=A[i];bx,by=B[i];cx,cy=C[i]
+                Jc[i,2*a]+=10*(-(cy-by)); Jc[i,2*a+1]+=10*(cx-bx)
+                Jc[i,2*b]+=10*(cy-ay); Jc[i,2*b+1]+=10*(-(cx-ax))
+                Jc[i,2*cc]+=10*(-(by-ay)); Jc[i,2*cc+1]+=10*(bx-ax)
+            rows.append(Jc)
+            km=np.argmax(dd); Js=np.zeros((1,2*n+D)); Js[0,:2*n]=Jd[km]; rows.append(Js)
+            if ONESIDED:
+                k0=np.where((I==0)&(J==n-1))[0][0]
+                act2=(dd[k0]-dd)<0
+                Jo=np.zeros((NP,2*n+D))
+                Jo[:,:2*n]=10*(Jd[k0][None,:]-Jd)*act2[:,None]
+                rows.append(Jo)
+            return np.vstack(rows)
+        sol=least_squares(res,np.concatenate([x,c0]),jac=jac,xtol=1e-15,ftol=1e-15,gtol=1e-15,max_nfev=500)
         xn=sol.x[:2*n]
         if np.allclose(xn,x,atol=1e-13): x=xn;break
         x=xn
@@ -102,7 +125,9 @@ def cocirc_count(x):
     return best
 seen={}
 for t in range(R):
-    x=init(); x,r,lab=run(x)
+    x=init()
+    try: x,r,lab=run(x)
+    except Exception: continue
     if ONESIDED:
         dd=dists(x); k0=np.where((I==0)&(J==n-1))[0][0]
         if dd.max()>dd[k0]+1e-9: continue
@@ -123,6 +148,7 @@ for t in range(R):
             fan0=np.ptp(d0)<1e-6; fanl=np.ptp(dl)<1e-6
             cat='cocirc' if cocirc_count(x)==n else ('fan' if (fan0 or fanl) else 'OTHER')
             print('   OS: cat=%s regular-arc=%s fan0=%s fanlast=%s  sides=%s'%(cat,regarc,fan0,fanl,np.round(sides,4)),flush=True)
+            if cat=='OTHER': print('   COORDS',np.round(P,8).tolist(),flush=True)
         print('NEW n=%d D=%d mult(asc)=%s rare=%d maxcocirc=%d vals=%s'%(n,D,mult,rare,cc,[round(v,5) for v in vals]),flush=True)
 print('restarts',R,'distinct configs',len(seen))
 for k,v in seen.items(): print(v[0],v[1],'cocirc',v[2])
