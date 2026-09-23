@@ -1,0 +1,75 @@
+
+ 957 Discussion Thread | Erdős Problems 
+ Forum 
+ Inbox 
+ Favourites 
+ Tags 
+ More 
+ FAQ 
+ Prizes 
+ Problem Lists 
+ Definitions 
+ Links 
+ Forum 
+ Menu 
+ Inbox 
+ Favourites 
+ Tags 
+ FAQ 
+ Prizes 
+ Problem Lists 
+ Definitions 
+ Links 
+ Go 
+ Go 
+ Dual View 
+ Random Solved 
+ Random Open 
+PROVED
+This has been solved in the affirmative.
+Let $A\subset \mathbb{R}^2$ be a set of size $n$ and let $\{d_1<\ldots<d_k\}$ be the set of distinct distances determined by $A$. Let $f(d)$ be the number of times the distance $d$ is determined. Is it true that\[f(d_1)f(d_k) \leq (\tfrac{9}{8}+o(1))n^2?\]
+ #957 : [ErPa90] 
+ geometry | 
+ distances 
+A question of Erdős and Pach [ErPa90] , who write that an 'easy' unpublished construction of Makai shows that this would be the best possible, and that it is 'not difficult' to prove\[f(d_1)+f(d_k) \leq 3n -c\sqrt{n}+o(\sqrt{n})\]for some $c>0$, and ask what the best possible value of $c$ is. 
+A stronger version of this problem (which implies the inequality in the problem statement) is that\[f(d_1)\leq 3n-2m+o(\sqrt{n}),\]where $m$ is the number of vertices of the convex hull of $A$.
+The odd regular polygon shows that it is possible for $f(d_i)\geq n$ for all $i$.
+The original problem was solved by Dumitrescu [Du19] , who proved that\[f(d_1)f(d_k)\leq \frac{9}{8}n^2+O(n).\]See also [132] and [756] .
+ Additional thanks to : Adrian Dumitrescu
+ Proof expositions (0) 
+If you would like to contribute an exposition of a proof related to this problem, please message a moderator or leave your exposition as a comment. 
+ No proof expositions yet.
+ Comments (0) 
+ Proof claims (0) 
+ More information and links 
+ ( View history ) ( View the LaTeX source ) 
+When referring to this problem, please use the original sources of Erdős. If you wish to acknowledge this website, the recommended citation format is:
+T. F. Bloom, Erdős Problem #957, https://www.erdosproblems.com/957, accessed 2026-09-23
+From the external database . (You can
+ help update
+ this.)
+ Formalised statement? 
+ No
+ ( create one )
+ Reactions 
+ Likes
+ None 
+ Open to collaboration
+ None 
+ Currently working on
+ None 
+ Looks difficult
+ None 
+ Looks tractable
+ None 
+ Could be formalisable
+ None 
+ Working on formalising
+ None 
+Order by
+ oldest first or
+ newest first . (The most recent comments are highlighted in a red border.)
+ All comments are the responsibility of the user. Comments appearing on this page are not verified for correctness. Please keep posts mathematical and on topic. 
+ Log in to add a comment.
+ Back to the forum 
+

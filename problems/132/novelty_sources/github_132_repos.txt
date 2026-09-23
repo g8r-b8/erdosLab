@@ -1,0 +1,313 @@
+################ lyfar/erdos-132-convex-k3-lean
+2026-08-17T15:14:36Z pushed 2026-08-17T15:14:43Z
+One rare disease is rare. Rare diseases together are not.
+
+I am building MISHA into an independent AI research lab for rare genetic
+diseases. This repository tests whether an AI-assisted mathematical result can
+be stated precisely, checked by Lean, and reviewed in public. It does not claim
+a direct application to biology.
+
+# A conditional convex three-distance theorem for Erdős Problem 132
+
+[![CI](https://github.com/lyfar/erdos-132-convex-k3-lean/actions/workflows/ci.yml/badge.svg)](https://github.com/lyfar/erdos-132-convex-k3-lean/actions/workflows/ci.yml)
+
+This repository is the standalone origin for the Lean Pool project
+`LeanPool.Erdos132ConvexK3`. It contains the same Lean modules with a minimal
+pinned Lake project around them.
+
+The result is conditional. It does not prove the convex `k = 3` case without
+an extra interface, and it does not solve the general Erdős problem.
+
+## Exact theorem
+
+The headline declaration is
+`LeanPool.Erdos132ConvexK3.convex_k3_degree_six_of_reduction`.
+
+Consider a finite, nonempty configuration of labelled points in strict convex
+position in the Euclidean plane. Join two labels when their squared distance is
+one of the three largest realized classes. Lean proves that this graph has a
+vertex of degree at most six, assuming
+`ConvexTopThreeDraftReductionComplete`.
+
+That single interface supplies the maximal-gap and thirteen-word reduction
+together with the route closures. Its remaining source-facing boundary is the
+coordinated-majorant selection step used in the proof sketch of Theorem 2.7 of
+Erdős, Lovász, and Vesztergombi. The paper does not state that selection step
+as a theorem.
+
+## Formalized content
+
+The Lean sources contain:
+
+- the top-three distance graph, strict convexity, and diameter-lens geometry;
+- penultimate-coordinate identities and the three-range metric dichotomy;
+- the cover process, majorant paths, terminal cages, anti-saturation, and the
+  thirteen-word assembly;
+- use-site rigidity for the exceptional `(1,2)`, `(2,1)`, and `(2,2)`
+  branches; and
+- exact rational witnesses, including a convex heptagon that refutes the
+  stronger universal longer-cover claim.
+
+The development also records nonnested-pair witnesses that rule out a general
+exchange statement. The theorem remains conditional on the one interface
+named above.
+
+## Source
+
+Paul Erdős, László Lovász, and Katalin Vesztergombi,
+[*On the Graph of Large Distances*](https://doi.org/10.1007/BF02187746),
+*Discrete & Computational Geometry* 4 (1989), 541–549.
+
+[Erdős Problem 132](https://www.erdosproblems.com/132) records the broader
+problem.
+
+## Reproducible verification
+
+The repository pins Lean, Mathlib, and the dependency graph. From the
+repository root:
+
+```bash
+lake exe cache get
+lake build --wfail LeanPool.Erdos132ConvexK3
+lake build --wfail
+lake env leanchecker
+./scripts/audit.sh
+```
+
+The audit strips Lean comments before checking forbidden executable tokens,
+enforces the Lean Pool source-size bound, rebuilds with warnings as errors,
+checks all 288 public declarations with `#print axioms`, and runs Lean's
+independent environment checker. The accepted axiom footprint is limited to
+`propext`, `Classical.choice`, and `Quot.sound`.
+
+################ lyfar/erdos-132-moment-obstruction-lean
+2026-07-21T10:12:02Z pushed 2026-07-27T14:35:50Z
+One rare disease is rare. Rare diseases together are not.
+
+I am building MISHA into an independent AI research lab for rare genetic
+diseases. This repository tests one part of that plan: whether an AI-assisted
+mathematical result can be stated precisely, checked by Lean, and reviewed in
+public. It does not claim a direct application to biology.
+
+# A conditional fourteen-point theorem for Erdős Problem 132
+
+[![CI](https://github.com/lyfar/erdos-132-moment-obstruction-lean/actions/workflows/ci.yml/badge.svg)](https://github.com/lyfar/erdos-132-moment-obstruction-lean/actions/workflows/ci.yml)
+
+This repository is the standalone companion to
+[Lean Pool PR #272](https://github.com/Vilin97/lean-pool/pull/272). It contains
+the same Lean theory as that PR, with a minimal pinned Lake project around it.
+
+The result is conditional. It does not prove the unconditional fourteen-point
+case and does not solve the general Erdős problem.
+
+## Exact theorem
+
+The headline declaration is
+`LeanPool.Erdos132N14.erdos132_for_fourteen_of_published_inputs`.
+
+For every injectively labelled fourteen-point configuration in the Euclidean
+plane, Lean proves that at least two realized distances occur on at most
+fourteen unordered pairs, assuming two explicit published interfaces:
+
+1. the published maximum-cardinality bound for planar sets determining at most
+   six distances; and
+2. the Szöllősi--Östergård classification of thirteen-point planar
+   six-distance sets.
+
+The first interface packages the known planar maxima through six distances.
+Its exact six-distance case is Wei's theorem `g(6) = 13`.
+
+## What is proved internally
+
+The Lean sources formalize:
+
+- unordered pairs, realized distances, distance multiplicities, and exact
+  insertion and deletion identities;
+- the Hopf--Pannwitz low-multiplicity diameter consequence at fourteen points,
+  via the planar Perles charging argument;
+- the hypothetical fourteen-point failure profile
+  `(1, 15, 15, 15, 15, 15, 15)`;
+- endpoint deletion to a thirteen-point six-distance configuration;
+- explicit regular-tridecagon, centered-dodecagon, and centered-hexagram
+  templates;
+- the tridecagon centroid, isotropy, chord multiplicities, and second and
+  fourth distance moments;
+- multiplicity elimination of the two nonregular templates; and
+- the regular-extension contradiction from the two moments and planar
+  Cauchy--Schwarz.
+
+## What is not proved
+
+Two published interfaces remain hypotheses: the proofs of the planar
+few-distance cardinality maxima through six distances and the computational
+Szöllősi--Östergård classification theorem. That classification-to-template
+bridge remains external geometry.
+
+The counting and descent bridge is no longer missing here: Lean derives the
+exact failure profile, deletes an endpoint of the unique rare pair, and proves
+that the remaining configuration has exactly thirteen points and six
+distances. It also formalizes the diameter argument used to start that descent.
+The missing bridge to an unconditional theorem is a Lean formalization of the
+two published inputs above.
+
+Therefore this repository does not establish the unconditional `n = 14`
+case, the all-`n` first clause, or the asymptotic second clause of Erdős
+Problem 132.
+
+## Sources
+
+- [Erdős Problem 132](https://www.erdosproblems.com/132) gives the canonical
+  statement and records its open status.
+- Xianglin Wei,
+  [*A Proof of Erdős--Fishburn's Conjecture for g(6)=13*](https://doi.org/10.37236/2917),
+  *Electronic Journal of Combinatorics* 19(4), P38 (2012).
+- Ferenc Szöllősi and Patric R. J. Östergård,
+################ vibemathing/problem-um-ep-132-erd-s-problem-132-c8168ca4
+2026-09-06T16:31:52Z pushed 2026-09-06T16:32:03Z
+# Vibe Mathing Single-Problem Research Repository
+
+This repository contains one canonical ProblemContract plus a fixed, self-contained Vibe Mathing Harness snapshot.
+
+Start with:
+
+1. `AGENTS.md`
+2. `WEB_BOOTSTRAP.md`
+3. `HARNESS_SNAPSHOT.json`
+4. `WEB_CONTEXT_BUNDLE.md`
+5. the Issue-bound Attempt/Route/Obligation
+
+After one-time repository admission, the Web GPT GitHub channel owns the routine candidate flow end to end: Issue, `web/attempt-*`, candidate file revisions, commits, PR creation/review, check monitoring/rerun, merge, and checkpoint. It cannot create the repository, direct-write protected/truth paths, or admit Evidence, Results, or Solutions. Machine gates and independent mathematical verification
+################ DeckardShaw31/erdos-132-proof
+2026-09-10T03:07:57Z pushed 2026-09-10T05:42:43Z
+# Erdős Problem #132 Research Package 
+
+This directory contains the complete mathematical paper, verification code, and submission materials giving a **complete affirmative resolution of Erdős Problem #132 across all $n \ge 5$**.
+
+---
+
+## 📂 Contents
+
+| File | Description |
+|---|---|
+| [`paper.tex`](file:///c:/Users/proin/Desktop/bountyhunt/132/paper.tex) | Complete academic paper in LaTeX format with full proofs, covering $n \le 16$, structural rigidity theorems, the universal capacity deficit barrier, the explicit energy contradiction ($n \ge 16$), and the Main Resolution Theorem. |
+| [`verify_n7.py`](file:///c:/Users/proin/Desktop/bountyhunt/132/verify_n7.py) | Standalone script verifying that all 9 candidate partitions for $n=7$ are impossible in $\mathbb{R}^2$. |
+| [`verify_n8.py`](file:///c:/Users/proin/Desktop/bountyhunt/132/verify_n8.py) | Standalone script verifying that all 11 candidate partitions for $n=8$ are impossible in $\mathbb{R}^2$. |
+| [`verify_n9.py`](file:///c:/Users/proin/Desktop/bountyhunt/132/verify_n9.py) | Standalone script verifying that all 11 candidate partitions for $n=9$ are impossible in $\mathbb{R}^2$. |
+| [`verify_n10.py`](file:///c:/Users/proin/Desktop/bountyhunt/132/verify_n10.py) | Standalone script verifying that the rigid partition for $n=10$ is impossible in $\mathbb{R}^2$. |
+| [`verify_n11.py`](file:///c:/Users/proin/Desktop/bountyhunt/132/verify_n11.py) | Standalone script verifying that all 18 candidate partitions for $n=11$ are impossible in $\mathbb{R}^2$. |
+| [`verify_n12.py`](file:///c:/Users/proin/Desktop/bountyhunt/132/verify_n12.py) | Standalone script verifying that $n=12$ admits no violator in $\mathbb{R}^2$. |
+| [`verify_n13.py`](file:///c:/Users/proin/Desktop/bountyhunt/132/verify_n13.py) | Standalone script verifying that all 29 candidate partitions for $n=13$ are impossible in $\mathbb{R}^2$. |
+| [`verify_n14.py`](file:///c:/Users/proin/Desktop/bountyhunt/132/verify_n14.py) | Standalone script verifying that the unique rigid partition for $n=14$ is impossible in $\mathbb{R}^2$. |
+| [`verify_n15.py`](file:///c:/Users/proin/Desktop/bountyhunt/132/verify_n15.py) | Standalone script verifying that all 44 candidate partitions for $n=15$ are impossible in $\mathbb{R}^2$. |
+| [`verify_n16.py`](file:///c:/Users/proin/Desktop/bountyhunt/132/verify_n16.py) | Standalone script verifying that the unique rigid partition for $n=16$ is impossible in $\mathbb{R}^2$. |
+| [`verify_analytical_bounds.py`](file:///c:/Users/proin/Desktop/bountyhunt/132/verify_analytical_bounds.py) | Script certifying the geometric capacity deficit and the second-moment energy gap $\Delta_E(n) > 0$ for all $n \ge 16$. |
+| [`verify_asymptotic_energy.py`](file:///c:/Users/proin/Desktop/bountyhunt/132/verify_asymptotic_energy.py) | Script calculating and certifying the asymptotic energy contradiction and $\ge 0.3516 n^3$ deficit. |
+| [`verify_general_deficit.py`](file:///c:/Users/proin/Desktop/bountyhunt/132/verify_general_deficit.py) | Script evaluating convex layer fraction floor bounds and incidence capacity margins. |
+| [`general_proof_notes.md`](file:///c:/Users/proin/Desktop/bountyhunt/132/general_proof_notes.md) | Technical synthesis of the complete proof architecture and Main Theorem. |
+| [`submission_claim.md`](file:///c:/Users/proin/Desktop/bountyhunt/132/submission_claim.md) | Text to claim the bounty on `erdosproblems.com` and submit a Pull Request to `teorth/erdosproblems`. |
+
+---
+
+## 🚀 How to Run the Verification Scripts
+
+Make sure you have `numpy` and `scipy` installed:
+```bash
+python verify_n7.py
+python verify_n8.py
+python verify_n9.py
+python verify_n10.py
+python verify_n11.py
+python verify_n12.py
+python verify_n13.py
+python verify_n14.py
+python verify_n15.py
+python verify_n16.py
+python verify_analytical_bounds.py
+python verify_asymptotic_energy.py
+```
+
+---
+################ JAgbanwa/Erdos-Problem-132
+2026-01-11T15:02:07Z pushed 2026-08-05T11:28:11Z
+################ lyfar/erdos132-wei-certificates
+2026-08-26T10:08:33Z pushed 2026-09-03T04:05:43Z
+# Certificates for the E₁₁(5) classification chain
+
+Machine-checked verification of the proof chain behind the classification of
+11-point 5-distance sets in the plane — the chain on which Marchetto's n = 11
+and n = 12 results for Erdős's distinct-distances multiplicity problem
+([Erdős #132](https://www.erdosproblems.com/132)) rest.
+
+Every substantive claim in this repository is backed by an exact, re-runnable
+script. Exact arithmetic throughout — rationals, `Q(ζₙ)` cyclotomic fields, or
+Gaussian-integer polynomials — with no floating point in any decision path.
+Every emptiness result carries a positive control through the identical code
+path, so a zero is a result and not a broken search.
+
+## What is verified, and what was found
+
+**Wei, *On 11-point 5-distance sets in the plane*, Ars Combin. 102 (2011)
+505–515** proves its classification through Theorem 13 and Lemma 10. A line
+audit found the chain carries **five substantive omitted proofs** where the
+literature records none:
+
+| gap | Wei's text | status |
+|---|---|---|
+| Lemma 7, Case 2.1 sub-case (all sides ≤ d₄) | omitted | **proved empty here** — 18,486 label maps, every planar Cayley–Menger ideal unit |
+| Lemma 7, Case 2.3 | "we use the similar way" | **proved empty here** — 18,150 maps; two admissible diameter graphs Wei's inventory misses |
+| Lemma 7, Case 2.2 parenthetical mirror | dismissed as similar | **proved empty here** — 12,596 maps; the branch was never enumerated by anyone, Wei included |
+| Lemma 8, six asserted diameter-graph shapes | asserted | **proved here** — each forces X_D = R₁₁ − 3; the second 2P₃+P₂ orbit is empty |
+| Lemma 10 at m = 7, DG(X_D) = C₇ | "we can prove that X_D = R₇" | closed by **Wei–Li–Cong–Gao 2014, Theorem 4** — line-audited below, one genuine defect found and repaired |
+| Theorem 13, all six branches | "it is clear that", "Clearly", "similar as in [6]" | **all six certified here** (`theorem13/`) |
+
+**Wei, Li, Cong, Gao, *Distance sets with diameter graph being cycle*,
+Taiwanese J. Math. 18(6) (2014) 1981–1990,
+[doi:10.11650/tjm.18.2014.4030](https://doi.org/10.11650/tjm.18.2014.4030)** —
+Theorem 4 is the external dependency above. Its proof asserts six steps as
+"the proof is similar". Line audit (`theorem4-2014/`):
+
+- three of the six are rigorously closed by an exact dihedral-group
+  computation (the unique nontrivial stabilizer of an edge in D₇);
+- the remaining three decompose into **eight** sub-lines (one, B4, absent from
+  every prior inventory); **seven hold exactly**;
+- **one fails**: in case E2, when the free edge d(6,7) has d₄-length, the
+  intended strict comparison is an **exact equality** on a reachable
+  configuration. The value-swap argument the paper relies on does not close
+  this leaf. This is a genuine defect in a refereed proof, found by exact
+  computation (`theorem4-2014/SUBLINES.md`).
+
+**The repair** (`theorem4-2014/E2-EXCLUSION-codex.md`): a self-contained exact
+exclusion replacing the defective step. In the E2 geometry the seven
+undetermined diagonals collapse into three algebraic classes; one is forced to
+d₂; exact inequalities leave three possible five-distance label assignments;
+each yields a polynomial system whose Gröbner basis over **Q** is `[1]` — no
+solution over the complex numbers, hence none over the reals. So **the E2
+pattern admits no five-distance realization, and Theorem 4's statement
+survives its own proof**. An independent second route
+(`E2-EXCLUSION-claude.md`, exact Gaussian-integer resultants; corroborative,
+not load-bearing) maps the full real configuration space: seven distinct
+distances everywhere except three isolated configurations with exactly six —
+the bound is sharp, and the theorem is tight against it.
+
+Net effect: with all five gaps closed and the 2014 defect repaired, **Wei's
+Lemma 10 and Theorem 13 are discharged outright**, and the E₁₁(5)
+classification chain is verified end to end. Downstream, this removes the
+unverified-dependency status from Marchetto's n = 11 and n = 12 results,
+which cite Theorem 13 directly. Erdős #132 itself remains open.
+
+## Layout
+
+- `theorem13/` — certificates for all six branches of Wei 2011 Theorem 13.
+  23 scripts; `bash theorem13/scripts/run_all.sh` re-runs everything, expect
+  `RUN_ALL_FAIL=0`. Includes the exact reconstructions of Wei's Figures 3a–3d
+  and the W-5 whole-plane search (37 sets, 3 similarity classes, matching
+  Wei's Figure 4 bijectively).
+- `lemma7-8/` — the four gap proofs (`GAP1.md`, `GAP2.md`, `GAP3.md`,
+  `GAP5.md`), their search scripts and outputs, and independent completeness
+  reviews of the enumerations.
+- `theorem4-2014/` — the line audit of Wei–Li–Cong–Gao 2014 Theorem 4: the
+  dihedral closures (`SYMMETRY-AUDIT.md`), the eight-sub-line audit with the
+  E2 defect (`SUBLINES.md`), the exact repair and its verifier
+  (`E2-EXCLUSION-codex.md`, `verify_e2_exclusion_codex.py`), and the
+  corroborating resultant certificate.
+

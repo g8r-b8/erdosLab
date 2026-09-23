@@ -1,0 +1,147 @@
+
+ 98 Discussion Thread | Erdős Problems 
+ Forum 
+ Inbox 
+ Favourites 
+ Tags 
+ More 
+ FAQ 
+ Prizes 
+ Problem Lists 
+ Definitions 
+ Links 
+ Forum 
+ Menu 
+ Inbox 
+ Favourites 
+ Tags 
+ FAQ 
+ Prizes 
+ Problem Lists 
+ Definitions 
+ Links 
+ Go 
+ Go 
+ Dual View 
+ Random Solved 
+ Random Open 
+OPEN
+This is open, and cannot be resolved with a finite computation.
+Let $h(n)$ be such that any $n$ points in $\mathbb{R}^2$, with no three on a line and no four on a circle, determine at least $h(n)$ distinct distances. Does $h(n)/n\to \infty$?
+ #98 : [Er75f,p.101] [Er83c] [Er87b,p.167] [Er90] [Er92b] [EFPR93] [Er94b] [Er97e] 
+ geometry | 
+ distances 
+Erdős could not even prove $h(n)\geq n$. Pach has shown $h(n)<n^{\log_23}$. Erdős, Füredi, and Pach [EFPR93] have improved this to\[h(n) < n\exp(c\sqrt{\log n})\]for some constant $c>0$.
+ Proof expositions (0) 
+If you would like to contribute an exposition of a proof related to this problem, please message a moderator or leave your exposition as a comment. 
+ No proof expositions yet.
+ Comments (5) 
+ Proof claims (0) 
+ More information and links 
+This page was last edited 15 October 2025.
+ ( View history ) ( View the LaTeX source ) 
+When referring to this problem, please use the original sources of Erdős. If you wish to acknowledge this website, the recommended citation format is:
+T. F. Bloom, Erdős Problem #98, https://www.erdosproblems.com/98, accessed 2026-09-23
+From the external database . (You can
+ help update
+ this.)
+ Formalised statement? 
+ Yes
+ OEIS 
+ Possible
+ Reactions 
+ Likes
+ JeewonKim 
+ Open to collaboration
+ mysticflounder 
+ Currently working on
+ mysticflounder 
+ Looks difficult
+ mysticflounder 
+ Looks tractable
+ None 
+ Could be formalisable
+ None 
+ Working on formalising
+ None 
+Order by
+ oldest first or
+ newest first . (The most recent comments are highlighted in a red border.)
+ Some work on exact small values of $h(n)$ and a lower bound they improve.
+Writing $h(n)$ as on this page (Sheffer's survey calls it $D_{gen}(n)$) I get
+$$h(3)=1,\quad h(4)=2,\quad h(5)=3,\quad h(6)=4,\quad h(7)=5,$$
+so $h(n)=n-2$ throughout the computed range. Each upper bound is an explicit configuration, re-verified in exact plane coordinates: no three collinear, no four cocircular, distance count as claimed. The $n=5$ witness is $(0,0)$, $(1,0)$, $(1/2,\sqrt3/2)$, $(-\sqrt3/2,-1/2)$, $(1/2,-(2+\sqrt3)/2)$, with squared distances $\{1, 2+\sqrt3, 4+2\sqrt3\}$; the others are triangular-lattice sets.
+The lower bounds are decided over the reals, not on a lattice. A distance pattern (which pairs share a distance) is realisable exactly when a polynomial system has a real solution in general position: gauge $P_0=(0,0)$, $P_1=(1,0)$, one unknown per distance class, the distance equations, and one further equation forcing the classes to be pairwise distinct and non-zero. Patterns are enumerated up to relabelling, cut by five proved lemmas (degree, $K_{2,3}$, perpendicular bisector, circumcentre, equilateral centre) and by the rule that every subpattern of a realisable pattern is realisable; the survivors go to Groebner bases over $\mathbb{Q}$.
+$h(5)>2$ reduces to the pentagon pattern, whose eliminant is $t^2-3t+1$, both roots giving cocircular realisations. For $h(6)>3$, the $61$ five-point seeds that survive the lemmas give $470$ six-point candidates: $467$ have no solution even over $\mathbb{C}$, and the other three are zero-dimensional with every real solution putting four points on a circle. For $h(7)>4$, $253$ five-point seeds give $1141$ six-point and then $132$ seven-point candidates: $128$ have no complex solution, and each of the other four has all seven points on one circle in every real solution. Those real solutions are classified in exact algebraic arithmetic, not numerically.
+Every rejection is a Groebner computation over $\mathbb{Q}$ or an exact classification of the real solutions of a lexicographic basis; six cases at $n=5$ also use msolve's certified real-root isolation. At $n=8$ I have only $5\le h(8)\le 7$.
+For comparison, Erdős–Hickerson–Pach record (Amer. Math. Monthly 96 (1989) 569–575, p. 571) that Szemerédi conjectured $h(n)\ge (n-1)/2$, generalising Altman. Every value above satisfies it, with equality at $n=3$ and a margin rising from $4/3$ at $n=4$ to $5/3$ at $n=7$.
+One consequence seems worth recording. Since $h$ is non-decreasing, these values give $h(n)\ge 5$ for every $n\ge 7$. DesmondWeisenberg's argument in this thread gives $h(n)\ge\min(\lfloor n/2\rfloor,\lceil (n-1)/3\rceil+1)$, so the exact values are the larger lower bound for $5\le n\le 10$, equal to his at $n=4$ and $11\le n\le 13$, and his is larger from $n=14$.
+One remark on why the constant is stuck. The no-four-cocircular hypothesis caps each class at $3$ per vertex, giving $Z(P)\le n(n-1)$ isosceles triples, which is exactly the perpendicular-bisector bound from no-three-collinear alone. The two hypotheses give the same number, so this hypothesis is inert for the counting argument, and a search for the true maximum of $Z$ found the ratio rising ($0.500$ at $n=5$, $0.600$ at $n=6$), suggesting the bound is close to tight.
+Nothing here bears on $h(n)/n\to\infty$.
+Code, witnesses and a standalone audit: https://github.com/sallerk/erdos-notes/tree/main/p98
+Disclosure: the searches and computations were done with AI assistance.
+ sallerk 
+ — 00:09 on 18 Sep 2026 
+ 👍 
+ 0 
+ 📝 
+ 0 
+ 🤖 
+ 0 
+ As noted, Szemerédi's results give $h(n) \geq \max\{\frac{n-1}{3}, \lfloor n/3 \rfloor\}$. I have an improvement to $h(n) \geq \frac{n+2}{3}$ for all large $n$; though this is a very small improvement, I also have some suggestions for how one could try to make it better.
+Lemma 1: Let $A \subseteq \mathbb{R}^2$ be a finite set, let $k \geq 2$, and let $x, y \in A$ be distinct points with $x$ on the $k$th convex layer of $A$. Then there exists $z \in A$ on the $(k-1)$th convex layer of $A$ such that $d(x, y) < d(z, y)$.
+Proof: Consider the line segment between $x$ and $y$. Extend it on the $x$ side until it hits the $(k-1)$th convex layer. If it hits a point in $A$, we're done. If it hits a line on the $(k-1)$th convex hull, move along the line in the direction that goes farther away until a point is reached.
+Lemma 2: Let $A \subseteq \mathbb{R}^2$ be a finite set with exactly $n$ points and $s$ convex layers, with no three points on a line and no four on a circle. Then $A$ determines at least $\frac{n-1}{3} + (s - 1)$ distinct distances.
+Proof: Let $x \in A$ be on the innermost convex layer. Since no four points of $A$ are on a circle, $x$ determines at least $\frac{n-1}{3}$ distinct distances. Choose $y \in A$ to maximize $d(x, y)$. By Lemma 1, we can then keep replacing $x$ with points on the next outermost convex layer to get a larger distance, which yields $s - 1$ more distinct distances.
+Theorem: We have $h(n) \geq \frac{n + 2}{3}$ for all large $n$.
+Proof: Let $A \subseteq \mathbb{R}^2$ have $n$ points with $n$ large, and no three points on a line and no four on a circle. We must prove that $A$ determines at least $\frac{n+2}{3}$ distinct distances. If $A$ has one convex layer, then by Altman's solution to [93] , $A$ determines at least $\lfloor n/2 \rfloor$ distinct distances, so we are done. Alternatively, if $A$ has at least two convex layers, then we are done by Lemma 2.
+If one wishes to improve this, then a place to start might be to look at Altman's solution to [93] . Can the bound be improved if we add a no-four-points-on-a-circle condition? Alternatively, what if we instead look at sets where the number of convex layers is fixed, or at least small relative to the number of points? Can we put a lower bound on the amount of distinct distances then? The first non-trivial case of this would be the case where there are at most two convex layers.
+ DesmondWeisenberg 
+ — 21:25 on 06 Sep 2026 
+ 👍 
+ 0 
+ 📝 
+ 0 
+ 🤖 
+ 0 
+ Two of the remaining page numbers are [Er83c,p.54] and [Er97e,p.531].
+The upper bound exponent of $\log_2(3)$ is found here ; it should also be attributed to Erdős and Hickerson. The source [EFPR93] should be attributed to Ruzsa as well.
+A trivial lower bound (which Erdős, Hickerson, and Pach attribute to Szemerédi) is $h(n) \geq \frac{n-1}{3}$ for all $n$. Indeed, the no-four-on-a-circle condition implies that every point determines at least this many distances.
+Maybe "see also"s should be exchanged between this and [1082] .
+Feel free to delete this comment after updating.
+ DesmondWeisenberg 
+ — 06:04 on 02 Sep 2026 
+ 👍 
+ 0 
+ 📝 
+ 1 
+ 🤖 
+ 0 
+ Adding to DesmondWeisenberg's comment above, after checking each cited source against the page.
+Everything on the page matches its sources except one constant. Erdős–Hickerson–Pach (Amer. Math. Monthly 96 (1989) 569–575, p. 571, Theorem 1) prove $h(n) < \tfrac32\, n^{\log_2 3}$ for every $n$; the proof gives $h(2^k) < 3^k/2$, so the page's $h(n) < n^{\log_2 3}$ holds at powers of two but is not what is proved for all $n$. The attribution to Pach is Erdős's own: the 1988 SIAM Clemson collection, p. 35, has "Pach just told me that $h(2^n)\le 3^n$. The projection of the $n$-dimensional cube shows this," followed by "Perhaps $h(n)/n\to\infty$, but as far as I know this is still open."
+The cited sources give the trivial lower bound in three forms. EHP p. 571: $h(n)\ge (n-1)/3$, credited to Szemerédi, who there conjectures $h(n)\ge (n-1)/2$. [Er75f, p. 101]: $\max_i d_2(x_i)\ge [n/3]$, a pinned bound under no-three-collinear alone (the $[n/2]$ statements on that page are conjectures). [EFPR93, p. 192] derives $(n-1)/3$ "obviously" from the hypothesis, as in the comment above. The floor form differs from $(n-1)/3$ at $n\equiv 2 \pmod 3$.
+Two smaller points. [Er83c, p. 54] defines $h(n)$ as the largest integer with the property; the page's "be such that" omits the word. [Er87b, p. 167] is the right page for $f(n)/n\to\infty$ (its (2)); the remark that $f(n)\ge n$ would settle the crescent conjecture is on p. 168. [EFPR93]'s Theorem 3.1 reads $g(P)\le n\,2^{c\sqrt{\log n}}$, the page's form up to $c$.
+Disclosure: this literature search was done with AI assistance.
+Edit: fixed 2 commas.
+ sallerk 
+ — 04:14 on 04 Sep 2026 
+ 👍 
+ 1 
+ 📝 
+ 1 
+ 🤖 
+ 0 
+ I spent some time working on this problem, but stopped a while back when an agent hallucinated and told me we had solved the problem but it had really just replaced half the proof with an axiom.
+I have created a gist that contains the current status at https://gist.github.com/flound1129/a10f2cc48ae3d111ed70883276c155ba
+ mysticflounder 
+ — 17:13 on 07 Aug 2026 
+ 👍 
+ 0 
+ 📝 
+ 0 
+ 🤖 
+ 0 
+ All comments are the responsibility of the user. Comments appearing on this page are not verified for correctness. Please keep posts mathematical and on topic. 
+ Log in to add a comment.
+ Back to the forum 
+

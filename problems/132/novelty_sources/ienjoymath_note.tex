@@ -1,0 +1,252 @@
+\documentclass[11pt]{amsart}
+\usepackage{amssymb,amsthm,amsmath}
+\usepackage[margin=1.2in]{geometry}
+\usepackage{url}
+
+\newtheorem{theorem}{Theorem}
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{conjecture}[theorem]{Conjecture}
+\newtheorem{remark}[theorem]{Remark}
+\newcommand{\R}{\mathbb{R}}
+\newcommand{\md}{\mu}
+
+\title{Two results on a distance multiplicity problem of Erd\H{o}s}
+\author{Anonymous}
+\thanks{The results in this note were obtained with substantial assistance from an AI
+system (Anthropic's Claude); all computer verifications are reproducible from the
+accompanying code.}
+\date{\today}
+
+\begin{document}
+\begin{abstract}
+Let $X\subset\R^2$ be a set of $n$ points. Erd\H{o}s conjectured that for $n\ge 5$ it is
+impossible that every distance except the diameter occurs more than $n$ times; this was
+known for $n=5,6$ (Erd\H{o}s--Fishburn) and, for all $n$, for convex and ``not too
+convex'' sets (Clemen--Dumitrescu--Liu). We give an independent, computer-verified proof
+of the conjecture for $n\in\{7,8,9,10,13\}$, confirming by different methods results
+recently announced by Marchetto (July 2026) and, for $n=7$, by Zeraoulia (January 2026).
+Our main contribution is the second result: for the extremal problem of
+Clemen--Dumitrescu--Liu on the simultaneous multiplicities of the second-largest
+distance $\Delta_2$ and the smallest distance $\delta$, we improve the lower bound
+$\tfrac98 n$ to $\tfrac97 n$: there are $n$-point sets with
+$\min\{\md(\Delta_2),\md(\delta)\}\ge \tfrac97 n-5\sqrt n$. We conjecture that $9/7$ is
+optimal.
+\end{abstract}
+\maketitle
+
+\section{Introduction}
+For a finite $X\subset\R^2$ and $d>0$ let $\md(d)=\md(X,d)$ be the number of pairs of
+points of $X$ at distance exactly $d$. Write $\Delta>\Delta_2$ for the two largest and
+$\delta$ for the smallest distances determined by $X$. Hopf and Pannwitz \cite{HP34}
+proved $\md(\Delta)\le n$ for $|X|=n$. Erd\H{o}s (see \cite{EF95,Blo132}) conjectured:
+
+\begin{conjecture}[Erd\H{o}s]\label{conj}
+For $n\ge5$, no $n$-point $X\subset\R^2$ has every distance except the diameter
+occurring more than $n$ times.
+\end{conjecture}
+
+The rhombus formed by two unit equilateral triangles shows $n\ge5$ is necessary.
+Erd\H{o}s and Fishburn \cite{EF95} proved the cases $n=5,6$; Clemen, Dumitrescu and Liu
+\cite{CDL} proved the conjecture for point sets in convex position and for ``not too
+convex'' sets, and state that $n\ge7$ is open in general. In \cite{Er97}
+Erd\H{o}s offered \$100 for any nontrivial result on this problem
+(see \cite{Blo132}).
+
+\begin{theorem}\label{thm:small}
+Conjecture~\ref{conj} holds for $n\in\{7,8,9,10,13\}$.
+\end{theorem}
+
+\emph{Note on priority.} After this note was completed we learned that
+Theorem~\ref{thm:small} is not new: the case $n=7$ (and a reduction of $n=8$ to the
+profile $(1,9,9,9)$) was posted by Z.~Rafik in January 2026, and all cases
+$7\le n\le 13$ (with $n=11,12$ conditional on Wei's classification) were announced by
+J.~Marchetto in July 2026, in comments on \cite{Blo132} with accompanying
+verification code. Our proof was found independently and by partly different means
+(the $n=8,10$ descent here uses circle-intersection enumeration against $R_7$, $R_9$);
+we retain it as independent confirmation. Theorem~\ref{thm:97} below appears to be new.
+
+The natural route to Conjecture~\ref{conj} would be to show that $\Delta_2$ or
+$\delta$ always has multiplicity at most $n$. Clemen--Dumitrescu--Liu showed this
+fails: they construct sets with
+$\min\{\md(\Delta_2),\md(\delta)\}\ge\tfrac98n+o(n)$, and pose the problem
+\cite[Problem~1.6]{CDL} of determining
+$L:=\limsup_{n\to\infty}\max_{|X|=n}\min\{\md(\Delta_2),\md(\delta)\}/n$.
+Vesztergombi's bound $\md(\Delta_2)\le\tfrac32n$ \cite{Ve87} gives $L\le\tfrac32$.
+
+\begin{theorem}\label{thm:97}
+$L\ge 9/7$. Explicitly, for all large $n$ there is an $n$-point $X\subset\R^2$ with
+$\min\{\md(X,\Delta_2),\md(X,\delta)\}\ge\tfrac97n-5\sqrt n$.
+\end{theorem}
+
+\section{Proof of Theorem~\ref{thm:small}}
+Call $X$ a \emph{violator} if every non-diameter distance of $X$ has multiplicity
+$\ge n+1$. Let $g(k)$ denote the maximum size of a planar $k$-distance set; by
+Erd\H{o}s--Fishburn \cite{EF96} (for $k\le4$; re-verified in \cite{BMP,Lat19}),
+Shinohara \cite{Shi08} ($k=5$) and Wei \cite{Wei12} ($k=6$),
+\[ g(1),\dots,g(6) \;=\; 3,\,5,\,7,\,9,\,12,\,13 .\]
+
+\begin{lemma}\label{lem:count}
+A violator with $k$ distinct distances satisfies
+$\binom n2\ge 1+(k-1)(n+1)$; moreover $k\ge\min\{j:g(j)\ge n\}$.
+\end{lemma}
+\begin{proof}
+The diameter occurs at least once and the other $k-1$ values at least $n+1$ times;
+a set with fewer than $k_0=\min\{j:g(j)\ge n\}$ distinct distances has at most
+$g(k_0-1)<n$ points.
+\end{proof}
+
+\emph{The classified configurations used.} By \cite{EF96} (see also \cite{Shi04,BMP})
+the $7$-point $3$-distance sets are exactly the regular heptagon $R_7$, with
+multiplicity spectrum $(7,7,7)$, and the hexagon with centre $R_6^+$, with spectrum
+$(12,6,3)$ (values $1,\sqrt3,2$ at unit side). By \cite{EF96} there are exactly four
+$9$-point $4$-distance sets. Three are: $R_9$, spectrum $(9,9,9,9)$; and, in the
+triangular lattice with quadratic form $a^2+ab+b^2$,
+\[
+A=\{(0,1),(0,2),(0,3),(1,0),(1,1),(1,2),(2,0),(2,1),(2,2)\},\quad
+B=\{(0,1),(0,2),(1,1),(1,2),(1,3),(2,0),(2,1),(2,2),(3,0)\},
+\]
+with spectra (listing $d^2\!:\!\md$) $A:(1{:}16,\,3{:}9,\,4{:}7,\,7{:}4)$ and
+$B:(1{:}15,\,3{:}9,\,4{:}6,\,7{:}6)$. The fourth is the $D_3$-symmetric set $F$
+consisting of three concentric orbits of size $3$ at radii
+$\tfrac{\sqrt3-1}2,\,1,\,\tfrac{1+\sqrt3}2$, the middle orbit rotated by $60°$;
+an exact computation in $\mathbb{Q}(\sqrt3)$ shows $F$ has precisely the four squared
+distances $3-\tfrac32\sqrt3,\ \tfrac32,\ 3,\ 3+\tfrac32\sqrt3$ with spectrum
+$(6,18,6,6)$. (Since $F$ is a $9$-point $4$-distance set whose spectrum differs from
+those of $R_9,A,B$, the classification forces $F$ to be the fourth configuration.)
+Finally, by \cite{Wei12,SzO20} the $13$-point $6$-distance sets are exactly $R_{13}$,
+spectrum $(13,\dots,13)$; $R_{12}^+$, spectrum $(24,12,12,12,12,6)$ (the centre--vertex
+distance coincides with the second chord); and the hexagram with centre, spectrum
+$(d^2\!:\!\md)=(1{:}24,\,3{:}18,\,4{:}15,\,7{:}12,\,9{:}6,\,12{:}3)$. The unique
+$12$-point $5$-distance set \cite{Shi08} is a lattice set with spectrum
+$(24,15,12,12,3)$.
+
+\smallskip\noindent\textbf{Case $n=7$.} Lemma~\ref{lem:count}: $21\ge1+8(k-1)$ gives
+$k\le3$, and $7>g(2)$ gives $k=3$. A violator needs both non-diameter multiplicities
+$\ge8$: $R_7$ has all multiplicities $7$; $R_6^+$ has non-diameter multiplicities
+$\{12,6\}$. Contradiction.
+
+\smallskip\noindent\textbf{Case $n=9$.} $36\ge1+10(k-1)$ gives $k\le4$; $9>g(3)$ gives
+$k=4$. A violator needs its three non-diameter multiplicities $\ge10$: the four spectra
+give non-diameter triples $(9,9,9)$, $(16,9,7)$, $(15,9,6)$, $(18,6,6)$
+(the diameters of $A,B$ are the $d^2=7$ classes; of $F$, the $3+\tfrac32\sqrt3$ class).
+All fail.
+
+\smallskip\noindent\textbf{Case $n=13$.} $78\ge1+14(k-1)$ gives $k\le6$; $13>g(5)$
+gives $k=6$. Non-diameter quintuples: $(13,13,13,13,13)$;
+$(24,12,12,12,12)$; $(24,18,15,12,6)$. A violator needs all five $\ge14$. All fail.
+
+\smallskip\noindent\textbf{Case $n=8$.} $28\ge1+9(k-1)$ gives $k\le4$; $8>g(3)$ gives
+$k=4$, and then $\md(\Delta)\le 28-27=1$: the multiplicity pattern is exactly
+$(1,9,9,9)$. Delete the unique diameter endpoint $x$: the remaining $7$ points realize
+only the three non-diameter values, with multiplicities $9-a_i\ge3$ where $a_i$ is the
+number of edges of $x$ at value $i$ and $\sum a_i=6$. So $X\setminus\{x\}$ is a
+$7$-point exactly-$3$-distance set. $R_6^+$ is impossible ($12>9$). $R_7$ forces
+$a_i=2$ for each $i$: normalizing $R_7$ to circumradius $1$ with chord lengths
+$c_k=2\sin(k\pi/7)$, the point $x$ has distance multiset
+$\{c_1,c_1,c_2,c_2,c_3,c_3,t\}$ to the vertices, with $t>c_3$. Any such $x$ lies on
+two circles of known radii about two vertices; enumerating all
+$\binom72\cdot 3\cdot3\cdot2=336$ (with multiplicity) intersection points and testing
+the full pattern in $60$-digit arithmetic, every candidate other than the vertices of
+$R_7$ themselves fails the required pattern by at least $0.26$. Since all candidate
+coordinates and the $c_k$ are algebraic numbers and the accumulated floating-point
+error is below $10^{-40}$, no such $x$ exists.
+
+\smallskip\noindent\textbf{Case $n=10$.} $45\ge1+11(k-1)$ gives $k\le5$; $10>g(4)$
+gives $k=5$ and $\md(\Delta)\le45-44=1$: pattern exactly $(1,11,11,11,11)$. Deleting
+the diameter endpoint leaves a $9$-point exactly-$4$-distance set with spectrum
+$\{11-a_i\}$, $\sum a_i=8$; among the four classified spectra only $R_9$'s $(9,9,9,9)$
+has all entries $\le11$, forcing $a_i=2$ for each $i$. So $x$ has exactly two vertices
+of $R_9$ at each chord length $2\sin(k\pi/9)$, $k=1,\dots,4$, and one farther vertex.
+The same enumeration ($1010$ candidates) shows every candidate fails by at least
+$0.22$. \qed
+
+\begin{remark}
+$n=11$ and $12$ reduce by the same method to the classification of $11$-point
+$5$-distance sets (X.~Wei, Ars Combin.\ 102 (2011) 505--515, which we could not
+access): for $n=12$ the $k=5$ branch dies against the unique $12$-point $5$-distance
+spectrum above, and a $k=6$ violator has pattern $(1,13,13,13,13,13)$ and deletes to an
+$11$-point $5$-distance set. The case $n=14$ requires $14$-point $7$-distance sets and
+lies beyond current classifications.
+\end{remark}
+
+\section{Proof of Theorem~\ref{thm:97}}
+Fix even $m\ge8$, put $\alpha=2\pi/m$, $c=\cos(\pi/m)$, and let
+$v_j=(\cos j\alpha,\sin j\alpha)$, $0\le j<m$, be a regular $m$-gon. Its chords are
+$2\sin(k\pi/m)$; thus $\Delta=2$ with $\md=m/2$ and the second value $\Delta_2=2c$
+with $\md=m$. Let
+\[ s=-c+\sqrt{5c^2-1}\in(0,1),\qquad u_i=s\big(\cos\theta_i,\sin\theta_i\big),\quad
+\theta_i=(i+\tfrac12)\alpha+\pi .\]
+The quadratic $s^2+2cs+1-4c^2=0$ gives $|u_iv_i|=|u_iv_{i+1}|=2c=\Delta_2$ exactly
+($2m$ further pairs). Because $m$ is even, the ray of $u_i$ passes through the midpoint
+of the hull edge $(v_{i+m/2},v_{i+m/2+1})$, and the reflection in this ray is a
+symmetry of the $m$-gon; hence
+\[ |u_i-v_{i+m/2}|=|u_i-v_{i+m/2+1}|=:g,\qquad g^2=1+s^2-2sc, \]
+the same value for every $i$ ($2m$ pairs). Writing $\varepsilon=\alpha^2/16$ one
+computes $c=1-2\varepsilon+O(\varepsilon^2)$, $s=1-3\varepsilon+O(\varepsilon^2)$,
+$g^2=4\varepsilon+O(\varepsilon^2)$, and verifies the strict orderings: $|u_0v_t|$ is
+decreasing in the circular gap $|t-\tfrac12|$ with maximum $\Delta_2$ and minimum $g$;
+$|u_iu_j|\le 2s<2c$; $(2s\sin\tfrac\alpha2)^2-g^2=12\varepsilon+O(\varepsilon^2)>0$;
+the hull spacing $h$ satisfies $h^2-g^2=12\varepsilon+O(\varepsilon^2)>0$; and no
+distance of the $2m$-point ring lies in $(\Delta_2,\Delta)$. Finally add a
+Harborth-extremal triangular-lattice patch \cite{Har74} of $P=n-2m$ points with mesh
+exactly $g$, centred at the origin; its diameter is $O(g\sqrt P)=o(1)$, so all
+blob--ring distances lie strictly between $g$ and $\Delta_2$, and the patch
+contributes $3P-\lceil\sqrt{12P-3}\rceil$ pairs at distance $g$. Altogether, with
+$\delta=g$:
+\[ \md(\Delta_2)=3m,\qquad \md(\delta)\ge 2m+3P-\sqrt{12P}. \]
+Choosing $m=2\lceil 3n/14\rceil$ gives
+$\min\{\md(\Delta_2),\md(\delta)\}\ge\tfrac97n-5\sqrt n$. \qed
+
+\begin{remark}
+The gain over \cite{CDL} is the parity trick: for odd $m$ the intersection point of
+$C(v_i,\Delta_2)$ and $C(v_{i+1},\Delta_2)$ lies radially below a hull \emph{vertex}
+at depth $\Theta(h^2)\ll h$, so servers can only use their chain spacing (one
+$\delta$-pair each); for even $m$ they sit below an edge midpoint and collect two exact
+minimum-distance pairs. All designed coincidences were additionally verified in exact
+arithmetic and the full spectrum numerically up to $n=4900$.
+\end{remark}
+
+\begin{conjecture}\label{conj:97}
+$L=9/7$.
+\end{conjecture}
+
+Supporting evidence, including a linear-programming analysis over Vesztergombi's
+structural constraints \cite{Ve85,Ve87,Ve96} in which the construction above is
+simultaneously extremal for every inequality, will appear in a companion note.
+
+\begin{thebibliography}{99}
+\bibitem{Blo132} T.~F.~Bloom, \emph{Erd\H{o}s Problem \#132},
+\url{https://www.erdosproblems.com/132}.
+\bibitem{BMP} P.~Brass, W.~Moser, J.~Pach, \emph{Research Problems in Discrete
+Geometry}, Springer, 2005, p.~200.
+\bibitem{CDL} F.~C.~Clemen, A.~Dumitrescu, D.~Liu, \emph{On multiplicities of
+interpoint distances}, Acta Math.\ Hungar.\ (2025); arXiv:2505.04283.
+\bibitem{EF95} P.~Erd\H{o}s, P.~Fishburn, \emph{Multiplicities of interpoint distances
+in finite planar sets}, Discrete Appl.\ Math.\ 60 (1995), 141--147.
+\bibitem{EF96} P.~Erd\H{o}s, P.~Fishburn, \emph{Maximum planar sets that determine $k$
+distances}, Discrete Math.\ 160 (1996), 115--125.
+\bibitem{Er97} P.~Erd\H{o}s, \emph{Some of my favourite problems and results}, in: The
+Mathematics of Paul Erd\H{o}s, Springer, 1997.
+\bibitem{Har74} H.~Harborth, \emph{L\"osung zu Problem 664A}, Elem.\ Math.\ 29 (1974),
+14--15.
+\bibitem{HP34} H.~Hopf, E.~Pannwitz, \emph{Aufgabe Nr.\ 167}, Jahresber.\ Deutsch.\
+Math.-Verein.\ 43 (1934), 114.
+\bibitem{Lat19} [Authors of] \emph{Lattice configurations determining few distances},
+arXiv:1911.11688 (2019).
+\bibitem{Shi04} M.~Shinohara, \emph{Classification of three-distance sets in two
+dimensional Euclidean space}, European J.\ Combin.\ 25 (2004), 1039--1058.
+\bibitem{Shi08} M.~Shinohara, \emph{Uniqueness of maximum planar five-distance sets},
+Discrete Math.\ 308 (2008), 3048--3055.
+\bibitem{SzO20} F.~Sz\"oll\H{o}si, P.~R.~J.~\"Osterg\aa rd, \emph{Constructions of
+maximum few-distance sets in Euclidean spaces}, Electron.\ J.\ Combin.\ 27(1) (2020),
+\#P1.23.
+\bibitem{Ve85} K.~Vesztergombi, \emph{On the distribution of distances in finite sets
+in the plane}, Discrete Math.\ 57 (1985), 129--145.
+\bibitem{Ve87} K.~Vesztergombi, \emph{On large distances in planar sets}, Discrete
+Math.\ 67 (1987), 191--198.
+\bibitem{Ve96} K.~Vesztergombi, \emph{The two largest distances in finite planar
+sets}, Discrete Math.\ 150 (1996), 379--386.
+\bibitem{Wei12} X.~Wei, \emph{A proof of Erd\H{o}s--Fishburn's conjecture for
+$g(6)=13$}, Electron.\ J.\ Combin.\ 19(4) (2012), \#P38.
+\end{thebibliography}
+\end{document}

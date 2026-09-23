@@ -1,0 +1,84 @@
+
+ 756 Discussion Thread | Erdős Problems 
+ Forum 
+ Inbox 
+ Favourites 
+ Tags 
+ More 
+ FAQ 
+ Prizes 
+ Problem Lists 
+ Definitions 
+ Links 
+ Forum 
+ Menu 
+ Inbox 
+ Favourites 
+ Tags 
+ FAQ 
+ Prizes 
+ Problem Lists 
+ Definitions 
+ Links 
+ Go 
+ Go 
+ Dual View 
+ Random Solved 
+ Random Open 
+PROVED (LEAN)
+This has been solved in the affirmative and the proof verified in Lean.
+Let $A\subset \mathbb{R}^2$ be a set of $n$ points. Can there be $\gg n$ many distinct distances each of which occurs for more than $n$ many pairs from $A$?
+ #756 : [ErPa90] [Er97b] 
+ geometry | 
+ distances 
+Asked by Erdős and Pach in the stronger form of whether all distances (aside from the largest) can occur with multiplicity $>n$. Hopf and Pannowitz [HoPa34] proved that the largest distance between points of $A$ can occur at most $n$ times, but it is unknown whether a second such distance must occur (see [132] ).
+The answer is yes: Bhowmick [Bh24] constructs a set of $n$ points in $\mathbb{R}^2$ such that $\lfloor\frac{n}{4}\rfloor$ distances occur at least $n+1$ times. More generally, they construct, for any $m$ and large $n$, a set of $n$ points such that $\lfloor \frac{n}{2(m+1)}\rfloor$ distances occur at least $n+m$ times.
+Further investigations were undertaken by Clemen, Dumitrescu, and Liu [CDL25] , who proved, amongst other results, that if we take $A$ to be the square grid of $n$ points, then there are at least $n^{c/\log\log n}$ many distances which occur with multiplicity at least $n^{1+c/\log\log n}$ (for some constant $c>0$). 
+See also [132] and [957] .
+ Proof expositions (0) 
+If you would like to contribute an exposition of a proof related to this problem, please message a moderator or leave your exposition as a comment. 
+ No proof expositions yet.
+ Comments (1) 
+ Proof claims (0) 
+ More information and links 
+ ( View history ) ( View the LaTeX source ) 
+When referring to this problem, please use the original sources of Erdős. If you wish to acknowledge this website, the recommended citation format is:
+T. F. Bloom, Erdős Problem #756, https://www.erdosproblems.com/756, accessed 2026-09-23
+From the external database . (You can
+ help update
+ this.)
+ Formalised statement? 
+ Yes
+ OEIS 
+ Possible
+ Reactions 
+ Likes
+ None 
+ Open to collaboration
+ None 
+ Currently working on
+ None 
+ Looks difficult
+ None 
+ Looks tractable
+ None 
+ Could be formalisable
+ BorisAlexeev 
+ Working on formalising
+ None 
+Order by
+ oldest first or
+ newest first . (The most recent comments are highlighted in a red border.)
+ The proof by Bhowmick that such a set $A$ exists has been formalized by Aristotle! For the moment you can type-check it online here .
+ Woett 
+ — 13:46 on 15 Mar 2026 
+ 👍 
+ 2 
+ 📝 
+ 0 
+ 🤖 
+ 0 
+ All comments are the responsibility of the user. Comments appearing on this page are not verified for correctness. Please keep posts mathematical and on topic. 
+ Log in to add a comment.
+ Back to the forum 
+
