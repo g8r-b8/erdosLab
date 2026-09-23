@@ -74,7 +74,7 @@ for n = 7 and n = 11.
    formalise, and it has not been done.
 2. **Removing the `bv_decide` axiom.** This would mean checking `verifyBVExpr … = true` in the kernel
    (`decide +kernel`). The LRAT certificate is stored as a string and parsed, so kernel evaluation is
-   very likely infeasible even for n = 7. See the report for the attempt. A fully kernel-checked
+   very likely infeasible. Attempt: `decide +kernel` on the n = 7 axiom statement ran for > 20 min without finishing, and was stopped. A fully kernel-checked
    alternative would need a custom LRAT checker designed for kernel reduction. It is not done.
 3. **Time and reproducibility.** Each compilation re-runs CaDiCaL. `bv_decide?` / `bv_check "file.lrat"`
    could pin the LRAT files in the repo, but they are not stored.
