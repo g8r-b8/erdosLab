@@ -355,6 +355,146 @@ theorem c4_window : Real.arcsin (√3 / 2 - 2 * beta) + Real.arcsin beta < π / 
     nlinarith
   linarith
 
+/-- Two unit vectors on the same side of `ℝu` whose elevations lie in a window of angular width
+`< 60°` are less than `1` apart. -/
+theorem same_side_close {u e₁ e₂ : Pt} (hu : ‖u‖ = 1) (h₁ : ‖e₁‖ = 1) (h₂ : ‖e₂‖ = 1) {σ : ℝ}
+    (hs₁ : 0 < σ * det2 u e₁) (hs₂ : 0 < σ * det2 u e₂) {L U : ℝ}
+    (ha₁ : L ≤ inner ℝ e₁ u ∧ inner ℝ e₁ u ≤ U) (ha₂ : L ≤ inner ℝ e₂ u ∧ inner ℝ e₂ u ≤ U)
+    (hw : Real.arcsin U - Real.arcsin L < π / 3) : ‖e₁ - e₂‖ < 1 := by
+  have hL := inner_mul_add_det_mul u e₁ e₂
+  rw [hu, real_inner_comm e₁ u, real_inner_comm e₂ u, one_pow, one_mul] at hL
+  set a₁ := inner ℝ e₁ u
+  set a₂ := inner ℝ e₂ u
+  set c₁ := det2 u e₁
+  set c₂ := det2 u e₂
+  have n₁ := inner_sq_add_det_sq (e := e₁) hu
+  have n₂ := inner_sq_add_det_sq (e := e₂) hu
+  rw [h₁] at n₁; rw [h₂] at n₂
+  have hcc : 0 < c₁ * c₂ := by
+    have := mul_pos hs₁ hs₂
+    have hσ : σ ≠ 0 := by rintro rfl; simp at hs₁
+    have : 0 < σ ^ 2 * (c₁ * c₂) := by linarith [show σ * c₁ * (σ * c₂) = σ ^ 2 * (c₁ * c₂) by ring]
+    exact pos_of_mul_pos_right this (sq_nonneg σ)
+  have ha₁r : a₁ ∈ Set.Icc (-1 : ℝ) 1 := by
+    constructor <;> nlinarith [sq_nonneg c₁]
+  have ha₂r : a₂ ∈ Set.Icc (-1 : ℝ) 1 := by
+    constructor <;> nlinarith [sq_nonneg c₂]
+  have hcc' : c₁ * c₂ = Real.cos (Real.arcsin a₁) * Real.cos (Real.arcsin a₂) := by
+    rw [Real.cos_arcsin, Real.cos_arcsin, ← Real.sqrt_mul (by nlinarith)]
+    rw [eq_comm, Real.sqrt_eq_iff_mul_self_eq (by nlinarith) hcc.le]
+    have e1 : 1 - a₁ ^ 2 = c₁ ^ 2 := by linarith
+    have e2 : 1 - a₂ ^ 2 = c₂ ^ 2 := by linarith
+    rw [e1, e2]; ring
+  have hinner : inner ℝ e₁ e₂ = Real.cos (Real.arcsin a₁ - Real.arcsin a₂) := by
+    rw [Real.cos_sub, ← hcc', Real.sin_arcsin ha₁r.1 ha₁r.2, Real.sin_arcsin ha₂r.1 ha₂r.2]
+    linarith
+  have hd : |Real.arcsin a₁ - Real.arcsin a₂| < π / 3 := by
+    have m1 := Real.monotone_arcsin ha₁.1
+    have m2 := Real.monotone_arcsin ha₁.2
+    have m3 := Real.monotone_arcsin ha₂.1
+    have m4 := Real.monotone_arcsin ha₂.2
+    rw [abs_lt]; constructor <;> linarith
+  have hcos : 1 / 2 < inner ℝ e₁ e₂ := by
+    rw [hinner, ← Real.cos_abs, ← Real.cos_pi_div_three]
+    exact Real.cos_lt_cos_of_nonneg_of_le_pi (abs_nonneg _) (by linarith [Real.pi_pos]) hd
+  have hn : ‖e₁ - e₂‖ ^ 2 < 1 := by
+    rw [@norm_sub_sq_real, h₁, h₂]; linarith
+  nlinarith [norm_nonneg (e₁ - e₂)]
+
+/-- `|a + b| ≤ β` for a good unit edge: `(q − p)·u_p + (p − q)·u_q = (q − p)·(u_p − u_q)`. -/
+theorem good_sum_le {F : DirField X} {p q : Pt} (hp : p ∈ Sset X) (hq : q ∈ Sset X)
+    (h1 : dist p q = 1) (hg : ang (F.u p) (F.u q) ≤ beta) :
+    inner ℝ (q - p) (F.u p) + inner ℝ (p - q) (F.u q) ≤ beta := by
+  have e : inner ℝ (q - p) (F.u p) + inner ℝ (p - q) (F.u q) =
+      inner ℝ (q - p) (F.u p - F.u q) := by
+    rw [inner_sub_right, ← neg_sub q p, inner_neg_left]; ring
+  rw [e]
+  refine (real_inner_le_norm _ _).trans ?_
+  rw [← dist_eq_norm, dist_comm, h1, one_mul]
+  exact (norm_sub_le_ang (F.norm_u hp) (F.norm_u hq)).trans hg
+
+/-- Positive elevation from `D`-ends and from normal points. -/
+theorem other_pos (hX : Normal X) (F : DirField X) {p q : Pt} (hp : p ∈ Sset X) (hpD : p ∉ Dset X)
+    (hq : q ∈ Sset X) (h1 : dist p q = 1) : 0 < inner ℝ (p - q) (F.u q) := by
+  have hT := two_of_pos hX.dist2_pos
+  have hpos := hX.dist2_pos
+  have hq1 : dist p q ^ 2 = 1 := by rw [h1]; norm_num
+  by_cases hqD : q ∈ Dset X
+  · refine lt_of_lt_of_le ?_ (exact_identity_a F hq hqD (Sset_sub hp))
+    rw [hq1]; apply div_pos one_pos; linarith [hT.lt]
+  · rcases exact_identity_b F hq hqD (Sset_sub hp) with h | h
+    · refine lt_of_lt_of_le ?_ h; rw [hq1]; apply div_pos one_pos; linarith
+    · exfalso; apply hpD
+      refine mem_Dset_of (Sset_sub hp) (F.partner_mem q hq) ?_ h
+      intro e; rw [e, dist_self] at h; linarith [hT.lt]
+
+theorem tau_ge_neg_beta (hX : Normal X) : -beta ≤ tau X := by
+  have hpos := hX.dist2_pos
+  have hT := two_of_pos hpos
+  have ht : 0 < tgap X := by unfold tgap; linarith [hT.lt]
+  have hl := hX.large
+  have : (1 - tgap X ^ 2) / (2 * dist2 X) ≤ beta := by
+    rw [div_le_iff₀ (by linarith)]; unfold beta; nlinarith
+  unfold tau; linarith
+
+/-- The elevation window at `p` in Region I. -/
+theorem regionI_window (hX : Normal X) (F : DirField X) (hτ : tau X ≤ √3 / 2 - 2 * beta)
+    {p : Pt} (hp : p ∈ Sset X) :
+    ∃ L U : ℝ, -1 < L ∧ U < 1 ∧ Real.arcsin U - Real.arcsin L < π / 3 ∧
+      ∀ q ∈ Sset X, dist p q = 1 → ang (F.u p) (F.u q) ≤ beta →
+        L ≤ inner ℝ (q - p) (F.u p) ∧ inner ℝ (q - p) (F.u p) ≤ U := by
+  have hb : beta = 1 / 100 := rfl
+  have h3 : √3 < 1.7321 := by rw [Real.sqrt_lt' (by norm_num)]; norm_num
+  have h3' : (1.732 : ℝ) < √3 := by rw [Real.lt_sqrt (by norm_num)]; norm_num
+  have hpos := hX.dist2_pos
+  have hT := two_of_pos hpos
+  have hτβ := tau_ge_neg_beta hX
+  have hc4 := c4_window
+  by_cases hpD : p ∈ Dset X
+  · refine ⟨0, √3 / 2 - beta, by norm_num, by rw [hb]; linarith, ?_, ?_⟩
+    · rw [Real.arcsin_zero, sub_zero]
+      have := (Real.arcsin_lt_iff_lt_sin (x := √3 / 2 - beta) (y := π / 3)
+        ⟨by rw [hb]; linarith, by rw [hb]; linarith⟩
+        ⟨by linarith [Real.pi_pos], by linarith [Real.pi_pos]⟩).2
+      rw [Real.sin_pi_div_three] at this
+      exact this (by rw [hb]; linarith)
+    · intro q hq h1 hg
+      have ha : 0 < inner ℝ (q - p) (F.u p) := by
+        refine lt_of_lt_of_le ?_ (exact_identity_a F hp hpD (Sset_sub hq))
+        rw [dist_comm, h1]; apply div_pos (by norm_num); linarith [hT.lt]
+      have hs := good_sum_le hp hq h1 hg
+      refine ⟨ha.le, ?_⟩
+      by_cases hqD : q ∈ Dset X
+      · have hb' : 0 < inner ℝ (p - q) (F.u q) := by
+          refine lt_of_lt_of_le ?_ (exact_identity_a F hq hqD (Sset_sub hp))
+          rw [h1]; apply div_pos (by norm_num); linarith [hT.lt]
+        rw [hb] at hs ⊢; linarith
+      · rcases exact_identity_b F hq hqD (Sset_sub hp) with h | h
+        · have : 0 < inner ℝ (p - q) (F.u q) := by
+            refine lt_of_lt_of_le ?_ h; rw [h1]; apply div_pos (by norm_num); linarith
+          rw [hb] at hs ⊢; linarith
+        · have := exact_identity_c F hq hqD h h1
+          linarith
+  · refine ⟨min (-tau X) 0, beta, ?_, by rw [hb]; norm_num, ?_, ?_⟩
+    · rw [lt_min_iff]; constructor
+      · rw [hb] at hτ; linarith
+      · norm_num
+    · rcases le_or_gt 0 (tau X) with h0 | h0
+      · rw [min_eq_left (by linarith), Real.arcsin_neg]
+        have := Real.monotone_arcsin hτ; linarith
+      · rw [min_eq_right (by linarith), Real.arcsin_zero]
+        have := Real.arcsin_nonneg.2 (show 0 ≤ √3 / 2 - 2 * beta by rw [hb]; linarith)
+        linarith
+    · intro q hq h1 hg
+      rcases exact_identity_b F hp hpD (Sset_sub hq) with h | h
+      · have ha : 0 < inner ℝ (q - p) (F.u p) := by
+          refine lt_of_lt_of_le ?_ h; rw [dist_comm, h1]; apply div_pos (by norm_num); linarith
+        have hs := good_sum_le hp hq h1 hg
+        have hb' := other_pos hX F hp hpD hq h1
+        exact ⟨(min_le_right _ _).trans ha.le, by linarith⟩
+      · have := exact_identity_c F hp hpD h (by rw [dist_comm]; exact h1)
+        rw [this]; exact ⟨min_le_left _ _, by linarith⟩
+
 /-- **Region I degree bound**: every `p ∈ S` has at most two good `δ`-edges (one per side of
 `ℝu_p`; none on the line).
 
@@ -366,7 +506,46 @@ Depends on: `exact_identity_a`, `exact_identity_b`, `exact_identity_c`, `c4_wind
 `DirField.norm_u`. Difficulty M–L. -/
 theorem regionI_deg_le (hX : Normal X) (F : DirField X) (hτ : tau X ≤ √3 / 2 - 2 * beta)
     {p : Pt} (hp : p ∈ Sset X) : ((good X F).filter (fun z => p ∈ z)).card ≤ 2 := by
-  sorry
+  obtain ⟨L, U, hL, hU, hw, hwin⟩ := regionI_window hX F hτ hp
+  have hu := F.norm_u hp
+  set G := (good X F).filter (fun z => p ∈ z)
+  let P : ℝ → Sym2 Pt → Prop := fun σ z => ∃ q, z = s(p, q) ∧ q ∈ Sset X ∧ dist p q = 1 ∧
+    ang (F.u p) (F.u q) ≤ beta ∧ 0 < σ * det2 (F.u p) (q - p)
+  have hsplit : G ⊆ G.filter (P 1) ∪ G.filter (P (-1)) := by
+    intro z hz
+    obtain ⟨hz', hpz⟩ := mem_filter.1 hz
+    obtain ⟨hze, hg⟩ := mem_filter.1 hz'
+    obtain ⟨hnd, hS⟩ := mem_edges hze
+    have hd : pairDist z = minDist X := (mem_filter.1 hze).2
+    set q := Sym2.Mem.other hpz
+    have hzq : z = s(p, q) := (Sym2.other_spec hpz).symm
+    have hq : q ∈ Sset X := hS q (by rw [hzq]; exact Sym2.mem_mk_right _ _)
+    have h1 : dist p q = 1 := by
+      rw [← hX.minDist_eq, ← hd, hzq]; rfl
+    have hgq : ang (F.u p) (F.u q) ≤ beta := hg p q hzq
+    obtain ⟨ha, hb⟩ := hwin q hq h1 hgq
+    have hn := inner_sq_add_det_sq (e := q - p) hu
+    rw [← dist_eq_norm, dist_comm, h1] at hn
+    have hdet : det2 (F.u p) (q - p) ≠ 0 := by
+      intro h0; rw [h0] at hn
+      nlinarith
+    rcases hdet.lt_or_gt with h | h
+    · exact mem_union.2 (Or.inr (mem_filter.2 ⟨hz, q, hzq, hq, h1, hgq, by linarith⟩))
+    · exact mem_union.2 (Or.inl (mem_filter.2 ⟨hz, q, hzq, hq, h1, hgq, by linarith⟩))
+  have hside : ∀ σ, (G.filter (P σ)).card ≤ 1 := by
+    intro σ
+    refine card_le_one.2 fun z₁ hz₁ z₂ hz₂ => ?_
+    obtain ⟨q₁, e₁, hq₁, d₁, g₁, s₁⟩ := (mem_filter.1 hz₁).2
+    obtain ⟨q₂, e₂, hq₂, d₂, g₂, s₂⟩ := (mem_filter.1 hz₂).2
+    rw [e₁, e₂]
+    have n₁ : ‖q₁ - p‖ = 1 := by rw [← dist_eq_norm, dist_comm, d₁]
+    have n₂ : ‖q₂ - p‖ = 1 := by rw [← dist_eq_norm, dist_comm, d₂]
+    have hc := same_side_close hu n₁ n₂ s₁ s₂ (hwin q₁ hq₁ d₁ g₁) (hwin q₂ hq₂ d₂ g₂) hw
+    rw [sub_sub_sub_cancel_right, ← dist_eq_norm] at hc
+    rw [eq_of_dist_lt_one hX.minDist_eq (Sset_sub hq₁) (Sset_sub hq₂) hc]
+  calc G.card ≤ (G.filter (P 1) ∪ G.filter (P (-1))).card := card_le_card hsplit
+    _ ≤ (G.filter (P 1)).card + (G.filter (P (-1))).card := card_union_le _ _
+    _ ≤ 2 := by linarith [hside 1, hside (-1)]
 
 /-- Region I: `#good ≤ |S|`.
 
