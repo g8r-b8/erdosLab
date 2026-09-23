@@ -4,7 +4,7 @@ The source bundle is `arxiv/arxiv-source.tar.gz`. It contains `paper.tex`, `pape
 - It compiles with plain `pdflatex` ×3 from a clean extract, without bibtex, because arXiv uses the `.bbl`.
 - The result is 21 pages, with no undefined references or citations. There is one harmless 6.6 pt overfull hbox, in the Lean paragraph.
 - It uses only standard TeX Live packages and has no figures or external files.
-- **Before uploading:** replace `https://github.com/<user>/erdos132-lean` in `arxiv/paper.tex`, in §"Computational verification" (look for the `TODO(author)` comment). Then rebuild the `.bbl` and the tarball:
+- **Before uploading:** replace `https://github.com/g8r-b8/erdos132-lean` in `arxiv/paper.tex`, in §"Computational verification" (look for the `TODO(author)` comment). Then rebuild the `.bbl` and the tarball:
   ```
   cd arxiv && pdflatex paper && bibtex paper && pdflatex paper && pdflatex paper
   COPYFILE_DISABLE=1 tar -czf arxiv-source.tar.gz paper.tex paper.bbl refs.bib
@@ -38,7 +38,7 @@ Consider adding the Lean sentence to the paper's abstract too, so the two agree.
 
 **Comments**
 ```
-21 pages. The main theorem (54/37 bound) is formalised in Lean 4/Mathlib (sorry-free, standard axioms only); code, Lean files and certificates at https://github.com/<user>/erdos132-lean. An AI assistant (Claude, Anthropic) was used for exploration, computation, formalisation and drafting; see the AI disclosure in the paper.
+21 pages. The main theorem (54/37 bound) is formalised in Lean 4/Mathlib (sorry-free, standard axioms only); code, Lean files and certificates at https://github.com/g8r-b8/erdos132-lean. An AI assistant (Claude, Anthropic) was used for exploration, computation, formalisation and drafting; see the AI disclosure in the paper.
 ```
 
 **MSC classes:** `52C10` (primary: Erdős problems and related topics of discrete geometry). Optional secondaries:

@@ -45,7 +45,7 @@ theorem erdos132_main : ∃ C₀ : ℝ, ∀ X : Finset Pt, 2 ≤ X.card →
 
    The layer bound in item 1 is also formalised, with standard axioms only.
 
-PDF / arXiv: [PLACEHOLDER: arXiv link] · Code, certificate scripts, Lean files: [PLACEHOLDER: repository link, e.g. https://github.com/<user>/erdos132-lean]
+PDF / arXiv: [PLACEHOLDER: arXiv link] · Code, certificate scripts, Lean files: https://github.com/g8r-b8/erdos132-lean
 
 **AI disclosure.** I used an AI assistant (Claude, Anthropic) for exploration, computation, formalisation and drafting; the checks performed are listed in the PDF's appendix. Comments and corrections are very welcome.
 

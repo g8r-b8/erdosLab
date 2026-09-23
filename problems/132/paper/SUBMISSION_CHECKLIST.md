@@ -13,7 +13,7 @@ Legend:
 ## 0. Prepared artefacts
 
 - [x] `PREFLIGHT.md`: novelty re-check of 2026-09-23. No red flags.
-- [x] `arxiv/`: clean arXiv source (`paper.tex`, `paper.bbl`, `refs.bib`) and `arxiv/arxiv-source.tar.gz`, verified to compile from a clean extract. The repository URL is still a TODO: `https://github.com/<user>/erdos132-lean`.
+- [x] `arxiv/`: clean arXiv source (`paper.tex`, `paper.bbl`, `refs.bib`) and `arxiv/arxiv-source.tar.gz`, verified to compile from a clean extract. The repository URL is still a TODO: `https://github.com/g8r-b8/erdos132-lean`.
 - [x] `ARXIV_METADATA.md`: title, abstract (1368 chars), categories, comments, MSC, endorsement notes.
 - [x] `FORUM_POST_DRAFT.md`, updated for the full Lean formalisation.
 - [x] `EMAILS_DRAFT.md`: emails to Clemen / Dumitrescu / Dingyuan Liu and to T. Bloom.
@@ -44,7 +44,7 @@ Legend:
 6. [ ] **Publish the repository.**
    - Make public a repo (or a trimmed copy) with `problems/132/scripts/`, `Erdos/` (the E132 files plus the lakefile/manifest) and `problems/132/lean/README.md`.
    - Do **not** include the paywalled PDFs in `novelty_sources/`.
-   - Replace `https://github.com/<user>/erdos132-lean` in `arxiv/paper.tex` (and replace `\placeholder{REPOSITORY URL}` in `paper.tex`), `ARXIV_METADATA.md`, `FORUM_POST_DRAFT.md` and `EMAILS_DRAFT.md`.
+   - Replace `https://github.com/g8r-b8/erdos132-lean` in `arxiv/paper.tex` (and replace `\placeholder{REPOSITORY URL}` in `paper.tex`), `ARXIV_METADATA.md`, `FORUM_POST_DRAFT.md` and `EMAILS_DRAFT.md`.
    - Rebuild the `.bbl` and tarball (commands in `ARXIV_METADATA.md`).
    - Optionally put the DRUP/LRAT certificates (about 120 MB for (13,7,5)) on Zenodo.
 7. [ ] **Same-day novelty re-check.** Repeat the "Still to do" list in `PREFLIGHT.md`: the forum thread, ienjoymath's repo (the `RESULT3-upper-bound-program.md` / `NOTES.md` 404s), CDL citations, and the arXiv author listings.
