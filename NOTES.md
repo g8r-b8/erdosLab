@@ -158,3 +158,30 @@ is the same f shifted by one. Later improvements (Kovač, Price), every n≥6 re
 limsup=∞ fully Lean-formalised (Principia Math, Jul 2026). Our first triage agent even noted
 "1054: Tao handled the density part" but I failed to connect 1054 ↔ 468. Lesson baked into
 PROMPT.md rule 4: check all cross-referenced/sibling problems and their threads.
+
+## Triage batch 400–699 (agent, iter 8) — one real candidate (#436), not quick
+- 146/300 have status open (problems.yaml 2026-09-22); pages fetched 2026-09-23 → scratchpad/e400/
+  (open.txt, summary.tsv = num/status/comments/claims/statement, p/<N>.html, f/<N>.html threads).
+- Heavily worked / not new: 404 (KitaKen1 Jul 2026: f(2,2)=254 exact + Lean, f(a,2) a≤256 table;
+  Tao lemma), 677 (Aristotle formalisations, qrdl/Sothanaphan Mar 2026), 614 (Tang–Ma Jan 2026:
+  finite-family Turán reformulation), 668 (2nd Q false at n=4; AMP25 tables n≤21), 644 (known r≤6).
+- 430 ≡ first part of 385 (Adenwalla) — open, prime-gap flavour. 662: statement garbled per site.
+- Rest deep (Ramsey/Turán asymptotics, analytic NT, set theory, random polys, distances).
+- ★ #436 (Lehmer–Lehmer consecutive k-th power residues) — OPEN sub-question explicitly on page:
+  "is Λ(k,3) finite for odd k≥5?" (Λ(k,2) finite: Hildebrand 1991; Λ(3,3)=23532 LLMS 1962;
+  even k: Λ(k,3)=∞; Λ(k,l)=∞ for l≥4). Smallest open case Λ(5,3).
+  Openness (checked 2026-09-23): erdosproblems.com/436 OPEN, 3 comments (Adenwalla/Bloom Oct 2025,
+  refs only), 0 claims, no see-also; formal-conjectures: no 436 file/PR (grep + gh pr search);
+  not on Tao's AI-contributions wiki (wiki clone grep); OEIS A000445 (Λ(k,2) only; Reble a(8) bounds;
+  last hist edit Oct 2025); arXiv/web: only Dietzel 1309.7506, 1810.01518 (pairs/IP-sets) — nothing on triples.
+  Reformulation: Λ(5,3) = max over completely additive f: N→Z/5 of first r with f(r)=f(r+1)=f(r+2)=0
+  (⇔ every index-5 subgroup of Q+ contains 3 consecutive ints). Since χ(−1)=1 for odd order,
+  character-mod-M constructions fail (±1 both in kernel ⇒ triple around multiples of M) → finiteness plausible.
+  Lean fit: UPPER bound Λ(5,3) ≤ R (⇒ "finite", answers the Q for k=5) is purely elementary:
+  kth-power char on (Z/p)^* + finite certificate over primes ≤ R+2. Exact value needs Chebotarev
+  (lower bound) — not needed for "finite".
+  Tried: naive DFS scratchpad/e400/l53/dfs.c reproduces Λ(2,2)=9, Λ(3,2)=77 but blows up already
+  on Λ(4,2), Λ(3,3) (2e8 nodes, depth ~190). Needs CDCL/SAT (one-hot F5 vars per prime, triple
+  clauses; no SAT solver installed — pip/brew needs user OK) or lazy domain-propagation (primes
+  >R/2 never forced). Risk: Λ(5,3) may be ∞ or ≫1e7 (Λ(7,2)=1.6e6). Verdict: best 400–699 lead,
+  a genuine computation project, NOT quick; certificate size for Lean (decide) may be the bottleneck.
