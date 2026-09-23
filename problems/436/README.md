@@ -54,8 +54,8 @@ so the model is only an upper bound there — but it still reproduces the known 
    `scripts/drive.py`): exact search reproduces Λ_comb = 9, 77, 1224, 7888 for (k,2), k = 2..5, and
    Λ_comb(3,3) = 23532 (kissat 2 s; final UNSAT DRAT proof checked by drat-trim, 1.2 MB LRAT).
    So the model matches all literature values tested.
-2. **k = 5, l = 3 — full instance** (see Log below).
-3. **k = 5, l = 3 — smooth weakening F_y(X)** (see Log below).
+2. **k = 5, l = 3:** Λ(5,3) ≥ 5,062,794 (new lower bound, via SAT model + Chebotarev); no
+   finiteness certificate yet (see Log).
 
 ## Files
 - `scripts/lam_sat.py` — reference incremental encoder + exact search (pysat Cadical153).
@@ -65,8 +65,38 @@ so the model is only an upper bound there — but it still reproduces the known 
 - `scripts/smooth_sat.py` — weakened instance F_y(X) (only primes ≤ y, only smooth runs).
 - `logs/` — solver logs.
 
-## Log
-(see below)
+## Log (2026-09-23)
+- **Full instance S(R), k=5, l=3** (`drive.py --grow 1.5`, kissat): SAT at R = 1.07e6, 1.5e6,
+  2.25e6, 3.375e6, 5.0625e6 (solve 10 s → 64 s), with model first-run 5,062,794.
+  ⇒ **Λ_comb(5,3) ≥ 5,062,794**, hence (Chebotarev, k odd) Λ(5,3) ≥ 5,062,794. Hardness jumps at
+  R = 7,593,750 (kissat > 1 h, running). Even f = Ω(n) mod 5 already has its first zero triple at
+  r = 1,073,149.
+- **Structure of models:** both the full-instance model (R=2.25e6) and the F_500 model have
+  f(2)=0, f(3)=1 (up to units) and f = 0 on most small primes (5,7,11,13,17,23,29,31,41,43,47,53,
+  59,71,83), nonzero on 19,37,61,67,73,79,89,97,… and value 1 on most larger primes — i.e.
+  "v_3(n) mod 5 plus an Ω-like count of large primes". Every branch f(2)=f(3)=0 is UNSAT at once.
+  Finitely supported f always fail (CRT: r+1 ≡ 0 mod (∏p)^5 exactly); likewise any finite sum of
+  local characters / Dirichlet characters (odd order ⇒ χ(−1)=1). So an infinite construction
+  would need a genuinely global f; none found.
+- **Smooth weakening F_y(X)** (only primes ≤ y; only runs of 3 consecutive y-smooth numbers ≤ X):
+  sound for UNSAT (subset of constraints) and F_y(∞) is finite (Størmer). Calibration on k=3:
+  F_200(1e8) SAT (a unique model up to units!), F_300(1e8) UNSAT (kissat 2 s) ⇒ Λ(3,3) ≤ 1e8.
+  For k=5: F_200(1e9) SAT, F_300(1e9) SAT, F_500(1e9) SAT (cube f(2)=0,f(3)=1,f(5)=0; 7 min).
+  F_1000(1e9) (168 primes, 247,734 triples, 12.4M clauses): cube-and-conquer on f(2),f(3),f(5)
+  running; f(2)=f(3)=0 cubes UNSAT in 4 s; f(2)=0,f(3)=1 cubes > 30 min each.
+  Naive first-moment counts are useless here (they predict UNSAT for k=3, y=200, which is SAT).
+- Counts of consecutive smooth triples: y=1000: 247,734 (X=1e9), 343,634 (X=1e10);
+  y=2000: 1,031,687 (X=1e9).
 
 ## Next steps
-(see below)
+1. Finish F_1000(1e9) cubes; if UNSAT ⇒ Λ(5,3) ≤ 1e9 (finite!). Then re-run each cube with
+   `kissat --no-binary` proof output, check with drat-trim (→ LRAT), and record hashes.
+2. If SAT: hybrid instance = full S(N0) ∪ F_y(X) (still sound), or y=2000 (1.03M triples).
+3. Lean route (only if UNSAT): (a) elementary reduction (k-th power character ⇒ completely
+   additive F, as above) — Mathlib has ZMod units cyclic + orderOf; (b) a Lean function generating
+   the same CNF from the list of smooth runs, with a soundness lemma (any f ⇒ satisfying
+   assignment); the list of runs itself needs no completeness proof, only that each listed r has
+   r, r+1, r+2 ≤ X and the factorizations are correct (checkable); (c) LRAT check via Lean core's
+   `Std.Tactic.BVDecide.LRAT` checker. With ~10^7 clauses the check needs compiled evaluation
+   (`native_decide` / `ofReduceBool`, as `bv_decide` itself uses) — must be disclosed per PROMPT.md;
+   a kernel-only check is not realistic at this size.
