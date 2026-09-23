@@ -399,7 +399,7 @@ theorem neg_mem_normalCone {v w : Pt} (hv : v ∈ KBall X) (hw : w ∈ X) (hvw :
 
 /-- **[C4]** the elevation window is `< 60°`: `arcsin(√3/2 − 2β) + arcsin β < π/3`.
 
-TODO: prove (via `cos(A + B) > 1/2`).
+TODO: none — proved.
 Acceptance: no `sorry`.
 Depends on: `Real.arcsin` bounds. Difficulty M. -/
 theorem c4_window : Real.arcsin (√3 / 2 - 2 * beta) + Real.arcsin beta < π / 3 := by
@@ -563,9 +563,7 @@ theorem regionI_window (hX : Normal X) (F : DirField X) (hτ : tau X ≤ √3 / 
 /-- **Region I degree bound**: every `p ∈ S` has at most two good `δ`-edges (one per side of
 `ℝu_p`; none on the line).
 
-TODO: prove.
-What's missing: elevations of good neighbours lie in `[−arcsin τ, arcsin β)` (cases `τ ≥ 0`,
-`τ < 0`, `p ∈ D`), a window `< 60°` by [C4]; two unit neighbours are `≥ 60°` apart.
+TODO: none — proved.
 Acceptance: no `sorry`.
 Depends on: `exact_identity_a`, `exact_identity_b`, `exact_identity_c`, `c4_window`,
 `DirField.norm_u`. Difficulty M–L. -/
@@ -660,7 +658,7 @@ theorem card_good_le_pure_add_mixed (F : DirField X) :
 
 /-- **[C5]** In Region II, `t − arcsin β ≥ 0.886`.
 
-TODO: prove (`t ≥ τ` if `t ≤ 1`, else `t > 1`; `arcsin β ≤ β + β³`).
+TODO: none — proved.
 Acceptance: no `sorry`.
 Depends on: `tau_sub_tgap`. Difficulty M. -/
 theorem c5_tgap (hX : Normal X) (hτ : √3 / 2 + 3 * beta ≤ tau X) :
@@ -796,7 +794,8 @@ theorem vol_arc_ge (P : ℝ → Prop) {a L : ℝ} (_hL0 : 0 ≤ L) (hL : L ≤ 2
     have hd : Disjoint (Set.Ioo a' (2 * π)) (Set.Ioo 0 (a' + L - 2 * π)) := by
       rw [Set.disjoint_left]; intro θ h1 h2; linarith [h1.1, h2.2, hm.2]
     calc ENNReal.ofReal L
-        = MeasureTheory.volume (Set.Ioo a' (2 * π)) + MeasureTheory.volume (Set.Ioo 0 (a' + L - 2 * π)) := by
+        = MeasureTheory.volume (Set.Ioo a' (2 * π)) +
+            MeasureTheory.volume (Set.Ioo 0 (a' + L - 2 * π)) := by
           rw [Real.volume_Ioo, Real.volume_Ioo, ← ENNReal.ofReal_add (by linarith [hm.2])
             (by linarith)]
           congr 1; ring
@@ -974,7 +973,8 @@ theorem lemma71 (hX : Normal X) (F : DirField X) (hτ : √3 / 2 + 3 * beta ≤ 
   have hzn : ‖zh‖ = 1 := by rw [← dist_eq_norm, dist_comm, hvz]
   set a := inner ℝ zh u
   set c := det2 u zh
-  have hac : a ^ 2 + c ^ 2 = 1 := by have := inner_sq_add_det_sq (e := zh) hu; rw [hzn] at this; linarith
+  have hac : a ^ 2 + c ^ 2 = 1 := by
+    have := inner_sq_add_det_sq (e := zh) hu; rw [hzn] at this; linarith
   have ha0 : 0 < a := hT.1
   have ha1 : a < beta := hT.2.1
   have hbeta : beta = 1 / 100 := rfl
@@ -1049,7 +1049,8 @@ theorem lemma71 (hX : Normal X) (F : DirField X) (hτ : √3 / 2 + 3 * beta ≤ 
   intro θ k hθ
   set θ' := θ + k * (2 * π)
   have hφ : ς * (θ₀ - θ') ∈ Set.Ioo 0 Θ := by
-    rcases hς with h | h <;> simp only [h, if_true, if_neg (show (-1 : ℝ) ≠ 1 by norm_num)] at hθ ⊢ <;>
+    rcases hς with h | h <;>
+      simp only [h, if_true, if_neg (show (-1 : ℝ) ≠ 1 by norm_num)] at hθ ⊢ <;>
       constructor <;> linarith [hθ.1, hθ.2]
   obtain ⟨y, hyΓ, hyν⟩ := key _ hφ
   refine ⟨y, hyΓ, ?_⟩
@@ -1149,7 +1150,7 @@ theorem card_mixedT_le (hX : Normal X) (F : DirField X) (hτ : √3 / 2 + 3 * be
 
 /-- `τ > 1` ⇒ no rungs (3.2(c)).
 
-TODO: prove.
+TODO: none — proved.
 Acceptance: no `sorry`.
 Depends on: `tau_le_one_of_exception`. Difficulty S. -/
 theorem rungs_eq_empty (F : DirField X) (hτ : 1 < tau X) : rungs X F = ∅ := by
@@ -1206,7 +1207,7 @@ theorem c5_rhombus : √3 / 2 + 3 * beta < Real.cos (beta / 2) := by
 
 /-- **(R1) at `v`**: a K-vertex has at most one rung (in Region II).
 
-TODO: prove (the two offsets are `2s < 1` apart; points are `≥ 1` apart).
+TODO: none — proved.
 Acceptance: no `sorry`.
 Depends on: `rung_offset`, `c5_sOff`. Difficulty S–M. -/
 theorem R1_v (hX : Normal X) (F : DirField X) (hτ₁ : √3 / 2 + 3 * beta ≤ tau X)
@@ -1225,7 +1226,7 @@ theorem R1_v (hX : Normal X) (F : DirField X) (hτ₁ : √3 / 2 + 3 * beta ≤ 
 
 /-- **(R1) at `z`**: a D-vertex has at most one good rung (`|v − v′| ≤ 2s + 2β < 1`).
 
-TODO: prove.
+TODO: none — proved.
 Acceptance: no `sorry`.
 Depends on: `rung_offset`, `c5_sOff`, rotation bound `|o(u) − o(u′)| ≤ ∠(u, u′)`.
 Difficulty M. -/
@@ -1276,7 +1277,7 @@ theorem norm_u_sub_le {a b c : Pt} (ha : ‖a‖ = 1) (hb : ‖b‖ = 1) (hc : �
 /-- **(R2) proximity**: `(v₀, z₀)` a good rung, `v₁`/`z₁` the right pure T-neighbours of
 `v₀`/`z₀`; if `v₁` has a good rung `(v₁, z′)` then `z′ = z₁` (`|z′ − z₁| ≤ 2s + 2β + arcsin β`).
 
-TODO: prove.
+TODO: none — proved.
 Acceptance: no `sorry`.
 Depends on: `rung_offset`, `c5_sOff`, T-step geometry. Difficulty M. -/
 theorem R2 (hX : Normal X) (F : DirField X) (hτ₁ : √3 / 2 + 3 * beta ≤ tau X) (hτ₂ : tau X ≤ 1)
@@ -1312,7 +1313,7 @@ theorem R2 (hX : Normal X) (F : DirField X) (hτ₁ : √3 / 2 + 3 * beta ≤ ta
 /-- **(R2-sym) symmetric proximity**: same setting; if `z₁` has a good rung `(v′, z₁)` then
 `v′ = v₁` (`|v′ − v₁| ≤ 2s + 4β + arcsin β ≤ 2s + 6β < 1`).
 
-TODO: prove.
+TODO: none — proved.
 Acceptance: no `sorry`.
 Depends on: `rung_offset`, `c5_sOff`, T-step geometry. Difficulty M. -/
 theorem R2_sym (hX : Normal X) (F : DirField X) (hτ₁ : √3 / 2 + 3 * beta ≤ tau X)
@@ -1354,7 +1355,7 @@ theorem R2_sym (hX : Normal X) (F : DirField X) (hτ₁ : √3 / 2 + 3 * beta �
 /-- **(R3a) no three parallel rungs**: `u_v` solves `c·u = −τ`, which has two unit solutions,
 and K-ends have distinct normals (Lemma 3.3).
 
-TODO: prove.
+TODO: none — proved.
 Acceptance: no `sorry`.
 Depends on: `exact_identity_c`, `u_ne`, `DirField.norm_u`. Difficulty M. -/
 theorem R3_no_three_parallel (F : DirField X) {v₁ v₂ v₃ z₁ z₂ z₃ : Pt} (h₁ : IsRung F v₁ z₁)
@@ -1394,7 +1395,8 @@ theorem R3_no_three_parallel (F : DirField X) {v₁ v₂ v₃ z₁ z₂ z₃ : P
   exact ne h₂.1 h₂.2.1 h₃.1 h₃.2.1 (by rw [k₂, k₃]; congr 2; linarith)
 
 
-/-- Planar core of (R3b): `x, y` two distinct common points of `C(0,1)` and `C(d,1)` ⇒ `x + y = d`. -/
+/-- Planar core of (R3b): `x, y` two distinct common points of `C(0,1)` and `C(d,1)` ⇒
+`x + y = d`. -/
 theorem rhombus_real {x0 x1 y0 y1 d0 d1 : ℝ} (hx : x0 ^ 2 + x1 ^ 2 = 1) (hy : y0 ^ 2 + y1 ^ 2 = 1)
     (hxd : (d0 - x0) ^ 2 + (d1 - x1) ^ 2 = 1) (hyd : (d0 - y0) ^ 2 + (d1 - y1) ^ 2 = 1)
     (hxy : ¬ (x0 = y0 ∧ x1 = y1)) (hd : ¬ (d0 = 0 ∧ d1 = 0)) :
@@ -1403,7 +1405,8 @@ theorem rhombus_real {x0 x1 y0 y1 d0 d1 : ℝ} (hx : x0 ^ 2 + x1 ^ 2 = 1) (hy : 
   set w1 := x1 - y1
   set b0 := x0 + y0 - d0
   set b1 := x1 + y1 - d1
-  have hwd : w0 * d0 + w1 * d1 = 0 := by simp only [w0, w1]; linear_combination (hyd - hxd - hy + hx) / 2
+  have hwd : w0 * d0 + w1 * d1 = 0 := by
+    simp only [w0, w1]; linear_combination (hyd - hxd - hy + hx) / 2
   have hwb : w0 * b0 + w1 * b1 = 0 := by
     simp only [w0, w1, b0, b1]; linear_combination hx - hy - (hyd - hxd - hy + hx) / 2
   have hbd : b0 * d0 + b1 * d1 = 0 := by
@@ -1431,7 +1434,7 @@ theorem rhombus_real {x0 x1 y0 y1 d0 d1 : ℝ} (hx : x0 ^ 2 + x1 ^ 2 = 1) (hy : 
 /-- **(R3b) rhombi force parallel rungs**: a unit rhombus `v₀v₁z₁z₀` has `z₀ − v₀ = z₁ − v₁`
 (`v₁, z₀` are the two points of `C(v₀,1) ∩ C(z₁,1)`).
 
-TODO: prove.
+TODO: none — proved.
 Acceptance: no `sorry`.
 Depends on: planar circle intersection. Difficulty M. -/
 theorem R3_rhombus {v₀ v₁ z₀ z₁ : Pt} (h₀₁ : dist v₀ v₁ = 1) (h₁₁ : dist v₁ z₁ = 1)
@@ -1455,7 +1458,7 @@ theorem R3_rhombus {v₀ v₁ z₀ z₁ : Pt} (h₀₁ : dist v₀ v₁ = 1) (h�
 /-- **(R3c) rhombi only near resonance**: two parallel rungs whose K-ends are joined by a good
 edge force `τ ≥ cos(β/2)` (their normals are exactly `2θ₀` apart, `θ₀ = arccos τ`).
 
-TODO: prove.
+TODO: none — proved.
 Acceptance: no `sorry`.
 Depends on: `exact_identity_c`, `u_ne`. Difficulty M. -/
 theorem R3_resonance (F : DirField X) {v₀ v₁ z₀ z₁ : Pt} (h₀ : IsRung F v₀ z₀)
@@ -1895,13 +1898,15 @@ theorem card_goodPure_le (hX : Normal X) (F : DirField X) (hτ₁ : √3 / 2 + 3
 
 /-- **Ownership count, no rhombi** (`√3/2 + 3β ≤ τ < cos(β/2)`): pure good edges `≤ (5/4)|S|`.
 
-TODO: prove.
-What's missing: formalise walks/ownership/charging: each rung owns `k + d` row vertices and
-`≤ 1 + k + d` edges with equality only when both walks reach; both-reach gaps are `(1,1)`
-(rhombus — excluded by `R3_resonance`) or `(≥2, ≥2)`; unowned vertices carry `≤ 1` edge.
+TODO: none — proved.
 Acceptance: no `sorry`.
-Depends on: `T1`, `T2`, `R1_v`, `R1_z`, `R2`, `R2_sym`, `R3_rhombus`, `R3_resonance`,
-`ownership_ratios`, `good_subset_T_union_rungs`. Difficulty XL. -/
+Proof: `ownership_core` (the abstract local-discharging count `own_count_core`, instantiated with
+pure right T-steps `RowR` and good rungs `RungM`) and `card_goodPure_le`.  Instead of the
+walk/ownership bookkeeping of the write-up, each rung `(v, z)` claims `{v, z}` and, when neither
+end is a path end and it is not a rhombus rung, both right neighbours `v₁, z₁`, which are unmatched
+by (R2)/(R2-sym); rhombi are excluded by `R3_rhombus` + `R3_resonance`.
+Depends on: `R1_v`, `R1_z`, `R2`, `R2_sym`, `R3_rhombus`, `R3_resonance`,
+`good_subset_T_union_rungs`. -/
 theorem ownership_rest (hX : Normal X) (F : DirField X) (hτ₁ : √3 / 2 + 3 * beta ≤ tau X)
     (hτ₂ : tau X < Real.cos (beta / 2)) :
     ((goodPure X F).card : ℝ) ≤ 5 / 4 * (Sset X).card := by
@@ -1914,12 +1919,13 @@ theorem ownership_rest (hX : Normal X) (F : DirField X) (hτ₁ : √3 / 2 + 3 *
 
 /-- **Ownership + pairing** (`cos(β/2) ≤ τ ≤ 1`): pure good edges `≤ (4/3)|S|`.
 
-TODO: prove.
-What's missing: as `ownership_rest`, plus pairing each rhombus rung with its (non-rhombus)
-successor, injectively (`R3_no_three_parallel`, T-cycles have length `≥ 3`); pair ratio `≤ 4/3`.
+TODO: none — proved.
 Acceptance: no `sorry`.
-Depends on: `ownership_rest` machinery, `R3_no_three_parallel`, `ownership_ratios`.
-Difficulty XL. -/
+Proof: as `ownership_rest`; a rhombus rung borrows `1/3` from its successor rung, which is not a
+rhombus rung (`R3_rhombus` twice + `R3_no_three_parallel`, no 2-cycles of T-steps) and has a
+sink or two unmatched right neighbours; the successor map is injective.
+Depends on: `R1_v`, `R1_z`, `R2`, `R2_sym`, `R3_rhombus`, `R3_no_three_parallel`,
+`good_subset_T_union_rungs`. -/
 theorem ownership_res (hX : Normal X) (F : DirField X) (hτ₁ : Real.cos (beta / 2) ≤ tau X)
     (hτ₂ : tau X ≤ 1) : ((goodPure X F).card : ℝ) ≤ 4 / 3 * (Sset X).card := by
   have hτ₁' : √3 / 2 + 3 * beta ≤ tau X := c5_rhombus.le.trans hτ₁
@@ -2059,9 +2065,7 @@ theorem inner_lt_sOff {c u u' : Pt} {τ : ℝ} (hc : ‖c‖ = 1) (hu : ‖u‖ 
 /-- **Corner lemma**: `v ∈ S ∖ D` with a rung and a second `Δ₂`-partner `w′`:
 `∠(u_v, u′) ≥ min(2θ₀, 90° − θ₀) > 2π/7`.
 
-TODO: prove.
-What's missing: case `|zw′| = Δ` (other root of `c·u = −τ`, angle `2θ₀`) / `|zw′| ≤ Δ₂`
-(`c·u′ > 0`, angle `≥ 90° − θ₀`); numerics from `c6`.
+TODO: none — proved.
 Acceptance: no `sorry`.
 Depends on: `exact_identity_b`, `exact_identity_c`, `c6`. Difficulty M–L. -/
 theorem corner_lemma (hX : Normal X) (F : DirField X) (hτ₁ : √3 / 2 - 2 * beta < tau X)
@@ -2128,7 +2132,7 @@ theorem corner_lemma (hX : Normal X) (F : DirField X) (hτ₁ : √3 / 2 - 2 * b
 /-- **At most 6 corner vertices** (their normal cones of `K` are wider than `2π/7` and
 interior-disjoint).
 
-TODO: prove.
+TODO: none — proved.
 Acceptance: no `sorry`.
 Depends on: `corner_lemma`, `ball_polygon_b`, `turning_sum_le` (or disjoint cones). Difficulty M. -/
 theorem card_cornerVerts_le (hX : Normal X) (F : DirField X) (hτ₁ : √3 / 2 - 2 * beta < tau X)
@@ -2197,7 +2201,7 @@ theorem card_cornerVerts_le (hX : Normal X) (F : DirField X) (hτ₁ : √3 / 2 
 
 /-- A K-vertex has at most two rungs (the positions `v + o_±`), so `#rungs ≤ 2 #rungVerts`.
 
-TODO: prove.
+TODO: none — proved.
 Acceptance: no `sorry`.
 Depends on: `rung_offset`. Difficulty M. -/
 theorem card_rungs_le (hX : Normal X) (F : DirField X) :
