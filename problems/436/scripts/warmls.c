@@ -58,6 +58,7 @@ typedef struct {
   HMap w;              // breakout weight of window r is 1 + w(r)
   HMap tabu;           // p -> step until which p may not be changed
   long pmin;
+  int rec; long *nb; long nnb, capnb;  // when rec: windows that became bad are appended to nb
   uint64_t rng;
 } State;
 
@@ -68,6 +69,10 @@ static int window_bad(const State *s, long r) {
 static void bad_add(State *s, long r) {
   if (hm_get(&s->badpos, r)) return;
   s->badlist[s->nbad++] = (int32_t)r; hm_set(&s->badpos, r, (uint32_t)s->nbad);
+  if (s->rec) {
+    if (s->nnb == s->capnb) { s->capnb = s->capnb ? 2 * s->capnb : 1024; s->nb = realloc(s->nb, s->capnb * sizeof(long)); }
+    s->nb[s->nnb++] = r;
+  }
 }
 static void bad_del(State *s, long r) {
   long i = (long)hm_get(&s->badpos, r) - 1; if (i < 0) return;
@@ -230,6 +235,75 @@ static void dump_window(const State *s, long r) {
   fputc('\n', stderr);
 }
 
+// distinct primes q >= minp dividing some member of window r with v_q not divisible by K, sorted
+// descending (largest = cheapest to score); tiers minp -> 30 -> 2 if a tier is empty.
+static int collect_cands(const State *s, long r, long *cand, long minp) {
+  long tiers[3] = { minp, minp < 30 ? minp : 30, 2 };
+  int nc = 0;
+  for (int t = 0; t < 3 && nc == 0; t++)
+    for (long j = r; j < r + s->L; j++) {
+      long n = j;
+      while (n > 1) {
+        long q = s->lpf[n] ? s->lpf[n] : n; int e = 0; while (n % q == 0) { n /= q; e++; }
+        if (q >= tiers[t] && e % s->K) {
+          int dup = 0; for (int i = 0; i < nc; i++) if (cand[i] == q) dup = 1;
+          if (!dup && nc < 64) cand[nc++] = q;
+        }
+      }
+    }
+  for (int i = 1; i < nc; i++) for (int j = i; j > 0 && cand[j] > cand[j-1]; j--) { long t = cand[j]; cand[j] = cand[j-1]; cand[j-1] = t; }
+  return nc;
+}
+
+/* kick
+ * Compound move for a window r at a local minimum: for each candidate (p, d) of r with unweighted
+ * gain <= KICKMAX, apply it, then greedily repair every window it newly broke with a strictly
+ * improving (unweighted) move on another prime.  Keep the whole sequence if nbad decreased,
+ * otherwise roll it back exactly (f(p) += K-d undoes f(p) += d).  Returns 1 if kept.
+ * Acceptance: after a rolled-back kick nbad is unchanged (checked in WARMLS_DEBUG mode).
+ */
+static long KICKMAX = 8, KICKDEPTH = 24;  // env WARMLS_KICKMAX / WARMLS_KICKDEPTH
+static int kick(State *s, long r, const long *cand, int nc, long step, int dbg) {
+  long before = s->nbad, gain[32], *jp = malloc((KICKDEPTH + 1) * sizeof(long)); int *jd = malloc((KICKDEPTH + 1) * sizeof(int));
+  long c2[64]; long nbcap = 4 * KICKMAX + 64, *nbcopy = malloc(nbcap * sizeof(long));
+  (void)r;
+  for (int i = 0; i < nc; i++) {
+    long p = cand[i];
+    score_prime(s, p, gain);
+    long g0[16]; for (int d = 1; d < s->K; d++) g0[d] = gain[d];
+    for (int d = 1; d < s->K; d++) {
+      if (g0[d] > KICKMAX) continue;
+      int nj = 0; jp[nj] = p; jd[nj] = d; nj++;
+      s->rec = 1; s->nnb = 0; apply_move(s, p, d); s->rec = 0;
+      long nnb = s->nnb; if (nnb > nbcap) nnb = nbcap;
+      memcpy(nbcopy, s->nb, nnb * sizeof(long));
+      int ok = 1;
+      for (long k = 0; k < nnb && ok; k++) {
+        long b = nbcopy[k];
+        if (!hm_get(&s->badpos, b)) continue;
+        int n2 = collect_cands(s, b, c2, s->pmin);
+        long fp = 0; int fd = 0;
+        for (int t = 0; t < n2 && !fp; t++) {
+          int used = 0; for (int u = 0; u < nj; u++) if (jp[u] == c2[t]) used = 1;
+          if (used) continue;
+          score_prime(s, c2[t], gain);
+          for (int dd = 1; dd < s->K; dd++) if (gain[dd] < 0 && (!fp || gain[dd] < gain[fd])) { fp = c2[t]; fd = dd; }
+        }
+        if (!fp || nj == KICKDEPTH) { ok = 0; break; }
+        apply_move(s, fp, fd); jp[nj] = fp; jd[nj] = fd; nj++;
+      }
+      if (ok && s->nbad < before) {
+        for (int u = 0; u < nj; u++) hm_set(&s->tabu, jp[u], (uint32_t)(step + 5 + rnd(s) % 10));
+        if (dbg) fprintf(stderr, "kick ok p=%ld d=%d gain0=%ld repairs=%d\n", p, d, g0[d], nj - 1);
+        free(nbcopy); free(jp); free(jd); return 1;
+      }
+      for (int u = nj - 1; u >= 0; u--) apply_move(s, jp[u], s->K - jd[u]);
+      if (dbg && s->nbad != before) { fprintf(stderr, "kick rollback mismatch %ld vs %ld\n", s->nbad, before); exit(5); }
+    }
+  }
+  free(nbcopy); free(jp); free(jd); return 0;
+}
+
 /* search
  * min-conflicts loop: pick a random bad r; candidate primes = distinct primes >= pmin dividing
  *       r..r+L-1 whose v_p is not divisible by K; score all (p, d); with probability noise pick a
@@ -243,24 +317,14 @@ static int search(State *s, long maxsteps, int noise_permille) {
   hm_init(&s->tabu, 1 << 16); hm_init(&s->w, 1 << 16);
   long best = s->nbad; time_t t0 = time(0), tl = t0;
   long cand[64]; long gain[32];
-  long step; int dbg = getenv("WARMLS_DEBUG") != 0;
+  long step, nkick = 0; int dbg = getenv("WARMLS_DEBUG") != 0;
+  long kick_below = getenv("WARMLS_KICK") ? atol(getenv("WARMLS_KICK")) : 50;  // kicks only in the tail
+  if (getenv("WARMLS_KICKMAX")) KICKMAX = atol(getenv("WARMLS_KICKMAX"));
+  if (getenv("WARMLS_KICKDEPTH")) KICKDEPTH = atol(getenv("WARMLS_KICKDEPTH"));
   for (step = 1; step <= maxsteps && s->nbad > 0; step++) {
     long r = s->badlist[rnd(s) % s->nbad];
-    int nc = 0;
-    for (int pass = 0; pass < 2 && nc == 0; pass++)
-      for (long j = r; j < r + s->L; j++) {
-        long n = j;
-        while (n > 1) {
-          long q = s->lpf[n] ? s->lpf[n] : n; int e = 0; while (n % q == 0) { n /= q; e++; }
-          if ((pass || q >= s->pmin) && e % s->K) {
-            int dup = 0; for (int i = 0; i < nc; i++) if (cand[i] == q) dup = 1;
-            if (!dup && nc < 64) cand[nc++] = q;
-          }
-        }
-      }
+    int nc = collect_cands(s, r, cand, s->pmin);
     if (nc == 0) { fprintf(stderr, "window %ld has no changeable prime\n", r); return 1; }
-    // largest primes first (cheapest to score, fewest side effects)
-    for (int i = 1; i < nc; i++) for (int j = i; j > 0 && cand[j] > cand[j-1]; j--) { long t = cand[j]; cand[j] = cand[j-1]; cand[j-1] = t; }
     long bp = 0; int bd = 0; long bg = 1L << 40; int ties = 0;
     for (int i = 0; i < nc; i++) {
       if (bg < 0 && cand[i] < 1000) break;  // improving move found; skip expensive small primes
@@ -272,7 +336,8 @@ static int search(State *s, long maxsteps, int noise_permille) {
         else if (g == bg && rnd(s) % (++ties) == 0) { bp = cand[i]; bd = d; }
       }
     }
-    if (!bp || bg >= 0) {  // local minimum for this window: breakout (raise its weight), sometimes move anyway
+    if (!bp || bg >= 0) {  // local minimum for this window: compound kick, else breakout (raise its weight)
+      if (s->nbad <= kick_below && kick(s, r, cand, nc, step, dbg)) { nkick++; if (s->nbad < best) best = s->nbad; continue; }
       hm_set(&s->w, r, hm_get(&s->w, r) + 1);
       if (!bp || (long)(rnd(s) % 1000) >= noise_permille) continue;
     }
@@ -286,13 +351,13 @@ static int search(State *s, long maxsteps, int noise_permille) {
       tl = time(0);
       long first = 0;
       for (long i = 0; i < s->nbad; i++) if (!first || s->badlist[i] < first) first = s->badlist[i];
-      fprintf(stderr, "t=%lds step=%ld nbad=%ld best=%ld first_bad=%ld\n", (long)(tl - t0), step, s->nbad, best, first);
+      fprintf(stderr, "t=%lds step=%ld nbad=%ld best=%ld first_bad=%ld kicks=%ld\n", (long)(tl - t0), step, s->nbad, best, first, nkick);
       if (s->nbad <= 3) for (long i = 0; i < s->nbad; i++) dump_window(s, s->badlist[i]);
     }
   }
   long first = 0;
   for (long i = 0; i < s->nbad; i++) if (!first || s->badlist[i] < first) first = s->badlist[i];
-  fprintf(stderr, "END t=%lds steps=%ld nbad=%ld best=%ld first_bad=%ld\n", (long)(time(0) - t0), step - 1, s->nbad, best, first);
+  fprintf(stderr, "END t=%lds steps=%ld nbad=%ld best=%ld first_bad=%ld kicks=%ld\n", (long)(time(0) - t0), step - 1, s->nbad, best, first, nkick);
   for (long i = 0; i < s->nbad && i < 40; i++) dump_window(s, s->badlist[i]);
   return s->nbad == 0 ? 0 : 1;
 }
