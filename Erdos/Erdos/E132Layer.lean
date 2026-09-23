@@ -791,13 +791,64 @@ theorem cand_real {a0 a1 c0 c1 r0 r1 : ℝ} (ha : a0 ^ 2 + a1 ^ 2 = 1) (hc : c0 
     (r1 + ((ρ - 2 / 3) * a1 + (ρ - 4 / 3) * c1)) * e1 - (ρ - 2 / 3) ^ 2 * ha -
     (ρ - 4 / 3) ^ 2 * hc - 2 * (ρ - 2 / 3) * (ρ - 4 / 3) * hac
 
-/-- TODO: prove.
-What's missing: (VERIFY_A1b Case 1, `v₁ = (1,0)`): `D = 3`, `v₂ = (−1/2, y₂)`, `v₃ = (−1/2, −y₂)`;
-each extra neighbour `rᵢ` is at squared distance `3` from some `vⱼ` (`j ≠ i`), hence a candidate
-(`cand_real`); if `r₁` points to `v₂` then `|r₁ r₂|² ∈ {4/3, 3ρ} ⊆ (1, 3)`, else `|r₁ r₃|²` is.
-Acceptance: Case 1 core computation: some vertex of the equilateral triangle has no second
-`Δ₂`-neighbour.
-Depends on: `cand_real`. -/
+/-- Case 1 incompatibility: a candidate `r` of `A` pointing to `C` and a candidate `s` of `C` (pointing to `A` or to the third vertex `−A − C`) are at squared distance `4/3` or `3ρ`, both in `(1, 3)`. -/
+theorem case1_pair_real {a0 a1 c0 c1 r0 r1 s0 s1 : ℝ} (ha : a0 ^ 2 + a1 ^ 2 = 1)
+    (hc : c0 ^ 2 + c1 ^ 2 = 1) (hac : a0 * c0 + a1 * c1 = -1 / 2)
+    (hra : (r0 - a0) ^ 2 + (r1 - a1) ^ 2 = 1) (hrc : (r0 - c0) ^ 2 + (r1 - c1) ^ 2 = 3)
+    (hrn : r0 ^ 2 + r1 ^ 2 ≤ 1)
+    (hsc : (s0 - c0) ^ 2 + (s1 - c1) ^ 2 = 1) (hsn : s0 ^ 2 + s1 ^ 2 ≤ 1)
+    (hsx : (s0 - a0) ^ 2 + (s1 - a1) ^ 2 = 3 ∨
+      (s0 - (-a0 - c0)) ^ 2 + (s1 - (-a1 - c1)) ^ 2 = 3) :
+    1 < (r0 - s0) ^ 2 + (r1 - s1) ^ 2 ∧ (r0 - s0) ^ 2 + (r1 - s1) ^ 2 < 3 := by
+  obtain ⟨e0, e1, q⟩ := cand_real ha hc hac hra hrc
+  set ρ := r0 ^ 2 + r1 ^ 2 with hρ
+  have hρ0 : 0 ≤ ρ := by rw [hρ]; positivity
+  have hne1 : ρ ≠ 1 := by intro h; rw [h] at q; norm_num at q
+  have hlt : ρ < 1 := lt_of_le_of_ne hrn hne1
+  have hgt : 1 / 3 < ρ := by
+    by_contra h; push Not at h
+    have : ρ * (3 - ρ) ≤ 1 := by nlinarith
+    have e : ρ * (3 - ρ) = 4 / 3 := by linear_combination -q
+    linarith
+  have hK : (-a0 - c0) ^ 2 + (-a1 - c1) ^ 2 = 1 := by linear_combination ha + hc + 2 * hac
+  have hCK : c0 * (-a0 - c0) + c1 * (-a1 - c1) = -1 / 2 := by linear_combination -hac - hc
+  have hca : c0 * a0 + c1 * a1 = -1 / 2 := by linear_combination hac
+  have same : ∀ σ : ℝ, σ ^ 2 - 3 * σ + 4 / 3 = 0 → σ ≤ 1 → σ = ρ := by
+    intro σ hσ hσ1
+    have : (σ - ρ) * (σ + ρ - 3) = 0 := by linear_combination hσ - q
+    rcases mul_eq_zero.1 this with h | h
+    · linarith
+    · linarith
+  rcases hsx with hsx | hsx
+  · obtain ⟨f0, f1, q'⟩ := cand_real hc ha hca hsc hsx
+    have hσ := same _ q' hsn
+    rw [hσ] at f0 f1
+    have hv : (r0 - s0) ^ 2 + (r1 - s1) ^ 2 = 4 / 3 := by
+      rw [e0, e1, f0, f1]
+      linear_combination (4 / 9 : ℝ) * ha + (4 / 9 : ℝ) * hc - (8 / 9 : ℝ) * hac
+    constructor <;> linarith
+  · obtain ⟨f0, f1, q'⟩ := cand_real hc hK hCK hsc hsx
+    have hσ := same _ q' hsn
+    rw [hσ] at f0 f1
+    have hv : (r0 - s0) ^ 2 + (r1 - s1) ^ 2 = 3 * ρ := by
+      rw [e0, e1, f0, f1]
+      linear_combination (2 * ρ - 2) ^ 2 * ha + (ρ - 2) ^ 2 * hc +
+        2 * (2 * ρ - 2) * (ρ - 2) * hac + 3 * q
+    constructor <;> linarith
+
+/-- For three unit vectors with `u + v + w = 0` and `r ≠ 0` with `|ru| = 1`: `r` is at squared distance `> 1` from `v` or from `w` (the sum of the two is `3|r|² + 2`). -/
+theorem far_real {u0 u1 v0 v1 w0 w1 p q : ℝ} (hu : u0 ^ 2 + u1 ^ 2 = 1)
+    (hv : v0 ^ 2 + v1 ^ 2 = 1) (hw : w0 ^ 2 + w1 ^ 2 = 1)
+    (hs0 : u0 + v0 + w0 = 0) (hs1 : u1 + v1 + w1 = 0)
+    (hr : (p - u0) ^ 2 + (q - u1) ^ 2 = 1) (hr0 : 0 < p ^ 2 + q ^ 2) :
+    1 < (p - v0) ^ 2 + (q - v1) ^ 2 ∨ 1 < (p - w0) ^ 2 + (q - w1) ^ 2 := by
+  have e : (p - v0) ^ 2 + (q - v1) ^ 2 + ((p - w0) ^ 2 + (q - w1) ^ 2) =
+      3 * (p ^ 2 + q ^ 2) + 2 := by
+    linear_combination hv + hw - hr + hu - 2 * p * hs0 - 2 * q * hs1
+  by_contra h; push Not at h
+  linarith [h.1, h.2]
+
+/-- VERIFY_A1b **Case 1** core computation (`v₁ = (1,0)`): `D = 3`, `v₂ = (−1/2, y₂)`, `v₃ = (−1/2, −y₂)`; each extra neighbour `rᵢ` is at squared distance `3` from another vertex (`far_real`), and `case1_pair_real` puts `|r₁ r₂|²` or `|r₁ r₃|²` in the gap `(1, 3)`. -/
 theorem case1_real {x₂ y₂ x₃ y₃ p₁ q₁ p₂ q₂ p₃ q₃ D : ℝ} (hD : 1 < D)
     (h₂ : x₂ ^ 2 + y₂ ^ 2 = 1) (h₃ : x₃ ^ 2 + y₃ ^ 2 = 1)
     (h12 : (1 - x₂) ^ 2 + y₂ ^ 2 = D) (h13 : (1 - x₃) ^ 2 + y₃ ^ 2 = D)
@@ -814,15 +865,78 @@ theorem case1_real {x₂ y₂ x₃ y₃ p₁ q₁ p₂ q₂ p₃ q₃ D : ℝ} (
     (g32 : (p₃ - x₂) ^ 2 + (q₃ - y₂) ^ 2 ≤ 1 ∨ (p₃ - x₂) ^ 2 + (q₃ - y₂) ^ 2 = D)
     (gr12 : (p₁ - p₂) ^ 2 + (q₁ - q₂) ^ 2 ≤ 1 ∨ (p₁ - p₂) ^ 2 + (q₁ - q₂) ^ 2 = D)
     (gr13 : (p₁ - p₃) ^ 2 + (q₁ - q₃) ^ 2 ≤ 1 ∨ (p₁ - p₃) ^ 2 + (q₁ - q₃) ^ 2 = D) : False := by
-  sorry
+  have hx : x₃ = x₂ := by linear_combination (1/2 : ℝ) * h12 - (1/2 : ℝ) * h13 -
+    (1/2 : ℝ) * h₂ + (1/2 : ℝ) * h₃
+  have hy : y₃ = -y₂ := by
+    have : (y₃ - y₂) * (y₃ + y₂) = 0 := by rw [hx] at h₃; linear_combination h₃ - h₂
+    rcases mul_eq_zero.1 this with h | h
+    · exfalso
+      have hy' : y₃ = y₂ := by linarith
+      rw [hx, hy'] at h23
+      nlinarith
+    · linarith
+  subst x₃ y₃
+  have hDx : D = 2 - 2 * x₂ := by linear_combination -h12 + h₂
+  have h4 : 4 * y₂ ^ 2 = D := by linear_combination h23
+  have hx2 : x₂ = -1 / 2 := by
+    have : (2 * x₂ + 1) * (x₂ - 1) = 0 := by linear_combination (-1/2 : ℝ) * h4 - (1/2 : ℝ) * hDx + 2 * h₂
+    rcases mul_eq_zero.1 this with h | h
+    · linarith
+    · exfalso; linarith
+  subst x₂
+  have hD3 : D = 3 := by linarith
+  subst hD3
+  have hy2 : y₂ ^ 2 = 3 / 4 := by linarith
+  have u2 : (-1 / 2 : ℝ) ^ 2 + y₂ ^ 2 = 1 := h₂
+  have u3 : (-1 / 2 : ℝ) ^ 2 + (-y₂) ^ 2 = 1 := by linear_combination h₂
+  have u1 : (1 : ℝ) ^ 2 + 0 ^ 2 = 1 := by norm_num
+  -- which vertex is `r₁` far from
+  have F1 := far_real (u0 := 1) (u1 := 0) (v0 := -1/2) (v1 := y₂) (w0 := -1/2) (w1 := -y₂)
+    (p := p₁) (q := q₁) u1 u2 u3 (by norm_num) (by ring) (by linear_combination hr₁) z₁
+  have F2 := far_real (u0 := -1/2) (u1 := y₂) (v0 := 1) (v1 := 0) (w0 := -1/2) (w1 := -y₂)
+    (p := p₂) (q := q₂) u2 u1 u3 (by norm_num) (by ring) hr₂ z₂
+  have F3 := far_real (u0 := -1/2) (u1 := -y₂) (v0 := 1) (v1 := 0) (w0 := -1/2) (w1 := y₂)
+    (p := p₃) (q := q₃) u3 u1 u2 (by norm_num) (by ring) hr₃ z₃
+  have hac2 : (1 : ℝ) * (-1 / 2) + 0 * y₂ = -1 / 2 := by ring
+  have hac3 : (1 : ℝ) * (-1 / 2) + 0 * (-y₂) = -1 / 2 := by ring
+  rcases F1 with F1 | F1
+  · -- `r₁` points to `v₂`; compare with `r₂`
+    have e12 : (p₁ - -1 / 2) ^ 2 + (q₁ - y₂) ^ 2 = 3 := g12.resolve_left (by linarith)
+    have hsx : (p₂ - 1) ^ 2 + (q₂ - 0) ^ 2 = 3 ∨
+        (p₂ - (-1 - -1 / 2)) ^ 2 + (q₂ - (-0 - y₂)) ^ 2 = 3 := by
+      rcases F2 with F2 | F2
+      · left; have := g21.resolve_left (by linarith [F2]); linear_combination this
+      · right; have := g23.resolve_left (by linarith [F2]); linear_combination this
+    have P := case1_pair_real (a0 := 1) (a1 := 0) (c0 := -1/2) (c1 := y₂) (r0 := p₁) (r1 := q₁)
+      (s0 := p₂) (s1 := q₂) u1 u2 hac2 (by linear_combination hr₁) e12 n₁ hr₂ n₂ hsx
+    rcases gr12 with h | h <;> linarith [P.1, P.2]
+  · have e13 : (p₁ - -1 / 2) ^ 2 + (q₁ - -y₂) ^ 2 = 3 := g13.resolve_left (by linarith)
+    have hsx : (p₃ - 1) ^ 2 + (q₃ - 0) ^ 2 = 3 ∨
+        (p₃ - (-1 - -1 / 2)) ^ 2 + (q₃ - (-0 - -y₂)) ^ 2 = 3 := by
+      rcases F3 with F3 | F3
+      · left; have := g31.resolve_left (by linarith [F3]); linear_combination this
+      · right; have := g32.resolve_left (by linarith [F3]); linear_combination this
+    have P := case1_pair_real (a0 := 1) (a1 := 0) (c0 := -1/2) (c1 := -y₂) (r0 := p₁)
+      (r1 := q₁) (s0 := p₃) (s1 := q₃) u1 u3 hac3 (by linear_combination hr₁) e13 n₁ hr₃ n₃ hsx
+    rcases gr13 with h | h <;> linarith [P.1, P.2]
 
-/-- TODO: prove.
-What's missing: (VERIFY_A1c Lemma F, `p = 0`, `w = (1,0)`, `r` WLOG not below the axis):
-Lemma M gives `|r a₁|² = |r a₂|² = D`; so `r ∥ a₁ + a₂`, which forces `x₁ + x₂ < 0`; the
-neighbour `a` with `x_a < 0` has `|aw|² > 2`, so `|aw|² = D`; `chord_real` gives `|ab|² > D`.
-Acceptance: Lemma F core computation.
-Depends on: `lemmaM_real`, `chord_real`. -/
-theorem lemmaF_real {x₁ y₁ x₂ y₂ xb yb xr yr D : ℝ} (hD : 1 < D)
+/-- End of Lemma F: a neighbour `a` of `p = 0` with `a·w < 0` (`w = (1,0)`) is at distance `Δ` from `w`, hence (chord monotonicity) farther than `Δ` from a neighbour `b` on the other side of `w`. -/
+theorem lemmaF_end_real {xa ya xb yb D : ℝ} (ha : xa ^ 2 + ya ^ 2 = 1)
+    (hb : xb ^ 2 + yb ^ 2 = 1) (hxa : xa < 0) (hya : ya < 0) (hyb : 0 < yb)
+    (hab : 0 < xa * yb - ya * xb)
+    (gw : (xa - 1) ^ 2 + ya ^ 2 ≤ 1 ∨ (xa - 1) ^ 2 + ya ^ 2 = D)
+    (m : (xa - xb) ^ 2 + (ya - yb) ^ 2 ≤ D) : False := by
+  have sw : (xa - 1) ^ 2 + ya ^ 2 = 2 - 2 * xa := by linear_combination ha
+  have ew : (xa - 1) ^ 2 + ya ^ 2 = D := gw.resolve_left (by linarith)
+  have hch := chord_real (a0 := xa) (a1 := ya) (w0 := 1) (w1 := 0) (b0 := xb) (b1 := yb) ha
+    (by norm_num) hb (by ring_nf; linarith) hab (by ring_nf; linarith)
+  have sb : (xa - xb) ^ 2 + (ya - yb) ^ 2 = 2 - 2 * (xa * xb + ya * yb) := by
+    linear_combination ha + hb
+  ring_nf at hch
+  linarith
+
+/-- **Lemma F** core computation (`p = 0`, `w = (1,0)`, `r` not below the axis): Lemma M gives `|r a₁|² = |r a₂|² = D`, so `r ∥ a₁ + a₂`, which forces `x₁ + x₂ < 0`; conclude with `lemmaF_end_real`. -/
+theorem lemmaF_real {x₁ y₁ x₂ y₂ xb yb xr yr D : ℝ} (_hD : 1 < D)
     (h₁ : x₁ ^ 2 + y₁ ^ 2 = 1) (h₂ : x₂ ^ 2 + y₂ ^ 2 = 1) (hb : xb ^ 2 + yb ^ 2 = 1)
     (hy₁ : y₁ < 0) (hy₂ : y₂ < 0) (hyb : 0 < yb) (hne : ¬ (x₁ = x₂ ∧ y₁ = y₂))
     (hc₁ : 0 < x₁ * yb - y₁ * xb) (hc₂ : 0 < x₂ * yb - y₂ * xb)
@@ -833,7 +947,35 @@ theorem lemmaF_real {x₁ y₁ x₂ y₂ xb yb xr yr D : ℝ} (hD : 1 < D)
     (gw₂ : (x₂ - 1) ^ 2 + y₂ ^ 2 ≤ 1 ∨ (x₂ - 1) ^ 2 + y₂ ^ 2 = D)
     (m₁ : (x₁ - xb) ^ 2 + (y₁ - yb) ^ 2 ≤ D) (m₂ : (x₂ - xb) ^ 2 + (y₂ - yb) ^ 2 ≤ D) :
     False := by
-  sorry
+  have M1 := lemmaM_real h₁ hy₁ hr hyr hr0
+  have M2 := lemmaM_real h₂ hy₂ hr hyr hr0
+  have e1 := g₁.resolve_left (by linarith)
+  have e2 := g₂.resolve_left (by linarith)
+  have hdot : xr * x₁ + yr * y₁ = xr * x₂ + yr * y₂ := by
+    linear_combination (-1/2 : ℝ) * e1 + (1/2 : ℝ) * e2 + (1/2 : ℝ) * h₁ - (1/2 : ℝ) * h₂
+  have hd : 0 < (x₁ - x₂) ^ 2 + (y₁ - y₂) ^ 2 := by
+    by_contra h; push Not at h
+    have a := sq_nonneg (x₁ - x₂)
+    have b := sq_nonneg (y₁ - y₂)
+    have ha : (x₁ - x₂) ^ 2 = 0 := by linarith
+    have hb : (y₁ - y₂) ^ 2 = 0 := by linarith
+    exact hne ⟨by linarith [pow_eq_zero_iff (n := 2) (two_ne_zero) |>.1 ha],
+      by linarith [pow_eq_zero_iff (n := 2) (two_ne_zero) |>.1 hb]⟩
+  have hcr : ((x₁ - x₂) ^ 2 + (y₁ - y₂) ^ 2) * (xr * (y₁ + y₂) - yr * (x₁ + x₂)) = 0 := by
+    linear_combination ((x₁ - x₂) * (y₁ + y₂) - (y₁ - y₂) * (x₁ + x₂)) * hdot +
+      ((y₁ - y₂) * xr - (x₁ - x₂) * yr) * (h₁ - h₂)
+  have hcross : xr * (y₁ + y₂) - yr * (x₁ + x₂) = 0 := (mul_eq_zero.1 hcr).resolve_left hd.ne'
+  have hxr : 0 < xr := by
+    have : (xr - 1) ^ 2 + yr ^ 2 = xr ^ 2 + yr ^ 2 - 2 * xr + 1 := by ring
+    linarith
+  have hsx : x₁ + x₂ < 0 := by
+    by_contra h; push Not at h
+    have k1 : xr * (y₁ + y₂) < 0 := mul_neg_of_pos_of_neg hxr (by linarith)
+    have k2 : 0 ≤ yr * (x₁ + x₂) := mul_nonneg hyr h
+    linarith
+  rcases lt_or_ge x₁ 0 with hx | hx
+  · exact lemmaF_end_real h₁ hb hx hy₁ hyb hc₁ gw₁ m₁
+  · exact lemmaF_end_real h₂ hb (by linarith) hy₂ hyb hc₂ gw₂ m₂
 
 /-! ## Prop 3: core vertices of `L₂` have core degree `2` -/
 
