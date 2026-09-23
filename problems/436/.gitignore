@@ -4,3 +4,6 @@ scripts/smoothruns
 __pycache__/
 scripts/sdfs
 logs/probes/*.log
+scripts/mrvdfs
+scripts/segcheck
+scripts/warmls
