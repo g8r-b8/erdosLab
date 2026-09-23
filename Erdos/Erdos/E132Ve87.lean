@@ -35,23 +35,95 @@ open Erdos132Layer
 
 /-! ## The middle lemma -/
 
+/-- Mixed case of the middle lemma: `|r|² = D`, `|s|² ≤ 1`.  With `S = U + V ∥ 1 − B`
+(complex notation, `U = u`, `V = v`, `B = b`), `UV · S̄ = S` and `(−B) · (1 − B)‾ = 1 − B` give
+`UV = −B`; then `|s − b|² = D` reads `b₀ = v₀ + 1/2 ≤ 0`, which forces `u₀ < 0`, contradicting
+`u₀ + v₀ > 0`. -/
+theorem mid_mixed_real {u0 u1 v0 v1 b0 b1 : ℝ}
+    (hu : u0 ^ 2 + u1 ^ 2 = 1) (hv : v0 ^ 2 + v1 ^ 2 = 1) (hb : b0 ^ 2 + b1 ^ 2 = 1)
+    (hu1 : u1 < 0) (hv1 : v1 < 0) (hb1 : 0 < b1) (hb0 : b0 < 1)
+    (hX : (u0 + v0) * b1 + (u1 + v1) * (1 - b0) = 0) (hs0 : 0 < u0 + v0)
+    (es : (1 + v0 - b0) ^ 2 + (v1 - b1) ^ 2 = 2 + 2 * u0) (hv0 : 2 + 2 * v0 ≤ 1) : False := by
+  have R : (u0 * v0 - u1 * v1) * (u0 + v0) + (u0 * v1 + u1 * v0) * (u1 + v1) = u0 + v0 := by
+    linear_combination v0 * hu + u0 * hv
+  have I : (u0 * v1 + u1 * v0) * (u0 + v0) - (u0 * v0 - u1 * v1) * (u1 + v1) = u1 + v1 := by
+    linear_combination v1 * hu + u1 * hv
+  have E1 : (u0 + v0) * ((u0 * v0 - u1 * v1) * (1 - b0) - (u0 * v1 + u1 * v0) * b1 - (1 - b0))
+      = 0 := by
+    linear_combination (1 - b0) * R - (u0 * v1 + u1 * v0) * hX
+  have E2 : (u0 + v0) * ((u0 * v1 + u1 * v0) * (1 - b0) + (u0 * v0 - u1 * v1) * b1 + b1)
+      = 0 := by
+    linear_combination (1 - b0) * I + (u0 * v0 - u1 * v1 + 1) * hX
+  have e1 := (mul_eq_zero.1 E1).resolve_left hs0.ne'
+  have e2 := (mul_eq_zero.1 E2).resolve_left hs0.ne'
+  have hc : 0 < (1 - b0) ^ 2 + b1 ^ 2 := by have := pow_pos hb1 2; positivity
+  have F0 : (u0 * v0 - u1 * v1 + b0) * ((1 - b0) ^ 2 + b1 ^ 2) = 0 := by
+    linear_combination (1 - b0) * e1 + b1 * e2 - (1 - b0) * hb
+  have F1 : (u0 * v1 + u1 * v0 + b1) * ((1 - b0) ^ 2 + b1 ^ 2) = 0 := by
+    linear_combination (1 - b0) * e2 - b1 * e1 + b1 * hb
+  have f0 := (mul_eq_zero.1 F0).resolve_right hc.ne'
+  have f1 := (mul_eq_zero.1 F1).resolve_right hc.ne'
+  have hbv : b0 = v0 + 1 / 2 := by
+    linear_combination (-1/2 : ℝ) * es + (1/2 : ℝ) * hv + (1/2 : ℝ) * hb +
+      - v0 * f0 - v1 * f1 + u0 * hv
+  have huv : 0 < u1 * v1 := mul_pos_of_neg_of_neg hu1 hv1
+  have : 0 < u0 * v0 := by linarith
+  have hu0 : u0 < 0 := by
+    rcases pos_and_pos_or_neg_and_neg_of_mul_pos this with h | h
+    · linarith [h.2]
+    · exact h.1
+  linarith
+
 /-- **Middle lemma, real core.**  Frame: `p = 0`, `w = (1, 0)`, `b` a unit vector strictly above
 the axis.  `r = w + u` and `s = w + v` (`u, v` unit, strictly below the axis) are both at squared
 distance `D` from `b`, and each of `|r|², |s|²` is `≤ 1` or `= D`.  Then `r = s`.
 
-TODO: prove.
-What's missing: `r ≠ s` ⇒ `(u + v) × (w − b) = 0` ⇒ `u₀ + v₀ > 0`; case split on the gaps; in the
-mixed case `UV = −B` (complex product) gives `b₀ = v₀ + 1/2 ≤ 0`, contradicting `u₀ + v₀ > 0`.
-Acceptance: no `sorry`.
-Depends on: nothing. -/
-theorem mid_pair_real {u0 u1 v0 v1 b0 b1 D : ℝ} (hD : 1 < D)
+Proof: `r ≠ s` ⇒ `(u + v) × (w − b) = 0` ⇒ `u₀ + v₀ > 0`; so not both `|r|², |s|² ≤ 1`; both `= D`
+gives `r = s`; the mixed case is `mid_mixed_real`. -/
+theorem mid_pair_real {u0 u1 v0 v1 b0 b1 D : ℝ} (_hD : 1 < D)
     (hu : u0 ^ 2 + u1 ^ 2 = 1) (hv : v0 ^ 2 + v1 ^ 2 = 1) (hb : b0 ^ 2 + b1 ^ 2 = 1)
     (hu1 : u1 < 0) (hv1 : v1 < 0) (hb1 : 0 < b1)
     (er : (1 + u0 - b0) ^ 2 + (u1 - b1) ^ 2 = D) (es : (1 + v0 - b0) ^ 2 + (v1 - b1) ^ 2 = D)
     (gr : (1 + u0) ^ 2 + u1 ^ 2 ≤ 1 ∨ (1 + u0) ^ 2 + u1 ^ 2 = D)
     (gs : (1 + v0) ^ 2 + v1 ^ 2 ≤ 1 ∨ (1 + v0) ^ 2 + v1 ^ 2 = D) :
     u0 = v0 ∧ u1 = v1 := by
-  sorry
+  by_contra hne
+  have hd : 0 < (u0 - v0) ^ 2 + (u1 - v1) ^ 2 := by
+    by_contra h; push Not at h
+    have a := sq_nonneg (u0 - v0)
+    have b := sq_nonneg (u1 - v1)
+    have ha : (u0 - v0) ^ 2 = 0 := by linarith
+    have hb' : (u1 - v1) ^ 2 = 0 := by linarith
+    exact hne ⟨by linarith [pow_eq_zero_iff (n := 2) two_ne_zero |>.1 ha],
+      by linarith [pow_eq_zero_iff (n := 2) two_ne_zero |>.1 hb']⟩
+  have ha : (u0 - v0) * (1 - b0) - (u1 - v1) * b1 = 0 := by
+    linear_combination (1/2 : ℝ) * er - (1/2 : ℝ) * es - (1/2 : ℝ) * hu + (1/2 : ℝ) * hv
+  have hX' : ((u0 - v0) ^ 2 + (u1 - v1) ^ 2) * ((u0 + v0) * b1 + (u1 + v1) * (1 - b0)) = 0 := by
+    linear_combination ((u0 - v0) * (u1 + v1) - (u1 - v1) * (u0 + v0)) * ha -
+      ((u0 - v0) * (-b1) - (u1 - v1) * (1 - b0)) * (hu - hv)
+  have hX : (u0 + v0) * b1 + (u1 + v1) * (1 - b0) = 0 :=
+    (mul_eq_zero.1 hX').resolve_left hd.ne'
+  have hb0 : b0 < 1 := by
+    have h2 := pow_pos hb1 2
+    have : b0 ^ 2 < 1 := by linarith
+    exact (abs_lt.1 ((sq_lt_one_iff_abs_lt_one b0).1 this)).2
+  have hs0 : 0 < u0 + v0 := by
+    have : 0 < (u0 + v0) * b1 := by
+      have : 0 < -(u1 + v1) * (1 - b0) := mul_pos (by linarith) (by linarith)
+      linarith
+    exact (pos_iff_pos_of_mul_pos this).2 hb1
+  have nr : (1 + u0) ^ 2 + u1 ^ 2 = 2 + 2 * u0 := by linear_combination hu
+  have ns : (1 + v0) ^ 2 + v1 ^ 2 = 2 + 2 * v0 := by linear_combination hv
+  rcases gr with gr | gr <;> rcases gs with gs | gs
+  · linarith
+  · exact mid_mixed_real hv hu hb hv1 hu1 hb1 hb0 (by linear_combination hX) (by linarith)
+      (by rw [← ns, gs]; exact er) (by linarith)
+  · exact mid_mixed_real hu hv hb hu1 hv1 hb1 hb0 hX hs0 (by rw [← nr, gr]; exact es)
+      (by linarith)
+  · have h0 : u0 = v0 := by linarith
+    have h1 : (u1 - v1) * (u1 + v1) = 0 := by linear_combination hu - hv - (u0 + v0) * h0
+    have : u1 - v1 = 0 := (mul_eq_zero.1 h1).resolve_right (by linarith)
+    exact hne ⟨h0, by linarith⟩
 
 /-- **Middle lemma.**  Let `p` have `Δ₂`-neighbours `w, a₁, a₂, b` with (for a sign `σ = ±1`)
 `a₁, a₂` strictly on one side of the line `pw`, `b` strictly on the other, and `b` after `a₁, a₂`
