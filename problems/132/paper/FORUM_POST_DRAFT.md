@@ -34,7 +34,7 @@ Sketch:
 
 PDF: [PLACEHOLDER: PDF link] · Code, certificates scripts, Lean file: [PLACEHOLDER: repository link]
 
-**AI disclosure.** These results were developed with substantial assistance from an AI system (Claude, Anthropic): the proofs, the verification scripts, the SAT encodings and the Lean formalisation. The checking that was done is listed in the PDF's appendix: independent adversarial re-derivations, exact/interval arithmetic for every numerical inequality, exhaustive checks of the combinatorial bookkeeping, and independently checked SAT certificates. [PLACEHOLDER: poster's own statement, e.g. "I have read and checked the proofs of the main theorem and of the layer bound myself, and I take responsibility for them."] Comments and corrections are very welcome.
+**AI disclosure.** I used an AI assistant (Claude, Anthropic) for exploration, computation, formalisation and drafting; the checks performed are listed in the PDF's appendix. Comments and corrections are very welcome.
 
 ---
 
