@@ -225,85 +225,82 @@ noncomputable def L1 (X : Finset Pt) : Finset Pt := by
 noncomputable def L2 (X : Finset Pt) : Finset Pt := by
   classical exact (X \ L1 X).filter (IsExt (X \ L1 X))
 
-/-- TODO: prove.
-What's missing: unfold `L1`, `mem_filter`, `IsExt` contains membership.
-Acceptance: `p ∈ L1 X ↔ IsExt X p`.
-Depends on: nothing. -/
+/-- `p ∈ L1 X ↔ IsExt X p`. -/
 theorem mem_L1 {X : Finset Pt} {p : Pt} : p ∈ L1 X ↔ IsExt X p := by
-  sorry
+  classical
+  unfold L1; rw [mem_filter]; exact ⟨fun h => h.2, fun h => ⟨h.1, h⟩⟩
 
-/-- TODO: prove.
-What's missing: unfold `L2`.
-Acceptance: `p ∈ L2 X ↔ IsExt (X \ L1 X) p`.
-Depends on: nothing. -/
+/-- `p ∈ L2 X ↔ IsExt (X \ L1 X) p`. -/
 theorem mem_L2 {X : Finset Pt} {p : Pt} : p ∈ L2 X ↔ IsExt (X \ L1 X) p := by
-  sorry
+  classical
+  unfold L2; rw [mem_filter]; exact ⟨fun h => h.2, fun h => ⟨h.1, h⟩⟩
 
-/-- TODO: prove.
-What's missing: from `mem_L1`, `mem_L2`.
-Acceptance: `L1 X ⊆ X`, `L2 X ⊆ X`, `Disjoint (L1 X) (L2 X)`.
-Depends on: `mem_L1`, `mem_L2`. -/
+/-- `L1 X ⊆ X`. -/
 theorem L1_subset (X : Finset Pt) : L1 X ⊆ X := by
-  sorry
+  exact fun p hp => (mem_L1.1 hp).1
 
-/-- TODO: prove. (see `L1_subset`) -/
+/-- `L2 X ⊆ X`. -/
 theorem L2_subset (X : Finset Pt) : L2 X ⊆ X := by
-  sorry
+  exact fun p hp => (mem_sdiff.1 (mem_L2.1 hp).1).1
 
-/-- TODO: prove. (see `L1_subset`) -/
+/-- `L1 X` and `L2 X` are disjoint. -/
 theorem disjoint_L1_L2 (X : Finset Pt) : Disjoint (L1 X) (L2 X) := by
-  sorry
+  exact disjoint_left.2 fun p h1 h2 => (mem_sdiff.1 (mem_L2.1 h2).1).2 h1
 
-/-- TODO: prove.
-What's missing: normal `u = q − c`; `2u·(x − q) = |x−c|² − |x−q|² − |q−c|² ≤ −|x−q|² < 0`.
-Acceptance: a point of `S` on the boundary of a disc containing `S` is extreme.
-Depends on: `sqd_pos_of_ne`. -/
+/-- A point of `S` on the boundary of a disc containing `S` is extreme. -/
 theorem isExt_of_disk {S : Finset Pt} {c q : Pt} {R : ℝ} (hq : q ∈ S)
     (hS : ∀ x ∈ S, sqd c x ≤ R) (hR : sqd c q = R) : IsExt S q := by
-  sorry
+  refine ⟨hq, q 0 - c 0, q 1 - c 1, fun x hx hxq => ?_⟩
+  have h1 := hS x hx
+  have h2 := sqd_pos_of_ne hxq
+  simp only [sqd] at h1 h2 hR
+  nlinarith
 
-/-- TODO: prove.
-What's missing: negate the definition of `IsExt` at the coefficients `(a, b)`.
-Acceptance: a non-extreme point has another point of `S` in every closed half-plane at it.
-Depends on: nothing. -/
+/-- A non-extreme point has another point of `S` in every closed half-plane at it. -/
 theorem exists_of_not_isExt {S : Finset Pt} {q : Pt} (hq : q ∈ S) (h : ¬ IsExt S q) (a b : ℝ) :
     ∃ x ∈ S, x ≠ q ∧ 0 ≤ a * (x 0 - q 0) + b * (x 1 - q 1) := by
-  sorry
+  by_contra hcon
+  push Not at hcon
+  exact h ⟨hq, a, b, fun x hx hxq => hcon x hx hxq⟩
 
 /-! ## Location of `Δ`- and `Δ₂`-pairs (Lemma "location", obs. (1)–(2)) -/
 
-/-- TODO: prove.
-What's missing: `isExt_of_disk` with centre `q`, radius `Δ²`.
-Acceptance: both endpoints of a `Δ`-pair are extreme (obs. (1)/(i)).
-Depends on: `isExt_of_disk`, `TwoLargest.sqd_le`, `dist_eq_iff_sqd`. -/
+/-- Both endpoints of a `Δ`-pair are extreme (obs. (1)/(i)). -/
 theorem isExt_of_dist_max {X : Finset Pt} {Δ Δ₂ : ℝ} (hT : TwoLargest X Δ Δ₂) {p q : Pt}
     (hp : p ∈ X) (hq : q ∈ X) (h : dist p q = Δ) : IsExt X p := by
-  sorry
+  refine isExt_of_disk hp (c := q) (R := Δ ^ 2) (fun x hx => hT.sqd_le hq hx) ?_
+  rw [sqd_comm]; exact (dist_eq_iff_sqd (hT.pos.trans hT.snd_lt).le).1 h
 
-/-- TODO: prove.
-What's missing: contrapositive of `isExt_of_dist_max` plus `dist_gap`.
-Acceptance: a non-extreme point has no `Δ`-partner, so all of `X` is within `Δ₂` of it.
-Depends on: `isExt_of_dist_max`, `TwoLargest.dist_gap`. -/
+/-- A non-extreme point has no `Δ`-partner. -/
 theorem dist_le_snd_of_not_isExt {X : Finset Pt} {Δ Δ₂ : ℝ} (hT : TwoLargest X Δ Δ₂) {q x : Pt}
     (hq : q ∈ X) (hqe : ¬ IsExt X q) (hx : x ∈ X) : dist q x ≤ Δ₂ := by
-  sorry
+  rcases hT.dist_gap hq hx with h | h
+  · exact h
+  · exact absurd (isExt_of_dist_max hT hq hx h) hqe
 
-/-- TODO: prove.
-What's missing: if `p ∉ L₁` then `X ⊆ D(p, Δ₂)` and `q` is extreme by `isExt_of_disk`.
-Acceptance: every `Δ₂`-pair has an endpoint in `L₁` (obs. (2), first half).
-Depends on: `dist_le_snd_of_not_isExt`, `isExt_of_disk`. -/
+/-- Every `Δ₂`-pair has an endpoint in `L₁` (obs. (2), first half). -/
 theorem mem_L1_or_of_dist_snd {X : Finset Pt} {Δ Δ₂ : ℝ} (hT : TwoLargest X Δ Δ₂) {p q : Pt}
     (hp : p ∈ X) (hq : q ∈ X) (h : dist p q = Δ₂) : p ∈ L1 X ∨ q ∈ L1 X := by
-  sorry
+  by_contra hcon
+  push Not at hcon
+  have hpe : ¬ IsExt X p := fun h => hcon.1 (mem_L1.2 h)
+  refine hcon.2 (mem_L1.2 (isExt_of_disk hq (c := p) (R := Δ₂ ^ 2) (fun x hx => ?_) ?_))
+  · exact (dist_le_iff_sqd hT.pos.le).1 (dist_le_snd_of_not_isExt hT hp hpe hx)
+  · exact (dist_eq_iff_sqd hT.pos.le).1 h
 
-/-- TODO: prove.
-What's missing: if `p ∉ L₁` then `q ∈ L₁` and every `x ∈ X \ L₁` is within `Δ₂` of `q`
-(a `Δ`-partner would be extreme), so `p` is extreme in `X \ L₁` by `isExt_of_disk`.
-Acceptance: every endpoint of a `Δ₂`-pair lies in `L₁ ∪ L₂` (obs. (2), second half).
-Depends on: `mem_L1_or_of_dist_snd`, `isExt_of_dist_max`, `isExt_of_disk`. -/
+/-- Every endpoint of a `Δ₂`-pair lies in `L₁ ∪ L₂` (obs. (2), second half). -/
 theorem mem_L12_of_dist_snd {X : Finset Pt} {Δ Δ₂ : ℝ} (hT : TwoLargest X Δ Δ₂) {p q : Pt}
     (hp : p ∈ X) (hq : q ∈ X) (h : dist p q = Δ₂) : p ∈ L1 X ∪ L2 X := by
-  sorry
+  by_cases hp1 : p ∈ L1 X
+  · exact mem_union_left _ hp1
+  refine mem_union_right _ (mem_L2.2 (isExt_of_disk (mem_sdiff.2 ⟨hp, hp1⟩) (c := q)
+    (R := Δ₂ ^ 2) (fun x hx => ?_) ?_))
+  · obtain ⟨hxX, hx1⟩ := mem_sdiff.1 hx
+    rcases hT.sqd_gap hq hxX with h' | h'
+    · exact h'
+    · refine absurd (mem_L1.2 (isExt_of_dist_max hT hxX hq ?_)) hx1
+      rw [dist_eq_iff_sqd (hT.pos.trans hT.snd_lt).le, sqd_comm]; exact h'
+  · rw [sqd_comm]; exact (dist_eq_iff_sqd hT.pos.le).1 h
 
 /-! ## Graphs, degrees and the 2-core -/
 
@@ -321,77 +318,146 @@ def MinDeg2 (V : Finset Pt) (d : ℝ) : Prop := ∀ v ∈ V, 2 ≤ (nbr V d v).c
 noncomputable def core (V : Finset Pt) (d : ℝ) : Finset Pt := by
   classical exact (V.powerset.filter (fun S => MinDeg2 S d)).sup id
 
-/-- TODO: prove.
-What's missing: unfold `nbr`, `mem_filter`.
-Acceptance: membership characterisation of `nbr`.
-Depends on: nothing. -/
+/-- Membership in `nbr`. -/
 theorem mem_nbr {V : Finset Pt} {d : ℝ} {v x : Pt} : x ∈ nbr V d v ↔ x ∈ V ∧ dist v x = d := by
-  sorry
+  unfold nbr; exact mem_filter
 
-/-- TODO: prove.
-What's missing: `filter_subset_filter`.
-Acceptance: `nbr` is monotone in the vertex set.
-Depends on: `mem_nbr`. -/
+/-- `nbr` is monotone in the vertex set. -/
 theorem nbr_mono {V V' : Finset Pt} (h : V ⊆ V') (d : ℝ) (v : Pt) : nbr V d v ⊆ nbr V' d v := by
-  sorry
+  intro x hx
+  rw [mem_nbr] at hx ⊢
+  exact ⟨h hx.1, hx.2⟩
 
-/-- TODO: prove.
-What's missing: `sup_le` over the powerset filter.
-Acceptance: `core V d ⊆ V`.
-Depends on: nothing. -/
+/-- `core V d ⊆ V`. -/
 theorem core_subset (V : Finset Pt) (d : ℝ) : core V d ⊆ V := by
-  sorry
+  classical
+  unfold core
+  exact Finset.sup_le fun S hS => mem_powerset.1 (mem_filter.1 hS).1
 
-/-- TODO: prove.
-What's missing: `le_sup` with `S ∈ V.powerset.filter _`.
-Acceptance: every min-degree-2 subset of `V` lies in the core.
-Depends on: nothing. -/
+/-- Every min-degree-2 subset of `V` lies in the core. -/
 theorem subset_core {V S : Finset Pt} {d : ℝ} (hS : S ⊆ V) (h : MinDeg2 S d) :
     S ⊆ core V d := by
-  sorry
+  classical
+  unfold core
+  exact le_sup (f := id) (mem_filter.2 ⟨mem_powerset.2 hS, h⟩)
 
-/-- TODO: prove.
-What's missing: `v ∈ core` lies in some min-degree-2 `S ⊆ core`; `nbr_mono`.
-Acceptance: the core itself has minimum degree `≥ 2`.
-Depends on: `nbr_mono`, `subset_core`. -/
+/-- The core itself has minimum degree `≥ 2`. -/
 theorem minDeg2_core (V : Finset Pt) (d : ℝ) : MinDeg2 (core V d) d := by
-  sorry
+  classical
+  intro v hv
+  have hv' := hv
+  unfold core at hv'
+  obtain ⟨S, hS, hvS⟩ := mem_sup.1 hv'
+  obtain ⟨hSV, hS2⟩ := mem_filter.1 hS
+  have hSc : S ⊆ core V d := subset_core (mem_powerset.1 hSV) hS2
+  exact (hS2 v hvS).trans (card_le_card (nbr_mono hSc d v))
 
-/-- TODO: prove.
-What's missing: expand both degree sums over `insert v V` with `sum_insert`; `v ∉ nbr · v`
-because `d ≠ 0`; symmetry of `dist` turns the column `Σ_u [u ~ v]` into `deg v`.
-Acceptance: adding a vertex adds twice its degree to `esum`.
-Depends on: `mem_nbr`. -/
+/-- Adding a vertex adds twice its degree to `esum`. -/
 theorem esum_insert {V : Finset Pt} {d : ℝ} (hd : d ≠ 0) {v : Pt} (hv : v ∉ V) :
     esum (insert v V) d = esum V d + 2 * (nbr (insert v V) d v).card := by
-  sorry
+  have key : ∀ (W : Finset Pt) (u : Pt),
+      (nbr W d u).card = ∑ x ∈ W, if dist u x = d then 1 else 0 := by
+    intro W u; unfold nbr; rw [card_filter]
+  have h0 : (0 : ℝ) ≠ d := Ne.symm hd
+  simp only [esum, key, sum_insert hv, dist_self, h0, ite_false, zero_add, sum_add_distrib]
+  have hsym : ∑ u ∈ V, (if dist u v = d then 1 else 0 : ℕ) =
+      ∑ x ∈ V, if dist v x = d then 1 else 0 :=
+    sum_congr rfl fun u _ => by rw [dist_comm]
+  rw [hsym]; ring
 
-/-- TODO: prove.
-What's missing: strong induction on `#V`: if `V ≠ core V`, some `v ∈ V \ core V` has
-`deg_V v ≤ 1` (else `V` is min-degree-2, so `V ⊆ core V`); `core (V.erase v) = core V`;
-apply `esum_insert`.
-Acceptance: pruning to the 2-core loses at most one edge (two degree units) per deleted vertex.
-Depends on: `esum_insert`, `core_subset`, `subset_core`, `minDeg2_core`. -/
+/-- Pruning to the 2-core loses at most one edge (two degree units) per deleted vertex. -/
 theorem esum_le_core {d : ℝ} (hd : d ≠ 0) (V : Finset Pt) :
     esum V d ≤ esum (core V d) d + 2 * (V \ core V d).card := by
-  sorry
+  induction V using Finset.strongInduction with
+  | H V ih =>
+  by_cases hV : V ⊆ core V d
+  · have : core V d = V := (core_subset V d).antisymm hV
+    rw [this]; simp
+  · have hex : ∃ v ∈ V, v ∉ core V d ∧ (nbr V d v).card ≤ 1 := by
+      by_contra hcon
+      push Not at hcon
+      apply hV
+      refine subset_core subset_rfl fun v hv => ?_
+      by_cases hvc : v ∈ core V d
+      · exact (minDeg2_core V d v hvc).trans (card_le_card (nbr_mono (core_subset V d) d v))
+      · exact hcon v hv hvc
+    obtain ⟨v, hv, hvc, hdeg⟩ := hex
+    have hcore : core (V.erase v) d = core V d := by
+      apply le_antisymm
+      · exact subset_core ((core_subset _ d).trans (erase_subset v V)) (minDeg2_core _ d)
+      · refine subset_core (fun x hx => ?_) (minDeg2_core V d)
+        exact mem_erase.2 ⟨fun h => hvc (h ▸ hx), core_subset V d hx⟩
+    have h1 := esum_insert hd (notMem_erase v V)
+    rw [insert_erase hv] at h1
+    have h2 := ih (V.erase v) (erase_ssubset hv)
+    rw [hcore, erase_sdiff_comm, card_erase_of_mem (mem_sdiff.2 ⟨hv, hvc⟩)] at h2
+    have h3 : 0 < (V \ core V d).card := card_pos.2 ⟨v, mem_sdiff.2 ⟨hv, hvc⟩⟩
+    omega
 
-/-- TODO: prove.
-What's missing: double counting: the ordered pairs at distance `d` map 2-to-1 onto the
-non-diagonal unordered pairs at distance `d` (`card_eq_sum_card_fiberwise`).
-Acceptance: handshake lemma `2 μ(d) = esum X d`.
-Depends on: `mem_nbr`. -/
+/-- Handshake lemma: `2 μ(d) = esum X d`. -/
 theorem two_mul_multS {d : ℝ} (hd : 0 < d) (X : Finset Pt) : 2 * multS X d = esum X d := by
-  sorry
+  classical
+  set O := (X ×ˢ X).filter (fun e : Pt × Pt => dist e.1 e.2 = d) with hO
+  have hE : esum X d = O.card := by
+    rw [hO, card_filter, sum_product]
+    unfold esum
+    refine sum_congr rfl fun u _ => ?_
+    unfold nbr; rw [card_filter]
+  set T := (pairsS X).filter (fun z => pairDist z = d) with hT
+  have hM : multS X d = T.card := by unfold multS; rfl
+  have hmaps : Set.MapsTo (fun e : Pt × Pt => s(e.1, e.2)) O T := by
+    intro e he
+    obtain ⟨he1, he2⟩ := mem_filter.1 he
+    obtain ⟨hx, hy⟩ := mem_product.1 he1
+    have hne : e.1 ≠ e.2 := by intro h; rw [h, dist_self] at he2; linarith
+    refine mem_filter.2 ⟨?_, by simpa [pairDist] using he2⟩
+    unfold pairsS
+    exact mem_filter.2 ⟨mk_mem_sym2_iff.2 ⟨hx, hy⟩, by simpa using hne⟩
+  have hfib : ∀ z ∈ T, (O.filter (fun e => s(e.1, e.2) = z)).card = 2 := by
+    intro z hz
+    induction z using Sym2.ind with
+    | h a b =>
+    obtain ⟨hz1, hz2⟩ := mem_filter.1 hz
+    unfold pairsS at hz1
+    obtain ⟨hz1, hdiag⟩ := mem_filter.1 hz1
+    have hab : a ≠ b := by simpa using hdiag
+    obtain ⟨ha, hb⟩ := mk_mem_sym2_iff.1 hz1
+    have hdab : dist a b = d := by simpa [pairDist] using hz2
+    have : O.filter (fun e => s(e.1, e.2) = s(a, b)) = {(a, b), (b, a)} := by
+      ext ⟨x, y⟩
+      simp only [hO, mem_filter, mem_product, Sym2.eq_iff, mem_insert, mem_singleton,
+        Prod.mk.injEq]
+      constructor
+      · rintro ⟨_, h⟩; exact h
+      · rintro (⟨rfl, rfl⟩ | ⟨rfl, rfl⟩)
+        · exact ⟨⟨⟨ha, hb⟩, hdab⟩, Or.inl ⟨rfl, rfl⟩⟩
+        · exact ⟨⟨⟨hb, ha⟩, by rw [dist_comm]; exact hdab⟩, Or.inr ⟨rfl, rfl⟩⟩
+    rw [this, card_pair]; simp [hab]
+  rw [hE, hM, card_eq_sum_card_fiberwise hmaps, sum_congr rfl hfib, sum_const, smul_eq_mul,
+    mul_comm]
 
-/-- TODO: prove.
-What's missing: vertices outside `L₁ ∪ L₂` have no `Δ₂`-neighbours and neighbours of vertices in
-`L₁ ∪ L₂` lie in `L₁ ∪ L₂` (`mem_L12_of_dist_snd`).
-Acceptance: the `Δ₂`-graph on `L₁ ∪ L₂` contains every `Δ₂`-pair.
-Depends on: `mem_L12_of_dist_snd`, `mem_nbr`. -/
+/-- The `Δ₂`-graph on `L₁ ∪ L₂` contains every `Δ₂`-pair. -/
 theorem esum_eq_esum_L12 {X : Finset Pt} {Δ Δ₂ : ℝ} (hT : TwoLargest X Δ Δ₂) :
     esum X Δ₂ = esum (L1 X ∪ L2 X) Δ₂ := by
-  sorry
+  have hW : L1 X ∪ L2 X ⊆ X := union_subset (L1_subset X) (L2_subset X)
+  unfold esum
+  rw [← sum_sdiff hW]
+  have h0 : ∑ v ∈ X \ (L1 X ∪ L2 X), (nbr X Δ₂ v).card = 0 := by
+    refine sum_eq_zero fun v hv => ?_
+    obtain ⟨hvX, hvW⟩ := mem_sdiff.1 hv
+    rw [card_eq_zero, eq_empty_iff_forall_notMem]
+    intro x hx
+    obtain ⟨hxX, hd⟩ := mem_nbr.1 hx
+    exact hvW (mem_L12_of_dist_snd hT hvX hxX hd)
+  rw [h0, zero_add]
+  refine sum_congr rfl fun v hv => ?_
+  congr 1
+  ext x
+  simp only [mem_nbr]
+  constructor
+  · rintro ⟨hxX, hd⟩
+    exact ⟨mem_L12_of_dist_snd hT hxX (hW hv) (by rw [dist_comm]; exact hd), hd⟩
+  · rintro ⟨hxW, hd⟩; exact ⟨hW hxW, hd⟩
 
 /-! ## Planar lemmas in normalised coordinates -/
 
