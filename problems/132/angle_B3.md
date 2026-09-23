@@ -228,3 +228,24 @@ Why Q-ORD is plausible, and where it could fail:
   four Erdős–Fishburn/Fishburn papers and the forum material go, new. Neither r₂⁽¹¹⁾ ≤ 11 nor a classification of
   convex 11-gons with 6 distances is known: Erdős–Fishburn's Cor. 1 leaves f(11) open. The ordinal reduction (Q
   alone suffices) is, to our knowledge, not in the literature. This was not audited per PROMPT rule 4.
+
+## 7. Independent re-certification with drat-trim (2026-09-23, parent session)
+
+`scripts/b3_drat_trim.py` rebuilds each CNF with `b3_sat.build(..., order_Q=True)` and writes it with a Glucose 4
+DRUP proof. The proof is then checked by **drat-trim**, the standard backward checker (Heule,
+github.com/marijnheule/drat-trim, built from source). drat-trim also emits an **LRAT** proof (`-L`), which is
+re-checked by **lrat-check** from the same repo. LRAT is the format that Lean's verified SAT-checking
+infrastructure consumes.
+
+| instance | lemmas | drat-trim | lrat-check |
+|---|---|---|---|
+| (7,4,2) Q | 714 | s VERIFIED | VERIFIED |
+| (11,2,0) TQ | 3 | s VERIFIED | VERIFIED |
+| (11,3,0) TQ | 8 | s VERIFIED | VERIFIED |
+| (11,4,0) TQ | 56 | s VERIFIED | VERIFIED |
+| (11,5,3) TQ | 524 | s VERIFIED | VERIFIED |
+| (11,6,4) Q | 35,510 | s VERIFIED | VERIFIED |
+
+Negative control: a truncated (11,6,4) proof gives `s NOT VERIFIED`. So **Theorem 11 is certified by two
+independent checkers**, trusting only the encoder `b3_sat.build`. CNF, proof and LRAT files are regenerated
+deterministically by the script; they are not stored in git because of their size.
