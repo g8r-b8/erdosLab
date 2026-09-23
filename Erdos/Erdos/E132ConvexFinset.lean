@@ -171,7 +171,58 @@ theorem orient_pos_of_lt {S : Finset Pt} (hS : NotInHull S) {p₀ a b c : Pt} (h
 theorem exists_strictConvexPolygon {S : Finset Pt} (hS : NotInHull S) :
     ∃ (m : ℕ) (p : Fin m → Pt), Function.Injective p ∧ Set.range p = ↑S ∧
       StrictConvexPolygon p := by
-  sorry
+  classical
+  rcases S.eq_empty_or_nonempty with rfl | ⟨p₀, h₀⟩
+  · exact ⟨0, Fin.elim0, fun i => i.elim0, by simp, fun i => i.elim0⟩
+  set T := S.erase p₀ with hTdef
+  have hT : ∀ a : T, (a : Pt) ∈ S ∧ (a : Pt) ≠ p₀ :=
+    fun a => ⟨mem_of_mem_erase a.2, ne_of_mem_erase a.2⟩
+  let r : T → T → Prop := fun a b => 0 < orient p₀ a b
+  have hswap : ∀ a b : Pt, orient p₀ b a = - orient p₀ a b := fun a b => by
+    simp only [orient]; ring
+  have : IsStrictTotalOrder T r :=
+    { irrefl := fun a h => by
+        have h' : 0 < orient p₀ a a := h
+        have : orient p₀ a a = 0 := by simp only [orient]; ring
+        rw [this] at h'
+        exact lt_irrefl _ h'
+      trans := fun a b c hab hbc => orient_trans hS h₀ (hT a).1 (hT b).1 (hT c).1 (hT a).2
+        (hT b).2 (hT c).2 hab hbc
+      trichotomous := fun a b hab hba => by
+        by_contra hne
+        have h := orient_ne_zero hS h₀ (hT a).1 (hT b).1 (hT a).2.symm (hT b).2.symm
+          (fun h => hne (Subtype.ext h))
+        rcases lt_or_gt_of_ne h with h | h
+        · exact hba (show 0 < orient p₀ b a by rw [hswap]; linarith)
+        · exact hab h }
+  let : LinearOrder T := linearOrderOfSTO r
+  let e : Fin T.card ≃o T := Fintype.orderIsoFinOfCardEq T (Fintype.card_coe T)
+  let f : Fin T.card → Pt := fun i => (e i : Pt)
+  have hmono : ∀ i j, i < j → 0 < orient p₀ (f i) (f j) := fun i j h => e.lt_iff_lt.2 h
+  refine ⟨T.card + 1, Fin.cons p₀ f, ?_, ?_, ?_⟩
+  · refine Fin.cons_injective_iff.2 ⟨?_, fun i j h => e.injective (Subtype.ext h)⟩
+    rintro ⟨i, hi⟩
+    exact (hT (e i)).2 hi
+  · have hf : Set.range f = ↑T := by
+      ext x
+      simp only [Set.mem_range, mem_coe, f]
+      constructor
+      · rintro ⟨i, rfl⟩; exact (e i).2
+      · intro hx; exact ⟨e.symm ⟨x, hx⟩, by simp⟩
+    rw [Fin.range_cons, hf, hTdef, coe_erase, Set.insert_sdiff_singleton,
+      Set.insert_eq_of_mem (mem_coe.2 h₀)]
+  · intro i j k hij hjk
+    have hj0 : (0 : Fin _) < j := lt_of_le_of_lt (Fin.zero_le _) hij
+    obtain ⟨j', rfl⟩ := Fin.exists_succ_eq.2 hj0.ne'
+    obtain ⟨k', rfl⟩ := Fin.exists_succ_eq.2 (hj0.trans hjk).ne'
+    have hjk' : j' < k' := Fin.succ_lt_succ_iff.1 hjk
+    cases i using Fin.cases with
+    | zero => simpa only [Fin.cons_zero, Fin.cons_succ] using hmono j' k' hjk'
+    | succ i' =>
+      have hij' : i' < j' := Fin.succ_lt_succ_iff.1 hij
+      simp only [Fin.cons_succ]
+      exact orient_pos_of_lt hS h₀ (hT _).1 (hT _).1 (hT _).1 (hT _).2 (hmono _ _ hij')
+        (hmono _ _ hjk') (hmono _ _ (hij'.trans hjk'))
 
 /-! ## Distances of a finite set -/
 
