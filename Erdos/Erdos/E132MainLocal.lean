@@ -1,4 +1,5 @@
 import Erdos.E132MainDefs
+import Mathlib.Geometry.Euclidean.Angle.Unoriented.TriangleInequality
 
 /-!
 # Erdős Problem 132, `54/37` theorem — local geometry (§3) and bad edges (§5)
@@ -1143,6 +1144,70 @@ Depends on: as `card_badKK_le`, with `convexHull ℝ X` in place of `K`. Difficu
 theorem card_badDD_le (hX : Normal X) (F : DirField X) : ((badDD X F).card : ℝ) ≤ 34000 := by
   sorry
 
+/-! ### Helpers for (c1) -/
+
+/-- A direction that is outward-normal at `z` for every point of `S` is normal to `conv S`. -/
+theorem mem_normalCone_convexHull {S : Set Pt} {z n : Pt}
+    (h : ∀ y ∈ S, inner ℝ (y - z) n ≤ 0) : n ∈ normalCone (convexHull ℝ S) z := by
+  have hH : Convex ℝ {y : Pt | inner ℝ (y - z) n ≤ 0} := by
+    intro a ha b hb s t hs ht hst
+    simp only [Set.mem_setOf_eq] at ha hb ⊢
+    obtain rfl : t = 1 - s := by linarith
+    have e : s • a + (1 - s) • b - z = s • (a - z) + (1 - s) • (b - z) := by
+      simp only [smul_sub, sub_smul, one_smul]; abel
+    rw [e, inner_add_left, real_inner_smul_left, real_inner_smul_left]
+    nlinarith
+  intro y hy
+  exact convexHull_min (fun y hy => h y hy) hH hy
+
+/-- A point of `K` with a non-zero outward normal is a boundary point. -/
+theorem mem_frontier_of_normal {K : Set Pt} {z n : Pt} (hz : z ∈ K) (hn : n ≠ 0)
+    (h : n ∈ normalCone K z) : z ∈ frontier K := by
+  refine ⟨subset_closure hz, fun hint => ?_⟩
+  obtain ⟨ε, hε, hball⟩ := Metric.mem_nhds_iff.1 (mem_interior_iff_mem_nhds.1 hint)
+  have hnpos : 0 < ‖n‖ := norm_pos_iff.2 hn
+  have hyz : (z + (ε / 2 / ‖n‖) • n) - z = (ε / 2 / ‖n‖) • n := by abel
+  have hy : z + (ε / 2 / ‖n‖) • n ∈ K := by
+    apply hball
+    rw [Metric.mem_ball, dist_eq_norm, hyz, norm_smul, Real.norm_of_nonneg (by positivity),
+      div_mul_cancel₀ _ hnpos.ne']
+    linarith
+  have := h _ hy
+  rw [hyz, real_inner_smul_left, real_inner_self_eq_norm_sq] at this
+  have : 0 < ε / 2 / ‖n‖ * ‖n‖ ^ 2 := by positivity
+  linarith
+
+/-- In a triangle `v z w` with `|vw| = a ≥ 10⁴`, `|zw| = b ≥ a`, `|vz| = 1`, the angle at `w`
+is at most `1/200`. -/
+theorem ang_small {v z w : Pt} {a b : ℝ} (ha : 10 ^ 4 ≤ a) (hb : a ≤ b) (hv : dist v w = a)
+    (hz : dist z w = b) (h1 : dist v z = 1) : ang (v - w) (z - w) ≤ 1 / 200 := by
+  set θ := ang (v - w) (z - w)
+  have hθ0 : 0 ≤ θ := InnerProductGeometry.angle_nonneg _ _
+  have hθπ : θ ≤ π := InnerProductGeometry.angle_le_pi _ _
+  have hc := InnerProductGeometry.cos_angle_mul_norm_mul_norm (v - w) (z - w)
+  rw [← dist_eq_norm, ← dist_eq_norm, hv, hz] at hc
+  have key := two_inner_sub v w z
+  rw [hv, hz, h1] at key
+  have h1c : a * b * (1 - Real.cos θ) ≤ 1 / 2 := by
+    change Real.cos θ * (a * b) = _ at hc
+    nlinarith [sq_nonneg (b - a)]
+  have hcos2 := Real.cos_two_mul (θ / 2)
+  rw [show 2 * (θ / 2) = θ by ring] at hcos2
+  have hsc := Real.sin_sq_add_cos_sq (θ / 2)
+  have hjordan := Real.mul_le_sin (x := θ / 2) (by positivity) (by linarith)
+  have hpi := Real.pi_pos
+  have hpi4 := Real.pi_lt_d4
+  set q := 2 / π * (θ / 2)
+  have hq0 : 0 ≤ q := by positivity
+  have h2 : 2 * q ^ 2 ≤ 1 - Real.cos θ := by nlinarith
+  have hab : (10 : ℝ) ^ 8 ≤ a * b := by nlinarith
+  have h3 : a * b * (2 * q ^ 2) ≤ 1 / 2 :=
+    le_trans (mul_le_mul_of_nonneg_left h2 (by positivity)) h1c
+  have hq : q ≤ 1 / 10 ^ 4 := by nlinarith
+  have hθq : θ = π * q := by simp only [q]; field_simp
+  rw [hθq]
+  nlinarith
+
 /-- **(c1) bound** `< 24π/β < 7600`: the normal cone of `P₁` at `z` has angle `> β/2`; normal
 cones are interior-disjoint.
 
@@ -1151,7 +1216,134 @@ Acceptance: no `sorry`.
 Depends on: `turning_sum_le` (or a direct disjoint-cones count), `exact_identity_a`, `c3`, `c9`,
 kissing. Difficulty L. -/
 theorem card_badC1_le (hX : Normal X) (F : DirField X) : ((badC1 X F).card : ℝ) ≤ 7600 := by
-  sorry
+  have hPc : IsCompact (convexHull ℝ (X : Set Pt)) := X.finite_toSet.isCompact_convexHull ℝ
+  set P := convexHull ℝ (X : Set Pt)
+  have hPconv : Convex ℝ P := convex_convexHull ℝ _
+  set Z := (Sset X).filter (fun z => z ∈ Dset X ∧ ∃ v ∈ Sset X, v ∉ Dset X ∧ dist v z = 1 ∧
+      dist z (F.partner v) = diam X ∧ beta < ang (F.u v) (F.u z))
+  -- step 1: every (c1) edge is a `δ`-edge at a point of `Z`
+  have hsub : badC1 X F ⊆
+      Z.biUnion (fun z => (partners X (minDist X) z).image (fun v => s(v, z))) := by
+    intro e he
+    obtain ⟨hbad, v, z, rfl, hvD, hzD, hexc⟩ := mem_filter.1 he
+    obtain ⟨hedge, hng⟩ := mem_filter.1 hbad
+    obtain ⟨hP, hd⟩ := mem_filter.1 hedge
+    simp only [pairsS, mem_filter, Finset.mk_mem_sym2_iff, Sym2.mk_isDiag_iff] at hP
+    obtain ⟨⟨hv, hz⟩, hvz⟩ := hP
+    have hd1 : dist v z = 1 := by rw [← hX.minDist_eq]; exact hd
+    have hang : beta < ang (F.u v) (F.u z) := by
+      simp only [IsGood, not_forall, not_le] at hng
+      obtain ⟨p, q, hpq, hlt⟩ := hng
+      rcases Sym2.eq_iff.1 hpq with ⟨rfl, rfl⟩ | ⟨rfl, rfl⟩
+      · exact hlt
+      · rwa [ang, InnerProductGeometry.angle_comm]
+    rw [mem_biUnion]
+    refine ⟨z, mem_filter.2 ⟨hz, hzD, v, hv, hvD, hd1, hexc, hang⟩,
+      mem_image.2 ⟨v, mem_partners.2 ⟨mem_of_mem_Sset hv, hvz, ?_⟩, rfl⟩⟩
+    rw [dist_comm, hd1, hX.minDist_eq]
+  have hcount : ((badC1 X F).card : ℝ) ≤ 6 * Z.card := by
+    have h1 := (card_le_card hsub).trans card_biUnion_le
+    have h2 : ∑ z ∈ Z, ((partners X (minDist X) z).image (fun v => s(v, z))).card ≤
+        ∑ _z ∈ Z, 6 :=
+      sum_le_sum fun z _ => card_image_le.trans (card_partners_minDist_le X z)
+    rw [sum_const, smul_eq_mul] at h2
+    have := h1.trans h2
+    have : (badC1 X F).card ≤ 6 * Z.card := by linarith
+    exact_mod_cast this
+  -- the outward normal `−u_z` of `P₁` at `z ∈ S ∩ D`
+  have hN : ∀ z ∈ Sset X, z ∈ Dset X → -F.u z ∈ normalCone P z := by
+    intro z hzS hzD
+    apply mem_normalCone_convexHull
+    intro y hy
+    rw [inner_neg_right, neg_nonpos]
+    have := exact_identity_a F hzS hzD hy
+    have hΔ := diam_pos_of_mem_Sset hzS
+    have hp : 0 ≤ dist y z ^ 2 / (2 * diam X) := by positivity
+    linarith
+  -- step 2: each `z ∈ Z` has turning `> 1/200` in `P₁`
+  have hturn : ∀ z ∈ Z, 1 / 200 < turning P {z} := by
+    intro z hz
+    obtain ⟨hzS, hzD, v, hv, hvD, hd1, hexc, hang⟩ := mem_filter.1 hz
+    have hΔ : 0 < diam X := diam_pos_of_mem_Sset hzS
+    have hwX : F.partner v ∈ X := F.partner_mem v hv
+    have hxX := F.partner_mem z hzS
+    have hzx : dist z (F.partner z) = diam X := F.partner_D z hzS hzD
+    set m := (diam X)⁻¹ • (F.partner v - z)
+    have hn2 : -m ∈ normalCone P z := by
+      apply mem_normalCone_convexHull
+      intro y hy
+      rw [inner_neg_right, neg_nonpos, real_inner_smul_right]
+      apply mul_nonneg (inv_nonneg.2 hΔ.le)
+      have key := two_inner_sub y z (F.partner v)
+      have hle := dist_le_diam hy hwX
+      rw [dist_comm (F.partner v) z, hexc] at key
+      have : dist y (F.partner v) ^ 2 ≤ diam X ^ 2 := pow_le_pow_left₀ dist_nonneg hle 2
+      nlinarith [sq_nonneg (dist y z)]
+    have hu1 : ‖-F.u z‖ = 1 := by rw [norm_neg]; exact F.norm_u' hzS
+    have hm1 : ‖m‖ = 1 := by
+      rw [norm_smul, Real.norm_eq_abs, abs_inv, abs_of_pos hΔ, ← dist_eq_norm, dist_comm, hexc,
+        inv_mul_cancel₀ hΔ.ne']
+    have hu2 : ‖-m‖ = 1 := by rw [norm_neg]; exact hm1
+    have hsmall : ang (F.u v) m ≤ 1 / 200 := by
+      have hdv : dist v (F.partner v) = dist2 X := F.partner_K v hv hvD
+      have hpos2 := dist2_pos_of_mem_Sset hv
+      rw [ang, DirField.u, InnerProductGeometry.angle_smul_left_of_pos _ _
+        (by rw [hdv]; exact inv_pos.2 hpos2),
+        InnerProductGeometry.angle_smul_right_of_pos _ _ (inv_pos.2 hΔ),
+        ← InnerProductGeometry.angle_neg_neg, neg_sub, neg_sub]
+      exact ang_small hX.large (dist2_le_diam X) hdv hexc hd1
+    have htri := InnerProductGeometry.angle_le_angle_add_angle (F.u v) m (F.u z)
+    have hang2 : 1 / 200 < ang (-F.u z) (-m) := by
+      rw [ang, InnerProductGeometry.angle_neg_neg, InnerProductGeometry.angle_comm]
+      unfold ang at hsmall hang
+      have hβ : beta = 1 / 100 := rfl
+      rw [hβ] at hang
+      linarith
+    have hltpi : ang (-F.u z) (-m) < π := by
+      rw [ang, InnerProductGeometry.angle_neg_neg]
+      refine lt_of_le_of_ne (InnerProductGeometry.angle_le_pi _ _) fun hpi => ?_
+      obtain ⟨-, r, hr, hrm⟩ := InnerProductGeometry.angle_eq_pi_iff.1 hpi
+      have habs : |r| = 1 := by
+        have := congrArg norm hrm
+        rwa [hm1, norm_smul, F.norm_u' hzS, mul_one, Real.norm_eq_abs, eq_comm] at this
+      have hr1 : r = -1 := by rw [abs_of_neg hr] at habs; linarith
+      rw [hr1, neg_one_smul, DirField.u, hzx] at hrm
+      have hwz : F.partner v - z = z - F.partner z := by
+        have := congrArg (fun y => diam X • y) hrm
+        simp only [m, smul_neg, smul_smul, mul_inv_cancel₀ hΔ.ne', one_smul] at this
+        rw [this]; abel
+      have hdw : dist (F.partner v) (F.partner z) = 2 * diam X := by
+        rw [dist_eq_norm, show F.partner v - F.partner z =
+          (F.partner v - z) + (z - F.partner z) by abel, hwz, ← two_smul ℝ, norm_smul,
+          ← dist_eq_norm, hzx]
+        norm_num
+      have := dist_le_diam hwX hxX
+      linarith
+    have := ang_le_turning_of_normals (Set.mem_singleton z) (hN z hzS hzD) hn2 hu1 hu2 hltpi
+    linarith
+  -- step 3: Lemma 3.4 with multiplicity 1
+  have hfront : ∀ z ∈ Z, ({z} : Set Pt) ⊆ frontier P := by
+    intro z hz y hy
+    rw [Set.mem_singleton_iff] at hy; subst hy
+    obtain ⟨hzS, hzD, -⟩ := mem_filter.1 hz
+    refine mem_frontier_of_normal (subset_convexHull ℝ _ (mem_coe.2 (mem_of_mem_Sset hzS)))
+      ?_ (hN y hzS hzD)
+    intro h0
+    have := F.norm_u' hzS
+    rw [← norm_neg, h0, norm_zero] at this
+    norm_num at this
+  have hsum := turning_sum_le hPconv hPc Z (fun z => ({z} : Set Pt)) hfront
+    (fun _ _ => isClosed_singleton) 1 (fun x => card_le_one.2 fun a ha b hb => by
+      simp only [Finset.mem_filter, Set.mem_singleton_iff] at ha hb
+      rw [← ha.2, ← hb.2])
+  have hZ : (Z.card : ℝ) * (1 / 200) ≤ 2 * π * 1 := by
+    have : ∑ _z ∈ Z, (1 / 200 : ℝ) ≤ ∑ z ∈ Z, turning P {z} :=
+      sum_le_sum fun z hz => (hturn z hz).le
+    rw [sum_const, nsmul_eq_mul] at this
+    push_cast at hsum
+    linarith
+  have hpi := Real.pi_lt_d4
+  linarith
 
 /-- **[C8]** `cos α ≥ −0.8821` on `ρ ∈ [1 − 10⁻⁴, 1]` (step 3 of (c2)).
 
