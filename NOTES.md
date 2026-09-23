@@ -108,8 +108,17 @@ then ¬(almost-all o(N)) as in PR #4076's Erdos468MinimalPreimageLittleOAlmostAl
   triage 700–949, triage 400–699. Loop paused until they report (hook pause file).
 - Own: C1 greedy evidence (problems/132/angle_C.md): max μ(Δ₂)−n = +1 up to n=21.
 
+## Iteration 8 results (2026-09-23)
+- 132: 54/37 audited NEW + rigorous write-up (~90%); convex n=11,13 k≥3 certified (drat-trim+lrat); convex
+  n≤8 k≥3 follows from Erdős–Fishburn 1995 (user-supplied PDFs); C1 greedy evidence.
+- 436: Λ(5,3) finiteness unresolved; new lower bound Λ(5,3) ≥ 5,062,794 (needs novelty check + Chebotarev
+  direction written up); brute-force certificate ~1e18 nodes → needs structural idea.
+- Triage 400–699 (→436) and 700–949 (→885 k=5, competitor active) found nothing quick.
+
 ## Next step
-- Integrate agent reports; pick best Lean-verifiable open target from the triage batches.
+- 132: novelty audit of convex n=11/13 result; independent read of WRITEUP_A2 §7.2 and §8 Step 4;
+  scope a Lean formalisation of convex n=11 (quadrilateral lemma + verified encoder + LRAT).
+- 436: novelty check of Λ(5,3) ≥ 5,062,794 (Lehmer–Mills-type tables); structural lemmas on small primes.
 - (old) Parallel triage of open problems 1050–1221 for tractability + open-status evidence.
 
 ## Short-formal-statement older problems (iter 6, own check) — all dropped
