@@ -366,6 +366,180 @@ def Bset (X : Finset Pt) (y : Pt) : Finset Pt := X \ Wset X y
 def incid (X : Finset Pt) (y : Pt) : ℕ :=
   ((Bset X y ×ˢ Wset X y).filter (fun bw => dist bw.1 bw.2 = dist2 X)).card
 
+namespace Degen
+
+open Erdos132Layer (fx fy frame_sqd frame_base frame_axis frame_inj)
+
+theorem mem_Wset {y w : Pt} : w ∈ Wset X y ↔ w = y ∨ (w ∈ X ∧ w ≠ y ∧ dist y w = diam X) := by
+  simp [Wset, partners]
+
+theorem mem_Bset {y b : Pt} : b ∈ Bset X y ↔ b ∈ X ∧ b ∉ Wset X y := by
+  simp [Bset]
+
+theorem Wset_subset {y : Pt} (hy : y ∈ X) : Wset X y ⊆ X :=
+  insert_subset hy (filter_subset _ _)
+
+/-- `B ⊆ K`: the points of `B` are within `Δ₂` of every point of `X`. -/
+theorem B_close (hdeg : 1.94 * dist2 X < diam X) {y : Pt}
+    (hstar : ∀ a ∈ X, ∀ b ∈ X, a ≠ b → dist a b = diam X → a = y ∨ b = y) {b x : Pt}
+    (hb : b ∈ Bset X y) (hx : x ∈ X) : dist b x ≤ dist2 X := by
+  obtain ⟨hbX, hbW⟩ := mem_Bset.1 hb
+  refine (gap hbX hx).resolve_right fun h => ?_
+  have hbx : b ≠ x := by
+    rintro rfl; rw [dist_self] at h; exact (diam_pos hdeg).ne' h.symm
+  rcases hstar b hbX x hx hbx h with rfl | rfl
+  · exact hbW (mem_Wset.2 (Or.inl rfl))
+  · exact hbW (mem_Wset.2 (Or.inr ⟨hbX, hbx, by rw [dist_comm]; exact h⟩))
+
+/-- Two distinct points of `A = Diam(y)` are within `Δ₂`. -/
+theorem A_close {y : Pt}
+    (hstar : ∀ a ∈ X, ∀ b ∈ X, a ≠ b → dist a b = diam X → a = y ∨ b = y) {a b : Pt}
+    (ha : a ∈ partners X (diam X) y) (hb : b ∈ partners X (diam X) y) : dist a b ≤ dist2 X := by
+  simp only [partners, mem_filter] at ha hb
+  by_cases hab : a = b
+  · subst hab; rw [dist_self]; exact dist2_nonneg' X
+  refine (gap ha.1 hb.1).resolve_right fun h => ?_
+  rcases hstar a ha.1 b hb.1 hab h with h' | h'
+  · exact ha.2.1 h'
+  · exact hb.2.1 h'
+
+/-- `y` has a diametral partner. -/
+theorem exists_partner (h4 : 4 ≤ X.card) {y : Pt}
+    (hstar : ∀ a ∈ X, ∀ b ∈ X, a ≠ b → dist a b = diam X → a = y ∨ b = y) :
+    ∃ a ∈ X, a ≠ y ∧ dist y a = diam X := by
+  obtain ⟨u, hu, v, hv, huv, d⟩ := exists_diam_pair (by omega : 2 ≤ X.card)
+  rcases hstar u hu v hv huv d with rfl | rfl
+  · exact ⟨v, hv, huv.symm, d⟩
+  · exact ⟨u, hu, huv, by rw [dist_comm]; exact d⟩
+
+/-- Lens: two points within `√q` of both `y` and `a` (`|ya|² = D`) are at squared distance
+`≤ 4q − D`. -/
+theorem lens {y a b b' : Pt} {D q : ℝ} (hya : sqd y a = D) (h1 : sqd b y ≤ q) (h2 : sqd b a ≤ q)
+    (h3 : sqd b' y ≤ q) (h4 : sqd b' a ≤ q) : sqd b b' ≤ 4 * q - D := by
+  simp only [sqd_coord] at *
+  nlinarith [sq_nonneg (b 0 + b' 0 - y 0 - a 0), sq_nonneg (b 1 + b' 1 - y 1 - a 1)]
+
+theorem le_one_of_sq {x y : ℝ} (h : x ^ 2 + y ^ 2 = 1) : x ≤ 1 := by
+  nlinarith [sq_nonneg y, sq_nonneg (x - 1)]
+
+/-- Real core of Step 3b (frame at `y`, axis `a = (1,0)`, unit circle, `ρ = (Δ₂/Δ)²`). -/
+theorem arcA_core {b0 b1 c0 c1 d0 d1 ρ : ℝ} (hb : b0 ^ 2 + b1 ^ 2 = 1) (hc : c0 ^ 2 + c1 ^ 2 = 1)
+    (hd : d0 ^ 2 + d1 ^ 2 = 1) (hab : (1 - b0) ^ 2 + b1 ^ 2 = ρ)
+    (hcd : (c0 - d0) ^ 2 + (c1 - d1) ^ 2 = ρ) (hac : (1 - c0) ^ 2 + c1 ^ 2 ≤ ρ)
+    (had : (1 - d0) ^ 2 + d1 ^ 2 ≤ ρ)
+    (hbc : (b0 - c0) ^ 2 + (b1 - c1) ^ 2 ≤ ρ) (hρ : ρ < 2) (hb1 : 0 < b1) (hcd1 : c1 ≤ d1) :
+    c0 = 1 ∧ c1 = 0 ∧ d0 = b0 ∧ d1 = b1 := by
+  have eb : 2 * b0 = 2 - ρ := by linear_combination hb - hab
+  have b0pos : 0 < b0 := by linarith
+  have ec0 : 2 - ρ ≤ 2 * c0 := by
+    have e : (1 - c0) ^ 2 + c1 ^ 2 = 2 - 2 * c0 := by linear_combination hc
+    linarith
+  have ebc : 2 - ρ ≤ 2 * (b0 * c0 + b1 * c1) := by
+    have e : (b0 - c0) ^ 2 + (b1 - c1) ^ 2 = 2 - 2 * (b0 * c0 + b1 * c1) := by
+      linear_combination hb + hc
+    linarith
+  have ecd : 2 * (c0 * d0 + c1 * d1) = 2 - ρ := by linear_combination hc + hd - hcd
+  have c0le : c0 ≤ 1 := le_one_of_sq hc
+  have d0le : d0 ≤ 1 := le_one_of_sq hd
+  have c0pos : 0 < c0 := by linarith
+  have c1nn : 0 ≤ c1 := by
+    by_contra h
+    push Not at h
+    have := mul_pos hb1 (neg_pos.2 h)
+    have := mul_le_mul_of_nonneg_left c0le b0pos.le
+    linarith
+  rcases c1nn.lt_or_eq with hc1 | hc1
+  · exfalso
+    have c0lt : c0 < 1 := by
+      have : 0 < c1 ^ 2 := by positivity
+      have : c0 ^ 2 < 1 := by linarith
+      nlinarith
+    have h1 : c1 * c1 ≤ c1 * d1 := mul_le_mul_of_nonneg_left hcd1 hc1.le
+    have h2 : d0 * (1 - c0) ≤ 1 - c0 := by
+      have := mul_le_mul_of_nonneg_right d0le (by linarith : (0:ℝ) ≤ 1 - c0); linarith
+    have h3 : 1 - c0 < c1 ^ 2 := by
+      have := mul_pos c0pos (by linarith : (0:ℝ) < 1 - c0)
+      have e : c1 ^ 2 = (1 - c0) * (1 + c0) := by linear_combination hc
+      rw [e]; nlinarith
+    -- `c · d > d₀ ≥ b₀`, while `c · d = b₀`
+    have ed0 : 2 - ρ ≤ 2 * d0 := by
+      have e : (1 - d0) ^ 2 + d1 ^ 2 = 2 - 2 * d0 := by linear_combination hd
+      linarith
+    have : c1 * c1 = c1 ^ 2 := by ring
+    linarith
+  · subst hc1
+    have hsq0 : (c0 - 1) * (c0 + 1) = 0 := by linear_combination hc
+    have c0eq : c0 = 1 := by
+      have := (mul_eq_zero.1 hsq0).resolve_right (by linarith); linarith
+    subst c0eq
+    have d0eq : d0 = b0 := by linarith
+    subst d0eq
+    have hsq : (d1 - b1) * (d1 + b1) = 0 := by linear_combination hd - hb
+    have : d1 - b1 = 0 := (mul_eq_zero.1 hsq).resolve_right (by linarith)
+    exact ⟨rfl, rfl, rfl, by linarith⟩
+
+theorem arcA_real {b0 b1 c0 c1 d0 d1 ρ : ℝ} (hb : b0 ^ 2 + b1 ^ 2 = 1) (hc : c0 ^ 2 + c1 ^ 2 = 1)
+    (hd : d0 ^ 2 + d1 ^ 2 = 1) (hab : (1 - b0) ^ 2 + b1 ^ 2 = ρ)
+    (hcd : (c0 - d0) ^ 2 + (c1 - d1) ^ 2 = ρ) (hac : (1 - c0) ^ 2 + c1 ^ 2 ≤ ρ)
+    (had : (1 - d0) ^ 2 + d1 ^ 2 ≤ ρ) (hbc : (b0 - c0) ^ 2 + (b1 - c1) ^ 2 ≤ ρ)
+    (hbd : (b0 - d0) ^ 2 + (b1 - d1) ^ 2 ≤ ρ) (hρ0 : 0 < ρ) (hρ : ρ < 2) :
+    (c0 = 1 ∧ c1 = 0 ∧ d0 = b0 ∧ d1 = b1) ∨ (d0 = 1 ∧ d1 = 0 ∧ c0 = b0 ∧ c1 = b1) := by
+  have hb1 : b1 ≠ 0 := by
+    rintro rfl
+    have eb : 2 * b0 = 2 - ρ := by linear_combination hb - hab
+    nlinarith
+  rcases hb1.lt_or_gt with hn | hp
+  · -- reflect in the axis
+    have hb' : b0 ^ 2 + (-b1) ^ 2 = 1 := Eq.trans (by ring) hb
+    have hc' : c0 ^ 2 + (-c1) ^ 2 = 1 := Eq.trans (by ring) hc
+    have hd' : d0 ^ 2 + (-d1) ^ 2 = 1 := Eq.trans (by ring) hd
+    have hab' : (1 - b0) ^ 2 + (-b1) ^ 2 = ρ := Eq.trans (by ring) hab
+    rcases le_total c1 d1 with h | h
+    · obtain ⟨e1, e2, e3, e4⟩ := arcA_core hb' hd' hc' hab' (Eq.trans (by ring) hcd)
+        (Eq.trans_le (by ring) had) (Eq.trans_le (by ring) hac) (Eq.trans_le (by ring) hbd) hρ (by linarith) (by linarith)
+      right; exact ⟨e1, by linarith, e3, by linarith⟩
+    · obtain ⟨e1, e2, e3, e4⟩ := arcA_core hb' hc' hd' hab' (Eq.trans (by ring) hcd)
+        (Eq.trans_le (by ring) hac) (Eq.trans_le (by ring) had) (Eq.trans_le (by ring) hbc) hρ (by linarith) (by linarith)
+      left; exact ⟨e1, by linarith, e3, by linarith⟩
+  · rcases le_total c1 d1 with h | h
+    · exact Or.inl (arcA_core hb hc hd hab hcd hac had hbc hρ hp h)
+    · exact Or.inr (arcA_core hb hd hc hab (Eq.trans (by ring) hcd) had hac hbd hρ hp h)
+
+/-- Point form of Step 3b: on the circle `C(y, Δ)`, with all chords `≤ Δ₂`, a `Δ₂`-chord is
+unique. -/
+theorem arcA {y a b c d : Pt} {D q : ℝ} (hya : sqd y a = D) (hyb : sqd y b = D) (hyc : sqd y c = D)
+    (hyd : sqd y d = D) (hab : sqd a b = q) (hcd : sqd c d = q) (hac : sqd a c ≤ q)
+    (had : sqd a d ≤ q) (hbc : sqd b c ≤ q) (hbd : sqd b d ≤ q) (hq0 : 0 < q) (hqD : q < 2 * D)
+    (hD : 0 < D) : (c = a ∧ d = b) ∨ (c = b ∧ d = a) := by
+  have hne : y ≠ a := by rintro rfl; simp [sqd] at hya; linarith
+  have F := frame_sqd hne
+  obtain ⟨y0, y1⟩ := frame_base y a
+  obtain ⟨a0, a1⟩ := frame_axis hne
+  rw [hya] at F
+  have unit : ∀ P, sqd y P = D → fx y a P ^ 2 + fy y a P ^ 2 = 1 := fun P hP => by
+    have := F y P
+    rw [y0, y1, hP, div_self hD.ne'] at this
+    linear_combination this
+  have ch : ∀ P Q, (fx y a P - fx y a Q) ^ 2 + (fy y a P - fy y a Q) ^ 2 = sqd P Q / D := F
+  set ρ := q / D
+  have hρ0 : 0 < ρ := div_pos hq0 hD
+  have hρ : ρ < 2 := by rw [div_lt_iff₀ hD]; linarith
+  have le : ∀ P Q, sqd P Q ≤ q → (fx y a P - fx y a Q) ^ 2 + (fy y a P - fy y a Q) ^ 2 ≤ ρ :=
+    fun P Q h => by rw [ch]; exact div_le_div_of_nonneg_right h hD.le
+  have eq : ∀ P Q, sqd P Q = q → (fx y a P - fx y a Q) ^ 2 + (fy y a P - fy y a Q) ^ 2 = ρ :=
+    fun P Q h => by rw [ch, h]
+  have r := arcA_real (unit b hyb) (unit c hyc) (unit d hyd)
+    (by have := eq a b hab; rw [a0, a1] at this; linear_combination this) (eq c d hcd)
+    (by have := le a c hac; rw [a0, a1] at this; linarith)
+    (by have := le a d had; rw [a0, a1] at this; linarith) (le b c hbc) (le b d hbd) hρ0 hρ
+  have pt : ∀ {P Q : Pt}, fx y a P = fx y a Q → fy y a P = fy y a Q → P = Q := fun h1 h2 => by
+    by_contra h; exact frame_inj hne h ⟨h1, h2⟩
+  rcases r with ⟨e1, e2, e3, e4⟩ | ⟨e1, e2, e3, e4⟩
+  · exact Or.inl ⟨pt (e1.trans a0.symm) (e2.trans a1.symm), pt e3 e4⟩
+  · exact Or.inr ⟨pt e3 e4, pt (e1.trans a0.symm) (e2.trans a1.symm)⟩
+
+end Degen
+
 /-- **Step 3a**: no `Δ₂`-pair inside `B` (`diam K < Δ₂`: lens bounding box, [C10]).
 
 TODO: prove.
@@ -375,7 +549,23 @@ theorem degen_B_no_pair (h4 : 4 ≤ X.card) (hdeg : 1.94 * dist2 X < diam X) {y 
     (hy : y ∈ X)
     (hstar : ∀ a ∈ X, ∀ b ∈ X, a ≠ b → dist a b = diam X → a = y ∨ b = y) :
     mult (Bset X y) (dist2 X) = 0 := by
-  sorry
+  obtain ⟨a, ha, -, dya⟩ := exists_partner h4 hstar
+  have hq := sq_gap hdeg
+  have hD := sqd_eq_diam hdeg dya
+  unfold mult multS
+  rw [card_eq_zero, filter_eq_empty_iff]
+  intro z hz hzd
+  induction z using Sym2.ind with
+  | _ b b' =>
+    simp only [pairsS, mem_filter, Finset.mk_mem_sym2_iff] at hz
+    obtain ⟨⟨hb, hb'⟩, -⟩ := hz
+    have hd : dist b b' = dist2 X := hzd
+    have hl := lens hD (sqd_le_dist2 (B_close hdeg hstar hb hy))
+      (sqd_le_dist2 (B_close hdeg hstar hb ha)) (sqd_le_dist2 (B_close hdeg hstar hb' hy))
+      (sqd_le_dist2 (B_close hdeg hstar hb' ha))
+    have e : sqd b b' = dist2 X ^ 2 := (dist_eq_iff_sqd (dist2_nonneg' X)).1 hd
+    have := dist2_nonneg' X
+    nlinarith
 
 /-- **Step 3b**: at most one `Δ₂`-pair inside `A = Diam(y)` (the two extreme points of the arc).
 
@@ -386,7 +576,31 @@ theorem degen_A_le_one (h4 : 4 ≤ X.card) (hdeg : 1.94 * dist2 X < diam X) {y :
     (hy : y ∈ X)
     (hstar : ∀ a ∈ X, ∀ b ∈ X, a ≠ b → dist a b = diam X → a = y ∨ b = y) :
     mult (partners X (diam X) y) (dist2 X) ≤ 1 := by
-  sorry
+  have hq := sq_gap hdeg
+  have hΔ := diam_pos hdeg
+  unfold mult multS
+  rw [card_le_one]
+  intro z1 hz1 z2 hz2
+  induction z1 using Sym2.ind with
+  | _ a b =>
+  induction z2 using Sym2.ind with
+  | _ c d =>
+    simp only [pairsS, mem_filter, Finset.mk_mem_sym2_iff, Sym2.mk_isDiag_iff] at hz1 hz2
+    obtain ⟨⟨⟨ha, hb⟩, hab⟩, dab⟩ := hz1
+    obtain ⟨⟨⟨hc, hd⟩, -⟩, dcd⟩ := hz2
+    have dab' : dist a b = dist2 X := dab
+    have dcd' : dist c d = dist2 X := dcd
+    have hpos : 0 < dist2 X := by rw [← dab']; exact dist_pos.2 hab
+    have onC : ∀ {P}, P ∈ partners X (diam X) y → sqd y P = diam X ^ 2 := fun hP =>
+      sqd_eq_diam hdeg (mem_filter.1 hP).2.2
+    have cl : ∀ {P Q}, P ∈ partners X (diam X) y → Q ∈ partners X (diam X) y →
+        sqd P Q ≤ dist2 X ^ 2 := fun hP hQ => sqd_le_dist2 (A_close hstar hP hQ)
+    have r := arcA (onC ha) (onC hb) (onC hc) (onC hd)
+      ((dist_eq_iff_sqd (dist2_nonneg' X)).1 dab') ((dist_eq_iff_sqd (dist2_nonneg' X)).1 dcd')
+      (cl ha hc) (cl ha hd) (cl hb hc) (cl hb hd) (by positivity) (by nlinarith) (by positivity)
+    rcases r with ⟨rfl, rfl⟩ | ⟨rfl, rfl⟩
+    · rfl
+    · exact Sym2.eq_swap
 
 /-- **Step 3**: `μ(Δ₂) ≤ 1 + I`.
 
