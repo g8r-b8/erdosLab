@@ -1278,46 +1278,187 @@ theorem deg_core_L2 {X : Finset Pt} {Δ Δ₂ : ℝ} (hT : TwoLargest X Δ Δ₂
 
 /-! ## Degree at most 4 on `L₁′` (Lemma M, Lemma F) -/
 
-/-- TODO: prove.
-What's missing: frame at `p` with axis `w`; if `r` is not strictly right of `pw` use `a₁, a₂, b₁`,
-else reflect (`y ↦ −y`) and use `b₁, b₂, a₁`; apply `lemmaF_real`.
-Acceptance: **Lemma F**: a neighbour `w` of an extreme point `p` with two further neighbours of
-`p` strictly on each side of the line `pw` has `p` as its only `Δ₂`-neighbour.
-Depends on: frame lemmas, `lemmaF_real`, `TwoLargest.sqd_gap`, `TwoLargest.sqd_le`. -/
+/-- **Lemma F**: a `Δ₂`-neighbour `w` of an extreme point `p` with two further neighbours of `p` strictly on each side of the line `pw` has `p` as its only `Δ₂`-neighbour.  Frame at `p` with axis `w`; if `r` lies strictly on the `a`-side, reflect. -/
 theorem lemmaF {X : Finset Pt} {Δ Δ₂ : ℝ} (hT : TwoLargest X Δ Δ₂) {p w a₁ a₂ b₁ b₂ : Pt}
-    (hp : p ∈ X) (hw : w ∈ X) (ha₁ : a₁ ∈ X) (ha₂ : a₂ ∈ X) (hb₁ : b₁ ∈ X) (hb₂ : b₂ ∈ X)
+    (_hp : p ∈ X) (hw : w ∈ X) (ha₁ : a₁ ∈ X) (ha₂ : a₂ ∈ X) (hb₁ : b₁ ∈ X) (hb₂ : b₂ ∈ X)
     (dw : dist p w = Δ₂) (da₁ : dist p a₁ = Δ₂) (da₂ : dist p a₂ = Δ₂)
     (db₁ : dist p b₁ = Δ₂) (db₂ : dist p b₂ = Δ₂) (hna : a₁ ≠ a₂) (hnb : b₁ ≠ b₂)
     (oa₁ : orient p w a₁ < 0) (oa₂ : orient p w a₂ < 0)
     (ob₁ : 0 < orient p w b₁) (ob₂ : 0 < orient p w b₂)
     (o11 : 0 < orient p a₁ b₁) (o21 : 0 < orient p a₂ b₁)
-    (o12 : 0 < orient p a₁ b₂) (o22 : 0 < orient p a₂ b₂)
+    (o12 : 0 < orient p a₁ b₂) (_o22 : 0 < orient p a₂ b₂)
     {r : Pt} (hr : r ∈ X) (hwr : dist w r = Δ₂) : r = p := by
-  sorry
+  by_contra hrp
+  have hpos := hT.pos
+  have hs0 : 0 < Δ₂ ^ 2 := by positivity
+  have hne := ne_of_dist_snd hpos dw
+  have hs : sqd p w = Δ₂ ^ 2 := (dist_eq_iff_sqd hpos.le).1 dw
+  have hsp := sqd_pos_of_ne hne
+  obtain ⟨m0, m1⟩ := frame_axis hne
+  have N := frame_nsq hne hs
+  have Nn := frame_norm' hne hs
+  have unit : ∀ P, dist p P = Δ₂ → fx p w P ^ 2 + fy p w P ^ 2 = 1 := fun P hP => by
+    rw [Nn, (dist_eq_iff_sqd hpos.le).1 hP, div_self hs0.ne']
+  have gap : ∀ P ∈ X, ∀ Q ∈ X, (fx p w P - fx p w Q) ^ 2 + (fy p w P - fy p w Q) ^ 2 ≤ 1 ∨
+      (fx p w P - fx p w Q) ^ 2 + (fy p w P - fy p w Q) ^ 2 = Δ ^ 2 / Δ₂ ^ 2 :=
+    fun P hP Q hQ => by rw [N]; exact hT.ngap hP hQ
+  have mx : ∀ P ∈ X, ∀ Q ∈ X,
+      (fx p w P - fx p w Q) ^ 2 + (fy p w P - fy p w Q) ^ 2 ≤ Δ ^ 2 / Δ₂ ^ 2 :=
+    fun P hP Q hQ => by rw [N]; exact hT.nle hP hQ
+  have gw : ∀ P ∈ X, (fx p w P - 1) ^ 2 + fy p w P ^ 2 ≤ 1 ∨
+      (fx p w P - 1) ^ 2 + fy p w P ^ 2 = Δ ^ 2 / Δ₂ ^ 2 := fun P hP => by
+    have := gap P hP w hw; rw [m0, m1, sub_zero] at this; exact this
+  have fyneg : ∀ P, orient p w P < 0 → fy p w P < 0 := fun P h => div_neg_of_neg_of_pos h hsp
+  have fypos : ∀ P, 0 < orient p w P → 0 < fy p w P := fun P h => div_pos h hsp
+  have crpos : ∀ P Q, 0 < orient p P Q → 0 < fx p w P * fy p w Q - fy p w P * fx p w Q :=
+    fun P Q h => by rw [frame_cross hne]; exact div_pos h hsp
+  have hr1 : (fx p w r - 1) ^ 2 + fy p w r ^ 2 = 1 := by
+    have := N r w
+    rw [m0, m1, sub_zero, sqd_comm, (dist_eq_iff_sqd hpos.le).1 hwr, div_self hs0.ne'] at this
+    exact this
+  have hr0 : 0 < fx p w r ^ 2 + fy p w r ^ 2 := by
+    rw [Nn]; exact div_pos (sqd_pos_of_ne (Ne.symm hrp)) hs0
+  have rf : ∀ u v : ℝ, (-u - -v) ^ 2 = (u - v) ^ 2 := fun u v => by ring
+  rcases le_or_gt 0 (fy p w r) with hyr | hyr
+  · exact lemmaF_real hT.one_lt (unit a₁ da₁) (unit a₂ da₂) (unit b₁ db₁) (fyneg a₁ oa₁)
+      (fyneg a₂ oa₂) (fypos b₁ ob₁) (frame_inj hne hna) (crpos a₁ b₁ o11) (crpos a₂ b₁ o21) hr1
+      hr0 hyr (gap r hr a₁ ha₁) (gap r hr a₂ ha₂) (gw a₁ ha₁) (gw a₂ ha₂) (mx a₁ ha₁ b₁ hb₁)
+      (mx a₂ ha₂ b₁ hb₁)
+  · -- reflect `y ↦ −y` and swap the roles of the two sides
+    have cr : ∀ P Q, 0 < orient p P Q →
+        0 < fx p w Q * -fy p w P - -fy p w Q * fx p w P := fun P Q h => by
+      have := crpos P Q h
+      have e : fx p w Q * -fy p w P - -fy p w Q * fx p w P =
+          fx p w P * fy p w Q - fy p w P * fx p w Q := by ring
+      rw [e]; exact this
+    refine lemmaF_real (x₁ := fx p w b₁) (y₁ := -fy p w b₁) (x₂ := fx p w b₂)
+      (y₂ := -fy p w b₂) (xb := fx p w a₁) (yb := -fy p w a₁) (xr := fx p w r) (yr := -fy p w r)
+      hT.one_lt (by rw [neg_sq]; exact unit b₁ db₁) (by rw [neg_sq]; exact unit b₂ db₂)
+      (by rw [neg_sq]; exact unit a₁ da₁) (by linarith [fypos b₁ ob₁])
+      (by linarith [fypos b₂ ob₂]) (by linarith [fyneg a₁ oa₁])
+      (fun h => frame_inj hne hnb ⟨h.1, neg_inj.1 h.2⟩) (cr a₁ b₁ o11) (cr a₁ b₂ o12)
+      (by rw [neg_sq]; exact hr1) (by rw [neg_sq]; exact hr0) (by linarith)
+      (by rw [rf]; exact gap r hr b₁ hb₁) (by rw [rf]; exact gap r hr b₂ hb₂)
+      (by rw [neg_sq]; exact gw b₁ hb₁) (by rw [neg_sq]; exact gw b₂ hb₂)
+      (by rw [rf]; exact mx b₁ hb₁ a₁ ha₁) (by rw [rf]; exact mx b₂ hb₂ a₁ ha₁)
 
-/-- TODO: prove.
-What's missing: with the half-plane normal `n` of `p`, `g x = (n × (x−p)) / (n·(x−p))` orders the
-neighbours by angle (`orient p x y > 0 ↔ g x < g y`) and is injective on points at equal
-distance from `p`; sort the 5 values (`orderEmbOfFin`) and take the median.
-Acceptance: among five `Δ₂`-neighbours of an extreme point, the angular median has two of them
-strictly on each side.
-Depends on: nothing beyond the definitions. -/
+/-- Real-number core of `eq_of_orient_zero`: equal lengths, zero cross product and the same open
+half-plane force equal vectors. -/
+theorem same_dir_real {u0 u1 w0 w1 α β : ℝ} (hd : u0 ^ 2 + u1 ^ 2 = w0 ^ 2 + w1 ^ 2)
+    (ho : u0 * w1 - u1 * w0 = 0) (hx : 0 < -(α * u0 + β * u1)) (hy : 0 < -(α * w0 + β * w1)) :
+    u0 = w0 ∧ u1 = w1 := by
+  have hlag : (u0 * w0 + u1 * w1) ^ 2 = (u0 ^ 2 + u1 ^ 2) ^ 2 := by
+    linear_combination (-(u0 * w1 - u1 * w0)) * ho - (u0 ^ 2 + u1 ^ 2) * hd
+  rcases sq_eq_sq_iff_eq_or_eq_neg.1 hlag with h | h
+  · have hz : (u0 - w0) ^ 2 + (u1 - w1) ^ 2 = 0 := by linear_combination -hd - 2 * h
+    have h0 : u0 - w0 = 0 := by nlinarith [sq_nonneg (u0 - w0), sq_nonneg (u1 - w1)]
+    have h1 : u1 - w1 = 0 := by nlinarith [sq_nonneg (u0 - w0), sq_nonneg (u1 - w1)]
+    exact ⟨by linarith, by linarith⟩
+  · have hz : (u0 + w0) ^ 2 + (u1 + w1) ^ 2 = 0 := by linear_combination -hd + 2 * h
+    have h0 : u0 + w0 = 0 := by nlinarith [sq_nonneg (u0 + w0), sq_nonneg (u1 + w1)]
+    have h1 : u1 + w1 = 0 := by nlinarith [sq_nonneg (u0 + w0), sq_nonneg (u1 + w1)]
+    have : -(α * w0 + β * w1) = α * u0 + β * u1 := by linear_combination (-α) * h0 + (-β) * h1
+    linarith
+
+/-- Two points at equal distance from `p`, collinear with `p` and in the same open half-plane at
+`p`, coincide. -/
+theorem eq_of_orient_zero {p x y : Pt} {α β : ℝ} (hd : sqd p x = sqd p y) (ho : orient p x y = 0)
+    (hx : 0 < -(α * (x 0 - p 0) + β * (x 1 - p 1)))
+    (hy : 0 < -(α * (y 0 - p 0) + β * (y 1 - p 1))) : x = y := by
+  simp only [sqd, orient] at hd ho
+  obtain ⟨h0, h1⟩ := same_dir_real (u0 := x 0 - p 0) (u1 := x 1 - p 1) (w0 := y 0 - p 0)
+    (w1 := y 1 - p 1) (by linear_combination hd) ho hx hy
+  ext i; fin_cases i
+  · simp only [Fin.zero_eta, Fin.isValue]; linarith
+  · simp only [Fin.mk_one, Fin.isValue]; linarith
+
+/-- Among five `Δ₂`-neighbours of an extreme point, the angular median has two of them strictly on each side.  The slope `g x = (n × (x−p)) / (n·(x−p))` (`n` the inner normal of the supporting half-plane) orders the neighbours by angle and is injective on them; sort five values with `orderEmbOfFin`. -/
 theorem exists_median {X : Finset Pt} {Δ₂ : ℝ} {p : Pt} (hp : IsExt X p) {S : Finset Pt}
     (hSX : S ⊆ X) (hS : ∀ x ∈ S, dist p x = Δ₂) (hpos : 0 < Δ₂) (h5 : 5 ≤ S.card) :
     ∃ w ∈ S, ∃ a₁ ∈ S, ∃ a₂ ∈ S, ∃ b₁ ∈ S, ∃ b₂ ∈ S, a₁ ≠ a₂ ∧ b₁ ≠ b₂ ∧
       orient p w a₁ < 0 ∧ orient p w a₂ < 0 ∧ 0 < orient p w b₁ ∧ 0 < orient p w b₂ ∧
       0 < orient p a₁ b₁ ∧ 0 < orient p a₂ b₁ ∧ 0 < orient p a₁ b₂ ∧ 0 < orient p a₂ b₂ := by
-  sorry
+  classical
+  obtain ⟨S', hS'S, hS'5⟩ := exists_subset_card_eq h5
+  obtain ⟨-, α, β, hαβ⟩ := hp
+  have hSp : ∀ x ∈ S', x ≠ p := fun x hx h => by
+    have := hS x (hS'S hx); rw [h, dist_self] at this; linarith
+  have hN : ∀ x ∈ S', 0 < -(α * (x 0 - p 0) + β * (x 1 - p 1)) := fun x hx => by
+    linarith [hαβ x (hSX (hS'S hx)) (hSp x hx)]
+  set g : Pt → ℝ := fun x =>
+    (-α * (x 1 - p 1) + β * (x 0 - p 0)) / -(α * (x 0 - p 0) + β * (x 1 - p 1)) with hg
+  have hn : 0 < α ^ 2 + β ^ 2 := by
+    obtain ⟨x, hx⟩ : S'.Nonempty := card_pos.1 (by omega)
+    by_contra h; push Not at h
+    have ha : α = 0 := by nlinarith [sq_nonneg α, sq_nonneg β]
+    have hb : β = 0 := by nlinarith [sq_nonneg α, sq_nonneg β]
+    have := hN x hx; rw [ha, hb] at this; simp at this
+  have anti : ∀ x y, orient p y x = -orient p x y := fun x y => by simp only [orient]; ring
+  have key : ∀ x ∈ S', ∀ y ∈ S', (0 < orient p x y ↔ g x < g y) := by
+    intro x hx y hy
+    have hx' := hN x hx
+    have hy' := hN y hy
+    have e : g y - g x = orient p x y * (α ^ 2 + β ^ 2) /
+        ((-(α * (x 0 - p 0) + β * (x 1 - p 1))) * (-(α * (y 0 - p 0) + β * (y 1 - p 1)))) := by
+      simp only [hg]
+      rw [div_sub_div _ _ hy'.ne' hx'.ne', div_eq_div_iff (mul_ne_zero hy'.ne' hx'.ne')
+        (mul_ne_zero hx'.ne' hy'.ne')]
+      simp only [orient]; ring
+    rw [← sub_pos (a := g y) (b := g x), e]
+    constructor
+    · intro h; exact div_pos (mul_pos h hn) (mul_pos hx' hy')
+    · intro h
+      exact (mul_pos_iff_of_pos_right hn).1 ((div_pos_iff_of_pos_right (mul_pos hx' hy')).1 h)
+  have inj : Set.InjOn g S' := by
+    intro x hx y hy hxy
+    have ho : orient p x y = 0 := by
+      rcases lt_trichotomy (orient p x y) 0 with h | h | h
+      · have h' : 0 < orient p y x := by rw [anti]; linarith
+        have := (key y hy x hx).1 h'; rw [hxy] at this; exact absurd this (lt_irrefl _)
+      · exact h
+      · have := (key x hx y hy).1 h; rw [hxy] at this; exact absurd this (lt_irrefl _)
+    have hd : sqd p x = sqd p y := by
+      rw [(dist_eq_iff_sqd hpos.le).1 (hS x (hS'S hx)),
+        (dist_eq_iff_sqd hpos.le).1 (hS y (hS'S hy))]
+    exact eq_of_orient_zero hd ho (hN x hx) (hN y hy)
+  set T := S'.image g with hT
+  have hT5 : T.card = 5 := by rw [hT, card_image_of_injOn inj, hS'5]
+  set emb := T.orderEmbOfFin hT5 with hemb
+  have pre : ∀ i : Fin 5, ∃ x ∈ S', g x = emb i := fun i => mem_image.1 (orderEmbOfFin_mem T hT5 i)
+  choose f hfS hfg using pre
+  have ord : ∀ i j : Fin 5, i < j → 0 < orient p (f i) (f j) := fun i j hij =>
+    (key _ (hfS i) _ (hfS j)).2 (by rw [hfg, hfg]; exact emb.strictMono hij)
+  have fne : ∀ i j : Fin 5, i ≠ j → f i ≠ f j := fun i j hij h => by
+    have := congrArg g h; rw [hfg, hfg] at this; exact hij (emb.injective this)
+  have neg : ∀ i j : Fin 5, i < j → orient p (f j) (f i) < 0 := fun i j hij => by
+    rw [anti]; linarith [ord i j hij]
+  refine ⟨f 2, hS'S (hfS 2), f 0, hS'S (hfS 0), f 1, hS'S (hfS 1), f 3, hS'S (hfS 3), f 4,
+    hS'S (hfS 4), fne 0 1 (by decide), fne 3 4 (by decide), neg 0 2 (by decide),
+    neg 1 2 (by decide), ord 2 3 (by decide), ord 2 4 (by decide), ord 0 3 (by decide),
+    ord 1 3 (by decide), ord 0 4 (by decide), ord 1 4 (by decide)⟩
 
-/-- TODO: prove.
-What's missing: five core neighbours give a median `w` (`exists_median`); by `lemmaF` all
-`Δ₂`-neighbours of `w` equal `p`, but `w ∈ core` has two core neighbours.
-Acceptance: **degree ≤ 4**: every `p ∈ L₁ ∩ V(G′)` has `deg_{G′} p ≤ 4`.
-Depends on: `exists_median`, `lemmaF`, `minDeg2_core`, `core_subset`. -/
+/-- **Degree ≤ 4**: every `p ∈ L₁ ∩ V(G′)` has `deg_{G′} p ≤ 4`. -/
 theorem deg_core_L1_le_four {X : Finset Pt} {Δ Δ₂ : ℝ} (hT : TwoLargest X Δ Δ₂) {p : Pt}
-    (hp : p ∈ L1 X) (hK : p ∈ core (L1 X ∪ L2 X) Δ₂) :
+    (hp : p ∈ L1 X) (_hK : p ∈ core (L1 X ∪ L2 X) Δ₂) :
     (nbr (core (L1 X ∪ L2 X) Δ₂) Δ₂ p).card ≤ 4 := by
-  sorry
+  set K := core (L1 X ∪ L2 X) Δ₂ with hKdef
+  have hKX : K ⊆ X := (core_subset _ _).trans (union_subset (L1_subset X) (L2_subset X))
+  have hpE : IsExt X p := mem_L1.1 hp
+  have hpX : p ∈ X := hpE.1
+  by_contra h
+  push Not at h
+  have hsub : nbr K Δ₂ p ⊆ X := fun x hx => hKX (mem_nbr.1 hx).1
+  obtain ⟨w, hw, a₁, ha₁, a₂, ha₂, b₁, hb₁, b₂, hb₂, hna, hnb, oa₁, oa₂, ob₁, ob₂, o11, o21, o12,
+    o22⟩ := exists_median hpE hsub (fun x hx => (mem_nbr.1 hx).2) hT.pos (by omega)
+  have hwK := (mem_nbr.1 hw).1
+  have hall : ∀ r ∈ nbr K Δ₂ w, r = p := fun r hr =>
+    lemmaF hT hpX (hsub hw) (hsub ha₁) (hsub ha₂) (hsub hb₁) (hsub hb₂) (mem_nbr.1 hw).2
+      (mem_nbr.1 ha₁).2 (mem_nbr.1 ha₂).2 (mem_nbr.1 hb₁).2 (mem_nbr.1 hb₂).2 hna hnb oa₁ oa₂ ob₁
+      ob₂ o11 o21 o12 o22 (hKX (mem_nbr.1 hr).1) (mem_nbr.1 hr).2
+  have h1 : (nbr K Δ₂ w).card ≤ 1 :=
+    card_le_one.2 fun a ha b hb => (hall a ha).trans (hall b hb).symm
+  have h2 : 2 ≤ (nbr K Δ₂ w).card := minDeg2_core _ _ w hwK
+  omega
 
 /-! ## Theorem A and Corollary A1 -/
 
