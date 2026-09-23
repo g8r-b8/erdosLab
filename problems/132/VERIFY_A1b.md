@@ -31,16 +31,23 @@ The other side of the line is symmetric. This case uses only that q is not extre
 - *Both |r − v₂|, |r − v₃| ≤ 1.* Impossible. Write r = (x, y) with y ≥ 0. On the arc |r|² = −2x ≥ 0, so
   |r − v₃|² − 1 = −2x(1 + cos a) + 2y sin a ≥ 0,
   with equality only when r = q.
-- *|r − v₂| = Δ* (or symmetrically |r − v₃| = Δ). Then |r − v₃| misses [0,1] ∪ {Δ} by at least 0.414 for every a ∈ (0°, 30°] (`va1b_case2_margin.py`, 3000 values of a).
+- *|r − v₂| = Δ* (or symmetrically |r − v₃| = Δ). Write c = cos a, s = sin a, Δ² = 2 + 2c.
+  - With |r|² = −2x, the condition |r − v₂|² = Δ² is linear: −2x(1+c) − 2sy = 1 + 2c.
+  - Intersecting with the circle gives x = (±s√(8c+7) − 3(1+c)) / (4(1+c)).
+  - So |r|² = (3(1+c) ∓ s√(8c+7)) / (2(1+c)).
+  - The minus root has |r|² ≥ 3/2, outside the disk.
+  - For the plus root, |r|² ≤ 1 ⟺ 1+c ≤ s√(8c+7) ⟺ 1+c ≤ (1−c)(8c+7) ⟺ c² ≤ 3/4 ⟺ a ≥ 30°.
+  - So for a ∈ (0°, 30°] the only possibility is a = 30°. There |r − v₃|² = 3 + c − s√(8c+7) = 2, which is strictly inside (1, Δ² = 2+√3). Forbidden.
+  - An interval-arithmetic check agrees: `va1b_exact.py`, mpmath.iv, 6000 subintervals, 0 failures.
 - *Both = Δ.* Then r lies on the x-axis, so r ∈ {q, (−2, 0)}, and (−2, 0) is outside the disk.
 
 So deg_G(v₁) = 1. This contradicts v₁ ∈ G′, because deg_G ≥ deg_{G′} ≥ 2.
 
 **Case 1: all three pairs at Δ (Ve87 Case 1).** The vᵢ form an equilateral triangle with circumcentre q, so Δ = √3.
 - An extra Δ₂-neighbour P ≠ q of vᵢ satisfies |P − vᵢ| = 1 and |P| ≤ 1.
-- It cannot have both other distances ≤ 1: 0 hits on a 2·10⁵-point sweep per vertex. So |P − vⱼ| = √3 for some j ≠ i.
+- It cannot have both other distances ≤ 1. Proof: |P − v₀| = 1 gives |P|² = 2P·v₀. Both other distances ≤ 1 means P·(v₀ − v₁) ≤ 0 and P·(v₀ − v₂) ≤ 0. Adding and using v₁ + v₂ = −v₀ gives 3P·v₀ ≤ 0, so |P|² ≤ 0 and P = q. So |P − vⱼ| = √3 for some j ≠ i.
 - That leaves exactly **6 candidate points**, two per vertex, related by the 3-fold symmetry (`va1b_case1.py`).
-- Their pairwise distances are 0.2149 (for 3 disjoint pairs) and 1.1547, 1.2758 or 1.3696 otherwise. The last three are all inside the forbidden gap (1, √3), with a margin of at least 0.15.
+- Their pairwise squared distances are ≤ 1 (for 3 disjoint pairs) and otherwise exactly 4/3, ≈1.6277 or ≈1.8759. All three lie strictly inside the forbidden gap (1, 3). The candidates are solved exactly and the comparisons are exact (`va1b_exact.py`).
 - So a compatible set has at most 2 candidates. At most two of the vᵢ can gain a second neighbour, and some vᵢ has deg_G = 1. Contradiction as before.
 
 With four or more neighbours, apply the argument to any three of them. **Hence deg_{G′}(q) ≤ 2, and so = 2.** ∎
@@ -53,7 +60,10 @@ The three cases are Vesztergombi's (Discrete Math 67 (1987) 191–198, pp. 192�
 
 So the concern raised in NOVELTY Audit 5, that deleting points can change d₁ and d₂, does not arise.
 
-Rigour: Case 3 and the open branch of Case 2 are proved by hand above. The equality branches of Cases 1–2 are verified numerically, with explicit margins ≥ 0.15 (Case 1) and ≥ 0.41 (Case 2) at double precision. Those are closed-form algebraic configurations, so a CAS or interval re-check would be routine, but it has not been done.
+Rigour (updated 2026-09-23): **every step is now exact.**
+- Case 3 and all of Case 2 are proved by hand. Case 2's equality branch is checked independently by interval arithmetic.
+- Case 1's open branch is proved by hand. Its six candidates and all their pairwise distances are computed exactly in sympy (`va1b_exact.py`).
+- The earlier float sweeps (`va1b_cases.py`, `va1b_case1.py`, `va1b_case2_margin.py`) are kept only as sanity checks.
 
 ## Consequence
 
