@@ -224,21 +224,21 @@ theorem hopf_pannwitz (Y : Finset Pt) : mult Y (diam Y) ≤ Y.card := by
 
 /-- `|S| + |R| = n`.
 
-TODO: fill (`card_sdiff`).
+TODO: none — proved (Phase 2).
 What's missing: nothing mathematical.
 Acceptance: no `sorry`.
 Depends on: definitions. Difficulty S. -/
 theorem card_S_add_R (X : Finset Pt) : (Sset X).card + (Rset X).card = X.card := by
-  sorry
+  rw [Rset, add_comm]; exact card_sdiff_add_card_eq_card (filter_subset _ _)
 
 /-- `e(S)` is the number of `edges`.
 
-TODO: fill (unfold; decidability instances should agree).
+TODO: none — proved (Phase 2).
 What's missing: nothing.
 Acceptance: no `sorry`.
 Depends on: definitions. Difficulty S. -/
 theorem card_edges (X : Finset Pt) : (edges X).card = eS X := by
-  sorry
+  rfl
 
 /-- **Kissing bound**: a point has at most 6 points of `X` at distance `δ`.
 
@@ -333,45 +333,61 @@ theorem VS_weighted {P₁ : Finset Pt} (hP : P₁ ⊆ Sset X) (hdeg : ∀ v ∈ 
 /-- **Lemma 4.1** (LP certificate): with `λ = (6 − k)/(7.5 − k)`,
 `min{μ₂, μ_δ} ≤ 9(s + r)/(7.5 − k) + C`.
 
-TODO: fill (Phase 2 leaf).
+TODO: none — proved (Phase 2).
 What's missing: nothing — algebra.
 Acceptance: no `sorry`.
 Depends on: nothing. Difficulty S. -/
-theorem lp_mix {μ₂ μδ s r e k C : ℝ} (hk0 : 0 ≤ k) (hk : k ≤ 3 / 2) (hs : 0 ≤ s) (hr : 0 ≤ r)
+theorem lp_mix {μ₂ μδ s r e k C : ℝ} (_hk0 : 0 ≤ k) (hk : k ≤ 3 / 2) (_hs : 0 ≤ s) (_hr : 0 ≤ r)
     (hC : 0 ≤ C) (h₂ : μ₂ ≤ 3 / 2 * s) (hδ : μδ ≤ e + 6 * r) (he : e ≤ k * s + C) :
     min μ₂ μδ ≤ 9 * (s + r) / (15 / 2 - k) + C := by
-  sorry
+  have hpos : 0 < 15 / 2 - k := by linarith
+  have h1 := min_le_left μ₂ μδ
+  have h2 := min_le_right μ₂ μδ
+  set m := min μ₂ μδ
+  have key : (15 / 2 - k) * m ≤ 9 * (s + r) + 3 / 2 * C := by
+    have a : (6 - k) * m ≤ (6 - k) * (3 / 2 * s) :=
+      mul_le_mul_of_nonneg_left (h1.trans h₂) (by linarith)
+    have b : 3 / 2 * m ≤ 3 / 2 * (k * s + C + 6 * r) := by
+      apply mul_le_mul_of_nonneg_left _ (by norm_num); linarith
+    nlinarith
+  have hCle : 3 / 2 * C ≤ (15 / 2 - k) * C := mul_le_mul_of_nonneg_right (by linarith) hC
+  rw [div_add' _ _ _ hpos.ne', le_div_iff₀ hpos]
+  nlinarith
 
 /-- **Lemma 4.2** (weighted LP, weights `4/5, 1/5`): `min{μ₂, μ_δ} ≤ (7/5)(s + r) + C`.
 
-TODO: fill (Phase 2 leaf).
+TODO: none — proved (Phase 2).
 What's missing: nothing — algebra.
 Acceptance: no `sorry`.
 Depends on: nothing. Difficulty S. -/
-theorem lp_weighted {μ₂ μδ s r e p C : ℝ} (hp : 0 ≤ p) (hps : p ≤ s) (hr : 0 ≤ r) (hC : 0 ≤ C)
+theorem lp_weighted {μ₂ μδ s r e p C : ℝ} (_hp : 0 ≤ p) (_hps : p ≤ s) (hr : 0 ≤ r) (hC : 0 ≤ C)
     (h₂ : μ₂ ≤ p + 3 / 2 * (s - p)) (hδ : μδ ≤ e + 6 * r) (he : e ≤ s + 2 * p + C) :
     min μ₂ μδ ≤ 7 / 5 * (s + r) + C := by
-  sorry
+  have h1 := min_le_left μ₂ μδ
+  have h2 := min_le_right μ₂ μδ
+  linarith
 
 /-- `9n/(7.5 − k) ≤ (54/37) n` for `0 ≤ k ≤ 4/3`.
 
-TODO: fill (Phase 2 leaf).
+TODO: none — proved (Phase 2).
 Acceptance: no `sorry`.
 Depends on: nothing. Difficulty S. -/
-theorem lp_value_le {k n : ℝ} (hk0 : 0 ≤ k) (hk : k ≤ 4 / 3) (hn : 0 ≤ n) :
+theorem lp_value_le {k n : ℝ} (_hk0 : 0 ≤ k) (hk : k ≤ 4 / 3) (hn : 0 ≤ n) :
     9 * n / (15 / 2 - k) ≤ 54 / 37 * n := by
-  sorry
+  have hpos : 0 < 15 / 2 - k := by linarith
+  rw [div_le_iff₀ hpos]
+  nlinarith
 
 /-- **[C1]** values of the certificate: `k = 1, 5/4, 4/3 ↦ 18/13, 36/25, 54/37`, and
 `7/5 ≤ 54/37`.
 
-TODO: fill (Phase 2 leaf, `norm_num`).
+TODO: none — proved (Phase 2).
 Acceptance: no `sorry`.
 Depends on: nothing. Difficulty S. -/
 theorem lp_values :
     (9 : ℝ) / (15 / 2 - 1) = 18 / 13 ∧ (9 : ℝ) / (15 / 2 - 5 / 4) = 36 / 25 ∧
       (9 : ℝ) / (15 / 2 - 4 / 3) = 54 / 37 ∧ (7 : ℝ) / 5 ≤ 54 / 37 := by
-  sorry
+  norm_num
 
 /-! ## Normalisation and small cases -/
 
@@ -390,11 +406,11 @@ theorem exists_normalize (hX : 2 ≤ X.card) :
 
 /-- **[C11]** `(2 · 1.94·10⁴ + 1)² < N₀`.
 
-TODO: fill (Phase 2 leaf, `norm_num`).
+TODO: none — proved (Phase 2).
 Acceptance: no `sorry`.
 Depends on: nothing. Difficulty S. -/
 theorem N0_check : (2 * (1.94 * 10 ^ 4) + 1 : ℝ) ^ 2 < N₀ := by
-  sorry
+  norm_num [N₀]
 
 /-- **Small cases** (§4): nondegenerate with `δ = 1`, `Δ₂ < 10⁴` ⇒ `n < N₀` (packing:
 `n ≤ (2Δ + 1)²`).
