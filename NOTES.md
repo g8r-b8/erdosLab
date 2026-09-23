@@ -103,8 +103,14 @@ then ¬(almost-all o(N)) as in PR #4076's Erdos468MinimalPreimageLittleOAlmostAl
 - 1218, 1220: large-cardinal set theory, not Mathlib-friendly.
 - 1221: asymptotic analysis on circle, no obvious handle.
 
+## Iteration 8 (2026-09-23)
+- Agents running: 132 novelty audit (A2, B2), 132 A2 write-up, 132 convex n=7 (angle_B3),
+  triage 700–949, triage 400–699. Loop paused until they report (hook pause file).
+- Own: C1 greedy evidence (problems/132/angle_C.md): max μ(Δ₂)−n = +1 up to n=21.
+
 ## Next step
-- Parallel triage of open problems 1050–1221 for tractability + open-status evidence.
+- Integrate agent reports; pick best Lean-verifiable open target from the triage batches.
+- (old) Parallel triage of open problems 1050–1221 for tractability + open-status evidence.
 
 ## Short-formal-statement older problems (iter 6, own check) — all dropped
 826, 943, 849, 383, 431, 396, 371, 479: short Lean statements but famous analytic-NT
