@@ -1,5 +1,7 @@
 import Erdos.E132MainDefs
 import Mathlib.Geometry.Euclidean.Angle.Unoriented.TriangleInequality
+import Mathlib.Analysis.LocallyConvex.Separation
+import Mathlib.Analysis.InnerProductSpace.Dual
 
 /-!
 # Erdős Problem 132, `54/37` theorem — local geometry (§3) and bad edges (§5)
@@ -849,10 +851,10 @@ theorem normalCone_add_smul {K : Set Pt} {x n₁ n₂ : Pt} (h₁ : n₁ ∈ nor
   rw [inner_add_right, real_inner_smul_right, real_inner_smul_right]
   nlinarith [h₁ y hy, h₂ y hy]
 
-/-- If the directions `[c, c + α]` (`α ≤ 2π`) are all normal at a point of `γ`, the turning of
-`γ` is at least `α`. -/
-theorem le_turning_of_Icc {K γ : Set Pt} {x : Pt} (hx : x ∈ γ) {c α : ℝ} (hα : 0 ≤ α)
-    (hα' : α ≤ 2 * π) (h : ∀ θ ∈ Set.Icc c (c + α), dirVec θ ∈ normalCone K x) :
+/-- If every direction in `[c, c + α]` (`α ≤ 2π`) is normal at some point of `γ`, the turning
+of `γ` is at least `α`. -/
+theorem le_turning_of_Icc {K γ : Set Pt} {c α : ℝ} (hα : 0 ≤ α)
+    (hα' : α ≤ 2 * π) (h : ∀ θ ∈ Set.Icc c (c + α), ∃ x ∈ γ, dirVec θ ∈ normalCone K x) :
     α ≤ turning K γ := by
   have hpi := Real.pi_pos
   set k : ℤ := ⌊c / (2 * π)⌋
@@ -863,16 +865,16 @@ theorem le_turning_of_Icc {K γ : Set Pt} {x : Pt} (hx : x ∈ γ) {c α : ℝ} 
     have := (le_div_iff₀ (by positivity : (0 : ℝ) < 2 * π)).1 hk1; simp only [c']; linarith
   have hc1 : c' < 2 * π := by
     have := (div_lt_iff₀ (by positivity : (0 : ℝ) < 2 * π)).1 hk2; simp only [c']; linarith
-  have h' : ∀ θ ∈ Set.Icc c' (c' + α), dirVec θ ∈ normalCone K x := by
+  have h' : ∀ θ ∈ Set.Icc c' (c' + α), ∃ x ∈ γ, dirVec θ ∈ normalCone K x := by
     intro θ hθ
     rw [← dirVec_add_int_mul θ k]
     exact h _ ⟨by simp only [c'] at hθ; linarith [hθ.1], by simp only [c'] at hθ; linarith [hθ.2]⟩
   set T : Set ℝ := {θ | θ ∈ Set.Ico 0 (2 * π) ∧ ∃ x ∈ γ, dirVec θ ∈ normalCone K x}
   have hT1 : Set.Ico c' (min (c' + α) (2 * π)) ⊆ T := fun θ hθ =>
-    ⟨⟨by linarith [hθ.1], lt_of_lt_of_le hθ.2 (min_le_right _ _)⟩, x, hx,
+    ⟨⟨by linarith [hθ.1], lt_of_lt_of_le hθ.2 (min_le_right _ _)⟩,
       h' θ ⟨hθ.1, (lt_of_lt_of_le hθ.2 (min_le_left _ _)).le⟩⟩
   have hT2 : Set.Ico 0 (c' + α - 2 * π) ⊆ T := fun θ hθ => by
-    refine ⟨⟨hθ.1, by linarith [hθ.2]⟩, x, hx, ?_⟩
+    refine ⟨⟨hθ.1, by linarith [hθ.2]⟩, ?_⟩
     rw [← dirVec_add_int_mul θ 1]
     exact h' _ ⟨by push_cast; linarith [hθ.1], by push_cast; linarith [hθ.2]⟩
   have hdisj : Disjoint (Set.Ico c' (min (c' + α) (2 * π))) (Set.Ico 0 (c' + α - 2 * π)) := by
@@ -942,12 +944,206 @@ theorem ang_le_turning_of_normals {K γ : Set Pt} {x n₁ n₂ : Pt} (hx : x ∈
     rw [real_inner_smul_right]
     exact mul_nonpos_of_nonneg_of_nonpos (inv_nonneg.2 hsin.le) (hn y hy)
   rcases hσ with rfl | rfl
-  · refine le_turning_of_Icc hx hα0 (by linarith [Real.pi_pos]) (c := θ₁) fun θ hθ => ?_
+  · refine le_turning_of_Icc hα0 (by linarith [Real.pi_pos]) (c := θ₁) fun θ hθ => ⟨x, hx, ?_⟩
     have := key (θ - θ₁) ⟨by linarith [hθ.1], by linarith [hθ.2]⟩
     rwa [one_mul, add_sub_cancel] at this
-  · refine le_turning_of_Icc hx hα0 (by linarith [Real.pi_pos]) (c := θ₁ - α) fun θ hθ => ?_
+  · refine le_turning_of_Icc hα0 (by linarith [Real.pi_pos]) (c := θ₁ - α)
+      fun θ hθ => ⟨x, hx, ?_⟩
     have := key (θ₁ - θ) ⟨by linarith [hθ.2], by linarith [hθ.1]⟩
     rwa [neg_one_mul, neg_sub, add_sub_cancel] at this
+
+/-! ### Normal directions along a boundary path -/
+
+/-- Supporting line at a boundary point of a convex body. -/
+theorem exists_unit_normal {K : Set Pt} (hK : Convex ℝ K) (hint : (interior K).Nonempty)
+    {x : Pt} (hx : x ∈ frontier K) : ∃ n : Pt, ‖n‖ = 1 ∧ n ∈ normalCone K x := by
+  have hxi : x ∉ interior K := hx.2
+  obtain ⟨f, hf⟩ := geometric_hahn_banach_open_point hK.interior isOpen_interior hxi
+  set n₀ := (InnerProductSpace.toDual ℝ Pt).symm f
+  have hfn : ∀ y, f y = inner ℝ n₀ y := fun y => InnerProductSpace.toDual_symm_apply.symm
+  have hle : ∀ y ∈ K, f y ≤ f x := by
+    intro y hy
+    have hcl : y ∈ closure (interior K) := by
+      rw [hK.closure_interior_eq_closure_of_nonempty_interior hint]; exact subset_closure hy
+    have hc : IsClosed {z : Pt | f z ≤ f x} := isClosed_le f.continuous continuous_const
+    exact closure_minimal (fun z hz => (hf z hz).le) hc hcl
+  obtain ⟨a, ha⟩ := hint
+  have hn0 : n₀ ≠ 0 := by
+    intro h0
+    have := hf a ha
+    rw [hfn, hfn, h0, inner_zero_left, inner_zero_left] at this
+    exact lt_irrefl _ this
+  refine ⟨‖n₀‖⁻¹ • n₀, by
+    rw [norm_smul, norm_inv, norm_norm, inv_mul_cancel₀ (norm_ne_zero_iff.2 hn0)], ?_⟩
+  intro y hy
+  rw [real_inner_smul_right, inner_sub_left, real_inner_comm n₀ y, real_inner_comm n₀ x,
+    ← hfn, ← hfn]
+  exact mul_nonpos_of_nonneg_of_nonpos (by positivity) (by linarith [hle y hy])
+
+/-- A convex body with interior has no pair of opposite normals at one point. -/
+theorem not_antipodal_normal {K : Set Pt} (hint : (interior K).Nonempty) {x n : Pt}
+    (hn : n ≠ 0) (h₁ : n ∈ normalCone K x) (h₂ : -n ∈ normalCone K x) : False := by
+  obtain ⟨a, ha⟩ := hint
+  obtain ⟨ε, hε, hball⟩ := Metric.mem_nhds_iff.1 (mem_interior_iff_mem_nhds.1 ha)
+  have haK : a ∈ K := hball (Metric.mem_ball_self hε)
+  have hnpos : 0 < ‖n‖ := norm_pos_iff.2 hn
+  have hyz : (a + (ε / 2 / ‖n‖) • n) - a = (ε / 2 / ‖n‖) • n := by abel
+  have hy : a + (ε / 2 / ‖n‖) • n ∈ K := by
+    apply hball
+    rw [Metric.mem_ball, dist_eq_norm, hyz, norm_smul, Real.norm_of_nonneg (by positivity),
+      div_mul_cancel₀ _ hnpos.ne']
+    linarith
+  have e1 := h₁ _ hy
+  have e2 := h₂ a haK
+  rw [show a + (ε / 2 / ‖n‖) • n - x = (a - x) + (ε / 2 / ‖n‖) • n by abel, inner_add_left,
+    real_inner_smul_left, real_inner_self_eq_norm_sq] at e1
+  rw [inner_neg_right] at e2
+  have : 0 < ε / 2 / ‖n‖ * ‖n‖ ^ 2 := by positivity
+  linarith
+
+/-- The normal cone contains the short arc between two of its directions. -/
+theorem dirVec_mem_of_arc {K : Set Pt} {x : Pt} {c α : ℝ} (hα : 0 < α) (hα' : α < π)
+    (h₁ : dirVec c ∈ normalCone K x) (h₂ : dirVec (c + α) ∈ normalCone K x) {t : ℝ}
+    (ht0 : 0 ≤ t) (ht1 : t ≤ α) : dirVec (c + t) ∈ normalCone K x := by
+  have hsin : 0 < Real.sin α := Real.sin_pos_of_pos_of_lt_pi hα hα'
+  have hdir : dirVec (c + t) =
+      (Real.sin α)⁻¹ • (Real.sin (α - t) • dirVec c + Real.sin t • dirVec (c + α)) := by
+    rw [eq_inv_smul_iff₀ hsin.ne']
+    ext i; fin_cases i <;> simp [dirVec, Real.sin_sub, Real.cos_add, Real.sin_add] <;> ring
+  rw [hdir]
+  have s1 : 0 ≤ Real.sin (α - t) :=
+    Real.sin_nonneg_of_nonneg_of_le_pi (x := α - t) (by linarith) (by linarith)
+  have s2 : 0 ≤ Real.sin t := Real.sin_nonneg_of_nonneg_of_le_pi ht0 (by linarith)
+  have hn := normalCone_add_smul h₁ h₂ s1 s2
+  intro y hy
+  rw [real_inner_smul_right]
+  exact mul_nonpos_of_nonneg_of_nonpos (inv_nonneg.2 hsin.le) (hn y hy)
+
+theorem isClosed_path_normalDirs {K : Set Pt} {γ : ℝ → Pt} {a b : ℝ}
+    (hγ : ContinuousOn γ (Set.Icc a b)) (u v : ℝ) :
+    IsClosed {s : Set.Icc a b | ∃ φ ∈ Set.Icc u v, dirVec φ ∈ normalCone K (γ s)} := by
+  have : CompactSpace (Set.Icc u v) := isCompact_iff_compactSpace.1 isCompact_Icc
+  have hc : Continuous fun s : Set.Icc a b => γ s := hγ.restrict
+  have hc0 : Continuous fun s : Set.Icc a b => γ s 0 := (EuclideanSpace.proj 0).continuous.comp hc
+  have hc1 : Continuous fun s : Set.Icc a b => γ s 1 := (EuclideanSpace.proj 1).continuous.comp hc
+  have hS : IsClosed {p : Set.Icc a b × Set.Icc u v |
+      dirVec (p.2 : ℝ) ∈ normalCone K (γ p.1)} := by
+    have : {p : Set.Icc a b × Set.Icc u v | dirVec (p.2 : ℝ) ∈ normalCone K (γ p.1)} =
+        ⋂ y ∈ K, {p : Set.Icc a b × Set.Icc u v | (y 0 - γ p.1 0) * Real.cos p.2 +
+          (y 1 - γ p.1 1) * Real.sin p.2 ≤ 0} := by
+      ext p; simp [normalCone, inner_coord, dirVec]
+    rw [this]
+    refine isClosed_biInter fun y _ => isClosed_le ?_ continuous_const
+    have h2 : Continuous fun p : Set.Icc a b × Set.Icc u v => (p.2 : ℝ) :=
+      continuous_subtype_val.comp continuous_snd
+    exact ((continuous_const.sub (hc0.comp continuous_fst)).mul
+      (Real.continuous_cos.comp h2)).add
+      ((continuous_const.sub (hc1.comp continuous_fst)).mul (Real.continuous_sin.comp h2))
+  have := isClosedMap_fst_of_compactSpace _ hS
+  convert this using 1
+  ext s
+  simp only [Set.mem_setOf_eq, Set.mem_image, Prod.exists, exists_and_right, exists_eq_right,
+    Subtype.exists, Set.mem_Icc]
+  constructor
+  · rintro ⟨φ, hφ, h⟩; exact ⟨φ, hφ, h⟩
+  · rintro ⟨φ, hφ, h⟩; exact ⟨φ, hφ, h⟩
+
+/-- Two directions never normal along the path separate the circle; the normal directions at
+the two ends cannot lie in different components. -/
+theorem turning_core {K : Set Pt} (hK : Convex ℝ K) (hint : (interior K).Nonempty)
+    {γ : ℝ → Pt} {a b : ℝ} (hγ : ContinuousOn γ (Set.Icc a b))
+    (hsub : γ '' Set.Icc a b ⊆ frontier K) {c α ω ω' : ℝ} {s₁ s₂ : ℝ}
+    (hs₁ : s₁ ∈ Set.Icc a b) (hs₂ : s₂ ∈ Set.Icc a b)
+    (h₁ : dirVec c ∈ normalCone K (γ s₁)) (h₂ : dirVec (c + α) ∈ normalCone K (γ s₂))
+    (hω : ω ∈ Set.Ioo c (c + α)) (hω' : ω' ∈ Set.Ioo (c + α) (c + 2 * π))
+    (hnω : ∀ s ∈ Set.Icc a b, dirVec ω ∉ normalCone K (γ s))
+    (hnω' : ∀ s ∈ Set.Icc a b, dirVec ω' ∉ normalCone K (γ s)) : False := by
+  have hpi := Real.pi_pos
+  have : PreconnectedSpace (Set.Icc a b) := Subtype.preconnectedSpace isPreconnected_Icc
+  set U := {s : Set.Icc a b | ∃ φ ∈ Set.Icc (ω' - 2 * π) ω, dirVec φ ∈ normalCone K (γ s)}
+  set V := {s : Set.Icc a b | ∃ φ ∈ Set.Icc ω ω', dirVec φ ∈ normalCone K (γ s)}
+  have hU : IsClosed U := isClosed_path_normalDirs hγ _ _
+  have hV : IsClosed V := isClosed_path_normalDirs hγ _ _
+  have hω'2 : ∀ s ∈ Set.Icc a b, dirVec (ω' - 2 * π) ∉ normalCone K (γ s) := by
+    intro s hs h
+    have := dirVec_add_int_mul (ω' - 2 * π) 1
+    push_cast at this
+    rw [show ω' - 2 * π + 1 * (2 * π) = ω' by ring] at this
+    exact hnω' s hs (this ▸ h)
+  have hcover : (Set.univ : Set (Set.Icc a b)) ⊆ U ∪ V := by
+    rintro ⟨s, hs⟩ -
+    obtain ⟨n, hn, hnN⟩ := exists_unit_normal hK hint (hsub ⟨s, hs, rfl⟩)
+    obtain ⟨φ₀, hφ₀⟩ := exists_dirVec hn
+    set k : ℤ := ⌊(φ₀ - (ω' - 2 * π)) / (2 * π)⌋
+    set φ := φ₀ - k * (2 * π)
+    have hk1 : (k : ℝ) ≤ (φ₀ - (ω' - 2 * π)) / (2 * π) := Int.floor_le _
+    have hk2 : (φ₀ - (ω' - 2 * π)) / (2 * π) < k + 1 := Int.lt_floor_add_one _
+    have hφ1 : ω' - 2 * π ≤ φ := by
+      have := (le_div_iff₀ (by positivity : (0 : ℝ) < 2 * π)).1 hk1; simp only [φ]; linarith
+    have hφ2 : φ < ω' := by
+      have := (div_lt_iff₀ (by positivity : (0 : ℝ) < 2 * π)).1 hk2; simp only [φ]; linarith
+    have hdφ : dirVec φ = n := by
+      rw [← hφ₀, show φ₀ = φ + k * (2 * π) by simp only [φ]; ring, dirVec_add_int_mul]
+    rcases le_or_gt φ ω with h | h
+    · exact Or.inl ⟨φ, ⟨hφ1, h⟩, hdφ ▸ hnN⟩
+    · exact Or.inr ⟨φ, ⟨h.le, hφ2.le⟩, hdφ ▸ hnN⟩
+  have hUn : (Set.univ ∩ U).Nonempty :=
+    ⟨⟨s₁, hs₁⟩, trivial, c, ⟨by linarith [hω'.2], hω.1.le⟩, h₁⟩
+  have hVn : (Set.univ ∩ V).Nonempty :=
+    ⟨⟨s₂, hs₂⟩, trivial, c + α, ⟨hω.2.le, hω'.1.le⟩, h₂⟩
+  obtain ⟨⟨s, hs⟩, -, ⟨φA, ⟨hA1, hA2⟩, hAN⟩, ⟨φB, ⟨hB1, hB2⟩, hBN⟩⟩ :=
+    isPreconnected_closed_iff.1 isPreconnected_univ U V hU hV hcover hUn hVn
+  have hA2' : φA < ω := lt_of_le_of_ne hA2 (fun h => hnω s hs (h ▸ hAN))
+  have hA1' : ω' - 2 * π < φA := lt_of_le_of_ne hA1 (fun h => hω'2 s hs (h ▸ hAN))
+  have hB1' : ω < φB := lt_of_le_of_ne hB1 (fun h => hnω s hs (h ▸ hBN))
+  have hB2' : φB < ω' := lt_of_le_of_ne hB2 (fun h => hnω' s hs (h ▸ hBN))
+  rcases lt_trichotomy (φB - φA) π with hlt | heq | hgt
+  · have := dirVec_mem_of_arc (c := φA) (α := φB - φA) (by linarith) hlt hAN
+      (by rw [show φA + (φB - φA) = φB by ring]; exact hBN) (t := ω - φA) (by linarith)
+      (by linarith)
+    rw [show φA + (ω - φA) = ω by ring] at this
+    exact hnω s hs this
+  · have hanti : dirVec φB = -dirVec φA := by
+      rw [show φB = φA + π by linarith]
+      ext i; fin_cases i <;> simp [dirVec, Real.cos_add_pi, Real.sin_add_pi]
+    have hne : dirVec φA ≠ 0 := by
+      intro h0; have := norm_dirVec φA; rw [h0, norm_zero] at this; norm_num at this
+    exact not_antipodal_normal hint hne hAN (hanti ▸ hBN)
+  · have hA' : dirVec (φB + (φA + 2 * π - φB)) ∈ normalCone K (γ s) := by
+      rw [show φB + (φA + 2 * π - φB) = φA + (1 : ℤ) * (2 * π) by push_cast; ring,
+        dirVec_add_int_mul]
+      exact hAN
+    have := dirVec_mem_of_arc (c := φB) (α := φA + 2 * π - φB) (by linarith) (by linarith) hBN
+      hA' (t := ω' - φB) (by linarith) (by linarith)
+    rw [show φB + (ω' - φB) = ω' by ring] at this
+    exact hnω' s hs this
+
+/-- Two unit vectors at angle `α` are `dirVec θ₁` and `dirVec (θ₁ ± α)`. -/
+theorem exists_dirVec_pair {n₁ n₂ : Pt} (hn₁ : ‖n₁‖ = 1) (hn₂ : ‖n₂‖ = 1) :
+    ∃ θ₁ σ : ℝ, (σ = 1 ∨ σ = -1) ∧ dirVec θ₁ = n₁ ∧ dirVec (θ₁ + σ * ang n₁ n₂) = n₂ := by
+  set α := ang n₁ n₂
+  have hα0 : 0 ≤ α := InnerProductGeometry.angle_nonneg _ _
+  have hαπ : α ≤ π := InnerProductGeometry.angle_le_pi _ _
+  have hcos : Real.cos α = inner ℝ n₁ n₂ := by
+    have := InnerProductGeometry.cos_angle_mul_norm_mul_norm n₁ n₂
+    rwa [hn₁, hn₂, mul_one, mul_one] at this
+  obtain ⟨θ₁, hθ₁⟩ := exists_dirVec hn₁
+  have hlag := lagrange n₂ n₁
+  rw [hn₁, hn₂, real_inner_comm, ← hcos] at hlag
+  have hdec := decomp hn₁ n₂
+  rw [real_inner_comm, ← hcos] at hdec
+  have hsin0 : 0 ≤ Real.sin α := Real.sin_nonneg_of_nonneg_of_le_pi hα0 hαπ
+  obtain ⟨σ, hσ, hdσ⟩ : ∃ σ : ℝ, (σ = 1 ∨ σ = -1) ∧ det2 n₁ n₂ = σ * Real.sin α := by
+    rcases mul_self_eq_mul_self_iff.1 (show det2 n₁ n₂ * det2 n₁ n₂ = Real.sin α * Real.sin α by
+      nlinarith [Real.sin_sq_add_cos_sq α]) with h | h
+    · exact ⟨1, Or.inl rfl, by linarith⟩
+    · exact ⟨-1, Or.inr rfl, by linarith⟩
+  refine ⟨θ₁, σ, hσ, hθ₁, ?_⟩
+  rw [dirVec_add, hθ₁]
+  have hc : Real.cos (σ * α) = Real.cos α := by rcases hσ with rfl | rfl <;> simp
+  have hs : Real.sin (σ * α) = σ * Real.sin α := by rcases hσ with rfl | rfl <;> simp
+  rw [hc, hs, ← hdσ]
+  exact hdec.symm
 
 /-- The turning of a connected boundary arc is at least the angle between (outward) normals at
 its ends.
@@ -962,7 +1158,68 @@ theorem turning_ge_angle {K : Set Pt} (hK : Convex ℝ K) (hKc : IsCompact K)
     (hγ : ContinuousOn γ (Set.Icc a b)) (hsub : γ '' Set.Icc a b ⊆ frontier K) {ν₁ ν₂ : Pt}
     (h₁ : ν₁ ∈ normalCone K (γ a)) (h₂ : ν₂ ∈ normalCone K (γ b)) (hn₁ : ν₁ ≠ 0)
     (hn₂ : ν₂ ≠ 0) : ang ν₁ ν₂ ≤ turning K (γ '' Set.Icc a b) := by
-  sorry
+  have hpi := Real.pi_pos
+  by_contra hlt
+  push Not at hlt
+  set α := ang ν₁ ν₂ with hα_def
+  have hT0 : 0 ≤ turning K (γ '' Set.Icc a b) := ENNReal.toReal_nonneg
+  have hα0 : 0 < α := lt_of_le_of_lt hT0 hlt
+  have hαπ : α ≤ π := InnerProductGeometry.angle_le_pi _ _
+  -- unit normals
+  have hp₁ : 0 < ‖ν₁‖ := norm_pos_iff.2 hn₁
+  have hp₂ : 0 < ‖ν₂‖ := norm_pos_iff.2 hn₂
+  have scale : ∀ {x ν : Pt}, ν ∈ normalCone K x → ‖ν‖⁻¹ • ν ∈ normalCone K x := by
+    intro x ν hν y hy
+    rw [real_inner_smul_right]
+    exact mul_nonpos_of_nonneg_of_nonpos (by positivity) (hν y hy)
+  have hu₁ : ‖‖ν₁‖⁻¹ • ν₁‖ = 1 := by
+    rw [norm_smul, norm_inv, norm_norm, inv_mul_cancel₀ hp₁.ne']
+  have hu₂ : ‖‖ν₂‖⁻¹ • ν₂‖ = 1 := by
+    rw [norm_smul, norm_inv, norm_norm, inv_mul_cancel₀ hp₂.ne']
+  have hang : ang (‖ν₁‖⁻¹ • ν₁) (‖ν₂‖⁻¹ • ν₂) = α := by
+    rw [ang, InnerProductGeometry.angle_smul_left_of_pos _ _ (inv_pos.2 hp₁),
+      InnerProductGeometry.angle_smul_right_of_pos _ _ (inv_pos.2 hp₂)]
+    rfl
+  obtain ⟨θ₁, σ, hσ, hd₁, hd₂⟩ := exists_dirVec_pair hu₁ hu₂
+  rw [hang] at hd₂
+  have hN₁ := scale h₁
+  have hN₂ := scale h₂
+  have ha : a ∈ Set.Icc a b := ⟨le_rfl, hab⟩
+  have hb : b ∈ Set.Icc a b := ⟨hab, le_rfl⟩
+  -- choose `c` with `dirVec c`, `dirVec (c + α)` normal at the two ends
+  obtain ⟨c, s₁, s₂, hs₁, hs₂, hc₁, hc₂⟩ : ∃ c s₁ s₂, s₁ ∈ Set.Icc a b ∧ s₂ ∈ Set.Icc a b ∧
+      dirVec c ∈ normalCone K (γ s₁) ∧ dirVec (c + α) ∈ normalCone K (γ s₂) := by
+    rcases hσ with rfl | rfl
+    · refine ⟨θ₁, a, b, ha, hb, hd₁ ▸ hN₁, ?_⟩
+      rw [one_mul] at hd₂; rw [hd₂]; exact hN₂
+    · refine ⟨θ₁ - α, b, a, hb, ha, ?_, ?_⟩
+      · rw [neg_one_mul, ← sub_eq_add_neg] at hd₂; rw [hd₂]; exact hN₂
+      · rw [sub_add_cancel, hd₁]; exact hN₁
+  -- a direction in each arc that is normal nowhere on the path
+  have gap : ∀ u L : ℝ, 0 ≤ L → L ≤ 2 * π → turning K (γ '' Set.Icc a b) < L →
+      ∃ ω ∈ Set.Icc u (u + L), ∀ s ∈ Set.Icc a b, dirVec ω ∉ normalCone K (γ s) := by
+    intro u L hL0 hL1 hLt
+    by_contra hno
+    push Not at hno
+    have := le_turning_of_Icc (γ := γ '' Set.Icc a b) (K := K) hL0 hL1 (c := u)
+      fun θ hθ => by
+        obtain ⟨s, hs, hN⟩ := hno θ hθ
+        exact ⟨γ s, ⟨s, hs, rfl⟩, hN⟩
+    linarith
+  obtain ⟨ω, hω, hnω⟩ := gap c α hα0.le (by linarith) hlt
+  obtain ⟨ω', hω', hnω'⟩ := gap (c + α) (2 * π - α) (by linarith) (by linarith)
+    (by linarith)
+  have hωc : ω ≠ c := fun h => hnω s₁ hs₁ (h ▸ hc₁)
+  have hωcα : ω ≠ c + α := fun h => hnω s₂ hs₂ (h ▸ hc₂)
+  have hω'cα : ω' ≠ c + α := fun h => hnω' s₂ hs₂ (h ▸ hc₂)
+  have hω'c2 : ω' ≠ c + 2 * π := by
+    intro h
+    apply hnω' s₁ hs₁
+    rw [h, show c + 2 * π = c + (1 : ℤ) * (2 * π) by push_cast; ring, dirVec_add_int_mul]
+    exact hc₁
+  exact turning_core hK hint hγ hsub hs₁ hs₂ hc₁ hc₂
+    ⟨lt_of_le_of_ne hω.1 (Ne.symm hωc), lt_of_le_of_ne hω.2 hωcα⟩
+    ⟨lt_of_le_of_ne hω'.1 (Ne.symm hω'cα), lt_of_le_of_ne (by linarith [hω'.2]) hω'c2⟩ hnω hnω'
 
 /-- `1`-separated reals in `[a, b]` number at most `b − a + 1`. -/
 theorem card_le_of_sep_real {a : ℝ} (T : Finset ℝ) : ∀ b : ℝ, a ≤ b + 1 →
