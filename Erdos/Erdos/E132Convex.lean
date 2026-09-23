@@ -554,13 +554,14 @@ def quads11 : List (Fin 11 × Fin 11 × Fin 11 × Fin 11) :=
 
 /-! ## The certificates (`bv_decide`) -/
 
-/-- `n = 7`: no ordinal counterexample with `≤ 4` colours (`bv_decide`, ~1 s of SAT). -/
+/-- `n = 7`: no ordinal counterexample with `≤ 4` colours.  The LRAT proof (found by `bv_decide?`,
+~1 s of SAT) is pinned in `lrat/bvNoCE7.lrat` (1.6 MB), so only the verified checker runs. -/
 theorem bvNoCE7 : BVNoCE 7 4 pairs7 quads7 := by
   intro x h1 h2 h3
   simp only [pairs7, quads7, List.forall_mem_cons, List.mem_nil_iff, false_imp_iff, implies_true,
     QBV, rareSumBV, rareBV, cntBV, List.foldr_cons, List.foldr_nil, List.range_succ,
     List.range_zero, List.nil_append, List.cons_append, and_true] at h1 h2 h3
-  bv_decide
+  bv_check "lrat/bvNoCE7.lrat"
 
 /-- `n = 11`: no ordinal counterexample with `≤ 6` colours (`bv_decide`, ~20 s of SAT). -/
 theorem bvNoCE11 : BVNoCE 11 6 pairs11 quads11 := by
