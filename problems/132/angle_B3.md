@@ -9,7 +9,7 @@
 |---|---|---|
 | 1 | **Thm 7.** Every strictly convex 7-set has k ≥ 3. | **proved, twice**: (a) corollary of published results (Altman + Erdős–Fishburn 1995 §3, which quotes Fishburn's DIMACS report 92-17); (b) independent computer proof from counting + the quadrilateral inequality only. Proof (b) has an exhaustive pure-Python search and a checked DRUP refutation. |
 | 2 | **Thm 11.** Every strictly convex 11-set has k ≥ 3. | **proved (computer-assisted)**: counting + quadrilateral inequality + a SAT refutation. The refutation is found by 4 solvers and checked by our own RUP checker (§4). **Not implied by the literature**: r₂⁽ⁿ⁾ is unknown for n ≥ 9. |
-| 3 | **Thm 13.** Every strictly convex 13-set has k ≥ 3. | **proved modulo trusting the solver on one instance**. Everything is certified except (13,7,5), which CaDiCaL and Glucose both report UNSAT; its DRUP check was still running at commit time (§6). |
+| 3 | **Thm 13.** Every strictly convex 13-set has k ≥ 3. | **proved modulo trusting the solver on one instance**. Everything is certified except (13,7,5), which CaDiCaL and Glucose both report UNSAT; its DRUP check was stopped unfinished (Python checker too slow; needs drat-trim). |
 | 4 | n = 15 | D ≤ 7 cases refuted (CaDiCaL). The hard case (15,8,6) was unresolved after more than 20 min of CaDiCaL at commit time. |
 | 5 | **Ordinal phenomenon.** For 7 ≤ n ≤ 13 the whole statement follows from the *ordinal* quadrilateral inequality alone. No circle/triangle rigidity and no Altman/Fishburn is needed. It also reproves Altman's D ≥ ⌊n/2⌋ ordinally for n ≤ 15. It fails at n = 5, 6: ordinal counterexample colourings exist there, and geometry must be used. | computational observation; Conjecture Q-ORD (§5) |
 | 6 | Reconfirmations without the Fishburn / Erdős–Fishburn classifications: n = 9 (B2 Thm B), and even n = 8, 10, 12 (B2 Thm A). | computer (SAT; n = 9 also DRUP-checked) |
@@ -149,7 +149,7 @@ All scripts are in `scripts/`. `b3_run_all.sh` reproduces everything. Run with `
 | (13,7,5) | order Q+T / order Q-only | UNSAT (102 s / 81 s) | cadical, glucose (446,686-line proof) | check running at commit time (Python checker, est. hours) |
 | (15,2..6,0) | order Q+T and Q-only; (15,6,0) also direct | UNSAT (≤ 142 s) | cadical | — |
 | (15,7,5) | order Q+T | UNSAT (83 s) | cadical | — |
-| (15,8,6) | order Q+T (7.3·10⁵ clauses); the direct encoding (5·10⁶ clauses) was abandoned | unresolved (> 20 min CaDiCaL, still running at commit time) | | |
+| (15,8,6) | order Q+T (7.3·10⁵ clauses); the direct encoding (5·10⁶ clauses) was abandoned | unresolved (> 20 min CaDiCaL; run stopped) | | |
 | even: (6,2,0), (8,2..3,0), (8,4,2), (10,2..4,0), (10,5,3), (12,2..5,0), (12,6,4) | direct Q+T | UNSAT (≤ 68 s) | cadical | — |
 | (6,3,1) | | SAT, (9,3,3) — ordinal counterexample; geometry (Fishburn / Erdős–Fishburn) needed at n = 6 | | |
 | (5,2,0), (5,3,1) | | SAT (R₅ pattern, etc.) | | |
