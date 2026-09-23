@@ -1,7 +1,7 @@
 # Erdős Problem #436: consecutive k-th power residues (triples, k = 5)
 
 **Status (ours):** computational attack on the smallest open case Λ(5,3). No resolution.
-New: **Λ(5,3) ≥ 1,000,007,372** (warm-start local search, witness in `witnesses/`, independently verified); brute-force
+New: **Λ(5,3) ≥ 2,000,028,671** (warm-start local search + small-prime smooth fix; witness in `logs/warmstart/`, independently verified); brute-force
 finiteness certificate estimated at ~1e18 nodes (infeasible; see THEORY.md).
 **Site status:** OPEN (erdosproblems.com/436, rechecked 2026-09-23).
 
@@ -153,8 +153,13 @@ Purpose: locate the SAT→hard transition. A quick SAT result raises the lower b
   300,001,271 · 400,006,178 · 500,003,685 · 700,026,741 · **1,000,007,372**. So **Λ(5,3) ≥ 1,000,007,372** (Chebotarev, k odd).
   Every bound was decoded by `lamenc run` and `checkf.py` (agent). The parent session also checked each bound from 15M on (the 1e9 bound included)
   with its own code: a prime-power accumulation checker up to 5e8 and `scripts/verify_pp.py` (segmented, 500M/700M/1e9). The 1e9 witness is
-  `witnesses/k5l3_first1000007372.{map,model}.xz`, SHA-256 of the uncompressed files: map 3482af99…, model d5ceb688…
+  superseded by the 2e9 witness below
   Interpretation: the full-instance "threshold" was a solver artifact. Nothing in the computations so far points toward finiteness.
 - 2026-09-23 — **Theory route** (THEORY.md): no finiteness certificate. "f(2)=0 forced" is false (models with f(2)=1 up to ~1e6). Tree
   estimates stay ~1e18 under every branching order: the primes ≤ 97 alone leave ~2e14 consistent assignments. The F_5 Nullstellensatz route
   looks like a dead end at this scale. Best idea: a conditional reduction to three-point logarithmic Elliott correlations.
+- 2026-09-23 16:50 — **Λ(5,3) ≥ 2,000,028,671.** Checks: agent's `segcheck.c` + `checkf.py`, and the parent's
+  `scripts/verify_pp.py` (1.5e9: 1,500,097,130 ✓; 2e9: 2,000,028,671 ✓, 377 s). Witness `logs/warmstart/k5l3_first2000028671.{map,model}.gz`,
+  SHA-256 of the uncompressed files: map 85e3c19a…, model 1bfef1c5… Method: WARMSTART.md. Every stall above 1.5e8 was a triple of 3000-smooth
+  numbers. These were resolved by re-solving f on primes ≤ 3000 against all smooth triples up to X (`smoothfix.py`). **Open computational question for
+  finiteness:** is F_y(∞) satisfiable for every y? A single UNSAT y proves Λ(5,3) < ∞. Local search cannot give an upper bound.

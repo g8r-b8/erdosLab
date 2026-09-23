@@ -38,3 +38,44 @@
 2026-09-23 13:20:23	R=5795000 opts=--lucky=false --preprocess=false --sat	SOLVE	kissat -v --lucky=false --preprocess=false --sat pid=60856
 2026-09-23 13:20:23	R=5772500 opts=--lucky=false --preprocess=false --sat	SOLVE	kissat -v --lucky=false --preprocess=false --sat pid=60855
 2026-09-23 13:20:23	R=5795000 seed=7	EXIT	rc=143 after 2177s
+2026-09-23 13:25:19	R=5772500	KILLED	freed RAM (swap 5.1/6G); default-config run stuck in lucky phase, superseded by cd run on same CNF
+2026-09-23 13:54:57	R=6000000 warmls	SAT	warm-start local search from R=5.75M model, 107s, first_run=6000730 (lamenc run + checkf.py agree) => Lambda(5,3) >= 6000730
+2026-09-23 13:55:31	R=6500000 warmls	SAT	4s from t6.map; lamenc_first_run=6500096 checkf_first_run=6500096; END t=3s steps=894 nbad=0 best=0 first_bad=0
+2026-09-23 13:55:44	R=7000000 warmls	SAT	3s from ws_R6500000.map; lamenc_first_run=7000020 checkf_first_run=7000020; END t=2s steps=893 nbad=0 best=0 first_bad=0
+2026-09-23 13:55:55	R=5772500,5795000,6634000	KILLED	all 4 full-instance kissat probes dominated by warm-start SAT at R=7,000,000 (cannot be UNSAT)
+2026-09-23 13:55:55	R=5795000 opts=--lucky=false --preprocess=false --sat	EXIT	rc=143 after 2132s
+2026-09-23 13:55:55	R=5772500 opts=--lucky=false --preprocess=false --sat	EXIT	rc=143 after 2132s
+2026-09-23 13:55:57	R=7600000 warmls	SAT	5s from ws_R7000000.map; lamenc_first_run=7600716 checkf_first_run=7600716; END t=3s steps=1033 nbad=0 best=0 first_bad=0
+2026-09-23 13:56:03	R=8500000 warmls	SAT	2s from ws_R7600000.map; lamenc_first_run=8500058 checkf_first_run=8500058; END t=2s steps=1569 nbad=0 best=0 first_bad=0
+2026-09-23 13:57:46	R=10000000 warmls	SAT	100s from ws_R8500000.map; lamenc_first_run=10000150 checkf_first_run=10000150; END t=99s steps=9426 nbad=0 best=0 first_bad=0
+2026-09-23 13:59:21	R=12000000 warmls	SAT	89s from ws_R10000000.map; lamenc_first_run=12000195 checkf_first_run=12000195; END t=88s steps=7414 nbad=0 best=0 first_bad=0
+2026-09-23 14:00:09	R=15000000 warmls	SAT	42s from ws_R12000000.map; lamenc_first_run=15000075 checkf_first_run=15000075; END t=42s steps=5308 nbad=0 best=0 first_bad=0
+2026-09-23 14:00:44	R=20000000 warmls	SAT	27s from ws_R15000000.map; lamenc_first_run=20000330 checkf_first_run=20000330; END t=27s steps=5703 nbad=0 best=0 first_bad=0
+2026-09-23 14:08:52	R=30000000 warmls	SAT	461s from ws_R20000000.map; lamenc_first_run=30000887 checkf_first_run=30000887; END t=460s steps=18501 nbad=0 best=0 first_bad=0
+2026-09-23 14:09:48	R=45000000 warmls	SAT	41s from ws_R30000000.map; lamenc_first_run=45000953 checkf_first_run=45000953; END t=40s steps=7894 nbad=0 best=0 first_bad=0
+2026-09-23 14:32:25	R=70000000 warmls	KILLED	seed 1 PMIN 30 stuck at best=1 after 1300s; retrying seeds 2 (PMIN 30) and 3 (PMIN 100)
+2026-09-23 14:40:55	R=70000000 warmls	SAT	481s from ws_R45000000.map; lamenc_first_run=70005949 checkf_first_run=70005949; END t=480s steps=27397 nbad=0 best=0 first_bad=0
+2026-09-23 14:41:15	R=70000000 warmls seed2	KILLED	PMIN 30 run superseded by seed 3 PMIN 100 (SAT)
+2026-09-23 14:44:55	R=100000000 warmls	SAT	154s from ws_R70000000.map; lamenc_first_run=100009485 checkf_first_run=100009485; END t=152s steps=16100 nbad=0 best=0 first_bad=0
+2026-09-23 14:45:12	R=100000000 warmls seed5	KILLED	redundant: seed 3 chain already SAT at 1e8
+2026-09-23 14:45:21	R=100000000 warmls	UNSOLVED	256s from ws_R70000000.map; lamenc_first_run= checkf_first_run=; 
+2026-09-23 14:45:23	R=150000000 warmls	UNSOLVED	4s from ws_R100000000.map; lamenc_first_run= checkf_first_run=; 
+2026-09-23 14:45:23	R=150000000 warmls	UNSOLVED	5s from ws_R100000000.map; lamenc_first_run= checkf_first_run=; 
+2026-09-23 14:45:31	R=100000000 warmls	NOTE	correction: the 100M SAT (first_run 100009485) was seed 5 PMIN 300 (dir c), warm from seed-3 70M model; it was the seed-3 PMIN-100 100M run that got killed
+2026-09-23 14:45:40	R=150000000 warmls	NOTE	the two 'UNSOLVED 4s' lines at 14:45:2x are launch errors (missing warm-start file), not search results; relaunched
+2026-09-23 14:58:36	R=150000000 warmls	SAT	750s from ws_R100000000.map; lamenc_first_run=150005898 checkf_first_run=150005898; END t=746s steps=39310 nbad=0 best=0 first_bad=0
+2026-09-23 14:59:53	R=150000000 warmls seed7	KILLED	superseded by seed 5 PMIN 300 (SAT at 150M)
+2026-09-23 15:02:11	R=200000000 warmls seeds5,9	KILLED	old binaries used ~2 GB at 200M (dense arrays); restarted with hash-map warmls (seeds 11, 13)
+2026-09-23 15:24:42	R=200000000 warmls seed13 PMIN1000	KILLED	slow: windows without a prime >= PMIN fell back to scoring all primes incl. 2,3
+2026-09-23 15:37:24	R=200000000 warmls seed11	KILLED	stuck 40 min at 2 bad windows = the two 1000-smooth zero triples of f in (1.5e8,2e8] (170225196, 193750000); switching to smooth-level fix (smoothfix.py) + PMIN>1000
+2026-09-23 16:04:16	R=200000000 warmls (smoothfix y=1000, PMIN 1009)	KILLED	stuck at 1 window whose only candidate >= 1009 is 1129 (e.g. r=91448); moving to smoothfix y=3000 X=3e8 (18 small primes changed) + PMIN 3001
+2026-09-23 16:05:13	R=200000000 warmls	SAT	7s from sf3k.map; lamenc_first_run=200011716 checkf_first_run=200011716; END t=4s steps=6620 nbad=0 best=0 first_bad=0 kicks=3
+2026-09-23 16:05:55	R=300000000 warmls	SAT	17s from sf3k.map; lamenc_first_run=300001271 checkf_first_run=300001271; END t=12s steps=12238 nbad=0 best=0 first_bad=0 kicks=5
+2026-09-23 16:06:43	R=300000000 warmls	SAT	10s from ws_R200000000.map; lamenc_first_run=300001271 checkf_first_run=300001271; END t=6s steps=6682 nbad=0 best=0 first_bad=0 kicks=2
+2026-09-23 16:22:19	R=400000000 warmls	SAT	11s from sf3k1e9.map; lamenc_first_run=400006178 checkf_first_run=400006178; END t=8s steps=6765 nbad=0 best=0 first_bad=0 kicks=0
+2026-09-23 16:23:49	R=500000000 warmls	SAT	12s from ws_R400000000.map; lamenc_first_run=500003685 checkf_first_run=500003685; END t=7s steps=3532 nbad=0 best=0 first_bad=0 kicks=1
+2026-09-23 16:29:44	R=700000000 warmls	SAT	47s from ws_R500000000.map; segcheck_first_run=700026741 checkf_first_run=700026741; END t=17s steps=5426 nbad=0 best=0 first_bad=0 kicks=0
+2026-09-23 16:33:58	R=1000000000 warmls	SAT	68s from ws_R700000000.map; segcheck_first_run=1000007372 checkf_first_run=1000007372; END t=31s steps=6165 nbad=0 best=0 first_bad=0 kicks=2
+2026-09-23 16:43:03	R=1500000000 warmls	SAT	70s from sf3k2e9.map; segcheck_first_run=1500097130 checkf_first_run=1500097130; END t=42s steps=8691 nbad=0 best=0 first_bad=0 kicks=0
+2026-09-23 16:49:50	R=2000000000 warmls	SAT	74s from ws_R1500000000.map; segcheck_first_run=2000028671 checkf_first_run=2000028671; END t=41s steps=5043 nbad=0 best=0 first_bad=0 kicks=3
+2026-09-23 16:53:36	R=2000000000 warmls	SUMMARY	best verified lower bound Lambda(5,3) >= 2000028671 (segcheck + checkf); certificate logs/warmstart/k5l3_first2000028671.*.gz; method in WARMSTART.md

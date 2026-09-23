@@ -5,7 +5,7 @@
 MAP: "p base" lines; MODEL: solver "v" lines; f(p)=v iff literal base+v is true (exactly one, asserted); unmapped primes get f=1.
 Checks the mapped numbers are prime, then for n in blocks divides out primes p <= sqrt(LIM+3) (adding e*f(p)); the cofactor left is 1
 or one prime P (add f(P)). Prints the first r <= LIM with f(r)=f(r+1)=f(r+2)=0 (mod K). Memory ~1.3 GB at BLOCK=1e7.
-Witness check: python3 verify_pp.py 5 3 1000007600 <(xz -dc ../witnesses/k5l3_first1000007372.map.xz) <(xz -dc ../witnesses/k5l3_first1000007372.model.xz) 10000000
+Witness check: python3 verify_pp.py 5 3 2000028900 <(gzip -dc ../logs/warmstart/k5l3_first2000028671.map.gz) <(gzip -dc ../logs/warmstart/k5l3_first2000028671.model.gz) 10000000
 """
 # Segmented independent check: for n in blocks, divide out primes p <= sqrt(M) (adding e*f(p)); leftover cofactor is 1 or one prime P.
 # f(p) from MAP/MODEL (exactly one true value literal per mapped prime), unmapped primes -> 1. Prints first r with f(r)=f(r+1)=f(r+2)=0.
