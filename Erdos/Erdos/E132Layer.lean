@@ -207,7 +207,10 @@ end TwoLargest
 def IsExt (S : Finset Pt) (p : Pt) : Prop :=
   p ∈ S ∧ ∃ a b : ℝ, ∀ x ∈ S, x ≠ p → a * (x 0 - p 0) + b * (x 1 - p 1) < 0
 
-/-- For finite sets, `IsExt S p` (exposed point) is equivalent to `p ∉ conv(S \ {p})`, so `L1 X` is the vertex set of `conv X`.  (→) the open half-plane is convex and misses `p`; (←) Hahn–Banach (`geometric_hahn_banach_point_closed`) against the compact set `conv(S \ {p})`.  Documentation of the definition; not used below. -/
+/-- For finite sets, `IsExt S p` (exposed point) is equivalent to `p ∉ conv(S \ {p})`, so `L1 X` is
+the vertex set of `conv X`.  (→) the open half-plane is convex and misses `p`; (←) Hahn–Banach
+(`geometric_hahn_banach_point_closed`) against the compact set `conv(S \ {p})`.  Documentation
+of the definition; not used below. -/
 theorem isExt_iff_notMem_convexHull {S : Finset Pt} {p : Pt} (hp : p ∈ S) :
     IsExt S p ↔ p ∉ convexHull ℝ ((S : Set Pt) \ {p}) := by
   constructor
@@ -523,7 +526,8 @@ theorem circle3_real {x₁ y₁ x₂ y₂ x₃ y₃ tx ty D : ℝ} (ht : 0 < tx 
   · exact Or.inr (Or.inl (eqpt k13 e13))
   · exact Or.inr (Or.inr (eqpt (k12.symm.trans k13) (by linarith)))
 
-/-- **Lemma M** (opposite-side lemma) with `p = 0`, `b = (1, 0)`, `|pa| = |br| = 1`: if `a` is strictly below the axis and `r ≠ p` is not, then `|ar| > 1`. -/
+/-- **Lemma M** (opposite-side lemma) with `p = 0`, `b = (1, 0)`, `|pa| = |br| = 1`: if `a` is
+strictly below the axis and `r ≠ p` is not, then `|ar| > 1`. -/
 theorem lemmaM_real {xa ya xr yr : ℝ} (ha : xa ^ 2 + ya ^ 2 = 1) (hya : ya < 0)
     (hr : (xr - 1) ^ 2 + yr ^ 2 = 1) (hyr : 0 ≤ yr) (hr0 : 0 < xr ^ 2 + yr ^ 2) :
     1 < (xr - xa) ^ 2 + (yr - ya) ^ 2 := by
@@ -531,7 +535,9 @@ theorem lemmaM_real {xa ya xr yr : ℝ} (ha : xa ^ 2 + ya ^ 2 = 1) (hya : ya < 0
   have hxa : xa < 1 := by nlinarith
   nlinarith [mul_pos hxr (sub_pos.2 hxa), mul_nonneg hyr (neg_nonneg.2 hya.le)]
 
-/-- Chord monotonicity: if `W` and then `B` follow `A` counter-clockwise within a half-turn, then `A·B < A·W`, i.e. `|AB| > |AW|`.  Uses `(A·W − A·B)(1 + W·B) = (W×B)(A×W + A×B)` (no condition on `|A|` needed). -/
+/-- Chord monotonicity: if `W` and then `B` follow `A` counter-clockwise within a half-turn, then
+`A·B < A·W`, i.e. `|AB| > |AW|`.  Uses `(A·W − A·B)(1 + W·B) = (W×B)(A×W + A×B)` (no condition
+on `|A|` needed). -/
 theorem chord_real {a0 a1 w0 w1 b0 b1 : ℝ} (_ha : a0 ^ 2 + a1 ^ 2 = 1) (hw : w0 ^ 2 + w1 ^ 2 = 1)
     (hb : b0 ^ 2 + b1 ^ 2 = 1) (haw : 0 < a0 * w1 - a1 * w0) (hab : 0 < a0 * b1 - a1 * b0)
     (hwb : 0 < w0 * b1 - w1 * b0) : a0 * b0 + a1 * b1 < a0 * w0 + a1 * w1 := by
@@ -561,7 +567,9 @@ theorem quarter_le_mul {x y : ℝ} (hx : 1 / 2 ≤ x) (hy : 1 / 2 ≤ y) : 1 / 4
   have e : (x - 1 / 2) * (y - 1 / 2) = x * y - x / 2 - y / 2 + 1 / 4 := by ring
   linarith
 
-/-- VERIFY_A1b **Case 3** core computation (`b = (1,0)` the middle neighbour, `t` in the closed half-plane `x ≤ 0` with `y_t ≥ 0`): `|tb|² = |tc|² = D`, then `t ∥ −(b + c)` and `a·b + a·c ≥ 0` give `|ta|² = D`, and three points on two distinct circles is impossible. -/
+/-- VERIFY_A1b **Case 3** core computation (`b = (1,0)` the middle neighbour, `t` in the closed
+half-plane `x ≤ 0` with `y_t ≥ 0`): `|tb|² = |tc|² = D`, then `t ∥ −(b + c)` and `a·b + a·c ≥ 0`
+give `|ta|² = D`, and three points on two distinct circles is impossible. -/
 theorem case3_real {xa ya xc yc xt yt D : ℝ} (_hD : 1 < D)
     (ha : xa ^ 2 + ya ^ 2 = 1) (hc : xc ^ 2 + yc ^ 2 = 1)
     (hab : (xa - 1) ^ 2 + ya ^ 2 ≤ 1) (hcb : (xc - 1) ^ 2 + yc ^ 2 ≤ 1)
@@ -609,7 +617,8 @@ theorem case3_real {xa ya xc yc xt yt D : ℝ} (_hD : 1 < D)
   · linarith [h.2]
   · linarith [h.2]
 
-/-- Case 3 with `a, c` on opposite sides of the axis and no sign condition on `y_t` (reflections of `case3_real`). -/
+/-- Case 3 with `a, c` on opposite sides of the axis and no sign condition on `y_t` (reflections of
+`case3_real`). -/
 theorem case3_real' {xa ya xc yc xt yt D : ℝ} (hD : 1 < D)
     (ha : xa ^ 2 + ya ^ 2 = 1) (hc : xc ^ 2 + yc ^ 2 = 1)
     (hab : (xa - 1) ^ 2 + ya ^ 2 ≤ 1) (hcb : (xc - 1) ^ 2 + yc ^ 2 ≤ 1)
@@ -639,7 +648,8 @@ theorem case3_real' {xa ya xc yc xt yt D : ℝ} (hD : 1 < D)
         (by rw [rf0]; exact hab) (by linarith) (by linarith) hxt (by rw [rf0]; exact ht0)
         (by linarith) (by rw [rf]; exact gc) (by rw [rf0]; exact gb) (by rw [rf]; exact ga)
 
-/-- If `a, c` lie on the same side of the axis within `60°` of `(1,0)` and `|y_a| < |y_c|`, then `a` separates `(1,0)` from `c`. -/
+/-- If `a, c` lie on the same side of the axis within `60°` of `(1,0)` and `|y_a| < |y_c|`, then `a`
+separates `(1,0)` from `c`. -/
 theorem middle_real {xa ya xc yc : ℝ} (ha : xa ^ 2 + ya ^ 2 = 1) (hc : xc ^ 2 + yc ^ 2 = 1)
     (hxa : 1 / 2 ≤ xa) (hxc : 1 / 2 ≤ xc) (hsame : 0 < ya * yc) (h : ya ^ 2 < yc ^ 2) :
     (-ya) * (xa * yc - ya * xc) < 0 := by
@@ -663,7 +673,8 @@ theorem middle_real {xa ya xc yc : ℝ} (ha : xa ^ 2 + ya ^ 2 = 1) (hc : xc ^ 2 
     ring
   linarith
 
-/-- If both non-middle neighbours lie on the same side, they are within distance `1` of each other and one of them separates the other two. -/
+/-- If both non-middle neighbours lie on the same side, they are within distance `1` of each other
+and one of them separates the other two. -/
 theorem case3_select_real {xa ya xc yc : ℝ}
     (ha : xa ^ 2 + ya ^ 2 = 1) (hc : xc ^ 2 + yc ^ 2 = 1)
     (hab : (xa - 1) ^ 2 + ya ^ 2 ≤ 1) (hcb : (xc - 1) ^ 2 + yc ^ 2 ≤ 1)
@@ -718,7 +729,9 @@ theorem case3_select_real {xa ya xc yc : ℝ}
     exact hne ⟨hx, hy⟩
   · exact Or.inr (middle_real hc ha hxc hxa (by linarith [mul_comm ya yc]) h)
 
-/-- Case 2 key computation: if the apex is `(1, 0)`, `v₂ = (x₂, y₂)` with `4y₂² ≤ 1`, and `r` (a second `Δ₂`-neighbour of the apex, inside the unit disc) has `|r v₂|² = D`, then `ρ = |r|² = 1`, `4x₂² = 3`, and `|r v₃|² = 2` for the mirror image `v₃ = (x₂, −y₂)`. -/
+/-- Case 2 key computation: if the apex is `(1, 0)`, `v₂ = (x₂, y₂)` with `4y₂² ≤ 1`, and `r` (a
+second `Δ₂`-neighbour of the apex, inside the unit disc) has `|r v₂|² = D`, then `ρ = |r|² = 1`,
+`4x₂² = 3`, and `|r v₃|² = 2` for the mirror image `v₃ = (x₂, −y₂)`. -/
 theorem case2_aux_real {x₂ y₂ xr yr D : ℝ} (hD : 1 < D) (h₂ : x₂ ^ 2 + y₂ ^ 2 = 1)
     (h12 : (1 - x₂) ^ 2 + y₂ ^ 2 = D) (hy : 4 * y₂ ^ 2 ≤ 1)
     (hr1 : (xr - 1) ^ 2 + yr ^ 2 = 1) (hrn : xr ^ 2 + yr ^ 2 ≤ 1)
@@ -751,7 +764,10 @@ theorem case2_aux_real {x₂ y₂ xr yr D : ℝ} (hD : 1 < D) (h₂ : x₂ ^ 2 +
   refine ⟨?_, hx0⟩
   linear_combination hr1 + h₂ + hL + (4 - 4 * x₂) * hxr'
 
-/-- VERIFY_A1b **Case 2** core computation (apex `v₁ = (1, 0)`): the apex has no second `Δ₂`-neighbour `r` inside the unit disc.  By symmetry `v₃ = (x₂, −y₂)`; if `|r v₂|² = D` (or `|r v₃|² = D`) then `case2_aux_real` puts the other distance at `2 ∈ (1, D)`; if both are `≤ 1` then `ρ(1 − x₂) ≤ 0`. -/
+/-- VERIFY_A1b **Case 2** core computation (apex `v₁ = (1, 0)`): the apex has no second
+`Δ₂`-neighbour `r` inside the unit disc.  By symmetry `v₃ = (x₂, −y₂)`; if `|r v₂|² = D` (or `|r
+v₃|² = D`) then `case2_aux_real` puts the other distance at `2 ∈ (1, D)`; if both are `≤ 1` then
+`ρ(1 − x₂) ≤ 0`. -/
 theorem case2_real {x₂ y₂ x₃ y₃ xr yr D : ℝ} (hD : 1 < D)
     (h₂ : x₂ ^ 2 + y₂ ^ 2 = 1) (h₃ : x₃ ^ 2 + y₃ ^ 2 = 1)
     (h12 : (1 - x₂) ^ 2 + y₂ ^ 2 = D) (h13 : (1 - x₃) ^ 2 + y₃ ^ 2 = D)
@@ -771,9 +787,11 @@ theorem case2_real {x₂ y₂ x₃ y₃ xr yr D : ℝ} (hD : 1 < D)
   rcases g2 with g2 | g2
   · rcases g3 with g3 | g3
     · have hDx : D = 2 - 2 * x₂ := by linear_combination -h12 + h₂
-      have e2 : (xr - x₂) ^ 2 + (yr - y₂) ^ 2 = xr ^ 2 + yr ^ 2 - 2 * xr * x₂ - 2 * yr * y₂ + 1 := by
+      have e2 : (xr - x₂) ^ 2 + (yr - y₂) ^ 2 =
+          xr ^ 2 + yr ^ 2 - 2 * xr * x₂ - 2 * yr * y₂ + 1 := by
         linear_combination h₂
-      have e3 : (xr - x₂) ^ 2 + (yr - -y₂) ^ 2 = xr ^ 2 + yr ^ 2 - 2 * xr * x₂ + 2 * yr * y₂ + 1 := by
+      have e3 : (xr - x₂) ^ 2 + (yr - -y₂) ^ 2 =
+          xr ^ 2 + yr ^ 2 - 2 * xr * x₂ + 2 * yr * y₂ + 1 := by
         linear_combination h₂
       have hρ : xr ^ 2 + yr ^ 2 = 2 * xr := by linear_combination hr1
       have hxr : 0 < xr := by linarith
@@ -793,7 +811,8 @@ theorem case2_real {x₂ y₂ x₃ y₃ xr yr D : ℝ} (hD : 1 < D)
     · have hDx : D = 2 - 2 * x₂ := by linear_combination -h12 + h₂
       exact hx0 (by linarith)
 
-/-- The two candidates of VERIFY_A1b Case 1: if `A, C` are unit vectors at `120°` and `|rA|² = 1`, `|rC|² = 3`, then `r = (ρ − 2/3)A + (ρ − 4/3)C` with `ρ = |r|²` and `ρ² − 3ρ + 4/3 = 0`. -/
+/-- The two candidates of VERIFY_A1b Case 1: if `A, C` are unit vectors at `120°` and `|rA|² = 1`,
+`|rC|² = 3`, then `r = (ρ − 2/3)A + (ρ − 4/3)C` with `ρ = |r|²` and `ρ² − 3ρ + 4/3 = 0`. -/
 theorem cand_real {a0 a1 c0 c1 r0 r1 : ℝ} (ha : a0 ^ 2 + a1 ^ 2 = 1) (hc : c0 ^ 2 + c1 ^ 2 = 1)
     (hac : a0 * c0 + a1 * c1 = -1 / 2)
     (hra : (r0 - a0) ^ 2 + (r1 - a1) ^ 2 = 1) (hrc : (r0 - c0) ^ 2 + (r1 - c1) ^ 2 = 3) :
@@ -824,7 +843,9 @@ theorem cand_real {a0 a1 c0 c1 r0 r1 : ℝ} (ha : a0 ^ 2 + a1 ^ 2 = 1) (hc : c0 
     (r1 + ((ρ - 2 / 3) * a1 + (ρ - 4 / 3) * c1)) * e1 - (ρ - 2 / 3) ^ 2 * ha -
     (ρ - 4 / 3) ^ 2 * hc - 2 * (ρ - 2 / 3) * (ρ - 4 / 3) * hac
 
-/-- Case 1 incompatibility: a candidate `r` of `A` pointing to `C` and a candidate `s` of `C` (pointing to `A` or to the third vertex `−A − C`) are at squared distance `4/3` or `3ρ`, both in `(1, 3)`. -/
+/-- Case 1 incompatibility: a candidate `r` of `A` pointing to `C` and a candidate `s` of `C`
+(pointing to `A` or to the third vertex `−A − C`) are at squared distance `4/3` or `3ρ`, both in
+`(1, 3)`. -/
 theorem case1_pair_real {a0 a1 c0 c1 r0 r1 s0 s1 : ℝ} (ha : a0 ^ 2 + a1 ^ 2 = 1)
     (hc : c0 ^ 2 + c1 ^ 2 = 1) (hac : a0 * c0 + a1 * c1 = -1 / 2)
     (hra : (r0 - a0) ^ 2 + (r1 - a1) ^ 2 = 1) (hrc : (r0 - c0) ^ 2 + (r1 - c1) ^ 2 = 3)
@@ -869,7 +890,8 @@ theorem case1_pair_real {a0 a1 c0 c1 r0 r1 s0 s1 : ℝ} (ha : a0 ^ 2 + a1 ^ 2 = 
         2 * (2 * ρ - 2) * (ρ - 2) * hac + 3 * q
     constructor <;> linarith
 
-/-- For three unit vectors with `u + v + w = 0` and `r ≠ 0` with `|ru| = 1`: `r` is at squared distance `> 1` from `v` or from `w` (the sum of the two is `3|r|² + 2`). -/
+/-- For three unit vectors with `u + v + w = 0` and `r ≠ 0` with `|ru| = 1`: `r` is at squared
+distance `> 1` from `v` or from `w` (the sum of the two is `3|r|² + 2`). -/
 theorem far_real {u0 u1 v0 v1 w0 w1 p q : ℝ} (hu : u0 ^ 2 + u1 ^ 2 = 1)
     (hv : v0 ^ 2 + v1 ^ 2 = 1) (hw : w0 ^ 2 + w1 ^ 2 = 1)
     (hs0 : u0 + v0 + w0 = 0) (hs1 : u1 + v1 + w1 = 0)
@@ -881,7 +903,9 @@ theorem far_real {u0 u1 v0 v1 w0 w1 p q : ℝ} (hu : u0 ^ 2 + u1 ^ 2 = 1)
   by_contra h; push Not at h
   linarith [h.1, h.2]
 
-/-- VERIFY_A1b **Case 1** core computation (`v₁ = (1,0)`): `D = 3`, `v₂ = (−1/2, y₂)`, `v₃ = (−1/2, −y₂)`; each extra neighbour `rᵢ` is at squared distance `3` from another vertex (`far_real`), and `case1_pair_real` puts `|r₁ r₂|²` or `|r₁ r₃|²` in the gap `(1, 3)`. -/
+/-- VERIFY_A1b **Case 1** core computation (`v₁ = (1,0)`): `D = 3`, `v₂ = (−1/2, y₂)`, `v₃ = (−1/2,
+−y₂)`; each extra neighbour `rᵢ` is at squared distance `3` from another vertex (`far_real`),
+and `case1_pair_real` puts `|r₁ r₂|²` or `|r₁ r₃|²` in the gap `(1, 3)`. -/
 theorem case1_real {x₂ y₂ x₃ y₃ p₁ q₁ p₂ q₂ p₃ q₃ D : ℝ} (hD : 1 < D)
     (h₂ : x₂ ^ 2 + y₂ ^ 2 = 1) (h₃ : x₃ ^ 2 + y₃ ^ 2 = 1)
     (h12 : (1 - x₂) ^ 2 + y₂ ^ 2 = D) (h13 : (1 - x₃) ^ 2 + y₃ ^ 2 = D)
@@ -912,7 +936,8 @@ theorem case1_real {x₂ y₂ x₃ y₃ p₁ q₁ p₂ q₂ p₃ q₃ D : ℝ} (
   have hDx : D = 2 - 2 * x₂ := by linear_combination -h12 + h₂
   have h4 : 4 * y₂ ^ 2 = D := by linear_combination h23
   have hx2 : x₂ = -1 / 2 := by
-    have : (2 * x₂ + 1) * (x₂ - 1) = 0 := by linear_combination (-1/2 : ℝ) * h4 - (1/2 : ℝ) * hDx + 2 * h₂
+    have : (2 * x₂ + 1) * (x₂ - 1) = 0 := by
+      linear_combination (-1/2 : ℝ) * h4 - (1/2 : ℝ) * hDx + 2 * h₂
     rcases mul_eq_zero.1 this with h | h
     · linarith
     · exfalso; linarith
@@ -953,7 +978,8 @@ theorem case1_real {x₂ y₂ x₃ y₃ p₁ q₁ p₂ q₂ p₃ q₃ D : ℝ} (
       (r1 := q₁) (s0 := p₃) (s1 := q₃) u1 u3 hac3 (by linear_combination hr₁) e13 n₁ hr₃ n₃ hsx
     rcases gr13 with h | h <;> linarith [P.1, P.2]
 
-/-- End of Lemma F: a neighbour `a` of `p = 0` with `a·w < 0` (`w = (1,0)`) is at distance `Δ` from `w`, hence (chord monotonicity) farther than `Δ` from a neighbour `b` on the other side of `w`. -/
+/-- End of Lemma F: a neighbour `a` of `p = 0` with `a·w < 0` (`w = (1,0)`) is at distance `Δ` from
+`w`, hence (chord monotonicity) farther than `Δ` from a neighbour `b` on the other side of `w`. -/
 theorem lemmaF_end_real {xa ya xb yb D : ℝ} (ha : xa ^ 2 + ya ^ 2 = 1)
     (hb : xb ^ 2 + yb ^ 2 = 1) (hxa : xa < 0) (hya : ya < 0) (hyb : 0 < yb)
     (hab : 0 < xa * yb - ya * xb)
@@ -968,7 +994,9 @@ theorem lemmaF_end_real {xa ya xb yb D : ℝ} (ha : xa ^ 2 + ya ^ 2 = 1)
   ring_nf at hch
   linarith
 
-/-- **Lemma F** core computation (`p = 0`, `w = (1,0)`, `r` not below the axis): Lemma M gives `|r a₁|² = |r a₂|² = D`, so `r ∥ a₁ + a₂`, which forces `x₁ + x₂ < 0`; conclude with `lemmaF_end_real`. -/
+/-- **Lemma F** core computation (`p = 0`, `w = (1,0)`, `r` not below the axis): Lemma M gives `|r
+a₁|² = |r a₂|² = D`, so `r ∥ a₁ + a₂`, which forces `x₁ + x₂ < 0`; conclude with
+`lemmaF_end_real`. -/
 theorem lemmaF_real {x₁ y₁ x₂ y₂ xb yb xr yr D : ℝ} (_hD : 1 < D)
     (h₁ : x₁ ^ 2 + y₁ ^ 2 = 1) (h₂ : x₂ ^ 2 + y₂ ^ 2 = 1) (hb : xb ^ 2 + yb ^ 2 = 1)
     (hy₁ : y₁ < 0) (hy₂ : y₂ < 0) (hyb : 0 < yb) (hne : ¬ (x₁ = x₂ ∧ y₁ = y₂))
@@ -1048,7 +1076,8 @@ theorem TwoLargest.one_lt {X : Finset Pt} {Δ Δ₂ : ℝ} (hT : TwoLargest X Δ
 theorem ne_of_dist_snd {Δ₂ : ℝ} (hpos : 0 < Δ₂) {q v : Pt} (h : dist q v = Δ₂) : q ≠ v := by
   rintro rfl; rw [dist_self] at h; linarith
 
-/-- Case 3 when the middle neighbour `m` separates `a` and `c` (frame at `q` with axis `m`; the witness `t` comes from `q` not being extreme). -/
+/-- Case 3 when the middle neighbour `m` separates `a` and `c` (frame at `q` with axis `m`; the
+witness `t` comes from `q` not being extreme). -/
 theorem prop3_case3_core {X : Finset Pt} {Δ Δ₂ : ℝ} (hT : TwoLargest X Δ Δ₂) {q m a c : Pt}
     (hq : q ∈ X) (hqe : ¬ IsExt X q) (hm : m ∈ X) (ha : a ∈ X) (hc : c ∈ X)
     (hqm : dist q m = Δ₂) (hqa : dist q a = Δ₂) (hqc : dist q c = Δ₂)
@@ -1087,7 +1116,9 @@ theorem prop3_case3_core {X : Finset Pt} {Δ Δ₂ : ℝ} (hT : TwoLargest X Δ 
   exact case3_real' hT.one_lt (unit a hqa) (unit c hqc) (close a hma) (close c hmc) hopp' hxt ht0
     (gap t htX a ha) gb (gap t htX c hc)
 
-/-- **Case 3** (at most one `Δ`-pair, labelled so that `v₂` is within `Δ₂` of both others): in the frame at `q` with axis `v₂`, either `v₂` separates `v₁, v₃`, or `case3_select_real` makes `v₁` or `v₃` the separating middle neighbour. -/
+/-- **Case 3** (at most one `Δ`-pair, labelled so that `v₂` is within `Δ₂` of both others): in the
+frame at `q` with axis `v₂`, either `v₂` separates `v₁, v₃`, or `case3_select_real` makes `v₁`
+or `v₃` the separating middle neighbour. -/
 theorem prop3_case3 {X : Finset Pt} {Δ Δ₂ : ℝ} (hT : TwoLargest X Δ Δ₂) {q v₁ v₂ v₃ : Pt}
     (hq : q ∈ X) (hqe : ¬ IsExt X q) (h₁ : v₁ ∈ X) (h₂ : v₂ ∈ X) (h₃ : v₃ ∈ X)
     (h12 : v₁ ≠ v₂) (h13 : v₁ ≠ v₃) (h23 : v₂ ≠ v₃)
@@ -1175,7 +1206,8 @@ theorem frame_inj {q v : Pt} (h : q ≠ v) {P Q : Pt} (hPQ : P ≠ Q) :
     (div_eq_zero_iff.1 (by rw [← this]; norm_num)).resolve_right (sqd_pos_of_ne h).ne'
   exact (sqd_pos_of_ne hPQ).ne' h0
 
-/-- **Case 2** (exactly two `Δ`-pairs, apex `v₁`): in the frame at `q` with axis `v₁`, `case2_real` shows that `v₁` has no `Δ₂`-neighbour besides `q`. -/
+/-- **Case 2** (exactly two `Δ`-pairs, apex `v₁`): in the frame at `q` with axis `v₁`, `case2_real`
+shows that `v₁` has no `Δ₂`-neighbour besides `q`. -/
 theorem prop3_case2 {X : Finset Pt} {Δ Δ₂ : ℝ} (hT : TwoLargest X Δ Δ₂) {q v₁ v₂ v₃ r : Pt}
     (hq : q ∈ X) (hqe : ¬ IsExt X q) (_h₁ : v₁ ∈ X) (h₂ : v₂ ∈ X) (h₃ : v₃ ∈ X)
     (h23 : v₂ ≠ v₃) (d₁ : dist q v₁ = Δ₂) (d₂ : dist q v₂ = Δ₂) (d₃ : dist q v₃ = Δ₂)
@@ -1212,7 +1244,8 @@ theorem prop3_case2 {X : Finset Pt} {Δ Δ₂ : ℝ} (hT : TwoLargest X Δ Δ₂
   exact case2_real hT.one_lt (unit v₂ d₂) (unit v₃ d₃) h12' h13' h23' (frame_inj hne h23) hr1 hrn
     hr0 (gap r hr v₂ h₂) (gap r hr v₃ h₃)
 
-/-- **Case 1** (all three pairs at `Δ`): in the frame at `q` with axis `v₁`, `case1_real` shows that the three second neighbours `rᵢ` cannot coexist. -/
+/-- **Case 1** (all three pairs at `Δ`): in the frame at `q` with axis `v₁`, `case1_real` shows that
+the three second neighbours `rᵢ` cannot coexist. -/
 theorem prop3_case1 {X : Finset Pt} {Δ Δ₂ : ℝ} (hT : TwoLargest X Δ Δ₂) {q v₁ v₂ v₃ r₁ r₂ r₃ : Pt}
     (hq : q ∈ X) (hqe : ¬ IsExt X q) (h₁ : v₁ ∈ X) (h₂ : v₂ ∈ X) (h₃ : v₃ ∈ X)
     (d₁ : dist q v₁ = Δ₂) (d₂ : dist q v₂ = Δ₂) (d₃ : dist q v₃ = Δ₂)
@@ -1258,7 +1291,8 @@ theorem prop3_case1 {X : Finset Pt} {Δ Δ₂ : ℝ} (hT : TwoLargest X Δ Δ₂
     (pos r₂ hrq₂) (pos r₃ hrq₃) (gap r₁ hr₁ v₂ h₂) (gap r₁ hr₁ v₃ h₃) g21 (gap r₂ hr₂ v₃ h₃) g31
     (gap r₃ hr₃ v₂ h₂) (gap r₁ hr₁ r₂ hr₂) (gap r₁ hr₁ r₃ hr₃)
 
-/-- A non-extreme point cannot have three `Δ₂`-neighbours that each have a further `Δ₂`-neighbour: split on which of the three pairs are at distance `Δ` and relabel. -/
+/-- A non-extreme point cannot have three `Δ₂`-neighbours that each have a further `Δ₂`-neighbour:
+split on which of the three pairs are at distance `Δ` and relabel. -/
 theorem prop3_three {X : Finset Pt} {Δ Δ₂ : ℝ} (hT : TwoLargest X Δ Δ₂) {q v₁ v₂ v₃ r₁ r₂ r₃ : Pt}
     (hq : q ∈ X) (hqe : ¬ IsExt X q) (h₁ : v₁ ∈ X) (h₂ : v₂ ∈ X) (h₃ : v₃ ∈ X)
     (h12 : v₁ ≠ v₂) (h13 : v₁ ≠ v₃) (h23 : v₂ ≠ v₃)
@@ -1311,7 +1345,9 @@ theorem deg_core_L2 {X : Finset Pt} {Δ Δ₂ : ℝ} (hT : TwoLargest X Δ Δ₂
 
 /-! ## Degree at most 4 on `L₁′` (Lemma M, Lemma F) -/
 
-/-- **Lemma F**: a `Δ₂`-neighbour `w` of an extreme point `p` with two further neighbours of `p` strictly on each side of the line `pw` has `p` as its only `Δ₂`-neighbour.  Frame at `p` with axis `w`; if `r` lies strictly on the `a`-side, reflect. -/
+/-- **Lemma F**: a `Δ₂`-neighbour `w` of an extreme point `p` with two further neighbours of `p`
+strictly on each side of the line `pw` has `p` as its only `Δ₂`-neighbour.  Frame at `p` with
+axis `w`; if `r` lies strictly on the `a`-side, reflect. -/
 theorem lemmaF {X : Finset Pt} {Δ Δ₂ : ℝ} (hT : TwoLargest X Δ Δ₂) {p w a₁ a₂ b₁ b₂ : Pt}
     (_hp : p ∈ X) (hw : w ∈ X) (ha₁ : a₁ ∈ X) (ha₂ : a₂ ∈ X) (hb₁ : b₁ ∈ X) (hb₂ : b₂ ∈ X)
     (dw : dist p w = Δ₂) (da₁ : dist p a₁ = Δ₂) (da₂ : dist p a₂ = Δ₂)
@@ -1405,7 +1441,10 @@ theorem eq_of_orient_zero {p x y : Pt} {α β : ℝ} (hd : sqd p x = sqd p y) (h
   · simp only [Fin.zero_eta, Fin.isValue]; linarith
   · simp only [Fin.mk_one, Fin.isValue]; linarith
 
-/-- Among five `Δ₂`-neighbours of an extreme point, the angular median has two of them strictly on each side.  The slope `g x = (n × (x−p)) / (n·(x−p))` (`n` the inner normal of the supporting half-plane) orders the neighbours by angle and is injective on them; sort five values with `orderEmbOfFin`. -/
+/-- Among five `Δ₂`-neighbours of an extreme point, the angular median has two of them strictly on
+each side.  The slope `g x = (n × (x−p)) / (n·(x−p))` (`n` the inner normal of the supporting
+half-plane) orders the neighbours by angle and is injective on them; sort five values with
+`orderEmbOfFin`. -/
 theorem exists_median {X : Finset Pt} {Δ₂ : ℝ} {p : Pt} (hp : IsExt X p) {S : Finset Pt}
     (hSX : S ⊆ X) (hS : ∀ x ∈ S, dist p x = Δ₂) (hpos : 0 < Δ₂) (h5 : 5 ≤ S.card) :
     ∃ w ∈ S, ∃ a₁ ∈ S, ∃ a₂ ∈ S, ∃ b₁ ∈ S, ∃ b₂ ∈ S, a₁ ≠ a₂ ∧ b₁ ≠ b₂ ∧
