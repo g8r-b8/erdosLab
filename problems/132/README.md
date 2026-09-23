@@ -1,6 +1,7 @@
 # Erdős Problem #132: two distances occurring at most n times
 
-**Status (ours):** IN PROGRESS. Five parallel agents launched 2026-09-22.
+**Status (ours):** all 5 angles reported 2026-09-22. Partial results only; novelty NOT yet
+checked against sibling problems/threads (see PROMPT.md rule 4 — lesson from #468).
 **Prize:** $100 for "any nontrivial result" (Erdős, [Er97e]).
 **Site status:** OPEN.
 
@@ -34,7 +35,13 @@ n pairs? Must the number of such distances → ∞ (perhaps ≥ n^{1−o(1)})?
   Dumitrescu μ(δ)μ(Δ) ≤ 9n²/8+O(n).
 
 ## Attack angles (agents)
-- A: Problem 1.6 upper bound < 3/2  → `angle_A.md`
+- A: Problem 1.6 upper bound < 3/2  → `angle_A.md` (DONE, conditional/partial)
+  - Theorem A (rigorous modulo CDL's Vesztergombi Props 1–8 as black boxes): if Δ ≤ (2−κ)Δ₂ and
+    t = Δ−Δ₂ ∉ (√3/2 − 2β, 1]·δ, then min{μ(Δ₂), μ(δ)} ≤ 16n/11 + C.
+    Via LP (multipliers 10/33, 15/33, 8/33) + "Ring Lemma" e_δ(S) ≤ |S| + C.
+  - Open window √3/2 < t/δ ≤ 1: Ring Lemma FALSE there (rhombic strip, avg degree 3 = the 3/2
+    barrier); would need weighted bound e(S) ≤ |S∖P| + α|P|, α<3. Also degenerate Δ > (2−κ)Δ₂.
+  - Some steps (lens-corner) sketched without explicit constants. 32/23 for t>1 sketched.
 - B: convex position, count of ≤n distances → ∞  → `angle_B.md` (DONE, partial)
   - Proved: counting k ≥ D − ⌊n/2⌋ + 1 (convex); slack versions (≥ ~n/2 distances occur ≤ λn times
     for λ>1); cocircular / max-equidistance-degree-2 ⇒ k = D ≥ ⌊n/2⌋.
