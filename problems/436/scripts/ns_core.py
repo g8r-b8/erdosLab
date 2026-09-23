@@ -61,7 +61,7 @@ def unsat_core(k: int, l: int, y: int, runs: List[int], tmpdir: str) -> List[int
     return cur
 
 
-def sampled_ns(k: int, y: int, core: List[int], deg: int, npoints: int, seed: int = 1) -> str:
+def sampled_ns(k: int, y: int, core: List[int], deg: int, npoints: int, seed: int = 1, l: int = 3) -> str:
     """Solve sum_r sum_{|m| <= deg} c_{r,m} m(x) P_r(x) = 1 on npoints random x in F_k^n.
 
     Supports deg 0 (g_r constant) and deg 1 restricted to g_r = c + sum over the run's own primes
@@ -75,7 +75,7 @@ def sampled_ns(k: int, y: int, core: List[int], deg: int, npoints: int, seed: in
     X[0] = 0
     cols = []
     for r in core:
-        tri = run_forms(k, 3, ps, r)
+        tri = run_forms(k, l, ps, r)
         ind = np.ones(npoints, dtype=np.int64)
         for v in tri:
             s = np.zeros(npoints, dtype=np.int64)
@@ -86,14 +86,14 @@ def sampled_ns(k: int, y: int, core: List[int], deg: int, npoints: int, seed: in
         if deg >= 1:
             for q in sorted({q for v in tri for q in v}):   # multipliers: variables of the run only
                 cols.append(ind * X[:, q] % k)
-    A = np.array(cols, dtype=np.int64).T % k            # npoints x unknowns
+    A = (np.array(cols, dtype=np.int16) % k).T           # npoints x unknowns
     b = np.ones(npoints, dtype=np.int64)
     return "FEASIBLE-ON-SAMPLE" if solvable_mod(k, A, b) else "INFEASIBLE"
 
 
 def solvable_mod(k: int, A: np.ndarray, b: np.ndarray) -> bool:
     """Is A c = b solvable over F_k?  Gaussian elimination on the augmented matrix."""
-    M = np.concatenate([A % k, (b % k)[:, None]], axis=1)
+    M = np.concatenate([A % k, (b % k)[:, None]], axis=1).astype(np.int16)   # k <= 5: products < 2^15
     rows, cols = M.shape
     r = 0
     for c in range(cols - 1):
@@ -123,17 +123,18 @@ def main() -> None:
     ap.add_argument("k", type=int); ap.add_argument("y", type=int); ap.add_argument("runs")
     ap.add_argument("out", nargs="?")
     ap.add_argument("--deg", type=int, default=0); ap.add_argument("--points", type=int, default=4000)
+    ap.add_argument("--l", type=int, default=3)
     a = ap.parse_args()
     runs = [int(x) for x in open(a.runs)]
     if a.mode == "core":
         with tempfile.TemporaryDirectory(dir=os.path.dirname(os.path.abspath(a.out))) as td:
-            core = unsat_core(a.k, 3, a.y, runs, td)
+            core = unsat_core(a.k, a.l, a.y, runs, td)
         with open(a.out, "w") as fh:
             fh.write("\n".join(map(str, core)) + "\n")
         print(f"core: {len(core)} runs (from {len(runs)})")
     else:
         print(f"k={a.k} y={a.y} core={len(runs)} deg={a.deg} points={a.points}: "
-              f"{sampled_ns(a.k, a.y, runs, a.deg, a.points)}")
+              f"{sampled_ns(a.k, a.y, runs, a.deg, a.points, l=a.l)}")
 
 
 if __name__ == "__main__":
