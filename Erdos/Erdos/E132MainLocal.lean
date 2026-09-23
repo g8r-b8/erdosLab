@@ -13,7 +13,7 @@ KK, DD, (c1), (c2).  See `E132MainDefs.lean` for the conventions.
 
 The counts KK, DD and (c2) do not use arc length along `∂K` (the paper's Lemma 5.2 and walk):
 they integrate over directions with the outward normals of `S ∖ D` / `S ∩ D`
-(`E132ConvexCurve.lean`).  `lens_arc_length` (Lemma 5.2) is consequently unused.
+(`E132ConvexCurve.lean`).  The paper's Lemma 5.2 (lens arc length) is consequently not needed and is not formalised.
 -/
 
 open Finset Real
@@ -1591,33 +1591,6 @@ theorem lens_corner {c₁ c₂ p q : Pt} {R : ℝ} (hd0 : 0 < dist c₁ c₂) (h
         Real.arccos ((xq * (-(d / 2)) + yq * (σ * R * S)) / (R * R)) := by
       rw [ang, InnerProductGeometry.angle, hnc₂, ← dist_eq_norm, hq, inner_frame he, ic₂, dc₂]
     rw [this]; exact h2
-
-/-- **Lemma 5.2 (lens-corner arc length)**: for compact convex `K' ⊆` lens, `p, q ∈ ∂K'` as in
-5.1 with `|pq| = 1`, the boundary arc of `K'` from `p` to `q` on the corner's side has length
-`≤ 2ρ₀`.
-
-NOT USED (2026-09-23): off the critical path.  `card_badKK_le` / `card_badDD_le` are now proved
-without arc length (direction-measure caps, `E132ConvexCurve.lean`), so nothing depends on this
-lemma; it is kept only as a record of the paper's Lemma 5.2 and may be deleted.
-TODO (only if wanted for its own sake; multi-day): prove it.
-What's missing:
-1. an arc-length parametrisation of `∂K'` for a compact convex planar `K'` (a closed
-   `1`-Lipschitz curve onto `∂K'`, or the segment case when `interior K' = ∅`);
-2. perimeter monotonicity for nested compact convex sets, applied to `K' ∩ H ⊆ Λ ∩ H`
-   (`H` the closed half-plane of line `pq` containing the corner `c`);
-3. `∂Λ ∩ H` is the circular arc `p → c → q`, of length `≤ 2ρ₀` by `lens_corner` (proved).
-The statement is true as it stands.
-Acceptance: no `sorry`.
-Depends on: `lens_corner` (proved); items 1–2 above. Difficulty XL. -/
-theorem lens_arc_length {c₁ c₂ p q : Pt} {R : ℝ} {K' : Set Pt} (hK' : Convex ℝ K')
-    (hKc : IsCompact K') (hsub : K' ⊆ Metric.closedBall c₁ R ∩ Metric.closedBall c₂ R)
-    (hd0 : 0 < dist c₁ c₂) (hd : dist c₁ c₂ < 2 * R)
-    (hR : 2 / (Real.cos (phi0 (dist c₁ c₂) R / 2) - Real.cos (phi0 (dist c₁ c₂) R)) ≤ R)
-    (hp : dist p c₁ = R) (hq : dist q c₂ = R) (hpK : p ∈ frontier K') (hqK : q ∈ frontier K')
-    (hpq : dist p q = 1) :
-    ∃ γ : ℝ → Pt, ∃ ℓ : ℝ, 0 ≤ ℓ ∧ ℓ ≤ 2 * rho0 (dist c₁ c₂) R ∧ LipschitzWith 1 γ ∧
-      γ 0 = p ∧ γ ℓ = q ∧ γ '' Set.Icc 0 ℓ ⊆ frontier K' := by
-  sorry
 
 /-- **[C7]** KK lens constants: `2/(1 − 0.97) < 8.2²`.
 

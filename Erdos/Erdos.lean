@@ -2,3 +2,10 @@ import Erdos.Basic
 import Erdos.E132Convex
 import Erdos.E132ConvexFinset
 import Erdos.E132Layer
+import Erdos.E132Ve87
+import Erdos.E132ConvexCurve
+import Erdos.E132MainDefs
+import Erdos.E132MainLocal
+import Erdos.E132MainRegions
+import Erdos.E132MainDegen
+import Erdos.E132Main

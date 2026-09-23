@@ -13,7 +13,17 @@ Conventions (in `E132MainDefs.lean`):
 - `diam`, `dist2` and `minDist` are the largest, second-largest and smallest distances. Each is `0` when it does not exist. Since `mult X 0 = 0`, small or degenerate sets need no side conditions.
 - The only hypothesis is `2 ≤ X.card`.
 
-## Status (2026-09-23)
+## ✅ COMPLETE (2026-09-23, integration)
+
+`erdos132_main` is proved with **no `sorry`**; `#print axioms Erdos132Main.erdos132_main` = `[propext, Classical.choice, Quot.sound]`.
+Full `lake build` (all E132 modules imported from `Erdos.lean`) succeeds. Deviations from the plan below:
+- `vesztergombi87` is proved (`E132Ve87.lean`, 2-core double counting), not cited; `hopf_pannwitz` proved in Defs.
+- Bad-edge bounds KK/DD/C2 proved by direction-measure counting (`E132ConvexCurve.lean`), not arc length; Lemma 5.2
+  `lens_arc_length` was unused and deleted.
+- `turning_sum_le` needed a closedness hypothesis (old form false: Bernstein-set counterexample); `turning_sum_le_closure` added.
+- `lemma71` restated with support points (no boundary path); `card_mixedT_le` bound 1200 instead of 71 (constant only).
+
+## Status at skeleton time (historical)
 
 | file | theorems | proved | `sorry` |
 |---|---|---|---|

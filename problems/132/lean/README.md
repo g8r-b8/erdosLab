@@ -1,3 +1,12 @@
+# ✅ 54/37 theorem fully formalised (2026-09-23)
+
+`Erdos132Main.erdos132_main : ∃ C₀ : ℝ, ∀ X : Finset Pt, 2 ≤ X.card → (min (mult X (dist2 X)) (mult X (minDist X)) : ℝ) ≤ 54/37 * X.card + C₀`
+
+- No `sorry`; `#print axioms` = `[propext, Classical.choice, Quot.sound]` (no native_decide / bv_decide).
+- Files: E132MainDefs, E132MainLocal, E132MainRegions, E132MainDegen, E132Main, E132ConvexCurve, E132Ve87 (+ E132Layer, E132ConvexFinset).
+- Also sorry-free and standard-axioms-only: Vesztergombi 1987 (`vesztergombi87`), Hopf–Pannwitz, Cor A1 (`Erdos132Layer.corA1`).
+- `cd Erdos && lake build` builds everything (all modules imported from `Erdos.lean`). See MAIN_PLAN.md for deviations from the paper's proof.
+
 # Erdős #132: Lean formalisation (convex case n = 7, 11, 13; layer bound Theorem A / Cor A1)
 
 Files (in `Erdos/Erdos/`):

@@ -102,6 +102,10 @@ then ¬(almost-all o(N)) as in PR #4076's Erdos468MinimalPreimageLittleOAlmostAl
 - 19, 475, 506, 551: decidable-but-infeasible finite checks.
 - 1218, 1220: large-cardinal set theory, not Mathlib-friendly.
 - 1221: asymptotic analysis on circle, no obvious handle.
+- 885 k=5 PARKED (2026-09-23): a Lean-checkable finite witness would only be a partial result, and
+  Aleksanndr_NFA is actively searching (posted today). Fixing 5 d's gives a genus-17 curve in x
+  (4 quadrics in P^5), so a blind search needs luck. Revisit only with a parametric/EC idea + PARI/gp,
+  or if the competitor's thread goes quiet.
 
 ## Iteration 8 (2026-09-23)
 - Agents running: 132 novelty audit (A2, B2), 132 A2 write-up, 132 convex n=7 (angle_B3),
@@ -128,6 +132,12 @@ then ¬(almost-all o(N)) as in PR #4076's Erdos468MinimalPreimageLittleOAlmostAl
 - 436: Λ(5,3) ≥ 5,062,794 NEW (no table for k≥5, l=3). The reduction is KNOWN (Lehmer–Lehmer–Mills case vectors;
   Brillhart–Lehmer–Lehmer 1964). Unread: Lehmer "Mechanized mathematics" (BAMS 1966), Lehmer–Lehmer
   "On runs of residues" (Proc AMS 1962), Mills' 1965 survey.
+
+## ★ Lean milestone 2 (2026-09-23): #132 54/37 bound fully formalised
+- Erdos132Main.erdos132_main (CDL Problem 1.6: min{μ(Δ₂),μ(δ)} ≤ 54/37·n + C₀) sorry-free, axioms = propext,
+  Classical.choice, Quot.sound. Also Vesztergombi 1987, Hopf–Pannwitz, Cor A1 (E132Layer). Full lake build OK.
+- This is a Lean-verified NEW partial result on open problem #132 (improves the 3/2 upper bound in CDL's Problem 1.6).
+  It does NOT resolve #132, so ERDOS_DONE is not met.
 
 ## Lean milestone (2026-09-23)
 - #132 convex n=7, n=11 (≥3 rare distances) proved in Lean without sorry: Erdos/Erdos/E132Convex.lean. Axioms:

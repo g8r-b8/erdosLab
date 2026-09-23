@@ -1268,7 +1268,7 @@ theorem IsSideT.step {F : DirField X} {p q : Pt} (h : IsSideT F (-1) p q) :
   refine ⟨by rw [← dist_eq_norm, dist_comm]; exact h1, a, b, by linarith⟩
 
 /-- `|u_a − u_c| ≤ β₁ + β₂` from two angle bounds through `u_b`. -/
-theorem norm_u_sub_le {a b c : Pt} (ha : ‖a‖ = 1) (hb : ‖b‖ = 1) (hc : ‖c‖ = 1) :
+theorem norm_u_sub_leR {a b c : Pt} (ha : ‖a‖ = 1) (hb : ‖b‖ = 1) (hc : ‖c‖ = 1) :
     ‖a - c‖ ≤ ang a b + ang b c := by
   have := norm_sub_le (a - b) (c - b)
   rw [sub_sub_sub_cancel_right] at this
@@ -1345,7 +1345,7 @@ theorem R2_sym (hX : Normal X) (F : DirField X) (hτ₁ : √3 / 2 + 3 * beta �
   have hO := norm_offset_sub huv' huv₀ hs0 hσ₁ hσ₀ (τ := tau X)
   have h1 : ‖F.u v₀ - F.u z₀‖ ≤ beta := (norm_sub_le_angR huv₀ huz₀).trans hg₀
   have h2 : ‖F.u v' - F.u v₀‖ ≤ 3 * beta := by
-    have k1 := norm_u_sub_le huv' huz₁ huz₀
+    have k1 := norm_u_sub_leR huv' huz₁ huz₀
     have k2 := norm_sub_le (F.u v' - F.u z₀) (F.u v₀ - F.u z₀)
     rw [sub_sub_sub_cancel_right] at k2
     have k3 : ang (F.u z₁) (F.u z₀) ≤ beta := by rw [ang_comm]; exact hz.2.2.2.1
