@@ -50,7 +50,8 @@ static void hm_set(HMap *h, long key, uint32_t val) {
 typedef struct {
   int K, L;            // modulus and run length (L = 3 supported)
   long R, N;           // runs r <= R are forbidden; N = R + L - 1
-  uint16_t *lpf;       // smallest prime factor of n (fits: N < 65536^2), 0 if n is prime
+  uint8_t *isp;        // prime bitset over [0, N]
+  long *smallp, nsmall; // primes <= sqrt(N)
   uint8_t *f;          // f[n] in Z/K for 1 <= n <= N (f[1] = 0)
   int32_t *badlist;    // list of bad r (N < 2^31)
   HMap badpos;         // r -> 1 + position of r in badlist (0 = not bad)
@@ -81,19 +82,28 @@ static void bad_del(State *s, long r) {
 }
 static uint64_t rnd(State *s) { s->rng ^= s->rng << 13; s->rng ^= s->rng >> 7; s->rng ^= s->rng << 17; return s->rng; }
 
-/* sieve_lpf
- * fill lpf[n] = smallest prime factor of composite n (0 for primes), 2 <= n <= N < 65536^2.
- * (Was an int32 largest-prime-factor table; uint16 spf halves memory to 2 bytes per n.)
- * What's missing: body.
- * Acceptance: lpf[p] == 0 iff p prime; lpf[12] == 2; lpf[1] unused.
- * Depends on: nothing.
+/* sieve_primes
+ * prime bitset for [0, N] (bit n set iff n prime) + list of primes <= sqrt(N).
+ * (Replaces an spf table: memory N/8 bytes instead of 2N; factoring is by trial division by the
+ * small primes, which is only needed for the few windows the search looks at.)
+ * Acceptance: isprime(2), isprime(97), !isprime(91); f of composites via compute_f unchanged.
  */
-static uint16_t *sieve_lpf(long N) {
-  if (N >= 65536L * 65536L) { fprintf(stderr, "N too large for uint16 spf\n"); exit(4); }
-  uint16_t *lpf = calloc(N + 1, sizeof(uint16_t));
-  if (!lpf) { perror("lpf"); exit(4); }
-  for (long p = 2; p * p <= N; p++) if (!lpf[p]) for (long j = p * p; j <= N; j += p) if (!lpf[j]) lpf[j] = (uint16_t)p;
-  return lpf;
+static int isprime(const State *s, long n) { return (s->isp[n >> 3] >> (n & 7)) & 1; }
+static void sieve_primes(State *s) {
+  long N = s->N;
+  s->isp = malloc(N / 8 + 1);
+  if (!s->isp) { perror("isp"); exit(4); }
+  memset(s->isp, 0xff, N / 8 + 1);
+  s->isp[0] &= (uint8_t)~3;  // 0, 1
+  for (long p = 2; p * p <= N; p++) if (isprime(s, p)) for (long j = p * p; j <= N; j += p) s->isp[j >> 3] &= (uint8_t)~(1 << (j & 7));
+  long cnt = 0; for (long p = 2; p * p <= N; p++) if (isprime(s, p)) cnt++;
+  s->smallp = malloc((cnt + 1) * sizeof(long)); s->nsmall = 0;
+  for (long p = 2; p * p <= N; p++) if (isprime(s, p)) s->smallp[s->nsmall++] = p;
+}
+// smallest prime factor of n >= 2 (trial division by the small primes; n itself if none <= sqrt n)
+static long pf(const State *s, long n) {
+  for (long i = 0; i < s->nsmall; i++) { long p = s->smallp[i]; if (p * p > n) break; if (n % p == 0) return p; }
+  return n;
 }
 
 /* load_warm
@@ -102,13 +112,13 @@ static uint16_t *sieve_lpf(long N) {
  * What's missing: body (read "p base" lines; read "v" lines of the model; tolerate primes > N in MAP).
  * Acceptance: on the 5.75M model, recomputing f and finding the first zero run gives 5,750,107
  *             (same as `lamenc run`).
- * Depends on: sieve_lpf.
+ * Depends on: sieve_primes.
  */
 static void load_warm(State *s, const char *map, const char *model) {
   long N = s->N;
   s->f = calloc(N + 1, 1);
   if (!s->f) { perror("f"); exit(4); }
-  for (long p = 2; p <= N; p++) if (!s->lpf[p]) s->f[p] = 1;
+  for (long p = 2; p <= N; p++) if (isprime(s, p)) s->f[p] = 1;
   long cap = 1 << 20, cnt = 0, p, b, maxv = 0;
   long *ps = malloc(cap * sizeof(long)), *bs = malloc(cap * sizeof(long));
   FILE *mp = fopen(map, "r"); if (!mp) { perror(map); exit(4); }
@@ -138,17 +148,34 @@ static void load_warm(State *s, const char *map, const char *model) {
 }
 
 /* compute_f
- * f[n] = f[q] + f[n/q] mod K for composite n (q = lpf[n]), increasing n.
- * What's missing: body.
- * Acceptance: f completely additive on [1, N].
- * Depends on: sieve_lpf, load_warm.
+ * f[n] for all composite n <= N from the prime values, segment by segment: divide each n by every
+ * prime power p^j <= n with p <= sqrt(N) (adding f(p) each time); the cofactor is 1 or one prime
+ * q > sqrt(N) whose f(q) is already stored.  Prime entries are rewritten with their own value.
+ * Acceptance: f completely additive on [1, N] (checked by the external decoders).
+ * Depends on: sieve_primes, load_warm.
  */
 static void compute_f(State *s) {
-  s->f[1] = 0;
-  for (long n = 2; n <= s->N; n++) {
-    long P = s->lpf[n];
-    if (P) s->f[n] = (uint8_t)((s->f[P] + s->f[n / P]) % s->K);
+  const long SEG = 1 << 20;
+  uint64_t *rem = malloc(SEG * sizeof(uint64_t)); uint32_t *acc = malloc(SEG * sizeof(uint32_t));
+  for (long lo = 2; lo <= s->N; lo += SEG) {
+    long hi = lo + SEG; if (hi > s->N + 1) hi = s->N + 1;
+    for (long n = lo; n < hi; n++) { rem[n - lo] = (uint64_t)n; acc[n - lo] = 0; }
+    for (long i = 0; i < s->nsmall; i++) {
+      long p = s->smallp[i]; uint32_t fp = s->f[p];
+      for (long pk = p; pk < hi; pk *= p) {
+        long st = ((lo + pk - 1) / pk) * pk;
+        for (long m = st; m < hi; m += pk) { rem[m - lo] /= (uint64_t)p; acc[m - lo] += fp; }
+        if (pk > s->N / p) break;
+      }
+    }
+    for (long n = lo; n < hi; n++) {
+      uint64_t q = rem[n - lo]; uint32_t a = acc[n - lo];
+      if (q > 1) a += s->f[q];
+      s->f[n] = (uint8_t)(a % (uint32_t)s->K);
+    }
   }
+  s->f[1] = 0;
+  free(rem); free(acc);
 }
 
 /* init_bad
@@ -229,7 +256,7 @@ static void dump_window(const State *s, long r) {
   fprintf(stderr, "bad r=%ld:", r);
   for (long j = r; j < r + s->L; j++) {
     fprintf(stderr, " %ld=", j); long n = j; int firstf = 1;
-    while (n > 1) { long q = s->lpf[n] ? s->lpf[n] : n; int e = 0; while (n % q == 0) { n /= q; e++; }
+    while (n > 1) { long q = pf(s, n); int e = 0; while (n % q == 0) { n /= q; e++; }
       fprintf(stderr, "%s%ld^%d(f=%d)", firstf ? "" : "*", q, e, s->f[q]); firstf = 0; }
   }
   fputc('\n', stderr);
@@ -244,7 +271,7 @@ static int collect_cands(const State *s, long r, long *cand, long minp) {
     for (long j = r; j < r + s->L; j++) {
       long n = j;
       while (n > 1) {
-        long q = s->lpf[n] ? s->lpf[n] : n; int e = 0; while (n % q == 0) { n /= q; e++; }
+        long q = pf(s, n); int e = 0; while (n % q == 0) { n /= q; e++; }
         if (q >= tiers[t] && e % s->K) {
           int dup = 0; for (int i = 0; i < nc; i++) if (cand[i] == q) dup = 1;
           if (!dup && nc < 64) cand[nc++] = q;
@@ -374,7 +401,7 @@ static void write_result(State *s, const char *omap, const char *omodel) {
   if (!mp || !md) { perror("output"); exit(4); }
   long i = 0, col = 0;
   for (long p = 2; p <= s->N; p++) {
-    if (s->lpf[p] || s->f[p] == 1) continue;
+    if (!isprime(s, p) || s->f[p] == 1) continue;
     long b = (long)s->K * i + 1; i++;
     fprintf(mp, "%ld %ld\n", p, b);
     if (col == 0) fputs("v", md);
@@ -395,7 +422,7 @@ int main(int argc, char **argv) {
   s.rng = argc > 9 ? strtoull(argv[9], 0, 10) * 2654435761ULL + 1 : 88172645463325252ULL;
   long maxsteps = argc > 10 ? atol(argv[10]) : 100000000L;
   int noise = argc > 11 ? atoi(argv[11]) : 20;
-  s.lpf = sieve_lpf(s.N);
+  sieve_primes(&s);
   load_warm(&s, argv[4], argv[5]);
   compute_f(&s);
   init_bad(&s);
