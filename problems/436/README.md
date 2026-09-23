@@ -1,5 +1,7 @@
 # Erdős Problem #436: consecutive k-th power residues (triples, k = 5)
 
+**PARKED 2026-09-23** — site: "open, and cannot be resolved with a finite computation"; finiteness reduces to
+three-point logarithmic Elliott correlations (THEORY.md + witness analysis), no prize → does not meet PROMPT.md's goal.
 **Status (ours):** computational attack on the smallest open case Λ(5,3). No resolution.
 New: **Λ(5,3) ≥ 2,000,028,671** (warm-start local search + small-prime smooth fix; witness in `logs/warmstart/`, independently verified); brute-force
 finiteness certificate estimated at ~1e18 nodes (infeasible; see THEORY.md).
@@ -12,8 +14,8 @@ Is Λ(k,2) finite for all k? Is Λ(k,3) finite for all odd k? How large are they
 
 Known (site / OEIS A000445): Λ(k,2) < ∞ for all k (Hildebrand 1991); Λ(2,2)=9, Λ(3,2)=77,
 Λ(4,2)=1224, Λ(5,2)=7888, Λ(6,2)=202124, Λ(7,2)=1649375; Λ(3,3)=23532 (Lehmer–Lehmer–Mills–Selfridge
-1962, "Machine proof of a theorem on cubic residues"); Λ(k,3)=∞ for even k; Λ(k,l)=∞ for l ≥ 4
-(Graham 1964). Open: Λ(k,3) for odd k ≥ 5. Smallest open case: **Λ(5,3)**.
+1962, "Machine proof of a theorem on cubic residues"); Λ(k,3)=∞ for even k; Λ(k,4)=∞ for all k ≤ 1,048,909 (Lehmer–Lehmer, per the site;
+earlier text here wrongly said all l ≥ 4, citing Graham 1964). Open: Λ(k,3) for odd k ≥ 5. Smallest open case: **Λ(5,3)**.
 Note: answering "finite for all odd k" needs more than k = 5, but Λ(5,3) = ∞ would disprove it,
 and Λ(5,3) < ∞ would be the first new case.
 
