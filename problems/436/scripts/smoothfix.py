@@ -27,9 +27,9 @@ def primes_upto(y: int) -> list:
     return [p for p in range(2, y + 1) if all(p % d for d in range(2, int(p ** 0.5) + 1))]
 
 
-def exponent_matrix(runs: np.ndarray, ps: list) -> np.ndarray:
-    """E[j, t, i] = v_{ps[i]}(runs[t] + j) mod 5 for j = 0..2 (int8). Asserts full Y-smoothness."""
-    E = np.zeros((3, len(runs), len(ps)), dtype=np.int8)
+def factor_sparse(runs: np.ndarray, ps: list):
+    """Per prime index i: (t, j, e) arrays with e = v_p(runs[t] + j) mod 5 != 0. Asserts smoothness."""
+    ts = [[] for _ in ps]; js = [[] for _ in ps]; es = [[] for _ in ps]
     for j in range(3):
         rem = runs + j
         for i, p in enumerate(ps):
@@ -40,62 +40,71 @@ def exponent_matrix(runs: np.ndarray, ps: list) -> np.ndarray:
                     break
                 e += m
                 rem = np.where(m, rem // p, rem)
-            E[j, :, i] = e % 5
+            nz = np.nonzero(e % 5)[0]
+            ts[i].append(nz); js[i].append(np.full(len(nz), j, dtype=np.int64)); es[i].append(e[nz] % 5)
         assert (rem == 1).all(), "runs file contains a non-smooth number"
-    return E
+    out = []
+    for i in range(len(ps)):
+        t = np.concatenate(ts[i]); j = np.concatenate(js[i]); e = np.concatenate(es[i])
+        U = np.unique(t)
+        out.append((U, np.searchsorted(U, t), j, e))
+    return out
 
 
-def fvals(E: np.ndarray, v: np.ndarray) -> np.ndarray:
-    """F[j, t] = f(runs[t] + j) mod 5 (loop over primes to avoid an int64 copy of E)."""
-    F = np.zeros(E.shape[:2], dtype=np.int64)
-    for i in range(E.shape[2]):
+def fvals(fac, v: np.ndarray, M: int) -> np.ndarray:
+    """F[j, t] = f(runs[t] + j) mod 5."""
+    F = np.zeros((3, M), dtype=np.int64)
+    for i, (U, pos, j, e) in enumerate(fac):
         if v[i]:
-            F += E[:, :, i].astype(np.int64) * int(v[i])
+            np.add.at(F, (j, U[pos]), e * int(v[i]))
     return F % 5
 
 
-def search(E: np.ndarray, v0: np.ndarray, ps: list, seed: int, maxsteps: int) -> np.ndarray:
-    """Min-conflicts with breakout weights. Returns v with no zero triple, or raises."""
+def search(fac, v0: np.ndarray, ps: list, M: int, seed: int, maxsteps: int) -> np.ndarray:
+    """Min-conflicts with breakout weights; tie-break toward changing large primes. Returns v."""
     rng = np.random.default_rng(seed)
     v = v0.copy()
-    F = fvals(E, v)  # f values of the 3 members
-    w = np.ones(E.shape[1])
-    touch = [np.nonzero(E[:, :, i].any(axis=0))[0] for i in range(len(ps))]
+    F = fvals(fac, v, M)
+    w = np.ones(M)
     inv_p = np.array([1.0 / p for p in ps])
+    # prime indices touching each run: build from fac
+    touching = [[] for _ in range(M)]
+    for i, (U, pos, j, e) in enumerate(fac):
+        for t in U[np.unique(pos)]:
+            touching[t].append(i)
 
-    def bad_mask(Fsub):
-        return (Fsub == 0).all(axis=0)
+    def delta(i, d):
+        U, pos, j, e = fac[i]
+        Fs = F[:, U].copy()
+        b0 = (Fs == 0).all(axis=0)
+        np.add.at(Fs, (j, pos), e * d)
+        Fs %= 5
+        b1 = (Fs == 0).all(axis=0)
+        return U, Fs, b1.astype(int) - b0.astype(int)
 
     for step in range(maxsteps):
-        bad = np.nonzero(bad_mask(F))[0]
+        bad = np.nonzero((F == 0).all(axis=0))[0]
         if len(bad) == 0:
             return v
-        t = rng.choice(bad)
-        cands = [i for i in range(len(ps)) if E[:, t, i].any()]
+        if step % 20 == 0:
+            print(f"step {step} bad {len(bad)} changed {int((v != v0).sum())}", file=sys.stderr)
+        t = int(rng.choice(bad))
         best = None
-        for i in cands:
-            idx = touch[i]
-            Fi = F[:, idx]
-            b0 = bad_mask(Fi)
+        for i in touching[t]:
             for d in range(1, 5):
-                Fn = (Fi + E[:, idx, i].astype(np.int64) * d) % 5
-                b1 = bad_mask(Fn)
-                wg = float((w[idx] * (b1.astype(int) - b0.astype(int))).sum())
+                U, Fs, dg = delta(i, d)
+                wg = float((w[U] * dg).sum())
                 changed = (v[i] + d) % 5 != v0[i]
                 cost = (inv_p[i] if changed else 0.0) - (inv_p[i] if v[i] != v0[i] else 0.0)
                 key = (wg, cost, rng.random())
                 if best is None or key < best[0]:
-                    best = (key, i, d)
-        (wg, cost, _), i, d = best
+                    best = (key, i, d, U, Fs)
+        (wg, cost, _), i, d, U, Fs = best
         if wg >= 0:
             w[t] += 1
             continue
-        idx = touch[i]
-        F[:, idx] = (F[:, idx] + E[:, idx, i].astype(np.int64) * d) % 5
+        F[:, U] = Fs
         v[i] = (v[i] + d) % 5
-        if step % 50 == 0:
-            print(f"step {step} bad {int(bad_mask(F).sum())} changed "
-                  f"{[ps[k] for k in np.nonzero(v != v0)[0]]}", file=sys.stderr)
     raise RuntimeError("no fix found")
 
 
@@ -107,11 +116,11 @@ def main() -> None:
     maxsteps = int(sys.argv[8]) if len(sys.argv) > 8 else 100000
     ps = primes_upto(y)
     v0 = np.array([pv.get(p, 1) for p in ps], dtype=np.int64)
-    E = exponent_matrix(runs, ps)
-    F0 = fvals(E, v0)
+    fac = factor_sparse(runs, ps)
+    F0 = fvals(fac, v0, len(runs))
     nb0 = int((F0 == 0).all(axis=0).sum())
     print(f"{len(runs)} smooth runs, {len(ps)} primes, violated at start: {nb0}", file=sys.stderr)
-    v = search(E, v0, ps, seed, maxsteps)
+    v = search(fac, v0, ps, len(runs), seed, maxsteps)
     ch = [(ps[k], int(v0[k]), int(v[k])) for k in np.nonzero(v != v0)[0]]
     print(f"fixed: changed primes (p, old, new): {ch}", file=sys.stderr)
     for k, p in enumerate(ps):
