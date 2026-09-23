@@ -479,6 +479,21 @@ theorem core_deg_le_two {Y : Finset Pt} (hD : 0 < diam Y) {v : Pt}
   · exact finish a b c ha hbY hcY da db dc h
   · exact finish c b a hc hbY haY dc db da h
 
+/-- Elements of `distSetS` are distances of distinct points. -/
+theorem mem_distSetS {Y : Finset Pt} {d : ℝ} (hd : d ∈ distSetS Y) :
+    ∃ x ∈ Y, ∃ y ∈ Y, x ≠ y ∧ dist x y = d := by
+  unfold distSetS at hd
+  obtain ⟨z, hz, rfl⟩ := mem_image.1 hd
+  induction z using Sym2.ind with
+  | h a b =>
+    obtain ⟨ha, hb, hab⟩ := mk_mem_pairsS.1 hz
+    exact ⟨a, ha, b, hb, hab, rfl⟩
+
+/-- `distSetS` is monotone. -/
+theorem distSetS_mono {Y Z : Finset Pt} (h : Y ⊆ Z) {d : ℝ} (hd : d ∈ distSetS Y) :
+    d ∈ distSetS Z := by
+  obtain ⟨x, hx, y, hy, hxy, rfl⟩ := mem_distSetS hd
+  exact dist_mem_distSetS (h hx) (h hy) hxy
 
 end Defs
 
@@ -685,7 +700,44 @@ Acceptance: no `sorry`.
 Depends on: `vesztergombi87`, `hopf_pannwitz`. Difficulty M. -/
 theorem mult_dist2_subset_le {Y : Finset Pt} (hY : Y ⊆ X) :
     (mult Y (dist2 X) : ℝ) ≤ 3 / 2 * Y.card := by
-  sorry
+  by_cases h0 : mult Y (dist2 X) = 0
+  · rw [h0]; simp only [Nat.cast_zero]; positivity
+  obtain ⟨z, hz⟩ := card_pos.1 (Nat.pos_of_ne_zero (by rwa [mult_eq_card] at h0))
+  induction z using Sym2.ind with
+  | h a b =>
+  obtain ⟨ha, hb, hab, hd⟩ := mem_pairsAt.1 hz
+  have hD2Y : dist2 X ∈ distSetS Y := hd ▸ dist_mem_distSetS ha hb hab
+  have hD2X : dist2 X ∈ distSetS X := distSetS_mono hY hD2Y
+  have hpos : 0 < dist2 X := pos_of_mem_distSetS hD2X
+  have hne : ((distSetS X).erase (diam X)).Nonempty := by
+    by_contra hh
+    have : dist2 X = 0 := by rw [dist2, dite_eq_right hh]
+    linarith
+  have hd2 : dist2 X = ((distSetS X).erase (diam X)).max' hne := by rw [dist2, dite_eq_left hne]
+  have hmem : dist2 X ∈ (distSetS X).erase (diam X) := by rw [hd2]; exact max'_mem _ _
+  have hD2ne : dist2 X ≠ diam X := ne_of_mem_erase hmem
+  have hle : ∀ d ∈ distSetS X, d ≠ diam X → d ≤ dist2 X := fun d hd hdne => by
+    rw [hd2]; exact le_max' _ _ (mem_erase.2 ⟨hdne, hd⟩)
+  by_cases hdiam : diam Y = diam X
+  · have hneY : ((distSetS Y).erase (diam Y)).Nonempty :=
+      ⟨dist2 X, mem_erase.2 ⟨by rw [hdiam]; exact hD2ne, hD2Y⟩⟩
+    have e : dist2 Y = dist2 X := by
+      rw [dist2, dite_eq_left hneY]
+      refine le_antisymm (max'_le _ _ _ fun d hd => ?_) (le_max' _ _ (mem_erase.2
+        ⟨by rw [hdiam]; exact hD2ne, hD2Y⟩))
+      obtain ⟨hdne, hdY⟩ := mem_erase.1 hd
+      exact hle d (distSetS_mono hY hdY) (by rw [← hdiam]; exact hdne)
+    have := vesztergombi87 Y
+    rwa [e] at this
+  · have hneY : (distSetS Y).Nonempty := ⟨_, hD2Y⟩
+    have hdY : diam Y ∈ distSetS Y := by rw [diam, dite_eq_left hneY]; exact max'_mem _ _
+    have e : dist2 X = diam Y :=
+      le_antisymm (le_diam hD2Y) (hle _ (distSetS_mono hY hdY) hdiam)
+    rw [e]
+    have := hopf_pannwitz Y
+    have : (mult Y (diam Y) : ℝ) ≤ Y.card := by exact_mod_cast this
+    have : (0 : ℝ) ≤ Y.card := Nat.cast_nonneg _
+    linarith
 
 /-- Every `Δ₂`-pair lies inside `S`.
 
@@ -740,7 +792,22 @@ Acceptance: no `sorry`.
 Depends on: `mult_dist2_eq_S`, `mult_dist2_subset_le`. Difficulty M. -/
 theorem VS_weighted {P₁ : Finset Pt} (hP : P₁ ⊆ Sset X) (hdeg : ∀ v ∈ P₁, deg2 X v = 1) :
     (mult X (dist2 X) : ℝ) ≤ P₁.card + 3 / 2 * (Sset X \ P₁).card := by
-  sorry
+  have h := mult_le_add_sum (Sset X \ P₁) X (dist2 X)
+  have hSX : Sset X ⊆ X := filter_subset _ _
+  have hsum : ∑ x ∈ X \ (Sset X \ P₁), (partners X (dist2 X) x).card = P₁.card := by
+    rw [← sum_subset (s₁ := P₁) (fun x hx => mem_sdiff.2 ⟨hSX (hP hx),
+      fun h' => (mem_sdiff.1 h').2 hx⟩)]
+    · rw [card_eq_sum_ones]
+      exact sum_congr rfl fun v hv => by have := hdeg v hv; rwa [deg2] at this
+    · intro x hx hxP
+      obtain ⟨hxX, hxS⟩ := mem_sdiff.1 hx
+      have hxS' : x ∉ Sset X := fun h' => hxS (mem_sdiff.2 ⟨h', hxP⟩)
+      rw [card_eq_zero, ← not_nonempty_iff_eq_empty]
+      exact fun hne => hxS' (mem_filter.2 ⟨hxX, hne⟩)
+  rw [hsum] at h
+  have h2 := mult_dist2_subset_le (X := X) (Y := Sset X \ P₁) (sdiff_subset.trans hSX)
+  have : (mult X (dist2 X) : ℝ) ≤ mult (Sset X \ P₁) (dist2 X) + P₁.card := by exact_mod_cast h
+  linarith
 
 /-! ## The linear programmes (Lemmas 4.1, 4.2) — pure algebra -/
 
