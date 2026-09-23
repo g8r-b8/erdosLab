@@ -580,6 +580,33 @@ theorem minDist_smul {c : ℝ} (hc : 0 < c) (X : Finset Pt) :
   · rw [dite_eq_left (h.image _), dite_eq_left h, min'_image hmono]
   · rw [dite_eq_right (by rwa [image_nonempty]), dite_eq_right h, mul_zero]
 
+/-- Coordinate differences are bounded by the distance (squared form). -/
+theorem coord_sq_le (x y : Pt) :
+    (x 0 - y 0) ^ 2 ≤ dist x y ^ 2 ∧ (x 1 - y 1) ^ 2 ≤ dist x y ^ 2 := by
+  rw [dist_sq_eq_sqd, sqd]
+  exact ⟨by nlinarith [sq_nonneg (x 1 - y 1)], by nlinarith [sq_nonneg (x 0 - y 0)]⟩
+
+/-- Grid-cell index of a coordinate value (cells of side `7/10`). -/
+theorem floor_cell_lt {t D : ℝ} (ht : 0 ≤ t) (htD : t ≤ D) (hD : D < 19400) :
+    ⌊t / (7 / 10)⌋₊ < 27715 := by
+  rw [Nat.floor_lt (by positivity)]
+  rw [div_lt_iff₀ (by norm_num)]; push_cast; linarith
+
+/-- Two values in the same grid cell differ by less than `7/10`. -/
+theorem close_of_floor_eq {t t' : ℝ} (ht : 0 ≤ t) (ht' : 0 ≤ t')
+    (h : ⌊t / (7 / 10)⌋₊ = ⌊t' / (7 / 10)⌋₊) : (t - t') ^ 2 < (7 / 10) ^ 2 := by
+  have a1 := Nat.floor_le (show 0 ≤ t / (7 / 10) by positivity)
+  have a2 := Nat.lt_floor_add_one (t / (7 / 10))
+  have b1 := Nat.floor_le (show 0 ≤ t' / (7 / 10) by positivity)
+  have b2 := Nat.lt_floor_add_one (t' / (7 / 10))
+  have h' : (⌊t / (7 / 10)⌋₊ : ℝ) = ⌊t' / (7 / 10)⌋₊ := by exact_mod_cast h
+  have h1 : t / (7 / 10) - t' / (7 / 10) < 1 := by linarith
+  have h2 : t' / (7 / 10) - t / (7 / 10) < 1 := by linarith
+  have e : t - t' = (7 / 10) * (t / (7 / 10) - t' / (7 / 10)) := by field_simp
+  rw [e, mul_pow]
+  have : (t / (7 / 10) - t' / (7 / 10)) ^ 2 < 1 := by nlinarith
+  nlinarith
+
 end Defs
 
 open Defs
@@ -600,9 +627,10 @@ open Erdos132Layer in
 /-- **[HP]** Hopf–Pannwitz (1934): in every `m`-point planar set the diameter occurs at most
 `m` times.
 
-TODO: prove (classical: two diametral segments always intersect; a graph with pairwise-crossing
-edges in convex-ish position has `≤ m` edges).
-What's missing: the crossing lemma and the counting (each vertex of degree ≥ 2 forces a leaf).
+TODO: none — proved (Phase 2).
+Proof: `2μ(Δ) = esum ≤ esum(2-core) + 2|Y ∖ core|` (`E132Layer.esum_le_core`); in the 2-core
+every vertex has degree `≤ 2`: of three `Δ`-neighbours one is the middle one (`select_middle`),
+and its second core neighbour would violate lemma M (`hp_core`).
 Acceptance: no `sorry`.
 Depends on: nothing (planar geometry only). Difficulty L. -/
 theorem hopf_pannwitz (Y : Finset Pt) : mult Y (diam Y) ≤ Y.card := by
@@ -642,8 +670,8 @@ theorem card_edges (X : Finset Pt) : (edges X).card = eS X := by
 
 /-- **Kissing bound**: a point has at most 6 points of `X` at distance `δ`.
 
-TODO: prove.
-What's missing: two `δ`-neighbours of `p` subtend `≥ 60°` at `p` (else closer than `δ`),
+TODO: none — proved (Phase 2).
+Proof: two `δ`-neighbours of `p` subtend `≥ 60°` at `p` (else closer than `δ`),
 so at most 6 fit around `p`.
 Acceptance: no `sorry`.
 Depends on: angle facts in `ℝ²`. Difficulty M. -/
@@ -716,8 +744,8 @@ theorem card_partners_minDist_le (X : Finset Pt) (p : Pt) :
 /-- **Handshake with degree ≤ k**: `2|E| ≤ k|V|` for a loopless edge set on `V` whose vertices
 have degree `≤ k`.
 
-TODO: prove by double counting `Σ_{p ∈ V} deg p = 2|E|`.
-What's missing: the double counting over `Sym2`.
+TODO: none — proved (Phase 2).
+Proof: the double counting over `Sym2`.
 Acceptance: no `sorry`.
 Depends on: nothing. Difficulty M. -/
 theorem two_mul_card_le_of_deg_le {V : Finset Pt} {E : Finset (Sym2 Pt)} {k : ℕ}
@@ -750,8 +778,8 @@ theorem two_mul_card_le_of_deg_le {V : Finset Pt} {E : Finset (Sym2 Pt)} {k : �
 
 /-- `μ(δ) ≤ 3n` (from the kissing bound).
 
-TODO: prove.
-What's missing: handshake applied to the `δ`-graph.
+TODO: none — proved (Phase 2).
+Proof: handshake applied to the `δ`-graph.
 Acceptance: no `sorry`.
 Depends on: `card_partners_minDist_le`, `two_mul_card_le_of_deg_le`. Difficulty S–M. -/
 theorem mult_minDist_le (X : Finset Pt) : (mult X (minDist X) : ℝ) ≤ 3 * X.card := by
@@ -777,8 +805,8 @@ theorem mult_minDist_le (X : Finset Pt) : (mult X (minDist X) : ℝ) ≤ 3 * X.c
 
 /-- **(VS), general form**: for `Y ⊆ X`, the `Δ₂(X)`-pairs inside `Y` number `≤ (3/2)|Y|`.
 
-TODO: prove.
-What's missing: case split: if `diam Y = diam X` then `dist2 Y = dist2 X` (no distances of `X`
+TODO: none — proved (Phase 2).
+Proof: case split: if `diam Y = diam X` then `dist2 Y = dist2 X` (no distances of `X`
 in `(Δ₂, Δ)`) and apply [Ve87] to `Y`; otherwise `diam Y ≤ Δ₂` and [HP] applies (or the count
 is `0`).
 Acceptance: no `sorry`.
@@ -826,8 +854,8 @@ theorem mult_dist2_subset_le {Y : Finset Pt} (hY : Y ⊆ X) :
 
 /-- Every `Δ₂`-pair lies inside `S`.
 
-TODO: prove.
-What's missing: both ends of a `Δ₂`-pair have a `Δ₂`-partner, so are in `S`.
+TODO: none — proved (Phase 2).
+Proof: both ends of a `Δ₂`-pair have a `Δ₂`-partner, so are in `S`.
 Acceptance: no `sorry`.
 Depends on: definitions. Difficulty S. -/
 theorem mult_dist2_eq_S (X : Finset Pt) : mult X (dist2 X) = mult (Sset X) (dist2 X) := by
@@ -851,8 +879,8 @@ theorem VS (X : Finset Pt) : (mult X (dist2 X) : ℝ) ≤ 3 / 2 * (Sset X).card 
 
 /-- **(E)** `μ(δ) ≤ e(S) + 6r`: every `δ`-pair not inside `S` has an endpoint in `R`.
 
-TODO: prove.
-What's missing: split the `δ`-pairs of `X` into those inside `S` and those meeting `R`;
+TODO: none — proved (Phase 2).
+Proof: split the `δ`-pairs of `X` into those inside `S` and those meeting `R`;
 bound the latter by `Σ_{x ∈ R} deg_δ x ≤ 6r`.
 Acceptance: no `sorry`.
 Depends on: `card_partners_minDist_le`. Difficulty M. -/
@@ -870,8 +898,8 @@ theorem E_bound (X : Finset Pt) :
 /-- **Weighted (VS)** (Lemma 4.2, first bullet): if every point of `P₁ ⊆ S` has `Δ₂`-degree 1
 then `μ(Δ₂) ≤ |P₁| + (3/2)|S ∖ P₁|`.
 
-TODO: prove.
-What's missing: pairs touching `P₁` number `≤ |P₁|`; the rest lie in `S ∖ P₁`, apply
+TODO: none — proved (Phase 2).
+Proof: pairs touching `P₁` number `≤ |P₁|`; the rest lie in `S ∖ P₁`, apply
 `mult_dist2_subset_le`.
 Acceptance: no `sorry`.
 Depends on: `mult_dist2_eq_S`, `mult_dist2_subset_le`. Difficulty M. -/
@@ -960,8 +988,8 @@ theorem lp_values :
 /-- **Scaling**: every `X` with `≥ 2` points has a copy `Y` (a dilate) with `δ(Y) = 1` and the
 same `n`, `μ(Δ₂)`, `μ(δ)`.
 
-TODO: prove.
-What's missing: `Y := δ⁻¹ • X`; distances scale by `δ⁻¹`, so `diam`, `dist2`, `minDist`,
+TODO: none — proved (Phase 2).
+Proof: `Y := δ⁻¹ • X`; distances scale by `δ⁻¹`, so `diam`, `dist2`, `minDist`,
 `mult` transform accordingly (`δ > 0` since the points are distinct).
 Acceptance: no `sorry`.
 Depends on: definitions. Difficulty M. -/
@@ -990,14 +1018,63 @@ theorem N0_check : (2 * (1.94 * 10 ^ 4) + 1 : ℝ) ^ 2 < N₀ := by
 /-- **Small cases** (§4): nondegenerate with `δ = 1`, `Δ₂ < 10⁴` ⇒ `n < N₀` (packing:
 `n ≤ (2Δ + 1)²`).
 
-TODO: prove.
-What's missing: packing bound — disjoint discs of radius `1/2` around the points inside a disc
-of radius `Δ + 1/2`, area comparison (or a grid-cell pigeonhole, which avoids measure theory).
+TODO: none — proved (Phase 2).
+Proof: grid pigeonhole — `X` lies in an axis-parallel square of side `Δ < 19400`; cells of
+side `7/10` have diameter `< 1 = δ`, so each holds `≤ 1` point: `n ≤ 27715² < N₀`.
 Acceptance: no `sorry`.
 Depends on: `N0_check`. Difficulty M–L. -/
 theorem card_lt_N0 (h1 : minDist X = 1) (hnd : diam X ≤ 1.94 * dist2 X)
     (hsmall : dist2 X < 10 ^ 4) : (X.card : ℝ) < N₀ := by
-  sorry
+  rcases X.eq_empty_or_nonempty with rfl | hne
+  · simp [N₀]
+  have hD : diam X < 19400 := by linarith
+  have hD0 := diam_nonneg X
+  set m0 := X.inf' hne (fun x : Pt => x 0)
+  set m1 := X.inf' hne (fun x : Pt => x 1)
+  obtain ⟨a, ha, hma⟩ := exists_mem_eq_inf' hne (fun x : Pt => x 0)
+  obtain ⟨b, hb, hmb⟩ := exists_mem_eq_inf' hne (fun x : Pt => x 1)
+  have lo0 : ∀ x ∈ X, 0 ≤ x 0 - m0 := fun x hx => sub_nonneg.2 (inf'_le _ hx)
+  have lo1 : ∀ x ∈ X, 0 ≤ x 1 - m1 := fun x hx => sub_nonneg.2 (inf'_le _ hx)
+  have hi0 : ∀ x ∈ X, x 0 - m0 ≤ diam X := fun x hx => by
+    have h := (coord_sq_le x a).1
+    have hd := dist_le_diam hx ha
+    have := lo0 x hx
+    have hm : m0 = a 0 := hma
+    rw [hm] at this ⊢
+    nlinarith [dist_nonneg (x := x) (y := a)]
+  have hi1 : ∀ x ∈ X, x 1 - m1 ≤ diam X := fun x hx => by
+    have h := (coord_sq_le x b).2
+    have hd := dist_le_diam hx hb
+    have := lo1 x hx
+    have hm : m1 = b 1 := hmb
+    rw [hm] at this ⊢
+    nlinarith [dist_nonneg (x := x) (y := b)]
+  obtain ⟨K, hK⟩ : ∃ K : ℕ, K = 27715 := ⟨_, rfl⟩
+  let f : Pt → ℕ × ℕ := fun x => (⌊(x 0 - m0) / (7 / 10)⌋₊, ⌊(x 1 - m1) / (7 / 10)⌋₊)
+  have hmaps : ∀ x ∈ X, f x ∈ range K ×ˢ range K := fun x hx => by
+    rw [mem_product, mem_range, mem_range, hK]
+    exact ⟨floor_cell_lt (lo0 x hx) (hi0 x hx) hD, floor_cell_lt (lo1 x hx) (hi1 x hx) hD⟩
+  have hinj : Set.InjOn f X := by
+    intro x hx y hy hxy
+    by_contra hne'
+    have e := Prod.mk.inj hxy
+    have c0 := close_of_floor_eq (lo0 x hx) (lo0 y hy) e.1
+    have c1 := close_of_floor_eq (lo1 x hx) (lo1 y hy) e.2
+    have hge := minDist_le_dist hx hy hne'
+    rw [h1] at hge
+    have hsq : 1 ≤ sqd x y := by
+      rw [← dist_sq_eq_sqd]; nlinarith
+    have e0 : x 0 - m0 - (y 0 - m0) = x 0 - y 0 := by ring
+    have e1 : x 1 - m1 - (y 1 - m1) = x 1 - y 1 := by ring
+    rw [e0] at c0; rw [e1] at c1
+    rw [sqd] at hsq
+    norm_num at c0 c1
+    linarith
+  have hcard := card_le_card_of_injOn f hmaps hinj
+  rw [card_product, card_range] at hcard
+  rw [hK] at hcard
+  have h' : (X.card : ℝ) ≤ 768121225 := by exact_mod_cast hcard.trans (by norm_num)
+  rw [N₀]; linarith
 
 end
 
