@@ -236,7 +236,7 @@ theorem cross_dist_identity (x x' z z' : Pt) :
 
 /-- **Step 1**: no two disjoint diametral pairs when `Δ > 1.94Δ₂`.
 
-TODO: prove.
+TODO: none — proved (Phase 2).
 What's missing: at least two cross distances equal `Δ` ([C10] + `cross_dist_identity`);
 disjoint cross pairs ⇒ rhombus of side `Δ` with a diagonal `≥ √2Δ`; sharing a point ⇒
 equilateral triangle and a distance in `[2Δ sin 15°, Δ)`, hence in `(Δ₂, Δ)`.
@@ -301,7 +301,7 @@ theorem degen_step1 (hdeg : 1.94 * dist2 X < diam X) {x x' z z' : Pt} (hx : x �
 
 /-- **Step 2**: the diameter graph is a star with centre `y`.
 
-TODO: prove.
+TODO: none — proved (Phase 2).
 What's missing: by Step 1 it is a star or a triangle; a triangle with a 4th point is impossible
 (`Δ₂² < Δ²/3` = circumradius², [C10]).
 Acceptance: no `sorry`.
@@ -538,11 +538,109 @@ theorem arcA {y a b c d : Pt} {D q : ℝ} (hya : sqd y a = D) (hyb : sqd y b = D
   · exact Or.inl ⟨pt (e1.trans a0.symm) (e2.trans a1.symm), pt e3 e4⟩
   · exact Or.inr ⟨pt e3 e4, pt (e1.trans a0.symm) (e2.trans a1.symm)⟩
 
+/-! ## Step 4 cores -/
+
+theorem sq_sum_zero {a b : ℝ} (h : a ^ 2 + b ^ 2 = 0) : a = 0 ∧ b = 0 := by
+  constructor <;> nlinarith [sq_nonneg a, sq_nonneg b]
+
+/-- Real core of "no point is interior to two arcs" (origin at `b`, `u = w − b`, `v = w' − b`,
+`p = b₁ − b`, `s = b₂ − b`): the arcs of `C(w, Δ₂)` and `C(w', Δ₂)` inside `K` cannot both arrive
+at `b` from the clockwise side. -/
+theorem star_real {u0 u1 v0 v1 p0 p1 s0 s1 r : ℝ} (hu : u0 ^ 2 + u1 ^ 2 = r)
+    (hv : v0 ^ 2 + v1 ^ 2 = r) (hpu : (p0 - u0) ^ 2 + (p1 - u1) ^ 2 = r)
+    (hpv : (p0 - v0) ^ 2 + (p1 - v1) ^ 2 ≤ r) (hsv : (s0 - v0) ^ 2 + (s1 - v1) ^ 2 = r)
+    (hsu : (s0 - u0) ^ 2 + (s1 - u1) ^ 2 ≤ r) (hp : 0 < u0 * p1 - u1 * p0)
+    (hs : 0 < v0 * s1 - v1 * s0) (huv : 0 < (u0 - v0) ^ 2 + (u1 - v1) ^ 2) : False := by
+  have e1 : 2 * (p0 * u0 + p1 * u1) = p0 ^ 2 + p1 ^ 2 := by linear_combination hu - hpu
+  have e2 : p0 ^ 2 + p1 ^ 2 ≤ 2 * (p0 * v0 + p1 * v1) := by
+    have e : (p0 - v0) ^ 2 + (p1 - v1) ^ 2 = p0 ^ 2 + p1 ^ 2 - 2 * (p0 * v0 + p1 * v1) + r := by
+      linear_combination hv
+    linarith
+  have f1 : 2 * (s0 * v0 + s1 * v1) = s0 ^ 2 + s1 ^ 2 := by linear_combination hv - hsv
+  have f2 : s0 ^ 2 + s1 ^ 2 ≤ 2 * (s0 * u0 + s1 * u1) := by
+    have e : (s0 - u0) ^ 2 + (s1 - u1) ^ 2 = s0 ^ 2 + s1 ^ 2 - 2 * (s0 * u0 + s1 * u1) + r := by
+      linear_combination hu
+    linarith
+  have id1 : r * (p0 * v0 + p1 * v1) = (p0 * u0 + p1 * u1) * (u0 * v0 + u1 * v1) +
+      (u0 * p1 - u1 * p0) * (u0 * v1 - u1 * v0) := by rw [← hu]; ring
+  have id2 : r * (s0 * u0 + s1 * u1) = (s0 * v0 + s1 * v1) * (u0 * v0 + u1 * v1) +
+      (v0 * s1 - v1 * s0) * (v0 * u1 - v1 * u0) := by rw [← hv]; ring
+  have hr : 0 ≤ r := by rw [← hu]; positivity
+  have huv' : 0 < r - (u0 * v0 + u1 * v1) := by
+    have e : (u0 - v0) ^ 2 + (u1 - v1) ^ 2 = 2 * (r - (u0 * v0 + u1 * v1)) := by
+      linear_combination hu + hv
+    linarith
+  have pu0 : 0 ≤ p0 * u0 + p1 * u1 := by nlinarith [sq_nonneg p0, sq_nonneg p1]
+  have sv0 : 0 ≤ s0 * v0 + s1 * v1 := by nlinarith [sq_nonneg s0, sq_nonneg s1]
+  have m1 := mul_nonneg hr (by linarith : (0:ℝ) ≤ (p0 * v0 + p1 * v1) - (p0 * u0 + p1 * u1))
+  have m2 := mul_nonneg pu0 huv'.le
+  have m3 := mul_nonneg hr (by linarith : (0:ℝ) ≤ (s0 * u0 + s1 * u1) - (s0 * v0 + s1 * v1))
+  have m4 := mul_nonneg sv0 huv'.le
+  have k1 : 0 ≤ (u0 * p1 - u1 * p0) * (u0 * v1 - u1 * v0) := by nlinarith
+  have k2 : 0 ≤ (v0 * s1 - v1 * s0) * (v0 * u1 - v1 * u0) := by nlinarith
+  have d1 : 0 ≤ u0 * v1 - u1 * v0 := by
+    by_contra h; push Not at h; linarith [mul_neg_of_pos_of_neg hp h]
+  have d2 : 0 ≤ v0 * u1 - v1 * u0 := by
+    by_contra h; push Not at h; linarith [mul_neg_of_pos_of_neg hs h]
+  have d0 : u0 * v1 - u1 * v0 = 0 := by linarith
+  rw [d0, mul_zero, add_zero] at id1
+  -- `(p·u)(r − u·v) ≤ 0`, so `p·u = 0`, so `p = 0`
+  have : (p0 * u0 + p1 * u1) * (r - (u0 * v0 + u1 * v1)) ≤ 0 := by
+    have eq : (p0 * u0 + p1 * u1) * (r - (u0 * v0 + u1 * v1)) =
+        -(r * ((p0 * v0 + p1 * v1) - (p0 * u0 + p1 * u1))) := by linear_combination id1
+    linarith
+  have pu : p0 * u0 + p1 * u1 = 0 := by
+    by_contra h
+    have := mul_pos (lt_of_le_of_ne pu0 (Ne.symm h)) huv'
+    linarith
+  obtain ⟨hp0, hp1⟩ := sq_sum_zero (by linarith : p0 ^ 2 + p1 ^ 2 = 0)
+  rw [hp0, hp1] at hp; simp at hp
+
+theorem star_pt {b w w' b₁ b₂ : Pt} {r : ℝ} (hbw : sqd b w = r) (hbw' : sqd b w' = r)
+    (h1 : sqd b₁ w = r) (h1' : sqd b₁ w' ≤ r) (h2 : sqd b₂ w' = r) (h2' : sqd b₂ w ≤ r)
+    (o1 : 0 < orient w b₁ b) (o2 : 0 < orient w' b₂ b) (hww : w ≠ w') : False := by
+  have hpos := sqd_pos_of_ne hww
+  simp only [sqd_coord] at *
+  exact star_real (u0 := w 0 - b 0) (u1 := w 1 - b 1) (v0 := w' 0 - b 0) (v1 := w' 1 - b 1)
+    (p0 := b₁ 0 - b 0) (p1 := b₁ 1 - b 1) (s0 := b₂ 0 - b 0) (s1 := b₂ 1 - b 1)
+    (by linear_combination hbw) (by linear_combination hbw') (by linear_combination h1)
+    (Eq.trans_le (by ring) h1') (by linear_combination h2) (Eq.trans_le (by ring) h2')
+    (lt_of_lt_of_eq o1 (by unfold orient; ring)) (lt_of_lt_of_eq o2 (by unfold orient; ring))
+    (lt_of_lt_of_eq hpos (by ring))
+
+theorem coll_real {x0 x1 y0 y1 r : ℝ} (hx : x0 ^ 2 + x1 ^ 2 = r) (hy : y0 ^ 2 + y1 ^ 2 = r)
+    (h : (x0 - y0) ^ 2 + (x1 - y1) ^ 2 ≤ r) (ho : x0 * y1 - x1 * y0 = 0) (hr : 0 < r) :
+    x0 = y0 ∧ x1 = y1 := by
+  have lag : (x0 * y0 + x1 * y1) ^ 2 = r ^ 2 := by
+    have : (x0 * y0 + x1 * y1) ^ 2 + (x0 * y1 - x1 * y0) ^ 2 = (x0 ^ 2 + x1 ^ 2) * (y0 ^ 2 + y1 ^ 2) := by
+      ring
+    rw [ho, hx, hy] at this; linarith
+  have e : (x0 - y0) ^ 2 + (x1 - y1) ^ 2 = 2 * r - 2 * (x0 * y0 + x1 * y1) := by
+    linear_combination hx + hy
+  have hd : r ≤ 2 * (x0 * y0 + x1 * y1) := by linarith
+  have hsq : (x0 * y0 + x1 * y1 - r) * (x0 * y0 + x1 * y1 + r) = 0 := by linear_combination lag
+  have hdr : x0 * y0 + x1 * y1 = r := by
+    have := (mul_eq_zero.1 hsq).resolve_right (by linarith); linarith
+  have z : (x0 - y0) ^ 2 + (x1 - y1) ^ 2 = 0 := by rw [e, hdr]; ring
+  have a : x0 - y0 = 0 := by nlinarith [sq_nonneg (x0 - y0), sq_nonneg (x1 - y1)]
+  have b : x1 - y1 = 0 := by nlinarith [sq_nonneg (x0 - y0), sq_nonneg (x1 - y1)]
+  exact ⟨by linarith, by linarith⟩
+
+theorem coll_pt {w b b' : Pt} {r : ℝ} (h1 : sqd b w = r) (h2 : sqd b' w = r) (h3 : sqd b b' ≤ r)
+    (ho : orient w b b' = 0) (hr : 0 < r) : b = b' := by
+  simp only [sqd_coord] at *
+  obtain ⟨e0, e1⟩ := coll_real (x0 := b 0 - w 0) (x1 := b 1 - w 1) (y0 := b' 0 - w 0)
+    (y1 := b' 1 - w 1) (by linear_combination h1) (by linear_combination h2)
+    (Eq.trans_le (by ring) h3) (Eq.trans (by unfold orient; ring) ho) hr
+  ext i; fin_cases i
+  · simp only [Fin.zero_eta, Fin.isValue]; linarith
+  · simp only [Fin.mk_one, Fin.isValue]; linarith
+
 end Degen
 
 /-- **Step 3a**: no `Δ₂`-pair inside `B` (`diam K < Δ₂`: lens bounding box, [C10]).
 
-TODO: prove.
+TODO: none — proved (Phase 2).
 Acceptance: no `sorry`.
 Depends on: `ball_polygon_a`-type facts, `c10`. Difficulty M. -/
 theorem degen_B_no_pair (h4 : 4 ≤ X.card) (hdeg : 1.94 * dist2 X < diam X) {y : Pt}
@@ -569,7 +667,7 @@ theorem degen_B_no_pair (h4 : 4 ≤ X.card) (hdeg : 1.94 * dist2 X < diam X) {y 
 
 /-- **Step 3b**: at most one `Δ₂`-pair inside `A = Diam(y)` (the two extreme points of the arc).
 
-TODO: prove.
+TODO: none — proved (Phase 2).
 Acceptance: no `sorry`.
 Depends on: `c10`, `degen_star`. Difficulty M. -/
 theorem degen_A_le_one (h4 : 4 ≤ X.card) (hdeg : 1.94 * dist2 X < diam X) {y : Pt}
@@ -604,17 +702,63 @@ theorem degen_A_le_one (h4 : 4 ≤ X.card) (hdeg : 1.94 * dist2 X < diam X) {y :
 
 /-- **Step 3**: `μ(Δ₂) ≤ 1 + I`.
 
-TODO: prove (split the `Δ₂`-pairs by where the endpoints lie; `y–A` pairs are at distance `Δ`).
+TODO: none — proved (split the `Δ₂`-pairs by where the endpoints lie; `y–A` pairs are at
+distance `Δ`).
 Acceptance: no `sorry`.
 Depends on: `degen_B_no_pair`, `degen_A_le_one`. Difficulty M. -/
 theorem degen_step3 (h4 : 4 ≤ X.card) (hdeg : 1.94 * dist2 X < diam X) {y : Pt} (hy : y ∈ X)
     (hstar : ∀ a ∈ X, ∀ b ∈ X, a ≠ b → dist a b = diam X → a = y ∨ b = y) :
     mult X (dist2 X) ≤ 1 + incid X y := by
-  sorry
+  have hB := degen_B_no_pair h4 hdeg hy hstar
+  have hA := degen_A_le_one h4 hdeg hy hstar
+  have hlt : dist2 X < diam X := by have := dist2_nonneg' X; linarith
+  unfold mult multS at hB hA ⊢
+  unfold incid
+  rw [card_eq_zero] at hB
+  set S := (Bset X y ×ˢ Wset X y).filter (fun bw => dist bw.1 bw.2 = dist2 X) with hS
+  have hsub : (pairsS X).filter (fun z => pairDist z = dist2 X) ⊆
+      (pairsS (partners X (diam X) y)).filter (fun z => pairDist z = dist2 X) ∪
+        S.image (fun bw => s(bw.1, bw.2)) := by
+    intro z hz
+    induction z using Sym2.ind with
+    | _ u v =>
+      have hz' := hz
+      simp only [pairsS, mem_filter, Finset.mk_mem_sym2_iff, Sym2.mk_isDiag_iff] at hz'
+      obtain ⟨⟨⟨hu, hv⟩, huv⟩, hd⟩ := hz'
+      have hd' : dist u v = dist2 X := hd
+      rw [mem_union]
+      by_cases huW : u ∈ Wset X y <;> by_cases hvW : v ∈ Wset X y
+      · left
+        rcases mem_Wset.1 huW with huy | ⟨-, huy, huA⟩
+        · exfalso
+          rcases mem_Wset.1 hvW with hvy | ⟨-, -, hvA⟩
+          · exact huv (huy.trans hvy.symm)
+          · rw [huy] at hd'; linarith
+        rcases mem_Wset.1 hvW with hvy | ⟨-, hvy, hvA⟩
+        · exfalso; rw [hvy, dist_comm] at hd'; linarith
+        simp only [pairsS, mem_filter, Finset.mk_mem_sym2_iff, Sym2.mk_isDiag_iff, partners]
+        exact ⟨⟨⟨⟨hu, huy, huA⟩, ⟨hv, hvy, hvA⟩⟩, huv⟩, hd⟩
+      · right
+        refine mem_image.2 ⟨(v, u), ?_, Sym2.eq_swap⟩
+        rw [hS, mem_filter, mem_product]
+        exact ⟨⟨mem_Bset.2 ⟨hv, hvW⟩, huW⟩, by rw [dist_comm]; exact hd'⟩
+      · right
+        refine mem_image.2 ⟨(u, v), ?_, rfl⟩
+        rw [hS, mem_filter, mem_product]
+        exact ⟨⟨mem_Bset.2 ⟨hu, huW⟩, hvW⟩, hd'⟩
+      · exfalso
+        have : s(u, v) ∈ (pairsS (Bset X y)).filter (fun z => pairDist z = dist2 X) := by
+          simp only [pairsS, mem_filter, Finset.mk_mem_sym2_iff, Sym2.mk_isDiag_iff]
+          exact ⟨⟨⟨mem_Bset.2 ⟨hu, huW⟩, mem_Bset.2 ⟨hv, hvW⟩⟩, huv⟩, hd⟩
+        rw [hB] at this; exact absurd this (notMem_empty _)
+  calc _ ≤ _ := card_le_card hsub
+    _ ≤ _ := card_union_le _ _
+    _ ≤ 1 + S.card := by
+      have := card_image_le (s := S) (f := fun bw => s(bw.1, bw.2)); omega
 
 /-- **Step 4 (incidence bound)** `I ≤ |B| + |W|`.
 
-TODO: prove.
+TODO: none — proved (Phase 2).
 What's missing: each `J_w = C(w, Δ₂) ∩ K` is a single arc; no point is interior to two arcs
 (internally tangent equal circles coincide); nondegenerate arcs are edges of `∂K`; injective
 map `b ↦` following edge.
@@ -623,7 +767,54 @@ Depends on: circle geometry; `degen_B_no_pair`. Difficulty L–XL. -/
 theorem degen_step4 (h4 : 4 ≤ X.card) (hdeg : 1.94 * dist2 X < diam X) {y : Pt} (hy : y ∈ X)
     (hstar : ∀ a ∈ X, ∀ b ∈ X, a ≠ b → dist a b = diam X → a = y ∨ b = y) :
     incid X y ≤ (Bset X y).card + (Wset X y).card := by
-  sorry
+  unfold incid
+  set S := (Bset X y ×ˢ Wset X y).filter (fun bw => dist bw.1 bw.2 = dist2 X) with hS
+  have memS : ∀ {bw : Pt × Pt}, bw ∈ S ↔ (bw.1 ∈ Bset X y ∧ bw.2 ∈ Wset X y) ∧
+      dist bw.1 bw.2 = dist2 X := by
+    intro bw; rw [hS, mem_filter, mem_product]
+  have hWX := Wset_subset hy
+  have r0 : ∀ {b w : Pt}, b ∈ Bset X y → w ∈ Wset X y → dist b w = dist2 X → 0 < dist2 X :=
+    fun hb hw h => by
+      rw [← h]; refine dist_pos.2 fun e => (mem_Bset.1 hb).2 (e ▸ hw)
+  have sq : ∀ {b w : Pt}, dist b w = dist2 X → sqd b w = dist2 X ^ 2 :=
+    fun h => (dist_eq_iff_sqd (dist2_nonneg' X)).1 h
+  have cl : ∀ {b x : Pt}, b ∈ Bset X y → x ∈ X → sqd b x ≤ dist2 X ^ 2 :=
+    fun hb hx => sqd_le_dist2 (B_close hdeg hstar hb hx)
+  let P : Pt × Pt → Prop := fun bw =>
+    ∃ b₁ ∈ Bset X y, dist b₁ bw.2 = dist2 X ∧ 0 < orient bw.2 b₁ bw.1
+  rw [← card_filter_add_card_filter_not (s := S) P]
+  have h1 : (S.filter P).card ≤ (Bset X y).card := by
+    refine card_le_card_of_injOn Prod.fst (fun bw hbw => ?_) ?_
+    · exact ((memS.1 (mem_filter.1 hbw).1).1).1
+    · rintro ⟨b, w⟩ hbw ⟨b', w'⟩ hbw' (e : b = b')
+      subst e
+      have hbw := mem_filter.1 (mem_coe.1 hbw)
+      have hbw' := mem_filter.1 (mem_coe.1 hbw')
+      obtain ⟨⟨hb, hw⟩, dbw⟩ := memS.1 hbw.1
+      obtain ⟨⟨-, hw'⟩, dbw'⟩ := memS.1 hbw'.1
+      obtain ⟨b₁, hb₁, d₁, o₁⟩ := hbw.2
+      obtain ⟨b₂, hb₂, d₂, o₂⟩ := hbw'.2
+      by_contra hne
+      have hww : w ≠ w' := fun e => hne (by rw [e])
+      exact star_pt (sq dbw) (sq dbw') (sq d₁) (cl hb₁ (hWX hw')) (sq d₂) (cl hb₂ (hWX hw))
+        o₁ o₂ hww
+  have h2 : (S.filter (fun bw => ¬ P bw)).card ≤ (Wset X y).card := by
+    refine card_le_card_of_injOn Prod.snd (fun bw hbw => ?_) ?_
+    · exact ((memS.1 (mem_filter.1 hbw).1).1).2
+    · rintro ⟨b, w⟩ hbw ⟨b', w'⟩ hbw' (e : w = w')
+      subst e
+      have hbw := mem_filter.1 (mem_coe.1 hbw)
+      have hbw' := mem_filter.1 (mem_coe.1 hbw')
+      obtain ⟨⟨hb, hw⟩, dbw⟩ := memS.1 hbw.1
+      obtain ⟨⟨hb', -⟩, dbw'⟩ := memS.1 hbw'.1
+      have n1 : ¬ 0 < orient w b' b := fun h => hbw.2 ⟨b', hb', dbw', h⟩
+      have n2 : ¬ 0 < orient w b b' := fun h => hbw'.2 ⟨b, hb, dbw, h⟩
+      have anti : orient w b b' + orient w b' b = 0 := by unfold orient; ring
+      have ho : orient w b b' = 0 := by push Not at n1 n2; linarith
+      have := coll_pt (sq dbw) (sq dbw') (cl hb (mem_Bset.1 hb').1) ho
+        (by have := r0 hb hw dbw; positivity)
+      simp only at this; rw [this]
+  omega
 
 /-- **§8 Degenerate regime**: `Δ > 1.94Δ₂`, `n ≥ 4` ⇒ `μ(Δ₂) ≤ n + 1`.
 
