@@ -207,15 +207,48 @@ end TwoLargest
 def IsExt (S : Finset Pt) (p : Pt) : Prop :=
   p ∈ S ∧ ∃ a b : ℝ, ∀ x ∈ S, x ≠ p → a * (x 0 - p 0) + b * (x 1 - p 1) < 0
 
-/-- TODO: prove.
-What's missing: (→) the half-plane is convex and misses `p`; (←) Hahn–Banach
-(`geometric_hahn_banach_point_closed`) against the compact set `conv(S \ {p})`, then read off
-the coefficients of the functional on the basis vectors.
-Acceptance: `IsExt S p ↔ p ∉ convexHull ℝ (S \ {p})`, so `L1 X` is the vertex set of `conv X`.
-Depends on: nothing (documentation of the definition; not used below). -/
+/-- For finite sets, `IsExt S p` (exposed point) is equivalent to `p ∉ conv(S \ {p})`, so `L1 X` is the vertex set of `conv X`.  (→) the open half-plane is convex and misses `p`; (←) Hahn–Banach (`geometric_hahn_banach_point_closed`) against the compact set `conv(S \ {p})`.  Documentation of the definition; not used below. -/
 theorem isExt_iff_notMem_convexHull {S : Finset Pt} {p : Pt} (hp : p ∈ S) :
     IsExt S p ↔ p ∉ convexHull ℝ ((S : Set Pt) \ {p}) := by
-  sorry
+  constructor
+  · rintro ⟨-, a, b, hab⟩ hmem
+    have hconv : Convex ℝ {x : Pt | a * (x 0 - p 0) + b * (x 1 - p 1) < 0} := by
+      intro x hx y hy s t hs ht hst
+      simp only [Set.mem_ofPred_eq] at hx hy ⊢
+      have e : a * ((s • x + t • y) 0 - p 0) + b * ((s • x + t • y) 1 - p 1) =
+          s * (a * (x 0 - p 0) + b * (x 1 - p 1)) + t * (a * (y 0 - p 0) + b * (y 1 - p 1)) := by
+        simp only [PiLp.add_apply, PiLp.smul_apply, smul_eq_mul]
+        linear_combination (a * p 0 + b * p 1) * hst
+      rw [e]
+      rcases hs.lt_or_eq with hs' | hs'
+      · have := mul_neg_of_pos_of_neg hs' hx
+        have := mul_nonpos_of_nonneg_of_nonpos ht hy.le
+        linarith
+      · rw [← hs'] at hst ⊢
+        rw [zero_add] at hst
+        rw [hst]; linarith
+    have hsub : (S : Set Pt) \ {p} ⊆ {x : Pt | a * (x 0 - p 0) + b * (x 1 - p 1) < 0} := by
+      rintro x ⟨hx, hxp⟩
+      exact hab x hx hxp
+    have := convexHull_min hsub hconv hmem
+    simp at this
+  · intro hn
+    refine ⟨hp, ?_⟩
+    have hfin : ((S : Set Pt) \ {p}).Finite := S.finite_toSet.sdiff
+    obtain ⟨f, u, hfp, hfb⟩ := geometric_hahn_banach_point_closed (convex_convexHull ℝ _)
+      (hfin.isCompact_convexHull ℝ).isClosed hn
+    refine ⟨-f (EuclideanSpace.single 0 1), -f (EuclideanSpace.single 1 1), fun x hx hxp => ?_⟩
+    have hx' : u < f x := hfb x (subset_convexHull ℝ _ ⟨hx, hxp⟩)
+    have hv : x - p = (x 0 - p 0) • EuclideanSpace.single 0 (1 : ℝ) +
+        (x 1 - p 1) • EuclideanSpace.single 1 (1 : ℝ) := by
+      ext i; fin_cases i <;> simp
+    have h1 : f (x - p) = (x 0 - p 0) * f (EuclideanSpace.single 0 1) +
+        (x 1 - p 1) * f (EuclideanSpace.single 1 1) := by
+      rw [hv, map_add, map_smul, map_smul, smul_eq_mul, smul_eq_mul]
+    rw [map_sub] at h1
+    have e2 : -f (EuclideanSpace.single 0 1) * (x 0 - p 0) +
+        -f (EuclideanSpace.single 1 1) * (x 1 - p 1) = -(f x - f p) := by linear_combination h1
+    rw [e2]; linarith
 
 /-- The first convex layer: the extreme points of `X`. -/
 noncomputable def L1 (X : Finset Pt) : Finset Pt := by
@@ -1553,5 +1586,17 @@ theorem corA1_le_card {X : Finset Pt} {Δ Δ₂ : ℝ} (hT : TwoLargest X Δ Δ�
     rw [← card_union_of_disjoint (disjoint_L1_L2 X)]
     exact card_le_card (union_subset (L1_subset X) (L2_subset X))
   omega
+
+/-! ## Axiom check -/
+
+#print axioms theoremA
+#print axioms corA1
+#print axioms corA1_uncond
+#print axioms cdl_layer_bound
+#print axioms corA1_le_card
+#print axioms deg_core_L2
+#print axioms deg_core_L1_le_four
+#print axioms isExt_iff_notMem_convexHull
+#print axioms exists_twoLargest
 
 end Erdos132Layer
