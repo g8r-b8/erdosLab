@@ -1,6 +1,7 @@
 import Erdos.E132ConvexFinset
 import Erdos.E132Ve87
 import Mathlib.Analysis.Real.Pi.Bounds
+import Mathlib.Analysis.SpecialFunctions.Complex.Arg
 import Mathlib.Geometry.Euclidean.Angle.Unoriented.Basic
 import Mathlib.MeasureTheory.Measure.Lebesgue.Basic
 
@@ -36,6 +37,7 @@ Plan and difficulty estimates: `problems/132/lean/MAIN_PLAN.md`.
 open Finset Real
 open Erdos132Convex (Pt pairDist pairsS multS distSetS)
 open scoped Classical
+open Erdos132Layer (sqd dist_eq_iff_sqd dist_sq_eq_sqd dist_mem_distSetS pos_of_mem_distSetS)
 
 namespace Erdos132Main
 
@@ -259,6 +261,46 @@ theorem mult_le_add_sum (Y Z : Finset Pt) (d : ℝ) :
   refine (card_le_card hsub).trans ((card_union_le _ _).trans (Nat.add_le_add_left ?_ _))
   exact card_biUnion_le.trans (sum_le_sum fun x _ => card_image_le)
 
+/-- `δ ≤` every distance of distinct points. -/
+theorem minDist_le_dist {X : Finset Pt} {x y : Pt} (hx : x ∈ X) (hy : y ∈ X) (hxy : x ≠ y) :
+    minDist X ≤ dist x y := by
+  have hm := dist_mem_distSetS hx hy hxy
+  have hne : (distSetS X).Nonempty := ⟨_, hm⟩
+  rw [minDist, dite_eq_left hne]
+  exact min'_le _ _ hm
+
+/-- Two points on a circle of radius `δ` whose angles differ by less than `π/3` are at distance
+`< δ`. -/
+theorem sqd_lt_of_arg {δ a b : ℝ} (hδ : 0 < δ) (hab : |a - b| < π / 3) :
+    (δ * cos a - δ * cos b) ^ 2 + (δ * sin a - δ * sin b) ^ 2 < δ ^ 2 := by
+  have hc : 1 / 2 < cos (a - b) := by
+    rw [← Real.cos_abs, ← Real.cos_pi_div_three]
+    exact Real.cos_lt_cos_of_nonneg_of_le_pi (abs_nonneg _) (by linarith [Real.pi_pos]) hab
+  have e : (δ * cos a - δ * cos b) ^ 2 + (δ * sin a - δ * sin b) ^ 2 =
+      δ ^ 2 * (2 - 2 * cos (a - b)) := by
+    rw [Real.cos_sub]
+    linear_combination δ ^ 2 * (Real.sin_sq_add_cos_sq a) + δ ^ 2 * (Real.sin_sq_add_cos_sq b)
+  rw [e]
+  have : 0 < δ ^ 2 := by positivity
+  nlinarith
+
+/-- No pair of distinct points is at distance `0`. -/
+theorem mult_zero (Y : Finset Pt) : mult Y 0 = 0 := by
+  rw [mult_eq_card, card_eq_zero, filter_eq_empty_iff]
+  intro z hz h0
+  induction z using Sym2.ind with
+  | h a b =>
+    obtain ⟨-, -, hab⟩ := mk_mem_pairsS.1 hz
+    rw [pairDist_mk] at h0
+    exact hab (dist_eq_zero.1 h0)
+
+/-- `δ ≥ 0`. -/
+theorem minDist_nonneg (X : Finset Pt) : 0 ≤ minDist X := by
+  unfold minDist
+  split_ifs with h
+  · exact (pos_of_mem_distSetS (min'_mem _ h)).le
+  · exact le_rfl
+
 end Defs
 
 open Defs
@@ -315,7 +357,69 @@ Acceptance: no `sorry`.
 Depends on: angle facts in `ℝ²`. Difficulty M. -/
 theorem card_partners_minDist_le (X : Finset Pt) (p : Pt) :
     (partners X (minDist X) p).card ≤ 6 := by
-  sorry
+  set δ := minDist X with hδdef
+  by_contra hcon
+  push Not at hcon
+  obtain ⟨q₀, hq₀⟩ := card_pos.1 (by omega : 0 < (partners X δ p).card)
+  obtain ⟨-, hq₀p, hq₀d⟩ := Defs.mem_partners.1 hq₀
+  have hδ : 0 < δ := by rw [← hq₀d]; exact dist_pos.2 (Ne.symm hq₀p)
+  let z : Pt → ℂ := fun q => ⟨q 0 - p 0, q 1 - p 1⟩
+  have hz : ∀ q ∈ partners X δ p, ‖z q‖ = δ := by
+    intro q hq
+    obtain ⟨-, -, hd⟩ := Defs.mem_partners.1 hq
+    have h1 := (dist_eq_iff_sqd hδ.le).1 hd
+    have h2 : ‖z q‖ ^ 2 = δ ^ 2 := by
+      rw [Complex.sq_norm, Complex.normSq_mk, ← h1, sqd]; ring
+    exact (pow_left_inj₀ (norm_nonneg _) hδ.le two_ne_zero).1 h2
+  have hre : ∀ q ∈ partners X δ p, q 0 - p 0 = δ * cos (Complex.arg (z q)) := by
+    intro q hq
+    have hz0 : z q ≠ 0 := by
+      intro h; have := hz q hq; rw [h, norm_zero] at this; linarith
+    rw [Complex.cos_arg hz0, hz q hq, mul_div_cancel₀ _ hδ.ne']
+  have him : ∀ q ∈ partners X δ p, q 1 - p 1 = δ * sin (Complex.arg (z q)) := by
+    intro q hq
+    rw [Complex.sin_arg, hz q hq, mul_div_cancel₀ _ hδ.ne']
+  let f : Pt → ℕ := fun q => ⌈(Complex.arg (z q) + π) / (π / 3)⌉₊
+  have hmaps : ∀ q ∈ partners X δ p, f q ∈ Icc 1 6 := by
+    intro q _
+    have h1 := Complex.neg_pi_lt_arg (z q)
+    have h2 := Complex.arg_le_pi (z q)
+    have hp3 : 0 < π / 3 := by positivity
+    rw [mem_Icc]
+    constructor
+    · exact Nat.one_le_iff_ne_zero.2 (Nat.pos_iff_ne_zero.1 (Nat.ceil_pos.2 (div_pos (by linarith) hp3)))
+    · refine Nat.ceil_le.2 ?_
+      rw [div_le_iff₀ hp3]; push_cast; linarith
+  have hcard : (Icc 1 6 : Finset ℕ).card < (partners X δ p).card := by simpa using hcon
+  obtain ⟨q, hq, q', hq', hqq', hf⟩ := exists_ne_map_eq_of_card_lt_of_maps_to hcard hmaps
+  have hclose : |Complex.arg (z q) - Complex.arg (z q')| < π / 3 := by
+    have hp3 : 0 < π / 3 := by positivity
+    have h1 := Complex.neg_pi_lt_arg (z q)
+    have h1' := Complex.neg_pi_lt_arg (z q')
+    set x := (Complex.arg (z q) + π) / (π / 3)
+    set y := (Complex.arg (z q') + π) / (π / 3)
+    have hx0 : 0 ≤ x := div_nonneg (by linarith) hp3.le
+    have hy0 : 0 ≤ y := div_nonneg (by linarith) hp3.le
+    have a1 := Nat.le_ceil x
+    have a2 := Nat.ceil_lt_add_one hx0
+    have b1 := Nat.le_ceil y
+    have b2 := Nat.ceil_lt_add_one hy0
+    have hf' : (⌈x⌉₊ : ℝ) = ⌈y⌉₊ := by exact_mod_cast hf
+    have hxy : |x - y| < 1 := by rw [abs_lt]; constructor <;> linarith
+    have e : Complex.arg (z q) - Complex.arg (z q') = (x - y) * (π / 3) := by
+      simp only [x, y]; field_simp; ring
+    rw [e, abs_mul, abs_of_pos hp3]
+    nlinarith [abs_nonneg (x - y)]
+  obtain ⟨hqX, -, -⟩ := Defs.mem_partners.1 hq
+  obtain ⟨hq'X, -, -⟩ := Defs.mem_partners.1 hq'
+  have hge := minDist_le_dist hqX hq'X hqq'
+  have hsq : δ ^ 2 ≤ sqd q q' := by
+    rw [← dist_sq_eq_sqd]; exact pow_le_pow_left₀ hδ.le hge 2
+  have hlt := sqd_lt_of_arg hδ hclose
+  have e : sqd q q' = (δ * cos (Complex.arg (z q)) - δ * cos (Complex.arg (z q'))) ^ 2 +
+      (δ * sin (Complex.arg (z q)) - δ * sin (Complex.arg (z q'))) ^ 2 := by
+    rw [← hre q hq, ← hre q' hq', ← him q hq, ← him q' hq', sqd]; ring
+  linarith
 
 /-- **Handshake with degree ≤ k**: `2|E| ≤ k|V|` for a loopless edge set on `V` whose vertices
 have degree `≤ k`.
@@ -359,7 +463,23 @@ What's missing: handshake applied to the `δ`-graph.
 Acceptance: no `sorry`.
 Depends on: `card_partners_minDist_le`, `two_mul_card_le_of_deg_le`. Difficulty S–M. -/
 theorem mult_minDist_le (X : Finset Pt) : (mult X (minDist X) : ℝ) ≤ 3 * X.card := by
-  sorry
+  rcases (minDist_nonneg X).eq_or_lt with h0 | hpos
+  · rw [← h0, mult_zero]; simp
+  · have h2 := Erdos132Layer.two_mul_multS hpos X
+    have hle : Erdos132Layer.esum X (minDist X) ≤ 6 * X.card := by
+      unfold Erdos132Layer.esum
+      calc ∑ v ∈ X, (Erdos132Layer.nbr X (minDist X) v).card ≤ ∑ _v ∈ X, 6 := by
+            refine sum_le_sum fun v _ => le_trans (card_le_card fun x hx => ?_)
+              (card_partners_minDist_le X v)
+            obtain ⟨hxX, hd⟩ := Erdos132Layer.mem_nbr.1 hx
+            refine Defs.mem_partners.2 ⟨hxX, fun h => ?_, hd⟩
+            rw [h, dist_self] at hd; linarith
+        _ = 6 * X.card := by rw [sum_const, smul_eq_mul, mul_comm]
+    have : 2 * mult X (minDist X) ≤ 6 * X.card := by
+      have e : mult X (minDist X) = multS X (minDist X) := rfl
+      omega
+    have : (2 * mult X (minDist X) : ℝ) ≤ 6 * X.card := by exact_mod_cast this
+    linarith
 
 /-! ## (VS) and (E) -/
 
@@ -409,7 +529,14 @@ Acceptance: no `sorry`.
 Depends on: `card_partners_minDist_le`. Difficulty M. -/
 theorem E_bound (X : Finset Pt) :
     (mult X (minDist X) : ℝ) ≤ eS X + 6 * (Rset X).card := by
-  sorry
+  have h := mult_le_add_sum (Sset X) X (minDist X)
+  have hs : ∑ x ∈ X \ Sset X, (partners X (minDist X) x).card ≤ 6 * (Rset X).card := by
+    calc ∑ x ∈ X \ Sset X, (partners X (minDist X) x).card ≤ ∑ _x ∈ X \ Sset X, 6 :=
+          sum_le_sum fun x _ => card_partners_minDist_le X x
+      _ = 6 * (Rset X).card := by rw [sum_const, smul_eq_mul, mul_comm, Rset]
+  have : mult X (minDist X) ≤ eS X + 6 * (Rset X).card := by
+    rw [eS]; omega
+  exact_mod_cast this
 
 /-- **Weighted (VS)** (Lemma 4.2, first bullet): if every point of `P₁ ⊆ S` has `Δ₂`-degree 1
 then `μ(Δ₂) ≤ |P₁| + (3/2)|S ∖ P₁|`.
