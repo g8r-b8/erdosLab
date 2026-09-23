@@ -93,12 +93,16 @@ n pairs? Must the number of such distances → ∞ (perhaps ≥ n^{1−o(1)})?
   B2 Thm A NEW as a statement but a parity-sharpened CDL Thm 1.2, so present it as a corollary. Risks: ienjoymath's
   announced "LP analysis" note, which hasn't appeared yet (re-check before posting), and paywalled Erdős–Fishburn 1995 / Fishburn papers
   that might cover convex n=6.
-  TODO (user): save these PDFs into novelty_sources/. ScienceDirect blocks automated access from
+  RESOLVED (Audit 3 in NOVELTY.md): r₂ ≤ n for convex n ≤ 8 [EF95b §3] ⇒ convex n=6,7,8 have ≥3 rare distances
+  from published results; B2 Thm A new only for even n ≥ 10, Thm B (n=9) unaffected.
+  (was) TODO (user): save these PDFs into novelty_sources/. ScienceDirect blocks automated access from
   here; the papers are likely in Elsevier's free open archive, so use a normal browser:
   Erdős–Fishburn DAM 60 (1995) 141–147 https://www.sciencedirect.com/science/article/pii/0166218X9400046G ;
   Erdős–Fishburn "Intervertex distances in convex polygons" DAM 60 https://www.sciencedirect.com/science/article/pii/0166218X9400047H ;
   Fishburn "Convex polygons with few intervertex distances" CGTA 5 (1995) 65–93 https://www.sciencedirect.com/science/article/pii/092577219400020V
-- Referee gaps closed → WRITEUP_A2.md + scripts/writeup_a2_checks.py
+- Referee gaps closed → WRITEUP_A2.md + scripts/writeup_a2_checks.py — DONE (e76d1a7): all gaps closed, 58 exact
+  interval checks pass, ~90% confidence; weakest spots §7.2 pairing and §8 Step 4. Referee's citation complaint was
+  wrong (CDL [23] = Ve87). Still needs an independent read and someone to see Ve87's original.
 - Convex n = 7 (and maybe 11) → angle_B3.md
 
 ## Next steps

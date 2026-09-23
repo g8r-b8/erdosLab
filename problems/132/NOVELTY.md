@@ -386,3 +386,18 @@ re-check and the points the section above does not cover. New raw material in `n
    - ienjoymath/9/7 LP note;
    - convex "at least three" … "at most n times";
    - gh code search for "Clemen Dumitrescu Problem 1.6", "second largest distance multiplicity" and "rare distances convex".
+
+## Audit 3: 1990s Erdős–Fishburn papers (read 2026-09-23; PDFs supplied by the user, kept out of git)
+
+Sources, with PDF and text dumps in `novelty_sources/` (gitignored):
+- [EF95a] Erdős–Fishburn, *Multiplicities of interpoint distances in finite planar sets*, DAM 60 (1995) 141–147, doi 10.1016/0166-218X(94)00046-G
+- [EF95b] Erdős–Fishburn, *Intervertex distances in convex polygons*, DAM 60 (1995) 149–158, doi 10.1016/0166-218X(94)00047-H
+- [Fi95] Fishburn, *Convex polygons with few intervertex distances*, CGTA 5 (1995) 65–93, doi 10.1016/0925-7721(94)00020-V
+- [EF96] Erdős–Fishburn, *Convex nonagons with five intervertex distances*, Geom. Dedicata 60 (1996) 317–332, doi 10.1007/BF00147368
+
+Findings:
+- **[EF95b] §3** (citing Fishburn, DIMACS 92-17): for convex n-gons, the largest possible second multiplicity is r₂⁽ⁿ⁾ = 1,3,5,6,7,8 for n = 3..8. So r₂ ≤ n for n ≤ 8, meaning **at most one distance is non-rare**. With Altman (m ≥ ⌊n/2⌋) and [EF95b] Thm 1 (M₆(3) = {R₆, R₇−1, one hexagon with r = (6,6,3)}; odd-n equality only for Rₙ), this gives **convex n = 6, 7, 8 ⇒ ≥ 3 rare distances** directly from published results. So our B2 Thm A is NOT new for n = 6, 8, and B3's n = 7 is a corollary of known results. B2 Thm A for even n ≥ 10 and Thm B (n = 9) are unaffected: none of the four papers gives r₂ for n ≥ 9.
+- **[EF95b] Thm 2:** there is a convex 25-gon with r₁ ≥ r₂ = 26 > n, and sup r₂/n ≥ 7/6. So in convex position, two non-rare distances can occur. Erdős–Fishburn could not get r₃ > n.
+- **[EF95a] Conj. 4 / Thm 5** is the n = 5, 6 case of #132, as already known.
+- **[EF95b] §2:** m*(n) = minimum number of distances for a convex n-gon with no 4 concyclic points; m*(5) = 4, and they conjecture m*(n)/n → ∞. This is relevant to Conjecture C1's hypothesis.
+- Nothing in these papers touches Problem 1.6 or the 54/37 bound.
