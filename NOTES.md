@@ -185,3 +185,42 @@ PROMPT.md rule 4: check all cross-referenced/sibling problems and their threads.
   clauses; no SAT solver installed — pip/brew needs user OK) or lazy domain-propagation (primes
   >R/2 never forced). Risk: Λ(5,3) may be ∞ or ≫1e7 (Λ(7,2)=1.6e6). Verdict: best 400–699 lead,
   a genuine computation project, NOT quick; certificate size for Lean (decide) may be the bottleneck.
+
+## Triage batch 700–949 (agent, iter 8) — nothing quick; best finite lead #885 k=5
+- problems.yaml (clone 2026-09-23): 118/250 status open. Pages + forum threads fetched 2026-09-23
+  → scratchpad/probs/<N>.html, thr/<N>.html; summary.txt (num, comments, claims, statement).
+  Only 25 open w/ 0 claims & ≤1 comment, all famous/deep (712 714 724 738 761 766 782 802 805
+  809 812 813 830 837 840 849 857 859 893 901 919 929 930 938 706).
+- Region is HEAVILY worked in 2026 (KitaKen1 Lean PRs, GPT-5.x/6 claims, SAT exact values):
+  944 k=4,r=1 Dirac case Lean-claimed (Kitamura, FC PR #5467, 10 Sep 2026); 768 claimed resolved
+  (arXiv 2606.24872 + Aristotle Lean); 731 (Li26 claim); 776 n0(r)~2r (He–Tang, Bloom minded to
+  mark solved; n0(11)=27 Thiim); 836 Q2 (GPT-5.5 Pro, Price Apr 2026); 873 neg. answer Lean (Sep);
+  878, 879, 889 (V-variant) Lean claims Sep 2026; 872 game near-resolution; 906, 749(upper) done.
+- Small-exact-value threads already occupied: 827 n4=7 (sallerk, 22 Sep 2026; n5 in [9,37]),
+  831 small h(n), 857 M(n,3) Lean-certified small values, 817 g3(7)≤474 (23 Sep), 902 f(1),f(2)
+  Lean (f(3)=19 known; f(4) open but big tournament SAT), 719 (3,6) exhaustively OK (Feb 2026).
+- ★ #885 (factor-difference sets, D(n)={|a−b|: n=ab}; ∀k ∃N1<…<Nk with |∩D(Ni)|≥k?) — OPEN.
+  Known k≤4 (ErRo97, Ji99, Bremner IJNT 2019). Finite, Lean-decidable witness for k=5 would be a
+  genuinely new case (NOT a full resolution). Reformulation: d∈D(N) ⇔ 4N+d² square ⇔ a (k+1)×k
+  sumset-of-squares {u_i+v_j} with u_0=0; k=5 needs (6,5); Choudhry arXiv 2508.07806 (Aug 2025)
+  only has (3,3),(5,3),(4,4) families.
+  Openness (checked 2026-09-23): erdosproblems.com/885 OPEN, 0 claims, 3 comments: sammausberg
+  19 Apr 2026 (3-way intersection {36,468,692,1028}, Lean via Aristotle); **Aleksanndr_NFA
+  23 Sep 2026 04:05 (TODAY)**: elliptic-curve search d_j≤40, many k=4, NO k=5; k=4 Lean in FC PR
+  #6509. No see-also links. formal-conjectures 885.lean (main @ 2026-09-23): main thm `research
+  open`, variants k=2,3,4 solved (k=4 = Bremner {65984625,508032000,1578963456,2505664000},
+  d={5040,27720,68880,164976}). Not on Tao's AI wiki. Web: JSP awards PR #297 (Lean k=2,3); no k=5.
+  Own search (scratchpad/e885/s885.c, s885l.c): pivot N1, columns D(N1), rows N=b(b+d), b≤B,
+  128-bit masks. Validated (recovers both k=4 examples). N1≤2e6 with |D|≥10, B=2e4 (rows ≤~4e10):
+  15 k=4 configs, 0 k=5. 1600 smooth N1∈[5e7,1.4e9] with τ≥640, 128 smallest d, B=2e4: 0 k=5.
+  Verdict: live competition (someone searching today), and the full ∀k question needs Bombieri–Lang-
+  type ideas (probably false/unknowable). Worth it only as a "k=5 witness" side result; better tool
+  = rational points on the genus-1 quartics (needs PARI/gp: not installed).
+- Drops (one line): 700/726/727/731/768/770/820/821/824/826/828/829/830/849/850/852–855/859/886–
+  893/912/913/928–933/935–943/945 analytic/multiplicative NT, conjecture-level (Dickson/abc/prime
+  gaps/Singmaster); 704/706/712–714/724/725/738/740/761/766/802/805/809–813/836–838/857/901/911/
+  917/918/919/934/944 extremal graph/hypergraph asymptotics or set theory; 708–711/860 covering-
+  interval asymptotics (claims exist); 749/757/773/774/786–792/796/817/819/839/840/856/864/866/
+  870/873/875/876/881/883/949 additive-comb. asymptotics, most with 2026 AI/partial work;
+  734 PBD construction for all n (Erdős: "probably not very difficult") — no finite core, open
+  but not quick; 719 Erdős–Sauer needs Turán K4^3 values; 778 game for all n; 782 squares.
