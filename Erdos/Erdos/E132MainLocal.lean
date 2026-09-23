@@ -1015,6 +1015,200 @@ def phi0 (d R : ℝ) : ℝ := Real.arccos (d / (2 * R))
 /-- Corner radius `ρ₀ = 1/sin(φ₀/2)`. -/
 def rho0 (d R : ℝ) : ℝ := 1 / Real.sin (phi0 d R / 2)
 
+/-- Real-variable core of Lemma 5.1 (steps 1–2). -/
+theorem lens_real {φ₀ a R : ℝ} (hφ : 0 < φ₀) (hφ' : φ₀ < π / 2) (ha : 0 ≤ a) (ha' : a ≤ φ₀)
+    (hR : 0 < R) (h1 : R * (Real.cos a - Real.cos φ₀) ≤ 1)
+    (h2 : 2 ≤ R * (Real.cos (φ₀ / 2) - Real.cos φ₀)) :
+    φ₀ / 2 < a ∧ R * (φ₀ - a) ≤ 1 / Real.sin (φ₀ / 2) := by
+  have hpi := Real.pi_pos
+  have hlt : φ₀ / 2 < a := by
+    by_contra h
+    push Not at h
+    have := Real.cos_le_cos_of_nonneg_of_le_pi ha (by linarith) h
+    nlinarith
+  refine ⟨hlt, ?_⟩
+  have hs2 : 0 < Real.sin (φ₀ / 2) := Real.sin_pos_of_pos_of_lt_pi (by linarith) (by linarith)
+  set y := (φ₀ - a) / 2 with hy
+  set x := (a + φ₀) / 2 with hx
+  have hy0 : 0 ≤ y := by linarith
+  have hyπ : y < π / 2 := by linarith
+  have hcosy : 0 < Real.cos y := Real.cos_pos_of_mem_Ioo ⟨by linarith, hyπ⟩
+  have htan := Real.le_tan hy0 hyπ
+  rw [Real.tan_eq_sin_div_cos, le_div_iff₀ hcosy] at htan
+  have hsx : 0 ≤ Real.sin x := Real.sin_nonneg_of_nonneg_of_le_pi (by linarith) (by linarith)
+  have hdiff : Real.cos a - Real.cos φ₀ = 2 * Real.sin x * Real.sin y := by
+    rw [Real.cos_sub_cos, show (a - φ₀) / 2 = -y by rw [hy]; ring, Real.sin_neg]; ring
+  have hprod : 2 * Real.sin x * Real.cos y = Real.sin a + Real.sin φ₀ := by
+    rw [Real.two_mul_sin_mul_cos, show x - y = a by rw [hx, hy]; ring,
+      show x + y = φ₀ by rw [hx, hy]; ring]
+  have hsa : Real.sin (φ₀ / 2) ≤ Real.sin a :=
+    Real.sin_le_sin_of_le_of_le_pi_div_two (by linarith) (by linarith) hlt.le
+  have hsφ : Real.sin (φ₀ / 2) ≤ Real.sin φ₀ :=
+    Real.sin_le_sin_of_le_of_le_pi_div_two (by linarith) (by linarith) (by linarith)
+  have key : Real.sin (φ₀ / 2) * (φ₀ - a) ≤ Real.cos a - Real.cos φ₀ := by
+    rw [hdiff]
+    have h3 : 2 * Real.sin x * (y * Real.cos y) ≤ 2 * Real.sin x * Real.sin y :=
+      mul_le_mul_of_nonneg_left htan (by positivity)
+    have e : 2 * Real.sin x * (y * Real.cos y) = y * (Real.sin a + Real.sin φ₀) := by
+      rw [← hprod]; ring
+    have e2 : φ₀ - a = 2 * y := by rw [hy]; ring
+    rw [e2]
+    nlinarith
+  rw [le_div_iff₀ hs2]
+  nlinarith
+
+/-- Inner product in an orthonormal frame `(e, e^⊥)`. -/
+theorem inner_frame {e : Pt} (he : ‖e‖ = 1) (w₁ w₂ : Pt) :
+    inner ℝ w₁ w₂ = inner ℝ w₁ e * inner ℝ w₂ e + det2 e w₁ * det2 e w₂ := by
+  have h := norm_sq_coord e
+  rw [he] at h
+  rw [inner_coord, inner_coord, inner_coord]
+  simp only [det2]
+  linear_combination (w₁ 0 * w₂ 0 + w₁ 1 * w₂ 1) * h
+
+theorem norm_sq_frame {e : Pt} (he : ‖e‖ = 1) (w : Pt) :
+    ‖w‖ ^ 2 = inner ℝ w e ^ 2 + det2 e w ^ 2 := by
+  rw [← real_inner_self_eq_norm_sq, inner_frame he]; ring
+
+/-- Angle from the cosine in a frame. -/
+theorem ang_eq_of_inner {w₁ w₂ : Pt} {R θ : ℝ} (hR : 0 < R) (h₁ : ‖w₁‖ = R) (h₂ : ‖w₂‖ = R)
+    (hθ : 0 ≤ θ) (hθ' : θ ≤ π) (h : inner ℝ w₁ w₂ = R ^ 2 * Real.cos θ) : ang w₁ w₂ = θ := by
+  rw [ang, InnerProductGeometry.angle, h₁, h₂, h, show R ^ 2 * Real.cos θ / (R * R) = Real.cos θ by
+    field_simp, Real.arccos_cos hθ hθ']
+
+/-- Lemma 5.1 in the coordinates of the frame `(e, e^⊥)`, `e = (c₂ − c₁)/d`:
+`p − c₁ = (xp, yp)`, `q − c₂ = (xq, yq)`. -/
+theorem lens_coord {R d xp yp xq yq : ℝ} (hd0 : 0 < d) (hd : d < 2 * R)
+    (hR : 2 / (Real.cos (phi0 d R / 2) - Real.cos (phi0 d R)) ≤ R)
+    (Ep : xp ^ 2 + yp ^ 2 = R ^ 2) (Eq : xq ^ 2 + yq ^ 2 = R ^ 2)
+    (Ep₂ : (xp - d) ^ 2 + yp ^ 2 ≤ R ^ 2) (Eq₁ : (xq + d) ^ 2 + yq ^ 2 ≤ R ^ 2)
+    (Epq : (xp - xq - d) ^ 2 + (yp - yq) ^ 2 ≤ 1) :
+    ∃ σ : ℝ, (σ = 1 ∨ σ = -1) ∧
+      R * Real.arccos ((xp * (d / 2) + yp * (σ * R * Real.sin (phi0 d R))) / (R * R)) ≤
+        rho0 d R ∧
+      R * Real.arccos ((xq * (-(d / 2)) + yq * (σ * R * Real.sin (phi0 d R))) / (R * R)) ≤
+        rho0 d R := by
+  have hpi := Real.pi_pos
+  have hR0 : 0 < R := by linarith
+  set C := d / (2 * R) with hC_def
+  have hC0 : 0 < C := by positivity
+  have hC1 : C < 1 := by rw [div_lt_one (by positivity)]; exact hd
+  have hdC : d = 2 * R * C := by rw [hC_def]; field_simp
+  set φ₀ := phi0 d R with hφ_def
+  have hφC : Real.cos φ₀ = C := Real.cos_arccos (by linarith) hC1.le
+  have hφ0 : 0 < φ₀ := Real.arccos_pos.2 hC1
+  have hφ1 : φ₀ < π / 2 := Real.arccos_lt_pi_div_two.2 hC0
+  set S := Real.sin φ₀ with hS_def
+  have hgpos : 0 < Real.cos (φ₀ / 2) - Real.cos φ₀ := by
+    have := Real.cos_lt_cos_of_nonneg_of_le_pi (by linarith) (by linarith)
+      (by linarith : φ₀ / 2 < φ₀)
+    linarith
+  have hg : 2 ≤ R * (Real.cos (φ₀ / 2) - Real.cos φ₀) := by
+    rw [div_le_iff₀ hgpos] at hR; linarith
+  have hs2 : 0 < Real.sin (φ₀ / 2) := Real.sin_pos_of_pos_of_lt_pi (by linarith) (by linarith)
+  have hhalf : 1 - Real.cos φ₀ = 2 * Real.sin (φ₀ / 2) ^ 2 := by
+    have h1 := Real.cos_two_mul (φ₀ / 2)
+    rw [show 2 * (φ₀ / 2) = φ₀ by ring] at h1
+    have h2 := Real.sin_sq_add_cos_sq (φ₀ / 2)
+    linarith
+  have hc2 : Real.cos (φ₀ / 2) ≤ 1 := Real.cos_le_one _
+  have hRs : 1 ≤ R * Real.sin (φ₀ / 2) ^ 2 := by
+    have : R * (Real.cos (φ₀ / 2) - Real.cos φ₀) ≤ R * (1 - Real.cos φ₀) :=
+      mul_le_mul_of_nonneg_left (by linarith) hR0.le
+    rw [hhalf] at this; linarith
+  have hs21 : Real.sin (φ₀ / 2) ^ 2 ≤ 1 := by
+    have := Real.sin_sq_add_cos_sq (φ₀ / 2); nlinarith [sq_nonneg (Real.cos (φ₀ / 2))]
+  have hR1 : 1 ≤ R := by
+    have := mul_le_mul_of_nonneg_left hs21 hR0.le; linarith
+  -- abscissae
+  have hxp : d / 2 ≤ xp := by
+    have h : d * d ≤ d * (2 * xp) := by nlinarith
+    have := le_of_mul_le_mul_left h hd0; linarith
+  have hxq : d / 2 ≤ -xq := by
+    have h : d * d ≤ d * (-2 * xq) := by nlinarith
+    have := le_of_mul_le_mul_left h hd0; linarith
+  have hxp1 : xp ≤ R := by
+    have : xp ^ 2 ≤ R ^ 2 := by nlinarith [sq_nonneg yp]
+    exact abs_le_of_sq_le_sq' this hR0.le |>.2
+  have hxq1 : -xq ≤ R := by
+    have : (-xq) ^ 2 ≤ R ^ 2 := by nlinarith [sq_nonneg yq]
+    exact abs_le_of_sq_le_sq' this hR0.le |>.2
+  have hsum : xp - xq - d ≤ 1 := by
+    have : (xp - xq - d) ^ 2 ≤ 1 := by linarith [sq_nonneg (yp - yq)]
+    have := abs_le_of_sq_le_sq' (show (xp - xq - d) ^ 2 ≤ 1 ^ 2 by rw [one_pow]; exact this)
+      zero_le_one
+    linarith [this.2]
+  set a := Real.arccos (xp / R) with ha_def
+  set b := Real.arccos (-xq / R) with hb_def
+  have hxpR : C ≤ xp / R := by rw [le_div_iff₀ hR0]; rw [hdC] at hxp; linarith
+  have hxqR : C ≤ -xq / R := by rw [le_div_iff₀ hR0]; rw [hdC] at hxq; linarith
+  have hxpR1 : xp / R ≤ 1 := by rw [div_le_one hR0]; exact hxp1
+  have hxqR1 : -xq / R ≤ 1 := by rw [div_le_one hR0]; exact hxq1
+  have hca : Real.cos a = xp / R := Real.cos_arccos (by linarith) hxpR1
+  have hcb : Real.cos b = -xq / R := Real.cos_arccos (by linarith) hxqR1
+  have ha0 : 0 ≤ a := Real.arccos_nonneg _
+  have hb0 : 0 ≤ b := Real.arccos_nonneg _
+  have haφ : a ≤ φ₀ := Real.arccos_le_arccos hxpR
+  have hbφ : b ≤ φ₀ := Real.arccos_le_arccos hxqR
+  have h1a : R * (Real.cos a - Real.cos φ₀) ≤ 1 := by
+    have e1 : R * (xp / R - C) = xp - R * C := by field_simp
+    rw [hca, hφC, e1]; rw [hdC] at hsum hxq; linarith
+  have h1b : R * (Real.cos b - Real.cos φ₀) ≤ 1 := by
+    have e1 : R * (-xq / R - C) = -xq - R * C := by field_simp
+    rw [hcb, hφC, e1]; rw [hdC] at hsum hxp; linarith
+  obtain ⟨hla, hRa⟩ := lens_real hφ0 hφ1 ha0 haφ hR0 h1a hg
+  obtain ⟨hlb, hRb⟩ := lens_real hφ0 hφ1 hb0 hbφ hR0 h1b hg
+  have hsa : Real.sin (φ₀ / 2) ≤ Real.sin a :=
+    Real.sin_le_sin_of_le_of_le_pi_div_two (by linarith) (by linarith) hla.le
+  have hsb : Real.sin (φ₀ / 2) ≤ Real.sin b :=
+    Real.sin_le_sin_of_le_of_le_pi_div_two (by linarith) (by linarith) hlb.le
+  have hsa0 : 0 ≤ Real.sin a := by linarith
+  have hsb0 : 0 ≤ Real.sin b := by linarith
+  have hyp2 : yp ^ 2 = (R * Real.sin a) ^ 2 := by
+    rw [mul_pow, Real.sin_sq, hca]; field_simp; linarith
+  have hyq2 : yq ^ 2 = (R * Real.sin b) ^ 2 := by
+    rw [mul_pow, Real.sin_sq, hcb]; field_simp; linarith
+  have habs_p : |yp| = R * Real.sin a := by
+    rw [← abs_of_nonneg (by positivity : 0 ≤ R * Real.sin a)]
+    exact (sq_eq_sq_iff_abs_eq_abs _ _).1 hyp2
+  have habs_q : |yq| = R * Real.sin b := by
+    rw [← abs_of_nonneg (by positivity : 0 ≤ R * Real.sin b)]
+    exact (sq_eq_sq_iff_abs_eq_abs _ _).1 hyq2
+  have e3 : 1 ≤ (R * Real.sin (φ₀ / 2)) ^ 2 := by
+    rw [mul_pow, sq R, mul_assoc]; exact one_le_mul_of_one_le_of_one_le hR1 hRs
+  have e1 : (R * Real.sin (φ₀ / 2)) ^ 2 ≤ yp ^ 2 := by
+    rw [hyp2]; exact pow_le_pow_left₀ (by positivity) (mul_le_mul_of_nonneg_left hsa hR0.le) 2
+  have e2 : (R * Real.sin (φ₀ / 2)) ^ 2 ≤ yq ^ 2 := by
+    rw [hyq2]; exact pow_le_pow_left₀ (by positivity) (mul_le_mul_of_nonneg_left hsb hR0.le) 2
+  have hsame : 0 < yp * yq := by
+    by_contra hneg
+    push Not at hneg
+    have ex : (yp - yq) ^ 2 = yp ^ 2 + yq ^ 2 - 2 * (yp * yq) := by ring
+    have : (yp - yq) ^ 2 ≤ 1 := by linarith [sq_nonneg (xp - xq - d)]
+    linarith
+  obtain ⟨σ, hσ, hσp, hσq⟩ : ∃ σ : ℝ, (σ = 1 ∨ σ = -1) ∧ σ * yp = |yp| ∧ σ * yq = |yq| := by
+    have hyp0 : yp ≠ 0 := by rintro h; rw [h, zero_mul] at hsame; exact lt_irrefl _ hsame
+    rcases lt_or_gt_of_ne hyp0 with h | h
+    · have h' : yq < 0 := by
+        by_contra h''; push Not at h''
+        exact absurd hsame (not_lt.2 (mul_nonpos_iff.2 (Or.inr ⟨h.le, h''⟩)))
+      exact ⟨-1, Or.inr rfl, by rw [abs_of_neg h]; ring, by rw [abs_of_neg h']; ring⟩
+    · have h' : 0 < yq := by
+        by_contra h''; push Not at h''
+        exact absurd hsame (not_lt.2 (mul_nonpos_iff.2 (Or.inl ⟨h.le, h''⟩)))
+      exact ⟨1, Or.inl rfl, by rw [abs_of_pos h]; ring, by rw [abs_of_pos h']; ring⟩
+  refine ⟨σ, hσ, ?_, ?_⟩
+  · have hcos : (xp * (d / 2) + yp * (σ * R * S)) / (R * R) = Real.cos (φ₀ - a) := by
+      rw [Real.cos_sub, hφC, hca, ← hS_def,
+        show yp * (σ * R * S) = R * S * (σ * yp) by ring, hσp, habs_p, hdC]
+      field_simp
+    rw [hcos, Real.arccos_cos (by linarith) (by linarith)]; exact hRa
+  · have hcos : (xq * (-(d / 2)) + yq * (σ * R * S)) / (R * R) = Real.cos (φ₀ - b) := by
+      rw [Real.cos_sub, hφC, hcb, ← hS_def,
+        show yq * (σ * R * S) = R * S * (σ * yq) by ring, hσq, habs_q, hdC]
+      field_simp
+    rw [hcos, Real.arccos_cos (by linarith) (by linarith)]; exact hRb
+
 /-- **Lemma 5.1 (lens lemma)**: `p` on the `C(c₁, R)`-arc, `q` on the `C(c₂, R)`-arc of the lens
 `D(c₁,R) ∩ D(c₂,R)`, `|pq| ≤ 1`, and `R ≥ 2/(cos(φ₀/2) − cos φ₀)` ⇒ a common corner `c` within
 circular arc length `ρ₀` of both.
@@ -1031,7 +1225,92 @@ theorem lens_corner {c₁ c₂ p q : Pt} {R : ℝ} (hd0 : 0 < dist c₁ c₂) (h
     ∃ c : Pt, dist c c₁ = R ∧ dist c c₂ = R ∧
       R * ang (p - c₁) (c - c₁) ≤ rho0 (dist c₁ c₂) R ∧
       R * ang (q - c₂) (c - c₂) ≤ rho0 (dist c₁ c₂) R := by
-  sorry
+  set d := dist c₁ c₂ with hd_def
+  have hR0 : 0 < R := by linarith
+  have hd0' : d ≠ 0 := hd0.ne'
+  set e : Pt := d⁻¹ • (c₂ - c₁) with he_def
+  have he : ‖e‖ = 1 := by
+    rw [he_def, norm_smul, Real.norm_eq_abs, abs_inv, abs_of_pos hd0, ← dist_eq_norm,
+      dist_comm, inv_mul_cancel₀ hd0']
+  have hce : c₂ - c₁ = d • e := by rw [he_def, smul_smul, mul_inv_cancel₀ hd0', one_smul]
+  have hee : inner ℝ e e = 1 := by rw [real_inner_self_eq_norm_sq, he]; norm_num
+  have hpe : inner ℝ (perp e) e = 0 := by rw [inner_coord]; simp [perp]; ring
+  have hdet_ee : det2 e e = 0 := by simp only [det2]; ring
+  have hdet_pe : det2 e (perp e) = 1 := by
+    have h := norm_sq_coord e; rw [he] at h; simp only [det2, perp]; simp; linarith
+  have lin_i : ∀ (w : Pt) (t : ℝ), inner ℝ (w + t • e) e = inner ℝ w e + t := by
+    intro w t; rw [inner_add_left, real_inner_smul_left, hee, mul_one]
+  have lin_d : ∀ (w : Pt) (t : ℝ), det2 e (w + t • e) = det2 e w := by
+    intro w t; simp only [det2, PiLp.add_apply, PiLp.smul_apply, smul_eq_mul]; ring
+  have det_lin : ∀ (a b : ℝ), det2 e (a • e + b • perp e) = b := by
+    intro a b
+    have : det2 e (a • e + b • perp e) = a * det2 e e + b * det2 e (perp e) := by
+      simp only [det2, PiLp.add_apply, PiLp.smul_apply, smul_eq_mul]; ring
+    rw [this, hdet_ee, hdet_pe]; ring
+  set xp := inner ℝ (p - c₁) e
+  set yp := det2 e (p - c₁)
+  set xq := inner ℝ (q - c₂) e
+  set yq := det2 e (q - c₂)
+  have Ep : xp ^ 2 + yp ^ 2 = R ^ 2 := by rw [← norm_sq_frame he, ← dist_eq_norm, hp]
+  have Eq : xq ^ 2 + yq ^ 2 = R ^ 2 := by rw [← norm_sq_frame he, ← dist_eq_norm, hq]
+  have Ep₂ : (xp - d) ^ 2 + yp ^ 2 ≤ R ^ 2 := by
+    have h := norm_sq_frame he (p - c₂)
+    have e' : p - c₂ = (p - c₁) + (-d) • e := by rw [neg_smul, ← hce]; abel
+    have hi : inner ℝ (p - c₂) e = xp - d := by rw [e', lin_i]; ring
+    have ht : det2 e (p - c₂) = yp := by rw [e', lin_d]
+    rw [hi, ht] at h
+    rw [← h, ← dist_eq_norm]; exact pow_le_pow_left₀ dist_nonneg hp₂ 2
+  have Eq₁ : (xq + d) ^ 2 + yq ^ 2 ≤ R ^ 2 := by
+    have h := norm_sq_frame he (q - c₁)
+    have e' : q - c₁ = (q - c₂) + d • e := by rw [← hce]; abel
+    have hi : inner ℝ (q - c₁) e = xq + d := by rw [e', lin_i]
+    have ht : det2 e (q - c₁) = yq := by rw [e', lin_d]
+    rw [hi, ht] at h
+    rw [← h, ← dist_eq_norm]; exact pow_le_pow_left₀ dist_nonneg hq₁ 2
+  have Epq : (xp - xq - d) ^ 2 + (yp - yq) ^ 2 ≤ 1 := by
+    have h := norm_sq_frame he (p - q)
+    have e' : p - q = ((p - c₁) - (q - c₂)) + (-d) • e := by rw [neg_smul, ← hce]; abel
+    have hi : inner ℝ (p - q) e = xp - xq - d := by rw [e', lin_i, inner_sub_left]; ring
+    have ht : det2 e (p - q) = yp - yq := by rw [e', lin_d, det2_sub_right]
+    rw [hi, ht] at h
+    rw [← h, ← dist_eq_norm]; exact pow_le_one₀ dist_nonneg hpq
+  obtain ⟨σ, hσ, h1, h2⟩ := lens_coord hd0 hd hR Ep Eq Ep₂ Eq₁ Epq
+  set S := Real.sin (phi0 d R) with hS_def
+  have hC1 : d / (2 * R) ≤ 1 := by rw [div_le_one (by positivity)]; linarith
+  have hS : S ^ 2 = 1 - (d / (2 * R)) ^ 2 := by
+    rw [hS_def, Real.sin_sq, phi0, Real.cos_arccos (by
+      have : 0 ≤ d / (2 * R) := by positivity
+      linarith) hC1]
+  have hσ2 : σ ^ 2 = 1 := by rcases hσ with rfl | rfl <;> norm_num
+  set c := c₁ + (d / 2) • e + (σ * R * S) • perp e with hc_def
+  have hcc₁ : c - c₁ = (d / 2) • e + (σ * R * S) • perp e := by rw [hc_def]; abel
+  have hcc₂ : c - c₂ = ((d / 2) • e + (σ * R * S) • perp e) + (-d) • e := by
+    rw [neg_smul, ← hce, hc_def]; abel
+  have ic₁ : inner ℝ (c - c₁) e = d / 2 := by
+    rw [hcc₁, inner_add_left, real_inner_smul_left e e (d / 2),
+      real_inner_smul_left (perp e) e (σ * R * S), hee, hpe]; ring
+  have dc₁ : det2 e (c - c₁) = σ * R * S := by rw [hcc₁, det_lin]
+  have ic₂ : inner ℝ (c - c₂) e = -(d / 2) := by rw [hcc₂, lin_i, ← hcc₁, ic₁]; ring
+  have dc₂ : det2 e (c - c₂) = σ * R * S := by rw [hcc₂, lin_d, ← hcc₁, dc₁]
+  have hsq : (d / 2) ^ 2 + (σ * R * S) ^ 2 = R ^ 2 := by
+    rw [mul_pow, mul_pow, hσ2, hS]; field_simp; ring
+  have hnc₁ : ‖c - c₁‖ = R := by
+    have h := norm_sq_frame he (c - c₁)
+    rw [ic₁, dc₁, hsq] at h
+    exact (pow_left_inj₀ (norm_nonneg _) hR0.le two_ne_zero).1 h
+  have hnc₂ : ‖c - c₂‖ = R := by
+    have h := norm_sq_frame he (c - c₂)
+    rw [ic₂, dc₂, neg_sq, hsq] at h
+    exact (pow_left_inj₀ (norm_nonneg _) hR0.le two_ne_zero).1 h
+  refine ⟨c, by rw [dist_eq_norm]; exact hnc₁, by rw [dist_eq_norm]; exact hnc₂, ?_, ?_⟩
+  · have : ang (p - c₁) (c - c₁) =
+        Real.arccos ((xp * (d / 2) + yp * (σ * R * S)) / (R * R)) := by
+      rw [ang, InnerProductGeometry.angle, hnc₁, ← dist_eq_norm, hp, inner_frame he, ic₁, dc₁]
+    rw [this]; exact h1
+  · have : ang (q - c₂) (c - c₂) =
+        Real.arccos ((xq * (-(d / 2)) + yq * (σ * R * S)) / (R * R)) := by
+      rw [ang, InnerProductGeometry.angle, hnc₂, ← dist_eq_norm, hq, inner_frame he, ic₂, dc₂]
+    rw [this]; exact h2
 
 /-- **Lemma 5.2 (lens-corner arc length)**: for compact convex `K' ⊆` lens, `p, q ∈ ∂K'` as in
 5.1 with `|pq| = 1`, the boundary arc of `K'` from `p` to `q` on the corner's side has length
