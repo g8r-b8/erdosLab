@@ -189,6 +189,18 @@ theorem inner_two_sol {c u₁ u₂ : Pt} {τ : ℝ} (hc : ‖c‖ = 1) (h₁ : �
   rw [hd'] at hL
   linear_combination -hL - n₂
 
+theorem det2_eq_inner_perp (a b : Pt) : det2 a b = inner ℝ (perp a) b := by
+  rw [det2_pt, inner_pt]; simp; ring
+
+theorem abs_det2_le (a b : Pt) : |det2 a b| ≤ ‖a‖ * ‖b‖ := by
+  rw [det2_eq_inner_perp, ← norm_perp a]; exact abs_real_inner_le_norm _ _
+
+theorem det2_add_left (a b e : Pt) : det2 (a + b) e = det2 a e + det2 b e := by
+  simp only [det2_pt, PiLp.add_apply]; ring
+
+theorem det2_neg_right (a e : Pt) : det2 a (-e) = - det2 a e := by
+  simp only [det2_pt, PiLp.neg_apply]; ring
+
 /-! ### The point set -/
 
 theorem dist_mem_distSetS' {x y : Pt} (hx : x ∈ X) (hy : y ∈ X) (hxy : x ≠ y) :
@@ -759,22 +771,293 @@ theorem tnbr_unique (hX : Normal X) {F : DirField X} {v w₁ w₂ : Pt} (hv : v 
   rw [sub_sub_sub_cancel_right, ← dist_eq_norm] at hc
   exact eq_of_dist_lt_one hX.minDist_eq (Sset_sub hw₁) (Sset_sub hw₂) hc
 
-/-- **Lemma 7.1**: for a T-edge `vz` with `v ∈ S ∖ D`, `z ∈ S ∩ D`, the boundary arc of `K` of
-length 2 from `v` on `z`'s side has turning `≥ t − arcsin β`.
+/-! ### Directions, support points and the arc measure (for Lemma 7.1) -/
 
-TODO: prove.
-What's missing: if the turning were `Θ < t − arcsin β`, the arc stays in a `Θ`-cone around the
-tangent `e₀`, reaches distance 1 from `v` at some `σ* ≤ 2` at a point within `Θ + arcsin β < t`
-of `z`, contradicting `dist(z, K) ≥ t` (Lemma 3.1(c)).
+/-- An arc of directions of length `L ≤ 2π` (mod `2π`) has measure `≥ L` in `[0, 2π)`. -/
+theorem vol_arc_ge (P : ℝ → Prop) {a L : ℝ} (_hL0 : 0 ≤ L) (hL : L ≤ 2 * π)
+    (hP : ∀ θ : ℝ, ∀ k : ℤ, θ + k * (2 * π) ∈ Set.Ioo a (a + L) → P θ) :
+    ENNReal.ofReal L ≤ MeasureTheory.volume {θ : ℝ | θ ∈ Set.Ico 0 (2 * π) ∧ P θ} := by
+  have hp : (0 : ℝ) < 2 * π := by positivity
+  set a' := toIcoMod hp 0 a
+  set n := toIcoDiv hp 0 a
+  have ha : a' + n • (2 * π) = a := toIcoMod_add_toIcoDiv_zsmul hp 0 a
+  rw [zsmul_eq_mul] at ha
+  have hm : a' ∈ Set.Ico 0 (0 + 2 * π) := toIcoMod_mem_Ico hp 0 a
+  rw [zero_add] at hm
+  by_cases hc : a' + L ≤ 2 * π
+  · calc ENNReal.ofReal L = MeasureTheory.volume (Set.Ioo a' (a' + L)) := by
+          rw [Real.volume_Ioo]; congr 1; ring
+      _ ≤ _ := by
+          apply MeasureTheory.measure_mono
+          intro θ hθ
+          refine ⟨⟨by linarith [hθ.1, hm.1], by linarith [hθ.2]⟩, hP θ n ?_⟩
+          constructor <;> linarith [hθ.1, hθ.2]
+  · push Not at hc
+    have hd : Disjoint (Set.Ioo a' (2 * π)) (Set.Ioo 0 (a' + L - 2 * π)) := by
+      rw [Set.disjoint_left]; intro θ h1 h2; linarith [h1.1, h2.2, hm.2]
+    calc ENNReal.ofReal L
+        = MeasureTheory.volume (Set.Ioo a' (2 * π)) + MeasureTheory.volume (Set.Ioo 0 (a' + L - 2 * π)) := by
+          rw [Real.volume_Ioo, Real.volume_Ioo, ← ENNReal.ofReal_add (by linarith [hm.2])
+            (by linarith)]
+          congr 1; ring
+      _ = MeasureTheory.volume (Set.Ioo a' (2 * π) ∪ Set.Ioo 0 (a' + L - 2 * π)) :=
+          (MeasureTheory.measure_union hd measurableSet_Ioo).symm
+      _ ≤ _ := by
+          apply MeasureTheory.measure_mono
+          intro θ hθ
+          rcases hθ with hθ | hθ
+          · refine ⟨⟨by linarith [hθ.1, hm.1], hθ.2⟩, hP θ n ?_⟩
+            constructor <;> linarith [hθ.1, hθ.2, hm.1, hm.2]
+          · refine ⟨⟨hθ.1.le, by linarith [hθ.2, hm.2]⟩, hP θ (n + 1) ?_⟩
+            push_cast
+            have e : ((n : ℝ) + 1) * (2 * π) = n * (2 * π) + 2 * π := by ring
+            rw [e]
+            constructor <;> linarith [hθ.1, hθ.2, hm.1, hm.2]
+
+@[simp] theorem dirVec_apply0 (θ : ℝ) : dirVec θ 0 = Real.cos θ := by simp [dirVec]
+@[simp] theorem dirVec_apply1 (θ : ℝ) : dirVec θ 1 = Real.sin θ := by simp [dirVec]
+
+theorem dirVec_add (θ ψ : ℝ) :
+    dirVec (θ + ψ) = Real.cos ψ • dirVec θ + Real.sin ψ • perp (dirVec θ) := by
+  rw [pt_ext_iff]; simp [Real.cos_add, Real.sin_add]; constructor <;> ring
+
+theorem dirVec_add_int (θ : ℝ) (k : ℤ) : dirVec (θ + k * (2 * π)) = dirVec θ := by
+  rw [pt_ext_iff]; simp [Real.cos_add_int_mul_two_pi, Real.sin_add_int_mul_two_pi]
+
+theorem perp_neg (a : Pt) : perp (-a) = - perp a := by rw [pt_ext_iff]; simp
+
+/-- Every unit vector is `dirVec θ` for some `θ ∈ [0, 2π)`. -/
+theorem exists_angle {n : Pt} (hn : ‖n‖ = 1) : ∃ θ ∈ Set.Ico 0 (2 * π), dirVec θ = n := by
+  have h := unit_sq hn
+  have hb : -1 ≤ n 0 ∧ n 0 ≤ 1 := by constructor <;> nlinarith [sq_nonneg (n 1)]
+  have hπ := Real.pi_pos
+  rcases le_or_gt 0 (n 1) with h1 | h1
+  · refine ⟨Real.arccos (n 0), ⟨Real.arccos_nonneg _, ?_⟩, ?_⟩
+    · linarith [Real.arccos_le_pi (n 0)]
+    · rw [pt_ext_iff]; simp only [dirVec_apply0, dirVec_apply1]
+      refine ⟨Real.cos_arccos hb.1 hb.2, ?_⟩
+      rw [Real.sin_arccos, Real.sqrt_eq_iff_mul_self_eq (by nlinarith) h1]; nlinarith
+  · have hlt : n 0 < 1 := by nlinarith
+    refine ⟨2 * π - Real.arccos (n 0), ⟨by linarith [Real.arccos_le_pi (n 0)], ?_⟩, ?_⟩
+    · linarith [Real.arccos_pos.2 hlt]
+    · rw [pt_ext_iff]; simp only [dirVec_apply0, dirVec_apply1]
+      rw [Real.cos_two_pi_sub, Real.sin_two_pi_sub, Real.cos_arccos hb.1 hb.2, Real.sin_arccos]
+      refine ⟨rfl, ?_⟩
+      rw [neg_eq_iff_eq_neg, Real.sqrt_eq_iff_mul_self_eq (by nlinarith) (by linarith)]; nlinarith
+
+theorem KBall_isClosed (X : Finset Pt) : IsClosed (KBall X) :=
+  isClosed_biInter fun _ _ => Metric.isClosed_closedBall
+
+/-- A maximiser of a unit linear functional over `K` is a boundary point. -/
+theorem mem_frontier_of_max {y ν : Pt} (hy : y ∈ KBall X) (hν : ‖ν‖ = 1)
+    (hmax : ∀ y' ∈ KBall X, inner ℝ y' ν ≤ inner ℝ y ν) : y ∈ frontier (KBall X) := by
+  rw [(KBall_isClosed X).frontier_eq]
+  refine ⟨hy, fun hint => ?_⟩
+  obtain ⟨ε, hε, hball⟩ := Metric.mem_nhds_iff.1 (mem_interior_iff_mem_nhds.1 hint)
+  have hm : y + (ε / 2) • ν ∈ KBall X := hball (by
+    rw [Metric.mem_ball, dist_eq_norm, add_sub_cancel_left, norm_smul, hν, mul_one,
+      Real.norm_eq_abs, abs_of_pos (by linarith)]; linarith)
+  have := hmax _ hm
+  rw [inner_add_left, inner_smul_left, real_inner_self_eq_norm_sq, hν] at this
+  simp at this; linarith
+
+/-- Wedge algebra: `α ≥ 0`, `α² + b² = 1`, `−α cos φ + b sin φ ≥ 0` ⇒ `b ≥ cos φ`. -/
+theorem cos_le_of_wedge {α b c s : ℝ} (hc : 0 < c) (hs : 0 < s) (hcs : c ^ 2 + s ^ 2 = 1)
+    (hα : 0 ≤ α) (hαb : α ^ 2 + b ^ 2 = 1) (h : 0 ≤ -(α * c) + b * s) : c ≤ b := by
+  by_contra hlt
+  push Not at hlt
+  have hb0 : 0 ≤ b := by
+    by_contra hb; push Not at hb
+    have : b * s < 0 := mul_neg_of_neg_of_pos hb hs
+    nlinarith [mul_nonneg hα hc.le]
+  have hbc2 : b ^ 2 < c ^ 2 := by nlinarith
+  have hαs : s < α := by nlinarith
+  have h1 : s * c < α * c := mul_lt_mul_of_pos_right hαs hc
+  have h2 : b * s < c * s := mul_lt_mul_of_pos_right hlt hs
+  nlinarith
+
+theorem norm_rot {u e₀ : Pt} (hu : ‖u‖ = 1) (he₀ : ‖e₀‖ = 1) (hue : inner ℝ u e₀ = 0) (φ : ℝ) :
+    ‖Real.cos φ • (-u) + Real.sin φ • e₀‖ = 1 := by
+  have hcs := Real.cos_sq_add_sin_sq φ
+  have : ‖Real.cos φ • (-u) + Real.sin φ • e₀‖ ^ 2 = 1 := by
+    rw [@norm_add_sq_real, norm_smul, norm_smul, norm_neg, hu, he₀, inner_smul_left,
+      inner_smul_right, inner_neg_left, hue]
+    simp only [Real.norm_eq_abs, conj_trivial, mul_one, mul_pow, sq_abs]; linarith
+  nlinarith [norm_nonneg (Real.cos φ • (-u) + Real.sin φ • e₀)]
+
+/-- The key step of Lemma 7.1: a support point `y` of `K` in a direction `ν` obtained by rotating
+the outward normal `−u` at `v` by `φ` towards `e₀` stays within distance `2` of `v`, provided
+`φ + |e₀ − (z − v)| < t` for some `z ∈ D`. -/
+theorem support_point_close {v z y u e₀ : Pt} {φ : ℝ} (hzD : z ∈ Dset X) (hvK : v ∈ KBall X)
+    (hyK : y ∈ KBall X) (hu : ‖u‖ = 1) (he₀ : ‖e₀‖ = 1)
+    (hframe : ∀ x : Pt, inner ℝ x u ^ 2 + inner ℝ x e₀ ^ 2 = ‖x‖ ^ 2)
+    (hn₀ : -u ∈ normalCone (KBall X) v)
+    (hmax : inner ℝ v (Real.cos φ • (-u) + Real.sin φ • e₀) ≤
+      inner ℝ y (Real.cos φ • (-u) + Real.sin φ • e₀))
+    (hφ0 : 0 < φ) (hφ1 : φ < 1) (hφt : φ + ‖e₀ - (z - v)‖ < tgap X) : dist y v ≤ 2 := by
+  by_contra hfar
+  push Not at hfar
+  have hπ := Real.pi_gt_three
+  have hcos : 0 < Real.cos φ := Real.cos_pos_of_mem_Ioo ⟨by linarith, by linarith⟩
+  have hsin : 0 < Real.sin φ := Real.sin_pos_of_pos_of_lt_pi hφ0 (by linarith)
+  have hcs := Real.cos_sq_add_sin_sq φ
+  set w := y - v with hw
+  set r := ‖w‖ with hr_def
+  have hr : 2 < r := by rw [hr_def, hw, ← dist_eq_norm]; exact hfar
+  have hr0 : 0 < r := by linarith
+  set wh := r⁻¹ • w with hwh_def
+  have hwh : ‖wh‖ = 1 := by
+    rw [hwh_def, norm_smul, Real.norm_eq_abs, abs_of_pos (inv_pos.2 hr0), inv_mul_cancel₀ hr0.ne']
+  have hq : v + r⁻¹ • w ∈ KBall X := (KBall_convex X).add_smul_sub_mem hvK hyK
+    ⟨inv_nonneg.2 hr0.le, inv_le_one_of_one_le₀ (by linarith)⟩
+  have htq := ball_polygon_c hzD hq
+  have hαb : inner ℝ wh u ^ 2 + inner ℝ wh e₀ ^ 2 = 1 := by rw [hframe, hwh, one_pow]
+  have hα : 0 ≤ inner ℝ wh u := by
+    have h1 := hn₀ y hyK
+    rw [inner_neg_right] at h1
+    have h2 : 0 ≤ inner ℝ w u := by rw [hw]; linarith
+    rw [hwh_def, inner_smul_left]; simp only [conj_trivial]; positivity
+  have hwν : 0 ≤ -(inner ℝ wh u * Real.cos φ) + inner ℝ wh e₀ * Real.sin φ := by
+    have h1 : 0 ≤ inner ℝ w (Real.cos φ • (-u) + Real.sin φ • e₀) := by
+      rw [hw, inner_sub_left]; linarith
+    have h2 : 0 ≤ inner ℝ wh (Real.cos φ • (-u) + Real.sin φ • e₀) := by
+      rw [hwh_def, inner_smul_left]; simp only [conj_trivial]; positivity
+    rw [inner_add_right, inner_smul_right, inner_smul_right, inner_neg_right] at h2
+    linarith
+  have hbc := cos_le_of_wedge hcos hsin hcs hα hαb hwν
+  have hwe : ‖wh - e₀‖ ≤ φ := by
+    have h2 : ‖wh - e₀‖ ^ 2 = 2 - 2 * inner ℝ wh e₀ := by
+      rw [@norm_sub_sq_real, hwh, he₀]; ring
+    have h3 := Real.one_sub_sq_div_two_le_cos (x := φ)
+    have : ‖wh - e₀‖ ^ 2 ≤ φ ^ 2 := by rw [h2]; linarith
+    exact (sq_le_sq₀ (norm_nonneg _) hφ0.le).1 this
+  have hdz : dist z (v + r⁻¹ • w) = ‖(wh - e₀) + (e₀ - (z - v))‖ := by
+    rw [dist_eq_norm, ← norm_neg]; congr 1; rw [hwh_def]; abel
+  have := norm_add_le (wh - e₀) (e₀ - (z - v))
+  linarith
+
+/-- **Lemma 7.1** (path-free form): for a T-edge `vz` with `v ∈ S ∖ D`, `z ∈ S ∩ D`, the boundary
+points of `K` within distance `2` of `v` carry turning `≥ t − arcsin β`.
+
+**Statement changed** (was: a `1`-Lipschitz path `γ` with `γ 0 = v`, `γ '' [0,2] ⊆ ∂K` and turning
+`≥ t − arcsin β`).  The path form needs an arc-length parametrisation of `∂K`; the only property
+used downstream (`card_mixedT_le`) is that the set lies in `∂K` within distance `2` of `v`.
+Proof (support points instead of tangents): for every direction `ν` obtained by rotating the
+outward normal `−u_v` by `φ ∈ (0, t − arcsin β)` towards `z`'s side, a support point `y` of `K`
+in direction `ν` satisfies `|y − v| < 1` — otherwise the point `q ∈ [v, y]` at distance `1` from
+`v` has direction within `φ` of the tangent `e₀`, so `|q − z| ≤ φ + arcsin β < t ≤ dist(z, K)`.
+
+TODO: none.
 Acceptance: no `sorry`.
-Depends on: `ball_polygon_b`, `ball_polygon_c`, `c5_tgap`; tangents of convex curves.
-Difficulty L. -/
+Depends on: `ball_polygon_a`, `ball_polygon_c`, `vol_arc_ge`, support points of `K`. -/
 theorem lemma71 (hX : Normal X) (F : DirField X) (hτ : √3 / 2 + 3 * beta ≤ tau X) {v z : Pt}
     (hv : v ∈ Sset X) (hvD : v ∉ Dset X) (hz : z ∈ Sset X) (hzD : z ∈ Dset X)
     (hvz : dist v z = 1) (hT : IsTEdge F v z) :
-    ∃ γ : ℝ → Pt, LipschitzWith 1 γ ∧ γ 0 = v ∧ γ '' Set.Icc 0 2 ⊆ frontier (KBall X) ∧
-      tgap X - Real.arcsin beta ≤ turning (KBall X) (γ '' Set.Icc 0 2) := by
-  sorry
+    ∃ Γ : Set Pt, Γ ⊆ frontier (KBall X) ∧ (∀ x ∈ Γ, dist v x ≤ 2) ∧
+      tgap X - Real.arcsin beta ≤ turning (KBall X) Γ := by
+  set K := KBall X
+  refine ⟨frontier K ∩ Metric.closedBall v 2, Set.inter_subset_left,
+    fun x hx => by rw [dist_comm]; exact hx.2, ?_⟩
+  set Θ := tgap X - Real.arcsin beta
+  have hvK : v ∈ K := ball_polygon_a (Sset_sub hv) hvD
+  have ht1 : tgap X ≤ 1 := by
+    have := ball_polygon_c hzD hvK; rwa [dist_comm, hvz] at this
+  have hab0 : 0 ≤ Real.arcsin beta := Real.arcsin_nonneg.2 (by unfold beta; norm_num)
+  rcases le_or_gt Θ 0 with hΘ | hΘ
+  · exact hΘ.trans ENNReal.toReal_nonneg
+  have hΘ1 : Θ ≤ 1 := by linarith
+  have hπ := Real.pi_gt_three
+  -- the frame `(u, e₀)` at `v`, `e₀` pointing to `z`'s side
+  set u := F.u v
+  have hu : ‖u‖ = 1 := F.norm_u hv
+  set zh := z - v
+  have hzn : ‖zh‖ = 1 := by rw [← dist_eq_norm, dist_comm, hvz]
+  set a := inner ℝ zh u
+  set c := det2 u zh
+  have hac : a ^ 2 + c ^ 2 = 1 := by have := inner_sq_add_det_sq (e := zh) hu; rw [hzn] at this; linarith
+  have ha0 : 0 < a := hT.1
+  have ha1 : a < beta := hT.2.1
+  have hbeta : beta = 1 / 100 := rfl
+  have hc0 : c ≠ 0 := by intro h; rw [h] at hac; rw [hbeta] at ha1; nlinarith
+  set ς : ℝ := if 0 < c then 1 else -1
+  have hς2 : ς * ς = 1 := by simp only [ς]; split_ifs <;> norm_num
+  have hςc : 0 < ς * c := by
+    simp only [ς]; split_ifs with h
+    · linarith
+    · have : c < 0 := lt_of_le_of_ne (not_lt.1 h) hc0
+      linarith
+  set e₀ : Pt := ς • perp u
+  have hie : ∀ x, inner ℝ x e₀ = ς * det2 u x := by
+    intro x; rw [inner_smul_right, real_inner_comm, det2_eq_inner_perp]
+  have he₀ : ‖e₀‖ = 1 := by
+    rw [norm_smul, norm_perp, hu, mul_one, Real.norm_eq_abs]
+    simp only [ς]; split_ifs <;> norm_num
+  have hue : inner ℝ u e₀ = 0 := by rw [hie, det2_pt]; ring
+  -- `−u` is an outward normal at `v`
+  have hn₀ : -u ∈ normalCone K v := by
+    have := neg_mem_normalCone hvK (F.partner_mem v hv) (F.partner_K v hv hvD)
+      (dist v (F.partner v))⁻¹ (inv_nonneg.2 dist_nonneg)
+    exact this
+  -- `e₀` is close to `zh`
+  have hze : ‖e₀ - zh‖ ≤ Real.arcsin beta := by
+    have hsc : ς * c = Real.cos (Real.arcsin a) := by
+      rw [Real.cos_arcsin, eq_comm, Real.sqrt_eq_iff_mul_self_eq (by nlinarith) hςc.le]
+      linear_combination (-1) * hac - c ^ 2 * hς2
+    have hz2 : ‖e₀ - zh‖ ^ 2 = 2 - 2 * Real.cos (Real.arcsin a) := by
+      rw [@norm_sub_sq_real, he₀, hzn, real_inner_comm, hie, ← hsc]; ring
+    have hA0 : 0 ≤ Real.arcsin a := Real.arcsin_nonneg.2 ha0.le
+    have hA1 : Real.arcsin a ≤ Real.arcsin beta := Real.monotone_arcsin ha1.le
+    have hcos := Real.one_sub_sq_div_two_le_cos (x := Real.arcsin a)
+    have : ‖e₀ - zh‖ ^ 2 ≤ Real.arcsin beta ^ 2 := by rw [hz2]; nlinarith
+    exact (sq_le_sq₀ (norm_nonneg _) hab0).1 this
+  obtain ⟨xa, hxa⟩ : X.Nonempty := card_pos.1 (by linarith [hX.four_le])
+  have hKc := KBall_isCompact ⟨xa, hxa⟩
+  -- support points in the directions `ν(φ) = cos φ (−u) + sin φ e₀`, `0 < φ < Θ`
+  have hframe : ∀ x : Pt, inner ℝ x u ^ 2 + inner ℝ x e₀ ^ 2 = ‖x‖ ^ 2 := by
+    intro x
+    rw [hie, ← inner_sq_add_det_sq (e := x) hu]
+    linear_combination (det2 u x) ^ 2 * hς2
+  have key : ∀ φ ∈ Set.Ioo 0 Θ, ∃ y ∈ frontier K ∩ Metric.closedBall v 2,
+      (Real.cos φ • (-u) + Real.sin φ • e₀) ∈ normalCone K y := by
+    intro φ hφ
+    have hνn := norm_rot hu he₀ hue φ
+    obtain ⟨y, hyK, hmax⟩ := hKc.exists_isMaxOn ⟨v, hvK⟩
+      (f := fun y => inner ℝ y (Real.cos φ • (-u) + Real.sin φ • e₀))
+      (continuous_id.inner continuous_const).continuousOn
+    have hmax' : ∀ y' ∈ K, inner ℝ y' (Real.cos φ • (-u) + Real.sin φ • e₀) ≤
+        inner ℝ y (Real.cos φ • (-u) + Real.sin φ • e₀) := fun y' hy' => hmax hy'
+    refine ⟨y, ⟨mem_frontier_of_max hyK hνn hmax', ?_⟩, fun y' hy' => ?_⟩
+    · rw [Metric.mem_closedBall]
+      exact support_point_close hzD hvK hyK hu he₀ hframe hn₀ (hmax' v hvK) hφ.1
+        (by linarith [hφ.2]) (by linarith [hφ.2])
+    · rw [inner_sub_left]; linarith [hmax' y' hy']
+  -- the angle of `−u`, and the measure of the arc of directions
+  obtain ⟨θ₀, -, hθ₀⟩ := exists_angle (show ‖-u‖ = 1 by rw [norm_neg, hu])
+  unfold turning
+  have hfin : MeasureTheory.volume {θ : ℝ | θ ∈ Set.Ico 0 (2 * π) ∧
+      ∃ x ∈ frontier K ∩ Metric.closedBall v 2, dirVec θ ∈ normalCone K x} ≠ ⊤ := by
+    refine ne_top_of_le_ne_top ?_ (MeasureTheory.measure_mono (fun θ hθ => hθ.1))
+    rw [Real.volume_Ico]; exact ENNReal.ofReal_ne_top
+  rw [← ENNReal.ofReal_le_iff_le_toReal hfin]
+  have hς : ς = 1 ∨ ς = -1 := by simp only [ς]; split_ifs <;> simp
+  have hdir : ∀ φ : ℝ, dirVec (θ₀ + (-ς * φ)) = Real.cos φ • (-u) + Real.sin φ • e₀ := by
+    intro φ
+    rw [dirVec_add, hθ₀, perp_neg]
+    simp only [e₀]
+    rcases hς with h | h <;> rw [h] <;> simp [Real.cos_neg, Real.sin_neg] <;> module
+  refine vol_arc_ge _ (a := if ς = 1 then θ₀ - Θ else θ₀) hΘ.le (by linarith) ?_
+  intro θ k hθ
+  set θ' := θ + k * (2 * π)
+  have hφ : ς * (θ₀ - θ') ∈ Set.Ioo 0 Θ := by
+    rcases hς with h | h <;> simp only [h, if_true, if_neg (show (-1 : ℝ) ≠ 1 by norm_num)] at hθ ⊢ <;>
+      constructor <;> linarith [hθ.1, hθ.2]
+  obtain ⟨y, hyΓ, hyν⟩ := key _ hφ
+  refine ⟨y, hyΓ, ?_⟩
+  have e1 : dirVec θ = dirVec θ' := (dirVec_add_int θ k).symm
+  have e2 : θ' = θ₀ + (-ς * (ς * (θ₀ - θ'))) := by
+    have : -ς * (ς * (θ₀ - θ')) = -(ς * ς) * (θ₀ - θ') := by ring
+    rw [this, hς2]; ring
+  rw [e1, e2, hdir]; exact hyν
 
 /-- **Mixed T-edges** `≤ 1200` in Region II.
 
@@ -830,28 +1113,23 @@ theorem card_mixedT_le (hX : Normal X) (F : DirField X) (hτ : √3 / 2 + 3 * be
     calc G.card ≤ (G.filter (P 1) ∪ G.filter (P (-1))).card := card_le_card hsplit
       _ ≤ (G.filter (P 1)).card + (G.filter (P (-1))).card := card_union_le _ _
       _ ≤ 2 := by linarith [hside 1, hside (-1)]
-  -- step 2: the arcs of Lemma 7.1 and the multiplicity bound
-  let Arc : Pt → Prop := fun v => ∃ γ : ℝ → Pt, LipschitzWith 1 γ ∧ γ 0 = v ∧
-    γ '' Set.Icc 0 2 ⊆ frontier (KBall X) ∧
-    tgap X - Real.arcsin beta ≤ turning (KBall X) (γ '' Set.Icc 0 2)
+  -- step 2: the boundary sets of Lemma 7.1 and the multiplicity bound
+  let Arc : Pt → Prop := fun v => ∃ Γ : Set Pt, Γ ⊆ frontier (KBall X) ∧ (∀ x ∈ Γ, dist v x ≤ 2) ∧
+    tgap X - Real.arcsin beta ≤ turning (KBall X) Γ
   have hArc : ∀ v ∈ A, Arc v ∧ v ∈ Sset X := by
     intro v hv
     obtain ⟨e, he, rfl⟩ := mem_image.1 hv
     obtain ⟨w, -, hv, hvD, hw, hwD, hvw, hT, -⟩ := hk e he
     exact ⟨lemma71 hX F hτ hv hvD hw hwD hvw hT, hv⟩
-  let Γ : Pt → Set Pt := fun v => if h : Arc v then h.choose '' Set.Icc 0 2 else ∅
+  let Γ : Pt → Set Pt := fun v => if h : Arc v then h.choose else ∅
   have hΓ : ∀ v ∈ A, Γ v ⊆ frontier (KBall X) ∧ tgap X - Real.arcsin beta ≤ turning (KBall X) (Γ v)
       ∧ ∀ x ∈ Γ v, dist v x ≤ 2 := by
     intro v hv
     have h := (hArc v hv).1
-    have e : Γ v = h.choose '' Set.Icc 0 2 := dif_pos h
-    obtain ⟨hL, h0, hsub, htu⟩ := h.choose_spec
+    have e : Γ v = h.choose := dif_pos h
+    obtain ⟨hsub, hd, htu⟩ := h.choose_spec
     rw [e]
-    refine ⟨hsub, htu, ?_⟩
-    rintro x ⟨σ, hσ, rfl⟩
-    have := hL.dist_le_mul σ 0
-    rw [h0, NNReal.coe_one, one_mul, Real.dist_eq, sub_zero, abs_of_nonneg hσ.1] at this
-    rw [dist_comm]; linarith [hσ.2]
+    exact ⟨hsub, htu, hd⟩
   obtain ⟨a, ha⟩ : X.Nonempty := card_pos.1 (by linarith [hX.four_le])
   have hsum := turning_sum_le (KBall_convex X) (KBall_isCompact ⟨a, ha⟩) A Γ
     (fun v hv => (hΓ v hv).1) 81 (fun x => by
@@ -1420,18 +1698,6 @@ theorem own_count_core (V K : Finset α) (R M : α → α → Prop) (hKV : K ⊆
 end Ownership
 
 /-! ### Geometric input for the ownership count -/
-
-theorem det2_eq_inner_perp (a b : Pt) : det2 a b = inner ℝ (perp a) b := by
-  rw [det2_pt, inner_pt]; simp; ring
-
-theorem abs_det2_le (a b : Pt) : |det2 a b| ≤ ‖a‖ * ‖b‖ := by
-  rw [det2_eq_inner_perp, ← norm_perp a]; exact abs_real_inner_le_norm _ _
-
-theorem det2_add_left (a b e : Pt) : det2 (a + b) e = det2 a e + det2 b e := by
-  simp only [det2_pt, PiLp.add_apply]; ring
-
-theorem det2_neg_right (a e : Pt) : det2 a (-e) = - det2 a e := by
-  simp only [det2_pt, PiLp.neg_apply]; ring
 
 /-- For a good T-step `p → q`, the side flips when seen from `q`:
 `det(u_q, p − q)` has the opposite sign of `det(u_p, q − p)`. -/
