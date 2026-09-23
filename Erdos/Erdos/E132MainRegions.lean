@@ -889,6 +889,51 @@ def P1set (X : Finset Pt) (F : DirField X) : Finset Pt :=
 def cornerVerts (X : Finset Pt) (F : DirField X) : Finset Pt :=
   (rungVerts X F).filter (fun v => ¬ deg2 X v = 1)
 
+
+/-- The direction field with the partner of `v ∉ D` changed to another `Δ₂`-partner `w`. -/
+def DirField.redirect (F : DirField X) {v w : Pt} (hw : w ∈ X) (hvw : dist v w = dist2 X)
+    (hvD : v ∉ Dset X) : DirField X where
+  partner := Function.update F.partner v w
+  partner_mem p hp := by
+    by_cases h : p = v
+    · subst h; simpa using hw
+    · simpa [h] using F.partner_mem p hp
+  partner_K p hp hpD := by
+    by_cases h : p = v
+    · subst h; simpa using hvw
+    · simpa [h] using F.partner_K p hp hpD
+  partner_D p hp hpD := by
+    by_cases h : p = v
+    · subst h; exact absurd hpD hvD
+    · simpa [h] using F.partner_D p hp hpD
+
+theorem DirField.redirect_partner (F : DirField X) {v w : Pt} (hw : w ∈ X)
+    (hvw : dist v w = dist2 X) (hvD : v ∉ Dset X) : (F.redirect hw hvw hvD).partner v = w := by
+  simp [DirField.redirect]
+
+/-- Corner inequality, algebra: `c·u = −τ`, `c·u' > 0`, `τ > 0` ⇒ `u·u' < √(1 − τ²)`. -/
+theorem inner_lt_sOff {c u u' : Pt} {τ : ℝ} (hc : ‖c‖ = 1) (hu : ‖u‖ = 1) (hu' : ‖u'‖ = 1)
+    (e : inner ℝ c u = -τ) (hτ : 0 < τ) (hpos : 0 < inner ℝ c u') :
+    inner ℝ u u' < √(1 - τ ^ 2) := by
+  have n₁ := inner_sq_add_det_sq (e := u) hc
+  have n₂ := inner_sq_add_det_sq (e := u') hc
+  rw [real_inner_comm, e, hu] at n₁
+  rw [real_inner_comm, hu'] at n₂
+  have hL := inner_mul_add_det_mul c u u'
+  rw [e, hc] at hL
+  set d := det2 c u
+  set b := det2 c u'
+  set a := inner ℝ c u'
+  set s := √(1 - τ ^ 2)
+  have hs : s ^ 2 = 1 - τ ^ 2 := Real.sq_sqrt (by nlinarith)
+  have hs0 : 0 ≤ s := Real.sqrt_nonneg _
+  have hdb : d * b ≤ s := by
+    by_contra h; push Not at h
+    have : s ^ 2 < (d * b) ^ 2 := by nlinarith
+    nlinarith [sq_nonneg a]
+  have : inner ℝ u u' = -τ * a + d * b := by linear_combination -hL
+  nlinarith [mul_pos hτ hpos]
+
 /-- **Corner lemma**: `v ∈ S ∖ D` with a rung and a second `Δ₂`-partner `w′`:
 `∠(u_v, u′) ≥ min(2θ₀, 90° − θ₀) > 2π/7`.
 
@@ -901,7 +946,61 @@ theorem corner_lemma (hX : Normal X) (F : DirField X) (hτ₁ : √3 / 2 - 2 * b
     (hτ₂ : tau X < √3 / 2 + 3 * beta) {v z w' : Pt} (hr : IsRung F v z) (hw' : w' ∈ X)
     (hw'v : dist v w' = dist2 X) (hne : w' ≠ F.partner v) :
     2 * π / 7 < ang (F.u v) ((dist2 X)⁻¹ • (w' - v)) := by
-  sorry
+  have hv := hr.1
+  have hvD := hr.2.1
+  have hw'X := hw'
+  have hT := hr.two
+  have hpos := hT.1.pos
+  set F' := F.redirect hw' hw'v hvD
+  have hp' : F'.partner v = w' := F.redirect_partner hw' hw'v hvD
+  have hu'eq : F'.u v = (dist2 X)⁻¹ • (w' - v) := by
+    unfold DirField.u; rw [hp', hw'v]
+  rw [← hu'eq]
+  have hc := hr.norm_c
+  have hu := F.norm_u hv
+  have hu' := F'.norm_u hv
+  have i₀ := hr.inner_eq
+  have hπ := Real.pi_gt_three
+  have h3 : (1.7 : ℝ) < √3 := by rw [Real.lt_sqrt (by norm_num)]; norm_num
+  have hτ0 : 0 < tau X := by unfold beta at hτ₁; linarith
+  obtain ⟨c61, c62⟩ := c6
+  by_cases hzw : dist z w' = diam X
+  · -- the other root of `c·u = −τ`: angle `2θ₀`
+    have i₁ : inner ℝ (z - v) (F'.u v) = - tau X :=
+      exact_identity_c F' hv hvD (by rw [hp']; exact hzw) (by rw [dist_comm]; exact hr.2.2.2.2.1)
+    have hne' : F.u v ≠ F'.u v := by
+      intro e
+      apply hne
+      have hpK := F.partner_K v hv hvD
+      unfold DirField.u at e
+      rw [hp', hpK, hw'v] at e
+      have := smul_right_injective Pt (inv_ne_zero hpos.ne') e
+      simpa using this.symm
+    have hi := inner_two_sol hc hu hu' i₀ i₁ hne'
+    refine lt_ang_of_inner_lt hu hu' (by positivity) (by linarith) ?_
+    rw [hi, show 2 * π / 7 = 2 * (π / 7) by ring, Real.cos_two_mul]
+    have : tau X < Real.cos (π / 7) := hτ₂.trans c61
+    nlinarith
+  · -- `c·u' > 0`, and `c·u_v = −τ`: angle `≥ 90° − θ₀`
+    have hb := exact_identity_b F' hv hvD hr.memX.2
+    rw [hp'] at hb
+    have ha : 0 < inner ℝ (z - v) (F'.u v) := by
+      rcases hb with hb | hb
+      · refine lt_of_lt_of_le ?_ hb
+        rw [dist_comm, hr.2.2.2.2.1]; positivity
+      · exact absurd hb hzw
+    have hlt := inner_lt_sOff hc hu hu' i₀ hτ0 ha
+    refine lt_ang_of_inner_lt hu hu' (by positivity) (by linarith) (hlt.trans_le ?_)
+    have e1 : Real.cos (2 * π / 7) = Real.sin (3 * π / 14) := by
+      rw [← Real.cos_pi_div_two_sub]; congr 1; ring
+    rw [e1]
+    have hs0 : 0 < Real.sin (3 * π / 14) := Real.sin_pos_of_pos_of_lt_pi (by positivity)
+      (by linarith)
+    have hc0 : 0 < Real.cos (3 * π / 14) := Real.cos_pos_of_mem_Ioo ⟨by linarith, by linarith⟩
+    have hsc := Real.sin_sq_add_cos_sq (3 * π / 14)
+    rw [Real.sqrt_le_left hs0.le]
+    have : Real.cos (3 * π / 14) < tau X := c62.trans hτ₁
+    nlinarith
 
 /-- **At most 6 corner vertices** (their normal cones of `K` are wider than `2π/7` and
 interior-disjoint).
@@ -920,7 +1019,30 @@ Acceptance: no `sorry`.
 Depends on: `rung_offset`. Difficulty M. -/
 theorem card_rungs_le (hX : Normal X) (F : DirField X) :
     (rungs X F).card ≤ 2 * (rungVerts X F).card := by
-  sorry
+  classical
+  let f : Sym2 Pt → Pt := fun e =>
+    if h : ∃ v w, e = s(v, w) ∧ IsRung F v w then h.choose else 0
+  have hf : ∀ e, (h : ∃ v w, e = s(v, w) ∧ IsRung F v w) →
+      ∃ w, e = s(f e, w) ∧ IsRung F (f e) w := by
+    intro e h
+    have : f e = h.choose := dif_pos h
+    rw [this]; exact h.choose_spec
+  refine card_le_mul_card_image_of_maps_to (f := f) ?_ 2 ?_
+  · intro e he
+    obtain ⟨w, -, hr⟩ := hf e (mem_filter.1 he).2
+    exact mem_filter.2 ⟨mem_sdiff.2 ⟨hr.1, hr.2.1⟩, w, hr⟩
+  · intro v _
+    let o : ℝ → Pt := fun σ => v + ((-tau X) • F.u v + (σ * sOff X) • perp (F.u v))
+    have hsub : (rungs X F).filter (fun e => f e = v) ⊆ {s(v, o 1), s(v, o (-1))} := by
+      intro e he
+      obtain ⟨he, hfe⟩ := mem_filter.1 he
+      obtain ⟨w, hew, hr⟩ := hf e (mem_filter.1 he).2
+      rw [hfe] at hew hr
+      obtain ⟨σ, hσ, ho⟩ := rung_offset F hr
+      have hw : w = o σ := by simp only [o]; rw [← ho]; abel
+      rw [hew, hw]
+      rcases hσ with rfl | rfl <;> simp
+    exact (card_le_card hsub).trans (card_le_two)
 
 /-- `rungVerts = P₁ ⊔ corners`.
 
