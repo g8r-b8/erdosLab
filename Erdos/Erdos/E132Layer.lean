@@ -57,40 +57,28 @@ noncomputable def sqd (x y : Pt) : ℝ := (x 0 - y 0) ^ 2 + (x 1 - y 1) ^ 2
 /-- Dot product of `a − q` and `b − q`. -/
 noncomputable def dotp (q a b : Pt) : ℝ := (a 0 - q 0) * (b 0 - q 0) + (a 1 - q 1) * (b 1 - q 1)
 
-/-- TODO: prove.
-What's missing: unfold `EuclideanSpace.dist_eq`, `Fin.sum_univ_two`, `Real.sq_sqrt`.
-Acceptance: `dist x y ^ 2 = sqd x y`, no sorry.
-Depends on: nothing. -/
+/-- `dist² = sqd`. -/
 theorem dist_sq_eq_sqd (x y : Pt) : dist x y ^ 2 = sqd x y := by
-  sorry
+  rw [EuclideanSpace.dist_eq, Real.sq_sqrt (Finset.sum_nonneg fun i _ => sq_nonneg _),
+    Fin.sum_univ_two, sqd]
+  simp only [Real.dist_eq, sq_abs]
 
-/-- TODO: prove.
-What's missing: both sides nonnegative, square both sides using `dist_sq_eq_sqd`.
-Acceptance: `dist x y = r ↔ sqd x y = r ^ 2` for `0 ≤ r`.
-Depends on: `dist_sq_eq_sqd`. -/
+/-- Distances vs squared distances (equality). -/
 theorem dist_eq_iff_sqd {x y : Pt} {r : ℝ} (hr : 0 ≤ r) : dist x y = r ↔ sqd x y = r ^ 2 := by
-  sorry
+  rw [← dist_sq_eq_sqd, sq_eq_sq₀ dist_nonneg hr]
 
-/-- TODO: prove.
-What's missing: monotonicity of squaring on `[0, ∞)` (`pow_le_pow_left`, `abs_le_abs`).
-Acceptance: `dist x y ≤ r ↔ sqd x y ≤ r ^ 2` for `0 ≤ r`.
-Depends on: `dist_sq_eq_sqd`. -/
+/-- Distances vs squared distances (inequality). -/
 theorem dist_le_iff_sqd {x y : Pt} {r : ℝ} (hr : 0 ≤ r) : dist x y ≤ r ↔ sqd x y ≤ r ^ 2 := by
-  sorry
+  rw [← dist_sq_eq_sqd, sq_le_sq₀ dist_nonneg hr]
 
-/-- TODO: prove.
-What's missing: `ring` after unfolding.
-Acceptance: symmetry of `sqd`.
-Depends on: nothing. -/
+/-- `sqd` is symmetric. -/
 theorem sqd_comm (x y : Pt) : sqd x y = sqd y x := by
-  sorry
+  simp only [sqd]; ring
 
-/-- TODO: prove.
-What's missing: if the sum of squares vanishes, both coordinates agree (`EuclideanSpace` ext).
-Acceptance: `x ≠ y → 0 < sqd x y`.
-Depends on: nothing. -/
+/-- Distinct points have positive squared distance. -/
 theorem sqd_pos_of_ne {x y : Pt} (h : x ≠ y) : 0 < sqd x y := by
-  sorry
+  have h' : 0 < dist x y := dist_pos.2 h
+  rw [← dist_sq_eq_sqd]; positivity
 
 /-- First frame coordinate of `P` in the frame at `q` with axis `v` (so `fx q v v = 1`). -/
 noncomputable def fx (q v P : Pt) : ℝ := dotp q v P / sqd q v
@@ -98,44 +86,40 @@ noncomputable def fx (q v P : Pt) : ℝ := dotp q v P / sqd q v
 /-- Second frame coordinate of `P` in the frame at `q` with axis `v` (counter-clockwise). -/
 noncomputable def fy (q v P : Pt) : ℝ := orient q v P / sqd q v
 
-/-- TODO: prove.
-What's missing: Lagrange identity `(u·a)² + (u×a)² = |u|²|a|²` applied to `a = P − Q`;
-`field_simp` then `ring`.
-Acceptance: the frame is a similarity with squared ratio `1 / sqd q v`.
-Depends on: `sqd_pos_of_ne`. -/
+/-- The frame is a similarity with squared ratio `1 / sqd q v`. -/
 theorem frame_sqd {q v : Pt} (h : q ≠ v) (P Q : Pt) :
     (fx q v P - fx q v Q) ^ 2 + (fy q v P - fy q v Q) ^ 2 = sqd P Q / sqd q v := by
-  sorry
+  have hpos := sqd_pos_of_ne h
+  simp only [fx, fy]
+  rw [← sub_div, ← sub_div, div_pow, div_pow, ← add_div, div_eq_div_iff (by positivity) hpos.ne']
+  simp only [dotp, orient, sqd]; ring
 
-/-- TODO: prove.
-What's missing: unfold; `simp`.
-Acceptance: `q` has frame coordinates `(0, 0)`.
-Depends on: nothing. -/
+/-- `q` has frame coordinates `(0, 0)`. -/
 theorem frame_base (q v : Pt) : fx q v q = 0 ∧ fy q v q = 0 := by
-  sorry
+  simp [fx, fy, dotp, orient]
 
-/-- TODO: prove.
-What's missing: `dotp q v v = sqd q v`, `orient q v v = 0`, `div_self`.
-Acceptance: `v` has frame coordinates `(1, 0)`.
-Depends on: `sqd_pos_of_ne`. -/
+/-- `v` has frame coordinates `(1, 0)`. -/
 theorem frame_axis {q v : Pt} (h : q ≠ v) : fx q v v = 1 ∧ fy q v v = 0 := by
-  sorry
+  have hpos := sqd_pos_of_ne h
+  refine ⟨?_, ?_⟩
+  · rw [fx, show dotp q v v = sqd q v by simp only [dotp, sqd]; ring, div_self hpos.ne']
+  · rw [fy, show orient q v v = 0 by simp only [orient]; ring, zero_div]
 
-/-- TODO: prove.
-What's missing: 2D identity `(u·a)(u·b) + (u×a)(u×b) = |u|² (a·b)`.
-Acceptance: frame coordinates preserve dot products (up to the factor `sqd q v`).
-Depends on: `sqd_pos_of_ne`. -/
+/-- Frame coordinates preserve dot products (up to the factor `sqd q v`). -/
 theorem frame_dot {q v : Pt} (h : q ≠ v) (P Q : Pt) :
     fx q v P * fx q v Q + fy q v P * fy q v Q = dotp q P Q / sqd q v := by
-  sorry
+  have hpos := sqd_pos_of_ne h
+  simp only [fx, fy]
+  rw [div_mul_div_comm, div_mul_div_comm, ← add_div, div_eq_div_iff (by positivity) hpos.ne']
+  simp only [dotp, orient, sqd]; ring
 
-/-- TODO: prove.
-What's missing: 2D identity `(u·a)(u×b) − (u×a)(u·b) = |u|² (a×b)`.
-Acceptance: frame coordinates preserve orientation (up to the factor `sqd q v`).
-Depends on: `sqd_pos_of_ne`. -/
+/-- Frame coordinates preserve orientation (up to the factor `sqd q v`). -/
 theorem frame_cross {q v : Pt} (h : q ≠ v) (P Q : Pt) :
     fx q v P * fy q v Q - fy q v P * fx q v Q = orient q P Q / sqd q v := by
-  sorry
+  have hpos := sqd_pos_of_ne h
+  simp only [fx, fy]
+  rw [div_mul_div_comm, div_mul_div_comm, ← sub_div, div_eq_div_iff (by positivity) hpos.ne']
+  simp only [dotp, orient, sqd]; ring
 
 /-! ## The two largest distances -/
 
@@ -147,71 +131,72 @@ structure TwoLargest (X : Finset Pt) (Δ Δ₂ : ℝ) : Prop where
   le_max : ∀ d ∈ distSetS X, d ≤ Δ
   le_snd : ∀ d ∈ distSetS X, d < Δ → d ≤ Δ₂
 
-/-- TODO: prove.
-What's missing: `s(x, y) ∈ X.sym2`, not diagonal, `pairDist s(x,y) = dist x y`.
-Acceptance: distances of distinct points of `X` lie in `distSetS X`.
-Depends on: nothing. -/
+/-- Distances of distinct points of `X` lie in `distSetS X`. -/
 theorem dist_mem_distSetS {X : Finset Pt} {x y : Pt} (hx : x ∈ X) (hy : y ∈ X) (hxy : x ≠ y) :
     dist x y ∈ distSetS X := by
-  sorry
+  unfold distSetS pairsS
+  refine mem_image.2 ⟨s(x, y), mem_filter.2 ⟨mk_mem_sym2_iff.2 ⟨hx, hy⟩, ?_⟩, ?_⟩
+  · simpa using hxy
+  · simp [pairDist]
 
-/-- TODO: prove.
-What's missing: elements of `distSetS X` are distances of non-diagonal pairs, hence positive.
-Acceptance: `0 < d` for `d ∈ distSetS X`.
-Depends on: nothing. -/
+/-- Elements of `distSetS X` are positive. -/
 theorem pos_of_mem_distSetS {X : Finset Pt} {d : ℝ} (hd : d ∈ distSetS X) : 0 < d := by
-  sorry
+  unfold distSetS pairsS at hd
+  obtain ⟨z, hz, rfl⟩ := mem_image.1 hd
+  induction z using Sym2.ind with
+  | h a b =>
+    have hab : a ≠ b := by simpa using (mem_filter.1 hz).2
+    simpa [pairDist] using dist_pos.2 hab
 
-/-- TODO: prove.
-What's missing: `Δ := max' (distSetS X)`, `Δ₂ := max' ((distSetS X).erase Δ)`.
-Acceptance: `TwoLargest` is satisfiable whenever `X` determines at least two distances.
-Depends on: nothing. -/
+/-- `TwoLargest` is satisfiable whenever `X` determines at least two distances. -/
 theorem exists_twoLargest (X : Finset Pt) (h : 2 ≤ (distSetS X).card) :
     ∃ Δ Δ₂, TwoLargest X Δ Δ₂ := by
-  sorry
+  have hne : (distSetS X).Nonempty := card_pos.1 (by omega)
+  set Δ := (distSetS X).max' hne with hΔ
+  have hne' : ((distSetS X).erase Δ).Nonempty := by
+    rw [← card_pos, card_erase_of_mem (max'_mem _ _)]; omega
+  set Δ₂ := ((distSetS X).erase Δ).max' hne' with hΔ₂
+  have h2 := max'_mem _ hne'
+  rw [← hΔ₂] at h2
+  refine ⟨Δ, Δ₂, max'_mem _ _, mem_of_mem_erase h2,
+    lt_of_le_of_ne (le_max' _ _ (mem_of_mem_erase h2)) (ne_of_mem_erase h2),
+    fun d hd => le_max' _ _ hd, fun d hd hlt => le_max' _ _ (mem_erase.2 ⟨hlt.ne, hd⟩)⟩
 
 namespace TwoLargest
 
 variable {X : Finset Pt} {Δ Δ₂ : ℝ}
 
-/-- TODO: prove.
-What's missing: `pos_of_mem_distSetS mem_snd`.
-Acceptance: `0 < Δ₂`.
-Depends on: `pos_of_mem_distSetS`. -/
+/-- `0 < Δ₂`. -/
 theorem pos (hT : TwoLargest X Δ Δ₂) : 0 < Δ₂ := by
-  sorry
+  exact pos_of_mem_distSetS hT.mem_snd
 
-/-- TODO: prove.
-What's missing: split `x = y` (distance `0`) / `x ≠ y` (`dist_mem_distSetS`, `le_max`).
-Acceptance: all distances are at most `Δ`.
-Depends on: `dist_mem_distSetS`, `pos`. -/
+/-- All distances are at most `Δ`. -/
 theorem dist_le (hT : TwoLargest X Δ Δ₂) {x y : Pt} (hx : x ∈ X) (hy : y ∈ X) :
     dist x y ≤ Δ := by
-  sorry
+  by_cases hxy : x = y
+  · subst hxy; simp only [dist_self]; linarith [hT.pos, hT.snd_lt]
+  · exact hT.le_max _ (dist_mem_distSetS hx hy hxy)
 
-/-- TODO: prove.
-What's missing: split `x = y` / `x ≠ y`; `le_snd`.
-Acceptance: no distance lies strictly between `Δ₂` and `Δ`.
-Depends on: `dist_mem_distSetS`, `pos`. -/
+/-- No distance lies strictly between `Δ₂` and `Δ`. -/
 theorem dist_gap (hT : TwoLargest X Δ Δ₂) {x y : Pt} (hx : x ∈ X) (hy : y ∈ X) :
     dist x y ≤ Δ₂ ∨ dist x y = Δ := by
-  sorry
+  by_cases hxy : x = y
+  · subst hxy; left; simp only [dist_self]; exact hT.pos.le
+  · rcases (hT.dist_le hx hy).lt_or_eq with h | h
+    · exact Or.inl (hT.le_snd _ (dist_mem_distSetS hx hy hxy) h)
+    · exact Or.inr h
 
-/-- TODO: prove.
-What's missing: `dist_le` + `dist_le_iff_sqd`.
-Acceptance: squared version of `dist_le`.
-Depends on: `dist_le`, `dist_le_iff_sqd`. -/
+/-- Squared version of `dist_le`. -/
 theorem sqd_le (hT : TwoLargest X Δ Δ₂) {x y : Pt} (hx : x ∈ X) (hy : y ∈ X) :
     sqd x y ≤ Δ ^ 2 := by
-  sorry
+  exact (dist_le_iff_sqd (hT.pos.trans hT.snd_lt).le).1 (hT.dist_le hx hy)
 
-/-- TODO: prove.
-What's missing: `dist_gap` + `dist_le_iff_sqd`, `dist_eq_iff_sqd`.
-Acceptance: squared version of `dist_gap`.
-Depends on: `dist_gap`. -/
+/-- Squared version of `dist_gap`. -/
 theorem sqd_gap (hT : TwoLargest X Δ Δ₂) {x y : Pt} (hx : x ∈ X) (hy : y ∈ X) :
     sqd x y ≤ Δ₂ ^ 2 ∨ sqd x y = Δ ^ 2 := by
-  sorry
+  rcases hT.dist_gap hx hy with h | h
+  · exact Or.inl ((dist_le_iff_sqd hT.pos.le).1 h)
+  · exact Or.inr ((dist_eq_iff_sqd (hT.pos.trans hT.snd_lt).le).1 h)
 
 end TwoLargest
 
