@@ -103,8 +103,9 @@ so the model is only an upper bound there — but it still reproduces the known 
   y=2000: 1,031,687 (X=1e9).
 
 ## Next steps
-Background jobs left running at hand-off (stop with `pkill -f run_cubes.sh; pkill kissat`):
-full S(7,593,750) (`logs/k5l3_geom.log`) and F_1000(1e9) cubes (`logs/cubes_y1000_1e9.log`).
+Background jobs ended: all were killed by SIGTERM (rc=143, not by us) after ~2.2 h —
+full S(7,593,750) with no answer after >80 min of kissat; F_1000(1e9) cubes with f(2)=0, f(3)=1
+UNKNOWN after ~7,850 s each (`logs/cubes_y1000_1e9.log`). Not restarted, given the ~1e18 estimate.
 1. Theory, not search: the obstruction is the huge solution space on small primes. Ideas: prove
    f(2)=0 ⇒ … structural lemmas (models all have f(2)=0, f(3)≠0, f=0 on most p ≤ 100) to collapse
    the top of the tree; or an algebraic (F_5-linear) refutation instead of case splits.

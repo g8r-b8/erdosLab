@@ -1,2 +1,6 @@
 cube 2=0,3=0,5=0 rc=20 UNSAT 4s vars=1862208 clauses=12358050
 cube 2=0,3=0,5=1 rc=20 UNSAT 4s vars=1862208 clauses=12358050
+cube 2=0,3=1,5=2 rc=143 UNKNOWN 7843s vars=1862208 clauses=12358050
+cube 2=0,3=1,5=0 rc=143 UNKNOWN 7882s vars=1862208 clauses=12358050
+cube 2=0,3=1,5=1 rc=143 UNKNOWN 7882s vars=1862208 clauses=12358050
+cube 2=0,3=1,5=3 rc=143 UNKNOWN 7840s vars=1862208 clauses=12358050
