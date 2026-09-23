@@ -28,11 +28,13 @@ variable {X : Finset Pt}
 
 /-- `δ`-edges inside `S` are non-degenerate pairs of points of `S`.
 
-TODO: fill (unfold `edges`, `pairsS`, `mem_sym2_iff`).
+TODO: none — proved (Phase 2).
 Acceptance: no `sorry`.
 Depends on: definitions. Difficulty S. -/
 theorem mem_edges {z : Sym2 Pt} (hz : z ∈ edges X) : ¬ z.IsDiag ∧ ∀ p ∈ z, p ∈ Sset X := by
-  sorry
+  unfold edges pairsS at hz
+  simp only [mem_filter, mem_sym2_iff] at hz
+  exact ⟨hz.1.2, hz.1.1⟩
 
 /-! ## §6 Region I: `τ ≤ √3/2 − 2β` -/
 
@@ -85,20 +87,21 @@ theorem regionI (hX : Normal X) (F : DirField X) (hτ : tau X ≤ √3 / 2 - 2 *
 
 /-- **[C5, C6]** `τ > √3/2 − 2β ⇒ τ > 2β`.
 
-TODO: fill (Phase 2 leaf).
+TODO: none — proved (Phase 2).
 Acceptance: no `sorry`.
 Depends on: nothing. Difficulty S. -/
 theorem two_beta_lt_of {τ : ℝ} (h : √3 / 2 - 2 * beta < τ) : 2 * beta < τ := by
-  sorry
+  have : (1.7 : ℝ) < √3 := by rw [Real.lt_sqrt (by norm_num)]; norm_num
+  rw [beta] at *; linarith
 
 /-- `good ≤ goodPure + mixedT`.
 
-TODO: fill (`card_le_card_sdiff_add_card`).
+TODO: none — proved (Phase 2).
 Acceptance: no `sorry`.
 Depends on: definitions. Difficulty S. -/
 theorem card_good_le_pure_add_mixed (F : DirField X) :
     (good X F).card ≤ (goodPure X F).card + (mixedT X F).card := by
-  sorry
+  rw [goodPure]; exact card_le_card_sdiff_add_card
 
 /-! ## §7.1 Mixed T-edges (Region II only) -/
 
@@ -113,11 +116,12 @@ theorem c5_tgap (hX : Normal X) (hτ : √3 / 2 + 3 * beta ≤ tau X) :
 
 /-- **[C5]** `2π·10/0.886 < 71`.
 
-TODO: fill (Phase 2 leaf).
+TODO: none — proved (Phase 2).
 Acceptance: no `sorry`.
 Depends on: nothing. Difficulty S. -/
 theorem c5_mixed : 2 * π * 10 / 0.886 < 71 := by
-  sorry
+  have hp := Real.pi_lt_d4
+  rw [div_lt_iff₀ (by norm_num)]; linarith
 
 /-- **Lemma 7.1**: for a T-edge `vz` with `v ∈ S ∖ D`, `z ∈ S ∩ D`, the boundary arc of `K` of
 length 2 from `v` on `z`'s side has turning `≥ t − arcsin β`.
@@ -176,20 +180,29 @@ theorem regionII_high (hX : Normal X) (F : DirField X) (hτ : 1 < tau X) :
 /-- **[C5]** `2s + 6β < 1` for `√3/2 + 3β ≤ τ ≤ 1` (covers R1-at-z `2s + 2β`, R2
 `2s + 2β + arcsin β`, R2-sym `2s + 4β + arcsin β`).
 
-TODO: fill (Phase 2 leaf).
+TODO: none — proved (Phase 2).
 Acceptance: no `sorry`.
 Depends on: nothing. Difficulty S. -/
 theorem c5_sOff {τ : ℝ} (h1 : √3 / 2 + 3 * beta ≤ τ) (h2 : τ ≤ 1) :
     2 * √(1 - τ ^ 2) + 6 * beta < 1 := by
-  sorry
+  have h3 : (1.732 : ℝ) < √3 := by rw [Real.lt_sqrt (by norm_num)]; norm_num
+  rw [beta] at *
+  have hτ : (0.896 : ℝ) ≤ τ := by linarith
+  have hs : √(1 - τ ^ 2) < 0.47 := by
+    rw [Real.sqrt_lt' (by norm_num)]; nlinarith
+  linarith
 
 /-- **[C5]** `cos(β/2) > √3/2 + 3β` (rhombi only near resonance).
 
-TODO: fill (Phase 2 leaf: `1 − x²/2 ≤ cos x`).
+TODO: none — proved (Phase 2).
 Acceptance: no `sorry`.
 Depends on: nothing. Difficulty S. -/
 theorem c5_rhombus : √3 / 2 + 3 * beta < Real.cos (beta / 2) := by
-  sorry
+  have h3 : √3 < 1.7321 := by rw [Real.sqrt_lt' (by norm_num)]; norm_num
+  have hc := Real.one_sub_sq_div_two_le_cos (x := beta / 2)
+  rw [beta] at *
+  norm_num at hc ⊢
+  linarith
 
 /-- **(R1) at `v`**: a K-vertex has at most one rung (in Region II).
 
@@ -273,13 +286,16 @@ theorem R3_resonance (F : DirField X) {v₀ v₁ z₀ z₁ : Pt} (h₀ : IsRung 
 /-- **[C5] ownership ratios**: rhombus pairs `(4+m)/(2+m) ≤ 4/3` (`m ≥ 4`),
 `(3+m)/(2+m) ≤ 4/3` (`m ≥ 2`); both-reach gaps `(1+k+d)/(k+d) ≤ 5/4` (`k, d ≥ 2`).
 
-TODO: fill (Phase 2 leaf).
+TODO: none — proved (Phase 2).
 Acceptance: no `sorry`.
 Depends on: nothing. Difficulty S. -/
 theorem ownership_ratios :
     (∀ m : ℝ, 4 ≤ m → (4 + m) / (2 + m) ≤ 4 / 3) ∧ (∀ m : ℝ, 2 ≤ m → (3 + m) / (2 + m) ≤ 4 / 3) ∧
       (∀ k d : ℝ, 2 ≤ k → 2 ≤ d → (1 + k + d) / (k + d) ≤ 5 / 4) := by
-  sorry
+  refine ⟨fun m hm => ?_, fun m hm => ?_, fun k d hk hd => ?_⟩
+  · rw [div_le_iff₀ (by linarith)]; linarith
+  · rw [div_le_iff₀ (by linarith)]; linarith
+  · rw [div_le_iff₀ (by linarith)]; linarith
 
 /-- **Ownership count, no rhombi** (`√3/2 + 3β ≤ τ < cos(β/2)`): pure good edges `≤ (5/4)|S|`.
 
@@ -342,11 +358,28 @@ theorem regionII_res (hX : Normal X) (F : DirField X) (hτ₁ : Real.cos (beta /
 
 /-- **[C6]** `√3/2 + 3β < cos(π/7)` and `cos(3π/14) < √3/2 − 2β`.
 
-TODO: fill (`1 − x²/2 ≤ cos x`; `Real.cos_bound` for the upper estimate).
+TODO: none — proved (Phase 2).
 Acceptance: no `sorry`.
 Depends on: nothing. Difficulty S–M. -/
 theorem c6 : √3 / 2 + 3 * beta < Real.cos (π / 7) ∧ Real.cos (3 * π / 14) < √3 / 2 - 2 * beta := by
-  sorry
+  have h3 : (1.732 : ℝ) < √3 := by rw [Real.lt_sqrt (by norm_num)]; norm_num
+  have h3' : √3 < 1.7321 := by rw [Real.sqrt_lt' (by norm_num)]; norm_num
+  have hpl := Real.pi_lt_d4
+  have hpg := Real.pi_gt_d4
+  refine ⟨?_, ?_⟩
+  · have hc := Real.one_sub_sq_div_two_le_cos (x := π / 7)
+    have : (π / 7) ^ 2 < (3.1416 / 7) ^ 2 := by
+      apply pow_lt_pow_left₀ (by linarith) (by positivity) (by norm_num)
+    rw [beta]; norm_num at this ⊢; nlinarith
+  · have hx : |3 * π / 14| ≤ 1 := by
+      rw [abs_le]; constructor <;> linarith
+    have hb := Real.cos_bound hx
+    have hlo : (3 * 3.1415 / 14 : ℝ) ^ 2 < (3 * π / 14) ^ 2 := by
+      apply pow_lt_pow_left₀ (by linarith) (by norm_num) (by norm_num)
+    have h4 : |3 * π / 14| ^ 4 ≤ 1 := by
+      have := pow_le_one₀ (abs_nonneg _) hx (n := 4); exact this
+    rw [abs_le] at hb
+    rw [beta]; norm_num at hlo ⊢; nlinarith
 
 /-- K-vertices having a rung. -/
 def rungVerts (X : Finset Pt) (F : DirField X) : Finset Pt :=
@@ -395,12 +428,12 @@ theorem card_rungs_le (hX : Normal X) (F : DirField X) :
 
 /-- `rungVerts = P₁ ⊔ corners`.
 
-TODO: fill (`filter_card_add_filter_neg_card_eq_card`).
+TODO: none — proved (Phase 2).
 Acceptance: no `sorry`.
 Depends on: definitions. Difficulty S. -/
 theorem card_rungVerts (F : DirField X) :
     (rungVerts X F).card = (P1set X F).card + (cornerVerts X F).card := by
-  sorry
+  rw [P1set, cornerVerts, card_filter_add_card_filter_not]
 
 /-- **Region III** (§7.3): `e(S) ≤ |S| + 2|P₁| + C` with `P₁ ⊆ S` of `Δ₂`-degree 1.
 
