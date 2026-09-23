@@ -448,14 +448,48 @@ noncomputable def dist2 (X : Finset Pt) : ℝ :=
 `μ(Δ₂) ≤ (3/2)|Y|` for every finite planar `Y` (with `Δ₂ = 0`, `μ = 0` if `Y` determines fewer
 than two distances).
 
-TODO: prove.
-What's missing: if `distSetS Y` has `≥ 2` elements, `TwoLargest Y (diam Y) (dist2 Y)` and `ve87`;
-otherwise `dist2 Y = 0` and `multS Y 0 = 0`.
-Acceptance: no `sorry`.
-Depends on: `ve87`. -/
+Proof: if `distSetS Y` has `≥ 2` elements, `TwoLargest Y (diam Y) (dist2 Y)` and `ve87`;
+otherwise `dist2 Y = 0` and `multS Y 0 = 0`. -/
 theorem vesztergombi87 (Y : Finset Pt) : (multS Y (dist2 Y) : ℝ) ≤ 3 / 2 * Y.card := by
-  sorry
+  have key : 2 * multS Y (dist2 Y) ≤ 3 * Y.card := by
+    by_cases h : 2 ≤ (distSetS Y).card
+    · have hne : (distSetS Y).Nonempty := card_pos.1 (by omega)
+      have hd : diam Y = (distSetS Y).max' hne := by rw [diam, dite_eq_left hne]
+      have hmem : diam Y ∈ distSetS Y := by rw [hd]; exact max'_mem _ _
+      have hne' : ((distSetS Y).erase (diam Y)).Nonempty := by
+        rw [← card_pos, card_erase_of_mem hmem]; omega
+      have hd2 : dist2 Y = ((distSetS Y).erase (diam Y)).max' hne' := by rw [dist2, dite_eq_left hne']
+      have h2 : dist2 Y ∈ (distSetS Y).erase (diam Y) := by rw [hd2]; exact max'_mem _ _
+      have hT : TwoLargest Y (diam Y) (dist2 Y) :=
+        ⟨hmem, mem_of_mem_erase h2,
+          lt_of_le_of_ne (by rw [hd]; exact le_max' _ _ (mem_of_mem_erase h2)) (ne_of_mem_erase h2),
+          fun d hd' => by rw [hd]; exact le_max' _ _ hd',
+          fun d hd' hlt => by rw [hd2]; exact le_max' _ _ (mem_erase.2 ⟨hlt.ne, hd'⟩)⟩
+      exact ve87 hT
+    · have hemp : ¬ ((distSetS Y).erase (diam Y)).Nonempty := by
+        rw [← card_pos]
+        have := card_erase_le (s := distSetS Y) (a := diam Y)
+        by_cases hne : (distSetS Y).Nonempty
+        · have hmem : diam Y ∈ distSetS Y := by rw [diam, dite_eq_left hne]; exact max'_mem _ _
+          rw [card_erase_of_mem hmem]; omega
+        · rw [not_nonempty_iff_eq_empty.1 hne]; simp
+      have h0 : dist2 Y = 0 := by rw [dist2, dite_eq_right hemp]
+      have hm : multS Y 0 = 0 := by
+        unfold multS
+        rw [card_eq_zero, filter_eq_empty_iff]
+        intro z hz hz0
+        have := pos_of_mem_distSetS (X := Y) (d := pairDist z) (by
+          unfold distSetS; exact mem_image_of_mem _ hz)
+        linarith
+      rw [h0, hm]; omega
+  have : (2 * multS Y (dist2 Y) : ℝ) ≤ 3 * Y.card := by exact_mod_cast key
+  linarith
 
 end MainShape
+
+/-! ## Axiom check -/
+
+#print axioms ve87
+#print axioms vesztergombi87
 
 end Erdos132Ve87
