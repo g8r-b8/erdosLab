@@ -99,6 +99,7 @@ CDL use the bare case of this implicitly in the proof of their Theorem 1.2. Sinc
 - **Conjecture C1.** If no four points of X are concyclic, then μ(Δ₂) ≤ n + O(1). Stronger: #{deg-3 vertices of G'} = O(1).
   - Given the conjecture's stronger form (O(1) degree-3 core vertices), Theorem A proves (a) for general-position sets with at least a constant number of points of depth ≥ 3.
   - Lemma T is the intended tool. A proof needs Vesztergombi's case analysis redone, and I have not done it.
+- **C1 evidence (iter 8, `scripts/c1_greedy.py`, floating point, tolerance 1e-9).** Greedy constructive search: Δ₂ = 1, Δ ∈ [1.02, 1.9]. New points go at unit ∩ unit, unit ∩ Δ, or random unit/Δ placements. Every candidate is rejected if it makes 4 points concyclic or creates a distance in (1, Δ). Over 7 seeds × 300 trials the best μ(Δ₂) − n was +1 (n = 8–11), dropping to ≤ 0 for n ≥ 12 and to −5 at n = 21. This is consistent with C1 but weak, because greedy search is myopic.
 - Theorem A relies on [Ve96, Prop 3], cited via CDL; I did not re-prove it. B2 relies on Pach–de Zeeuw, whose constants are not explicit.
 - Convex layers in the scripts are computed with scipy in floating point; the equalities were checked with tolerance 1e-9.
 
