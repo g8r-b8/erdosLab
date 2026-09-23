@@ -26,6 +26,300 @@ noncomputable section
 
 variable {X : Finset Pt}
 
+/-! ## Helpers (coordinates, separation, unit vectors, offsets, T-steps) -/
+
+theorem inner_pt (x y : Pt) : inner ℝ x y = x 0 * y 0 + x 1 * y 1 := by
+  simp [EuclideanSpace.inner_eq_star_dotProduct, Fin.sum_univ_two, dotProduct]; ring
+
+theorem norm_sq_pt (x : Pt) : ‖x‖ ^ 2 = x 0 ^ 2 + x 1 ^ 2 := by
+  rw [← real_inner_self_eq_norm_sq, inner_pt]; ring
+
+theorem dist_sq_pt (x y : Pt) : dist x y ^ 2 = (x 0 - y 0) ^ 2 + (x 1 - y 1) ^ 2 := by
+  rw [dist_eq_norm, norm_sq_pt]; simp
+
+@[simp] theorem perp_apply0 (a : Pt) : perp a 0 = - a 1 := by simp [perp]
+@[simp] theorem perp_apply1 (a : Pt) : perp a 1 = a 0 := by simp [perp]
+
+theorem pt_ext_iff {a b : Pt} : a = b ↔ a 0 = b 0 ∧ a 1 = b 1 := by
+  constructor
+  · rintro rfl; exact ⟨rfl, rfl⟩
+  · rintro ⟨h0, h1⟩
+    ext i; fin_cases i <;> simp [h0, h1]
+
+theorem det2_pt (a b : Pt) : det2 a b = a 0 * b 1 - a 1 * b 0 := rfl
+
+theorem norm_perp (a : Pt) : ‖perp a‖ = ‖a‖ := by
+  have h : ‖perp a‖ ^ 2 = ‖a‖ ^ 2 := by rw [norm_sq_pt, norm_sq_pt]; simp; ring
+  exact (sq_eq_sq₀ (norm_nonneg _) (norm_nonneg _)).1 h
+
+theorem perp_sub (a b : Pt) : perp (a - b) = perp a - perp b := by
+  rw [pt_ext_iff]; simp; ring
+
+theorem unit_sq {a : Pt} (h : ‖a‖ = 1) : a 0 ^ 2 + a 1 ^ 2 = 1 := by
+  rw [← norm_sq_pt, h, one_pow]
+
+theorem inner_unit_le {a b : Pt} (ha : ‖a‖ = 1) (hb : ‖b‖ = 1) : |inner ℝ a b| ≤ 1 := by
+  have := abs_real_inner_le_norm a b; rw [ha, hb] at this; simpa using this
+
+theorem ang_unit {a b : Pt} (ha : ‖a‖ = 1) (hb : ‖b‖ = 1) :
+    ang a b = Real.arccos (inner ℝ a b) := by
+  unfold ang InnerProductGeometry.angle; rw [ha, hb]; simp
+
+theorem cos_ang_unit {a b : Pt} (ha : ‖a‖ = 1) (hb : ‖b‖ = 1) :
+    Real.cos (ang a b) = inner ℝ a b := by
+  unfold ang; rw [InnerProductGeometry.cos_angle, ha, hb]; simp
+
+theorem ang_comm (a b : Pt) : ang a b = ang b a := InnerProductGeometry.angle_comm a b
+
+/-- Chord `≤` arc for unit vectors. -/
+theorem norm_sub_le_ang {a b : Pt} (ha : ‖a‖ = 1) (hb : ‖b‖ = 1) : ‖a - b‖ ≤ ang a b := by
+  have h0 : 0 ≤ ang a b := InnerProductGeometry.angle_nonneg a b
+  have hc := Real.one_sub_sq_div_two_le_cos (x := ang a b)
+  rw [cos_ang_unit ha hb] at hc
+  have hn : ‖a - b‖ ^ 2 = 2 - 2 * inner ℝ a b := by
+    rw [@norm_sub_sq_real, ha, hb]; ring
+  have : ‖a - b‖ ^ 2 ≤ ang a b ^ 2 := by rw [hn]; linarith
+  exact (sq_le_sq₀ (norm_nonneg _) h0).1 this
+
+/-- A lower bound on an angle from an upper bound on the inner product. -/
+theorem lt_ang_of_inner_lt {a b : Pt} (ha : ‖a‖ = 1) (hb : ‖b‖ = 1) {θ : ℝ} (h0 : 0 ≤ θ)
+    (hπ : θ ≤ π) (h : inner ℝ a b < Real.cos θ) : θ < ang a b := by
+  rw [ang_unit ha hb]
+  have h1 := inner_unit_le ha hb
+  rw [abs_le] at h1
+  calc θ = Real.arccos (Real.cos θ) := (Real.arccos_cos h0 hπ).symm
+    _ < Real.arccos (inner ℝ a b) :=
+        Real.arccos_lt_arccos h1.1 h (Real.cos_le_one θ)
+
+theorem cos_le_inner_of_ang_le {a b : Pt} (ha : ‖a‖ = 1) (hb : ‖b‖ = 1) {θ : ℝ}
+    (hπ : θ ≤ π) (h : ang a b ≤ θ) : Real.cos θ ≤ inner ℝ a b := by
+  rw [← cos_ang_unit ha hb]
+  exact Real.cos_le_cos_of_nonneg_of_le_pi (InnerProductGeometry.angle_nonneg a b) hπ h
+
+/-- Decomposition in the frame `(u, u^⊥)` of a unit `u`. -/
+theorem decomp {u : Pt} (hu : ‖u‖ = 1) (e : Pt) :
+    e = inner ℝ e u • u + det2 u e • perp u := by
+  have h := unit_sq hu
+  rw [pt_ext_iff, inner_pt, det2_pt]; simp
+  constructor
+  · linear_combination (-e 0) * h
+  · linear_combination (-e 1) * h
+
+theorem inner_sq_add_det_sq {u e : Pt} (hu : ‖u‖ = 1) :
+    inner ℝ e u ^ 2 + det2 u e ^ 2 = ‖e‖ ^ 2 := by
+  have h := unit_sq hu
+  rw [inner_pt, det2_pt, norm_sq_pt]; linear_combination (e 0 ^ 2 + e 1 ^ 2) * h
+
+/-- Lagrange-type identity: `(c·a)(c·b) + det(c,a) det(c,b) = |c|² (a·b)`. -/
+theorem inner_mul_add_det_mul (c a b : Pt) :
+    inner ℝ c a * inner ℝ c b + det2 c a * det2 c b = ‖c‖ ^ 2 * inner ℝ a b := by
+  rw [inner_pt, inner_pt, inner_pt, det2_pt, det2_pt, norm_sq_pt]; ring
+
+theorem norm_frame {a c : ℝ} (h : a ^ 2 + c ^ 2 = 1) (w : Pt) : ‖a • w + c • perp w‖ = ‖w‖ := by
+  have : ‖a • w + c • perp w‖ ^ 2 = ‖w‖ ^ 2 := by
+    rw [norm_sq_pt, norm_sq_pt]; simp; linear_combination (w 0 ^ 2 + w 1 ^ 2) * h
+  exact (sq_eq_sq₀ (norm_nonneg _) (norm_nonneg _)).1 this
+
+theorem norm_frame_le (a c : ℝ) {u : Pt} (hu : ‖u‖ = 1) : ‖a • u + c • perp u‖ ≤ |a| + |c| := by
+  refine (norm_add_le _ _).trans ?_
+  rw [norm_smul, norm_smul, norm_perp, hu, Real.norm_eq_abs, Real.norm_eq_abs]; simp
+
+/-- Offsets `o_σ(u) = −τu + σ s u^⊥`: `|o_σ(u) − o_σ'(u')| ≤ |τ||u − u'| + 2s`. -/
+theorem norm_offset_sub {u u' : Pt} (hu : ‖u‖ = 1) (hu' : ‖u'‖ = 1) {τ s σ σ' : ℝ}
+    (hs : 0 ≤ s) (hσ : σ = 1 ∨ σ = -1) (hσ' : σ' = 1 ∨ σ' = -1) :
+    ‖((-τ) • u + (σ * s) • perp u) - ((-τ) • u' + (σ' * s) • perp u')‖ ≤
+      |τ| * ‖u - u'‖ + 2 * s := by
+  have e : ((-τ) • u + (σ * s) • perp u) - ((-τ) • u' + (σ' * s) • perp u') =
+      (-τ) • (u - u') + ((σ * s) • perp u - (σ' * s) • perp u') := by
+    rw [smul_sub]; abel
+  rw [e]
+  refine (norm_add_le _ _).trans (add_le_add ?_ ?_)
+  · rw [norm_smul, Real.norm_eq_abs, abs_neg]
+  · refine (norm_sub_le _ _).trans ?_
+    rw [norm_smul, norm_smul, norm_perp, norm_perp, hu, hu', Real.norm_eq_abs, Real.norm_eq_abs,
+      abs_mul, abs_mul]
+    rcases hσ with rfl | rfl <;> rcases hσ' with rfl | rfl <;>
+      simp [abs_of_nonneg hs] <;> linarith
+
+/-- Two right T-steps from nearly parallel normals are close. -/
+theorem norm_tstep_sub {u₁ u₂ e₁ e₂ : Pt} (hu₁ : ‖u₁‖ = 1) (hu₂ : ‖u₂‖ = 1) (he₁ : ‖e₁‖ = 1)
+    (he₂ : ‖e₂‖ = 1) (ha₁ : 0 < inner ℝ e₁ u₁) (ha₁' : inner ℝ e₁ u₁ < beta)
+    (ha₂ : 0 < inner ℝ e₂ u₂) (ha₂' : inner ℝ e₂ u₂ < beta) (hc₁ : det2 u₁ e₁ < 0)
+    (hc₂ : det2 u₂ e₂ < 0) : ‖e₁ - e₂‖ ≤ ‖u₁ - u₂‖ + 2 * beta := by
+  set a₁ := inner ℝ e₁ u₁
+  set a₂ := inner ℝ e₂ u₂
+  set c₁ := det2 u₁ e₁
+  set c₂ := det2 u₂ e₂
+  have n₁ := inner_sq_add_det_sq (e := e₁) hu₁
+  have n₂ := inner_sq_add_det_sq (e := e₂) hu₂
+  rw [he₁] at n₁; rw [he₂] at n₂
+  have E : e₁ - e₂ = (a₁ • (u₁ - u₂) + c₁ • perp (u₁ - u₂)) +
+      ((a₁ - a₂) • u₂ + (c₁ - c₂) • perp u₂) := by
+    conv_lhs => rw [decomp hu₁ e₁, decomp hu₂ e₂]
+    rw [perp_sub, smul_sub, smul_sub, sub_smul, sub_smul]; abel
+  rw [E]
+  refine (norm_add_le _ _).trans ?_
+  rw [norm_frame (by linarith) (u₁ - u₂)]
+  have h2 := norm_frame_le (a₁ - a₂) (c₁ - c₂) hu₂
+  have hb : beta = 1 / 100 := rfl
+  have ha : |a₁ - a₂| ≤ beta := by rw [abs_le]; constructor <;> linarith
+  have hc : |c₁ - c₂| ≤ beta := by
+    rw [abs_le]
+    constructor <;> nlinarith
+  linarith
+
+/-- Two unit solutions of `c·u = −τ` that differ have `u₁·u₂ = 2τ² − 1`. -/
+theorem inner_two_sol {c u₁ u₂ : Pt} {τ : ℝ} (hc : ‖c‖ = 1) (h₁ : ‖u₁‖ = 1) (h₂ : ‖u₂‖ = 1)
+    (e₁ : inner ℝ c u₁ = -τ) (e₂ : inner ℝ c u₂ = -τ) (hne : u₁ ≠ u₂) :
+    inner ℝ u₁ u₂ = 2 * τ ^ 2 - 1 := by
+  have n₁ := inner_sq_add_det_sq (e := u₁) hc
+  have n₂ := inner_sq_add_det_sq (e := u₂) hc
+  rw [real_inner_comm, e₁, h₁] at n₁
+  rw [real_inner_comm, e₂, h₂] at n₂
+  have hL := inner_mul_add_det_mul c u₁ u₂
+  rw [e₁, e₂, hc] at hL
+  have hd : det2 c u₁ ≠ det2 c u₂ := by
+    intro hd; apply hne
+    rw [decomp hc u₁, decomp hc u₂, real_inner_comm, e₁, real_inner_comm, e₂, hd]
+  have hd' : det2 c u₁ = - det2 c u₂ := by
+    have : (det2 c u₁ - det2 c u₂) * (det2 c u₁ + det2 c u₂) = 0 := by linear_combination n₁ - n₂
+    rcases mul_eq_zero.1 this with h | h
+    · exact absurd (sub_eq_zero.1 h) hd
+    · linarith
+  rw [hd'] at hL
+  linear_combination -hL - n₂
+
+/-! ### The point set -/
+
+theorem dist_mem_distSetS' {x y : Pt} (hx : x ∈ X) (hy : y ∈ X) (hxy : x ≠ y) :
+    dist x y ∈ distSetS X := by
+  unfold distSetS pairsS
+  refine mem_image.2 ⟨s(x, y), mem_filter.2 ⟨mk_mem_sym2_iff.2 ⟨hx, hy⟩, ?_⟩, ?_⟩
+  · simpa using hxy
+  · simp [pairDist]
+
+theorem pos_of_mem_distSetS' {d : ℝ} (hd : d ∈ distSetS X) : 0 < d := by
+  unfold distSetS pairsS at hd
+  obtain ⟨z, hz, rfl⟩ := mem_image.1 hd
+  induction z using Sym2.ind with
+  | h a b =>
+    have hab : a ≠ b := by simpa using (mem_filter.1 hz).2
+    simpa [pairDist] using dist_pos.2 hab
+
+theorem minDist_le_dist {x y : Pt} (hx : x ∈ X) (hy : y ∈ X) (hxy : x ≠ y) :
+    minDist X ≤ dist x y := by
+  have hm := dist_mem_distSetS' hx hy hxy
+  unfold minDist
+  rw [dif_pos ⟨_, hm⟩]
+  exact min'_le _ _ hm
+
+theorem one_le_dist (h1 : minDist X = 1) {x y : Pt} (hx : x ∈ X) (hy : y ∈ X) (hxy : x ≠ y) :
+    1 ≤ dist x y := h1 ▸ minDist_le_dist hx hy hxy
+
+theorem eq_of_dist_lt_one (h1 : minDist X = 1) {x y : Pt} (hx : x ∈ X) (hy : y ∈ X)
+    (h : dist x y < 1) : x = y := by
+  by_contra hxy; exact absurd (one_le_dist h1 hx hy hxy) (not_le.2 h)
+
+theorem dist2_nonneg (X : Finset Pt) : 0 ≤ dist2 X := by
+  unfold dist2
+  split_ifs with h
+  · exact (pos_of_mem_distSetS' (mem_of_mem_erase (max'_mem _ h))).le
+  · exact le_rfl
+
+/-- The two largest distances, when `Δ₂ > 0`. -/
+structure Two (X : Finset Pt) : Prop where
+  pos : 0 < dist2 X
+  lt : dist2 X < diam X
+  le_diam : ∀ x ∈ X, ∀ y ∈ X, dist x y ≤ diam X
+  gap : ∀ x ∈ X, ∀ y ∈ X, dist x y ≤ dist2 X ∨ dist x y = diam X
+
+theorem two_of_pos (h : 0 < dist2 X) : Two X := by
+  have h' := h
+  unfold dist2 at h'
+  split_ifs at h' with hne
+  · have hne0 : (distSetS X).Nonempty := hne.mono (erase_subset _ _)
+    have hd : diam X = (distSetS X).max' hne0 := by unfold diam; rw [dif_pos hne0]
+    have hd2 : dist2 X = ((distSetS X).erase (diam X)).max' hne := by
+      unfold dist2; rw [dif_pos hne]
+    have h2 := max'_mem _ hne
+    rw [← hd2] at h2
+    have hle : ∀ x ∈ X, ∀ y ∈ X, dist x y ≤ diam X := by
+      intro x hx y hy
+      by_cases hxy : x = y
+      · subst hxy; rw [dist_self, hd]; exact (pos_of_mem_distSetS' (max'_mem _ _)).le
+      · rw [hd]; exact le_max' _ _ (dist_mem_distSetS' hx hy hxy)
+    refine ⟨h, lt_of_le_of_ne (hd ▸ le_max' _ _ (mem_of_mem_erase h2)) (ne_of_mem_erase h2),
+      hle, ?_⟩
+    intro x hx y hy
+    by_cases hxy : x = y
+    · subst hxy; left; rw [dist_self]; exact h.le
+    rcases (hle x hx y hy).lt_or_eq with hl | hl
+    · left; rw [hd2]; exact le_max' _ _ (mem_erase.2 ⟨hl.ne, dist_mem_distSetS' hx hy hxy⟩)
+    · exact Or.inr hl
+  · exact absurd h' (lt_irrefl 0)
+
+theorem mem_Dset_of {p q : Pt} (hp : p ∈ X) (hq : q ∈ X) (hpq : q ≠ p) (h : dist p q = diam X) :
+    p ∈ Dset X := by
+  unfold Dset partners
+  exact mem_filter.2 ⟨hp, q, mem_filter.2 ⟨hq, hpq, h⟩⟩
+
+theorem Normal.dist2_pos (hX : Normal X) : 0 < dist2 X := by
+  have := hX.large; linarith
+
+theorem Sset_sub : Sset X ⊆ X := filter_subset _ _
+
+/-- `τ ≥ −1/2` once `Δ₂ ≥ 1`. -/
+theorem neg_half_le_tau (hT : Two X) (h1 : 1 ≤ dist2 X) : -(1 / 2) ≤ tau X := by
+  have ht : 0 < tgap X := by unfold tgap; linarith [hT.lt]
+  have : (1 - tgap X ^ 2) / (2 * dist2 X) ≤ 1 / 2 := by
+    rw [div_le_iff₀ (by linarith)]; nlinarith
+  unfold tau; linarith
+
+theorem abs_tau_le_one (hτ₁ : √3 / 2 + 3 * beta ≤ tau X) (hτ₂ : tau X ≤ 1) : |tau X| ≤ 1 := by
+  have := Real.sqrt_nonneg 3
+  rw [abs_le]; unfold beta at hτ₁; constructor <;> linarith
+
+namespace IsRung
+
+variable {F : DirField X} {v z : Pt}
+
+theorem memX (h : IsRung F v z) : v ∈ X ∧ z ∈ X := ⟨Sset_sub h.1, Sset_sub h.2.2.1⟩
+
+theorem ne (h : IsRung F v z) : v ≠ z := by
+  intro e; have := h.2.2.2.2.1; rw [e, dist_self] at this; norm_num at this
+
+/-- A rung forces `Δ₂ > 0` (so the two largest distances exist) and `Δ₂ ≥ 1`. -/
+theorem two (h : IsRung F v z) : Two X ∧ 1 ≤ dist2 X := by
+  obtain ⟨hv, hvD, hz, hzD, h1, hex⟩ := h
+  have hvX := Sset_sub hv
+  have hzX := Sset_sub hz
+  have hvz : z ≠ v := by intro e; rw [e, dist_self] at h1; norm_num at h1
+  have hpos : 0 < dist2 X := by
+    rcases (dist2_nonneg X).lt_or_eq with h' | h'
+    · exact h'
+    · exfalso
+      have hp := F.partner_K v hv hvD
+      rw [← h', dist_eq_zero] at hp
+      rw [← hp] at hex
+      rw [dist_comm] at hex
+      exact hvD (mem_Dset_of hvX hzX hvz hex)
+  have hT := two_of_pos hpos
+  refine ⟨hT, ?_⟩
+  rcases hT.gap v hvX z hzX with h' | h'
+  · linarith
+  · exact absurd (mem_Dset_of hvX hzX hvz h') hvD
+
+theorem tau_ge (h : IsRung F v z) : -(1 / 2) ≤ tau X := neg_half_le_tau h.two.1 h.two.2
+
+/-- `c = z − v` is a unit vector with `c·u_v = −τ`. -/
+theorem inner_eq (h : IsRung F v z) : inner ℝ (z - v) (F.u v) = - tau X :=
+  exact_identity_c F h.1 h.2.1 h.2.2.2.2.2 (by rw [dist_comm]; exact h.2.2.2.2.1)
+
+theorem norm_c (h : IsRung F v z) : ‖z - v‖ = 1 := by
+  rw [← dist_eq_norm, dist_comm]; exact h.2.2.2.2.1
+
+end IsRung
+
 /-- `δ`-edges inside `S` are non-degenerate pairs of points of `S`.
 
 TODO: none — proved (Phase 2).
@@ -158,7 +452,12 @@ TODO: prove.
 Acceptance: no `sorry`.
 Depends on: `tau_le_one_of_exception`. Difficulty S. -/
 theorem rungs_eq_empty (F : DirField X) (hτ : 1 < tau X) : rungs X F = ∅ := by
-  sorry
+  rw [eq_empty_iff_forall_notMem]
+  intro e he
+  obtain ⟨v, w, -, hr⟩ := (mem_filter.1 he).2
+  have := tau_le_one_of_exception F hr.1 hr.2.1 hr.2.2.2.2.2
+    (by rw [dist_comm]; exact hr.2.2.2.2.1)
+  linarith
 
 /-- **Region II-high** (`τ > 1`): `e(S) ≤ |S| + C`.
 
@@ -211,7 +510,17 @@ Acceptance: no `sorry`.
 Depends on: `rung_offset`, `c5_sOff`. Difficulty S–M. -/
 theorem R1_v (hX : Normal X) (F : DirField X) (hτ₁ : √3 / 2 + 3 * beta ≤ tau X)
     (hτ₂ : tau X ≤ 1) {v z₁ z₂ : Pt} (h₁ : IsRung F v z₁) (h₂ : IsRung F v z₂) : z₁ = z₂ := by
-  sorry
+  obtain ⟨σ₁, hσ₁, e₁⟩ := rung_offset F h₁
+  obtain ⟨σ₂, hσ₂, e₂⟩ := rung_offset F h₂
+  have hu := F.norm_u h₁.1
+  have hs := c5_sOff hτ₁ hτ₂
+  have hs0 : 0 ≤ sOff X := Real.sqrt_nonneg _
+  refine eq_of_dist_lt_one hX.minDist_eq h₁.memX.2 h₂.memX.2 ?_
+  have e : z₁ - z₂ = (z₁ - v) - (z₂ - v) := by abel
+  rw [dist_eq_norm, e, e₁, e₂]
+  refine (norm_offset_sub hu hu hs0 hσ₁ hσ₂).trans_lt ?_
+  simp only [sub_self, norm_zero, mul_zero, zero_add]
+  unfold sOff; unfold beta at hs; linarith
 
 /-- **(R1) at `z`**: a D-vertex has at most one good rung (`|v − v′| ≤ 2s + 2β < 1`).
 
@@ -222,7 +531,28 @@ Difficulty M. -/
 theorem R1_z (hX : Normal X) (F : DirField X) (hτ₁ : √3 / 2 + 3 * beta ≤ tau X)
     (hτ₂ : tau X ≤ 1) {v₁ v₂ z : Pt} (h₁ : IsRung F v₁ z) (h₂ : IsRung F v₂ z)
     (hg₁ : ang (F.u v₁) (F.u z) ≤ beta) (hg₂ : ang (F.u v₂) (F.u z) ≤ beta) : v₁ = v₂ := by
-  sorry
+  obtain ⟨σ₁, hσ₁, e₁⟩ := rung_offset F h₁
+  obtain ⟨σ₂, hσ₂, e₂⟩ := rung_offset F h₂
+  have hu₁ := F.norm_u h₁.1
+  have hu₂ := F.norm_u h₂.1
+  have huz := F.norm_u h₁.2.2.1
+  have hs := c5_sOff hτ₁ hτ₂
+  have hs0 : 0 ≤ sOff X := Real.sqrt_nonneg _
+  have hτ0 : |tau X| ≤ 1 := abs_tau_le_one hτ₁ hτ₂
+  refine eq_of_dist_lt_one hX.minDist_eq h₁.memX.1 h₂.memX.1 ?_
+  have e : v₁ - v₂ = (z - v₂) - (z - v₁) := by abel
+  rw [dist_eq_norm, e, e₁, e₂]
+  refine (norm_offset_sub hu₂ hu₁ hs0 hσ₂ hσ₁).trans_lt ?_
+  have hd : ‖F.u v₂ - F.u v₁‖ ≤ 2 * beta := by
+    have := norm_sub_le (F.u v₂ - F.u z) (F.u v₁ - F.u z)
+    rw [sub_sub_sub_cancel_right] at this
+    have a₁ := norm_sub_le_ang hu₁ huz
+    have a₂ := norm_sub_le_ang hu₂ huz
+    linarith
+  have : |tau X| * ‖F.u v₂ - F.u v₁‖ ≤ 2 * beta :=
+    (mul_le_of_le_one_left (norm_nonneg _) hτ0).trans hd
+  have hb : (0 : ℝ) < beta := by unfold beta; norm_num
+  unfold sOff; linarith
 
 /-- **(R2) proximity**: `(v₀, z₀)` a good rung, `v₁`/`z₁` the right pure T-neighbours of
 `v₀`/`z₀`; if `v₁` has a good rung `(v₁, z′)` then `z′ = z₁` (`|z′ − z₁| ≤ 2s + 2β + arcsin β`).
