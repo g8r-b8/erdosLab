@@ -685,13 +685,40 @@ theorem case3_select_real {xa ya xc yc : ℝ}
     exact hne ⟨hx, hy⟩
   · exact Or.inr (middle_real hc ha hxc hxa (by linarith [mul_comm ya yc]) h)
 
-/-- TODO: prove.
-What's missing: (VERIFY_A1b Case 2 with the apex `v₁ = (1, 0)`): `x₂ = x₃ = −c`, `y₃ = −y₂`,
-`D = 2 + 2c`, `c² ≥ 3/4`; with `ρ = |r|² = 2 x_r ∈ (0, 1]`:
-both far distances `≤ 1` ⇒ `ρ(1 + c) ≤ 0`; `|r v₂|² = D` ⇒
-`2(1+c)(1−ρ)(2−ρ) + 4c² − 3 = 0` ⇒ `ρ = 1, c² = 3/4` ⇒ `|r v₃|² = 2 ∈ (1, D)`; symmetric for `v₃`.
-Acceptance: Case 2 core computation: the apex has no second `Δ₂`-neighbour.
-Depends on: nothing. -/
+/-- Case 2 key computation: if the apex is `(1, 0)`, `v₂ = (x₂, y₂)` with `4y₂² ≤ 1`, and `r` (a second `Δ₂`-neighbour of the apex, inside the unit disc) has `|r v₂|² = D`, then `ρ = |r|² = 1`, `4x₂² = 3`, and `|r v₃|² = 2` for the mirror image `v₃ = (x₂, −y₂)`. -/
+theorem case2_aux_real {x₂ y₂ xr yr D : ℝ} (hD : 1 < D) (h₂ : x₂ ^ 2 + y₂ ^ 2 = 1)
+    (h12 : (1 - x₂) ^ 2 + y₂ ^ 2 = D) (hy : 4 * y₂ ^ 2 ≤ 1)
+    (hr1 : (xr - 1) ^ 2 + yr ^ 2 = 1) (hrn : xr ^ 2 + yr ^ 2 ≤ 1)
+    (E : (xr - x₂) ^ 2 + (yr - y₂) ^ 2 = D) :
+    (xr - x₂) ^ 2 + (yr + y₂) ^ 2 = 2 ∧ x₂ ≠ 0 := by
+  have hL : 2 * x₂ * xr - 2 * x₂ - 2 * xr + 2 * y₂ * yr + 1 = 0 := by
+    linear_combination -E + hr1 + h12
+  have hG : 2 * (1 - x₂) * (1 - 2 * xr) * (2 - 2 * xr) + 4 * x₂ ^ 2 - 3 = 0 := by
+    linear_combination (2 * x₂ * xr - 2 * x₂ - 2 * xr + 1 - 2 * y₂ * yr) * hL +
+      4 * yr ^ 2 * h₂ + 4 * (1 - x₂ ^ 2) * hr1
+  have hDx : D = 2 - 2 * x₂ := by linear_combination -h12 + h₂
+  have hx2 : x₂ < 1 / 2 := by linarith
+  have hxr : 2 * xr ≤ 1 := by
+    have : (xr - 1) ^ 2 + yr ^ 2 = xr ^ 2 + yr ^ 2 - 2 * xr + 1 := by ring
+    linarith
+  have hq : 3 ≤ 4 * x₂ ^ 2 := by linarith
+  have T1 : 0 ≤ 2 * (1 - x₂) * (1 - 2 * xr) * (2 - 2 * xr) := by
+    have := mul_nonneg (mul_nonneg (by linarith : (0:ℝ) ≤ 2 * (1 - x₂))
+      (by linarith : (0:ℝ) ≤ 1 - 2 * xr)) (by linarith : (0:ℝ) ≤ 2 - 2 * xr)
+    linarith
+  have hT : 2 * (1 - x₂) * (1 - 2 * xr) * (2 - 2 * xr) = 0 := by linarith
+  have hxr' : xr = 1 / 2 := by
+    rcases mul_eq_zero.1 hT with h | h
+    · rcases mul_eq_zero.1 h with h' | h'
+      · linarith
+      · linarith
+    · linarith
+  have hx0 : x₂ ≠ 0 := by
+    rintro rfl; norm_num at hq
+  refine ⟨?_, hx0⟩
+  linear_combination hr1 + h₂ + hL + (4 - 4 * x₂) * hxr'
+
+/-- VERIFY_A1b **Case 2** core computation (apex `v₁ = (1, 0)`): the apex has no second `Δ₂`-neighbour `r` inside the unit disc.  By symmetry `v₃ = (x₂, −y₂)`; if `|r v₂|² = D` (or `|r v₃|² = D`) then `case2_aux_real` puts the other distance at `2 ∈ (1, D)`; if both are `≤ 1` then `ρ(1 − x₂) ≤ 0`. -/
 theorem case2_real {x₂ y₂ x₃ y₃ xr yr D : ℝ} (hD : 1 < D)
     (h₂ : x₂ ^ 2 + y₂ ^ 2 = 1) (h₃ : x₃ ^ 2 + y₃ ^ 2 = 1)
     (h12 : (1 - x₂) ^ 2 + y₂ ^ 2 = D) (h13 : (1 - x₃) ^ 2 + y₃ ^ 2 = D)
@@ -699,21 +726,70 @@ theorem case2_real {x₂ y₂ x₃ y₃ xr yr D : ℝ} (hD : 1 < D)
     (hr1 : (xr - 1) ^ 2 + yr ^ 2 = 1) (hrn : xr ^ 2 + yr ^ 2 ≤ 1) (hr0 : 0 < xr ^ 2 + yr ^ 2)
     (g2 : (xr - x₂) ^ 2 + (yr - y₂) ^ 2 ≤ 1 ∨ (xr - x₂) ^ 2 + (yr - y₂) ^ 2 = D)
     (g3 : (xr - x₃) ^ 2 + (yr - y₃) ^ 2 ≤ 1 ∨ (xr - x₃) ^ 2 + (yr - y₃) ^ 2 = D) : False := by
-  sorry
+  have hx : x₃ = x₂ := by linear_combination (1/2 : ℝ) * h12 - (1/2 : ℝ) * h13 -
+    (1/2 : ℝ) * h₂ + (1/2 : ℝ) * h₃
+  have hy : y₃ = -y₂ := by
+    have : (y₃ - y₂) * (y₃ + y₂) = 0 := by rw [hx] at h₃; linear_combination h₃ - h₂
+    rcases mul_eq_zero.1 this with h | h
+    · exact absurd ⟨hx.symm, by linarith⟩ hne
+    · linarith
+  subst x₃ y₃
+  have hy4 : 4 * y₂ ^ 2 ≤ 1 := by nlinarith
+  rcases g2 with g2 | g2
+  · rcases g3 with g3 | g3
+    · have hDx : D = 2 - 2 * x₂ := by linear_combination -h12 + h₂
+      have e2 : (xr - x₂) ^ 2 + (yr - y₂) ^ 2 = xr ^ 2 + yr ^ 2 - 2 * xr * x₂ - 2 * yr * y₂ + 1 := by
+        linear_combination h₂
+      have e3 : (xr - x₂) ^ 2 + (yr - -y₂) ^ 2 = xr ^ 2 + yr ^ 2 - 2 * xr * x₂ + 2 * yr * y₂ + 1 := by
+        linear_combination h₂
+      have hρ : xr ^ 2 + yr ^ 2 = 2 * xr := by linear_combination hr1
+      have hxr : 0 < xr := by linarith
+      have : xr * (1 - x₂) ≤ 0 := by nlinarith
+      have := mul_pos hxr (by linarith : (0:ℝ) < 1 - x₂)
+      linarith
+    · obtain ⟨h, hx0⟩ := case2_aux_real (y₂ := -y₂) hD (by linear_combination h₂)
+        (by linear_combination h12) (by nlinarith) hr1 hrn g3
+      have : (yr + -y₂) = yr - y₂ := by ring
+      rw [this] at h
+      linarith
+  · obtain ⟨h, hx0⟩ := case2_aux_real hD h₂ h12 hy4 hr1 hrn g2
+    have : (yr - -y₂) = yr + y₂ := by ring
+    rw [this] at g3
+    rcases g3 with g3 | g3
+    · linarith
+    · have hDx : D = 2 - 2 * x₂ := by linear_combination -h12 + h₂
+      exact hx0 (by linarith)
 
-/-- TODO: prove.
-What's missing: `r·A = ρ/2`, `r·C = ρ/2 − 1`; `r − (αA + βC)` is orthogonal to `A` and `C`,
-which span the plane (`(A × C)² = 3/4`), so it vanishes; then `ρ = α² + β² − αβ`.
-Acceptance: the two candidates of VERIFY_A1b Case 1: `r = (ρ − 2/3)A + (ρ − 4/3)C` with
-`ρ² − 3ρ + 4/3 = 0`, `ρ = |r|²`.
-Depends on: nothing. -/
+/-- The two candidates of VERIFY_A1b Case 1: if `A, C` are unit vectors at `120°` and `|rA|² = 1`, `|rC|² = 3`, then `r = (ρ − 2/3)A + (ρ − 4/3)C` with `ρ = |r|²` and `ρ² − 3ρ + 4/3 = 0`. -/
 theorem cand_real {a0 a1 c0 c1 r0 r1 : ℝ} (ha : a0 ^ 2 + a1 ^ 2 = 1) (hc : c0 ^ 2 + c1 ^ 2 = 1)
     (hac : a0 * c0 + a1 * c1 = -1 / 2)
     (hra : (r0 - a0) ^ 2 + (r1 - a1) ^ 2 = 1) (hrc : (r0 - c0) ^ 2 + (r1 - c1) ^ 2 = 3) :
     r0 = (r0 ^ 2 + r1 ^ 2 - 2 / 3) * a0 + (r0 ^ 2 + r1 ^ 2 - 4 / 3) * c0 ∧
     r1 = (r0 ^ 2 + r1 ^ 2 - 2 / 3) * a1 + (r0 ^ 2 + r1 ^ 2 - 4 / 3) * c1 ∧
     (r0 ^ 2 + r1 ^ 2) ^ 2 - 3 * (r0 ^ 2 + r1 ^ 2) + 4 / 3 = 0 := by
-  sorry
+  set ρ := r0 ^ 2 + r1 ^ 2 with hρ
+  have hA : r0 * a0 + r1 * a1 = ρ / 2 := by linear_combination (-1/2 : ℝ) * hra + (1/2 : ℝ) * ha
+  have hC : r0 * c0 + r1 * c1 = ρ / 2 - 1 := by
+    linear_combination (-1/2 : ℝ) * hrc + (1/2 : ℝ) * hc
+  have hcr : (a0 * c1 - a1 * c0) ^ 2 = 3 / 4 := by
+    linear_combination (c0 ^ 2 + c1 ^ 2) * ha + hc - (a0 * c0 + a1 * c1 - 1 / 2) * hac
+  have hne : a0 * c1 - a1 * c0 ≠ 0 := by
+    intro h; rw [h] at hcr; norm_num at hcr
+  have hw0 : (a0 * c1 - a1 * c0) * (r0 - ((ρ - 2 / 3) * a0 + (ρ - 4 / 3) * c0)) = 0 := by
+    linear_combination c1 * hA - c1 * (ρ - 2 / 3) * ha - c1 * (ρ - 4 / 3) * hac - a1 * hC +
+      a1 * (ρ - 2 / 3) * hac + a1 * (ρ - 4 / 3) * hc
+  have hw1 : (a0 * c1 - a1 * c0) * (r1 - ((ρ - 2 / 3) * a1 + (ρ - 4 / 3) * c1)) = 0 := by
+    linear_combination a0 * hC - a0 * (ρ - 2 / 3) * hac - a0 * (ρ - 4 / 3) * hc - c0 * hA +
+      c0 * (ρ - 2 / 3) * ha + c0 * (ρ - 4 / 3) * hac
+  have e0 : r0 = (ρ - 2 / 3) * a0 + (ρ - 4 / 3) * c0 := by
+    linarith [(mul_eq_zero.1 hw0).resolve_left hne]
+  have e1 : r1 = (ρ - 2 / 3) * a1 + (ρ - 4 / 3) * c1 := by
+    linarith [(mul_eq_zero.1 hw1).resolve_left hne]
+  refine ⟨e0, e1, ?_⟩
+  have hq : ρ = r0 ^ 2 + r1 ^ 2 := hρ
+  linear_combination hq - (r0 + ((ρ - 2 / 3) * a0 + (ρ - 4 / 3) * c0)) * e0 -
+    (r1 + ((ρ - 2 / 3) * a1 + (ρ - 4 / 3) * c1)) * e1 - (ρ - 2 / 3) ^ 2 * ha -
+    (ρ - 4 / 3) ^ 2 * hc - 2 * (ρ - 2 / 3) * (ρ - 4 / 3) * hac
 
 /-- TODO: prove.
 What's missing: (VERIFY_A1b Case 1, `v₁ = (1,0)`): `D = 3`, `v₂ = (−1/2, y₂)`, `v₃ = (−1/2, −y₂)`;
