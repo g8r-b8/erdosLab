@@ -28,7 +28,7 @@ A reformulation that is useful: CDL's condition 2|L₁| + |L₂| ≤ n is the sa
    e(G') = ½ Σ_{v∈G'} deg' = |V(G')| + ½ Σ_{p∈L₁'} (deg'(p) − 2).
 4. Adding the two estimates gives the bound. ∎
 
-Using deg' ≤ 4 on L₁' ([Ve96, Props 5–8]) recovers CDL's bound 2|L₁| + |L₂|.
+Using deg' ≤ 4 on L₁' ([Ve96, Props 5–8]; now proved directly in VERIFY_A1c.md) recovers CDL's bound 2|L₁| + |L₂|.
 
 **Corollary A1 (new class).** Assume hypothesis (H3): no hull vertex has 4 or more points of X at distance Δ₂. This holds in particular when **no four points of X are concyclic**. Then
   μ(Δ₂) ≤ |L₁| + |L₂| + ½·#{p ∈ L₁' : deg'(p) = 3} ≤ (3/2)|L₁| + |L₂|.
@@ -36,8 +36,9 @@ So Δ₂ occurs at most n times whenever **|L₁| ≤ 2m₃**, i.e. (3/2)|L₁| 
 
 **Why this is new.** Take |L₁| = |L₂| = 0.4n and m₃ = 0.2n. CDL's three quantities are 1.2n, 1.33n and 1.2n, all larger than n, so CDL does not apply. Corollary A1 gives exactly n.
 
-**Unconditional form.** Let h(p) be the number of points at distance Δ₂ from p. The conjecture holds whenever
+**Unconditional form (proved; VERIFY_A1c.md, 2026-09-23).** Let h(p) be the number of points at distance Δ₂ from p. The conjecture holds whenever
   Σ_{p∈L₁} (min(h(p), 4) − 2)⁺ ≤ 2m₃.
+The input deg' ≤ 4 on L₁' ([Ve96, Props 5–8] via CDL) is now proved directly in the 2-core, without deleting points. If p is extreme with Δ₂-neighbours w₁, …, w_k in angular order, then deg_G(wᵢ) = 1 for 3 ≤ i ≤ k − 2. Also, at most 2 of p's G'-neighbours are non-extreme.
 
 **Sharpness (numerically verified with `checkA.py`).** Take a regular even m-gon and put CDL "servers" on alternate edges.
 - Every vertex has 3 Δ₂-neighbours, so (H3) holds.
