@@ -13,12 +13,17 @@ for R in "$@"; do
   "$W/warmls" 5 3 "$R" "$map" "$model" "$W/$tag.map" "$W/$tag.model" "$PMIN" "$SEED" "$MAXSTEPS" "$NOISE" > "$log" 2>&1
   rc=$?; dt=$(( $(date +%s) - t0 ))
   lim=$((R + 1000000))
-  while :; do a=$("$HERE/lamenc" run 5 3 $lim "$W/$tag.map" "$W/$tag.model"); case $a in NONE*) lim=$((lim * 2));; *) break;; esac; done
+  # decoder A: lamenc run (the original decoder, ~5 bytes per n) up to LAMENC_MAX, else segcheck (O(segment))
+  if [ "$R" -le "${LAMENC_MAX:-500000000}" ]; then dec=lamenc; else dec=segcheck; fi
+  while :; do
+    if [ $dec = lamenc ]; then a=$("$HERE/lamenc" run 5 3 $lim "$W/$tag.map" "$W/$tag.model"); else a=$("$HERE/segcheck" 5 3 $lim "$W/$tag.map" "$W/$tag.model"); fi
+    case $a in NONE*) lim=$((lim * 2));; *) break;; esac
+  done
   b=$(python3 "$HERE/checkf.py" 5 3 $lim "$W/$tag.map" "$W/$tag.model")
   end=$(grep '^END' "$log")
   if [ $rc = 0 ]; then st=SAT; else st=UNSOLVED; fi
-  printf "%s\tR=%s warmls\t%s\t%ss from %s; lamenc_first_run=%s checkf_first_run=%s; %s\n" "$(ts)" "$R" "$st" "$dt" "$(basename "$map")" "$a" "$b" "$end" >> "$ST"
-  echo "$(ts) R=$R $st ${dt}s lamenc=$a checkf=$b | $end"
+  printf "%s\tR=%s warmls\t%s\t%ss from %s; %s_first_run=%s checkf_first_run=%s; %s\n" "$(ts)" "$R" "$st" "$dt" "$(basename "$map")" "$dec" "$a" "$b" "$end" >> "$ST"
+  echo "$(ts) R=$R $st ${dt}s $dec=$a checkf=$b | $end"
   [ $rc = 0 ] || exit 1
   map=$W/$tag.map; model=$W/$tag.model
 done
