@@ -14,105 +14,298 @@ find the least Nullstellensatz degree D that refutes, and compare with the DFS s
 from __future__ import annotations
 
 import argparse
+import random
 from typing import Dict, List, Sequence, Tuple
 
-Mono = Tuple[int, ...]            # exponent vector over the free variables, entries in [0, k-1]
-Poly = Dict[Mono, int]            # monomial -> coefficient in F_k
+import numpy as np
+
+# Dense representation: a reduced polynomial in n variables over F_k is a length-k^n int64 array of
+# coefficients, indexed by the monomial x^e <-> sum_i e_i k^i (0 <= e_i <= k-1).
+Poly = np.ndarray
+Affine = Tuple[int, Dict[int, int]]            # (constant, {free position: coefficient}) over F_k
 
 
 def primes_upto(y: int) -> List[int]:
     """Primes <= y.
 
-    TODO: implement (trial division is fine, y <= 5000).
     Acceptance: primes_upto(10) == [2, 3, 5, 7].
-    Depends on: nothing.
     """
-    raise NotImplementedError("primes_upto")
+    return [p for p in range(2, y + 1) if all(p % d for d in range(2, int(p ** 0.5) + 1))]
 
 
 def run_forms(k: int, l: int, ps: Sequence[int], r: int) -> List[Dict[int, int]]:
     """Exponent vectors (prime index -> exponent mod k, zeros dropped) of r, ..., r+l-1.
 
-    TODO: factor each member over ps.
-    What's missing: everything.  Acceptance: raises ValueError if a member is not ps-smooth.
-    Depends on: primes_upto.
+    Raises ValueError if a member is not ps-smooth.
     """
-    raise NotImplementedError("run_forms")
+    out = []
+    for n in range(r, r + l):
+        v: Dict[int, int] = {}
+        for i, p in enumerate(ps):
+            if n == 1:
+                break
+            e = 0
+            while n % p == 0:
+                n //= p
+                e += 1
+            if e % k:
+                v[i] = e % k
+        if n != 1:
+            raise ValueError(f"{r}: member not smooth")
+        out.append(v)
+    return out
 
 
 def restrict(k: int, forms: List[List[Dict[int, int]]], fix: Dict[int, int], free: Sequence[int]
-             ) -> Tuple[List[List[Tuple[int, Dict[int, int]]]], bool]:
+             ) -> Tuple[List[List[Affine]], bool]:
     """Substitute fixed prime values; keep only runs whose remaining primes are all in `free`.
 
-    TODO: each member becomes an affine form (const, {free var position: coef}).  Members with no
-    free variables and nonzero constant satisfy the run (drop the run).  Runs mentioning a prime that
-    is neither fixed nor free are dropped (sound: fewer constraints).  Returns (runs, trivially_unsat)
-    where trivially_unsat means some run has all members constant zero.
-    What's missing: everything.
-    Acceptance: on k=3 with all primes fixed to a model, returns ([], False).
-    Depends on: run_forms.
+    Members with no free variables and nonzero constant satisfy the run (run dropped).  Runs
+    mentioning a prime that is neither fixed nor free are dropped (sound: fewer constraints).
+    Returns (runs, trivially_unsat); trivially_unsat means some run has all members constant 0.
     """
-    raise NotImplementedError("restrict")
+    pos = {q: j for j, q in enumerate(free)}
+    runs: List[List[Affine]] = []
+    for tri in forms:
+        if any(q not in fix and q not in pos for v in tri for q in v):
+            continue
+        aff: List[Affine] = []
+        dead = False
+        for v in tri:
+            c = sum(e * fix[q] for q, e in v.items() if q in fix) % k
+            lin = {pos[q]: e % k for q, e in v.items() if q in pos}
+            if not lin and c:
+                dead = True
+                break
+            aff.append((c, lin))
+        if dead:
+            continue
+        if all(not lin for _, lin in aff):
+            return [], True
+        runs.append(aff)
+    return runs, False
+
+
+_TABLES: Dict[Tuple[int, int], Tuple[np.ndarray, np.ndarray, np.ndarray]] = {}
+
+
+def _tables(k: int, n: int):
+    """(exponent matrix N x n, degree vector, monomial product table N x N) for k^n monomials."""
+    key = (k, n)
+    if key not in _TABLES:
+        N = k ** n
+        ex = np.array([[(m // k ** i) % k for i in range(n)] for m in range(N)], dtype=np.int64).reshape(N, n)
+        deg = ex.sum(axis=1)
+        s = ex[:, None, :] + ex[None, :, :]
+        s = np.where(s >= k, s - (k - 1), s)             # x^k = x
+        w = k ** np.arange(n, dtype=np.int64)
+        prod = (s * w).sum(axis=2)
+        _TABLES[key] = (ex, deg, prod)
+    return _TABLES[key]
 
 
 def poly_mul(k: int, a: Poly, b: Poly) -> Poly:
-    """Product in F_k[x]/(x_i^k - x_i).
+    """Product in F_k[x]/(x_i^k - x_i) (dense arrays of length k^n).
 
-    TODO: multiply monomials, reduce exponents e >= k via e -> ((e - 1) mod (k - 1)) + 1.
     Acceptance: for k=3, x*x*x == x.
-    Depends on: nothing.
     """
-    raise NotImplementedError("poly_mul")
+    N = a.shape[0]
+    n = int(round(np.log(N) / np.log(k)))
+    _, _, prod = _tables(k, n)
+    ia, ib = np.nonzero(a)[0], np.nonzero(b)[0]
+    out = np.zeros(N, dtype=np.int64)
+    if len(ia) and len(ib):
+        idx = prod[np.ix_(ia, ib)].ravel()
+        val = (a[ia][:, None] * b[ib][None, :]).ravel()
+        np.add.at(out, idx, val)
+    return out % k
 
 
-def run_poly(k: int, n: int, run: List[Tuple[int, Dict[int, int]]]) -> Poly:
-    """P_r = prod_m (1 - L_m^{k-1}) for an affine run (n free variables).
+def _interp(k: int, n: int, values: np.ndarray) -> Poly:
+    """Reduced polynomial with the given value table (values indexed like monomials: point x <-> sum x_i k^i)."""
+    V = np.array([[pow(x, e, k) if (x or e) else 1 for e in range(k)] for x in range(k)], dtype=np.int64)
+    # inverse of V mod k by brute-force Gauss-Jordan
+    A = np.concatenate([V % k, np.eye(k, dtype=np.int64)], axis=1)
+    for c in range(k):
+        piv = next(r for r in range(c, k) if A[r, c] % k)
+        A[[c, piv]] = A[[piv, c]]
+        A[c] = A[c] * pow(int(A[c, c]), k - 2, k) % k
+        for r in range(k):
+            if r != c and A[r, c]:
+                A[r] = (A[r] - A[r, c] * A[c]) % k
+    Vi = A[:, k:]
+    t = values.reshape([k] * n)                          # axis j <-> variable n-1-j (C order)
+    for ax in range(n):
+        t = np.moveaxis(np.tensordot(Vi, t, axes=([1], [ax])) % k, 0, ax)
+    return t.reshape(-1) % k
 
-    TODO: build via poly_mul.
-    Acceptance: evaluating P_r on all points of F_k^n gives 1 exactly on the common zeros.
-    Depends on: poly_mul.
+
+def run_poly(k: int, n: int, run: List[Affine]) -> Poly:
+    """P_r = prod_m (1 - L_m^{k-1}): the indicator of 'all members vanish' (n free variables).
+
+    Built by interpolating its value table (exact: every function F_k^n -> F_k is a unique reduced
+    polynomial).  Acceptance: value table is 1 exactly on the common zeros (checked in selftest).
     """
-    raise NotImplementedError("run_poly")
+    ex, _, _ = _tables(k, n)
+    vals = np.ones(k ** n, dtype=np.int64)
+    for c, lin in run:
+        s = np.full(k ** n, c, dtype=np.int64)
+        for j, e in lin.items():
+            s = s + e * ex[:, j]
+        vals &= (s % k == 0).astype(np.int64)
+    return _interp(k, n, vals)
 
 
-def monomials(k: int, n: int, maxdeg: int) -> List[Mono]:
-    """All reduced monomials (exponents <= k-1) of total degree <= maxdeg in n variables.
+def monomials(k: int, n: int, maxdeg: int) -> List[int]:
+    """Indices of all reduced monomials of total degree <= maxdeg in n variables."""
+    _, deg, _ = _tables(k, n)
+    return list(np.nonzero(deg <= maxdeg)[0])
 
-    TODO: implement recursively.
-    Depends on: nothing.
-    """
-    raise NotImplementedError("monomials")
+
+def _in_span(k: int, gens: np.ndarray, target: np.ndarray) -> bool:
+    """Is target in the F_k-row-span of gens?  (Gaussian elimination mod k, numpy.)"""
+    basis = np.zeros((0, gens.shape[1]), dtype=np.int64)
+    pivs: List[int] = []
+    chunk = 4000
+    for s in range(0, gens.shape[0], chunk):
+        M = np.concatenate([basis, gens[s:s + chunk] % k])
+        # reduce new rows by existing pivots, then row-reduce the rest
+        rows = M[len(basis):]
+        for i, pc in enumerate(pivs):
+            f = rows[:, pc].copy()
+            nz = f != 0
+            if nz.any():
+                rows[nz] = (rows[nz] - f[nz, None] * basis[i]) % k
+        for pc in range(gens.shape[1]):
+            if pc in pivs:
+                continue
+            nzr = np.nonzero(rows[:, pc])[0]
+            if not len(nzr):
+                continue
+            r0 = nzr[0]
+            row = rows[r0] * pow(int(rows[r0, pc]), k - 2, k) % k
+            rows = np.delete(rows, r0, axis=0)
+            f = rows[:, pc].copy()
+            nz = f != 0
+            if nz.any():
+                rows[nz] = (rows[nz] - f[nz, None] * row) % k
+            fb = basis[:, pc].copy() if len(basis) else np.zeros(0, dtype=np.int64)
+            if len(basis) and (fb != 0).any():
+                basis[fb != 0] = (basis[fb != 0] - fb[fb != 0, None] * row) % k
+            basis = np.concatenate([basis, row[None, :]])
+            pivs.append(pc)
+            if not len(rows):
+                break
+    t = target % k
+    for i, pc in enumerate(pivs):
+        if t[pc]:
+            t = (t - t[pc] * basis[i]) % k
+    return not t.any()
 
 
 def nullstellensatz_refutes(k: int, n: int, polys: List[Poly], D: int) -> bool:
-    """True iff sum_r g_r P_r = 1 has a solution with deg(g_r P_r) <= D.
+    """True iff sum_r g_r P_r = 1 has a solution with deg(g_r) + deg(P_r) <= D (quotient ring).
 
-    TODO: unknowns = coefficients of g_r (monomials of degree <= D - deg P_r); equations = one per
-    monomial of degree <= D; solve the linear system over F_k by sparse Gaussian elimination
-    (row-reduce the columns g_r*m, test whether the constant-1 vector is in the span).
-    Acceptance: returns True for the trivially contradictory system {1}; False for D below the
-    degree of any P_r when the instance has a solution.
-    Depends on: monomials, poly_mul.
+    Acceptance: True for the system {1} at D = 0; never True for a satisfiable system.
     """
-    raise NotImplementedError("nullstellensatz_refutes")
+    _, deg, _ = _tables(k, n)
+    gens = []
+    for P in polys:
+        nz = np.nonzero(P)[0]
+        if not len(nz):
+            continue
+        dP = int(deg[nz].max())
+        for m in monomials(k, n, D - dP):
+            e = np.zeros(k ** n, dtype=np.int64)
+            e[m] = 1
+            gens.append(poly_mul(k, e, P))
+    if not gens:
+        return False
+    one = np.zeros(k ** n, dtype=np.int64)
+    one[0] = 1
+    return _in_span(k, np.array(gens), one)
 
 
-def brute_force_sat(k: int, n: int, runs: List[List[Tuple[int, Dict[int, int]]]]) -> int:
-    """Number of assignments of the n free variables satisfying all runs (sanity check, k^n <= 1e6).
+def brute_force_sat(k: int, n: int, runs: List[List[Affine]]) -> int:
+    """Number of assignments of the n free variables satisfying all runs."""
+    ex, _, _ = _tables(k, n)
+    ok = np.ones(k ** n, dtype=bool)
+    for run in runs:
+        allz = np.ones(k ** n, dtype=bool)
+        for c, lin in run:
+            s = np.full(k ** n, c, dtype=np.int64)
+            for j, e in lin.items():
+                s = s + e * ex[:, j]
+            allz &= (s % k == 0)
+        ok &= ~allz
+    return int(ok.sum())
 
-    TODO: enumerate.
-    Depends on: restrict.
-    """
-    raise NotImplementedError("brute_force_sat")
+
+def selftest() -> None:
+    k, n = 3, 2
+    x = np.zeros(9, dtype=np.int64); x[1] = 1
+    assert (poly_mul(k, poly_mul(k, x, x), x) == x).all()
+    run = [(0, {0: 1}), (1, {0: 1, 1: 2}), (0, {1: 1})]      # x0 = 0, 1 + x0 + 2 x1 = 0, x1 = 0: never
+    P = run_poly(k, n, run)
+    assert not P.any()
+    run = [(0, {0: 1}), (0, {1: 1})]                          # indicator of x0 = x1 = 0
+    P = run_poly(k, n, run)
+    ex, _, _ = _tables(k, n)
+    for pt in range(9):
+        a, b = pt % 3, pt // 3
+        v = sum(int(P[m]) * a ** int(ex[m, 0]) * b ** int(ex[m, 1]) for m in range(9)) % 3
+        assert v == (1 if a == 0 and b == 0 else 0)
+    assert nullstellensatz_refutes(3, 1, [np.array([1, 0, 0])], 0)
+    print("selftest ok")
 
 
 def main() -> None:
-    """CLI: build the residual instance, report #runs, brute-force #solutions, least refuting D.
-
-    TODO: argparse as in the module docstring; loop D = 1..maxdeg.
-    Depends on: everything above.
-    """
-    raise NotImplementedError("main")
+    """CLI: residual instances (all primes except `nfree` chosen ones fixed at random), least NS degree."""
+    ap = argparse.ArgumentParser()
+    ap.add_argument("k", type=int); ap.add_argument("y", type=int); ap.add_argument("runs")
+    ap.add_argument("--nfree", type=int, default=5)
+    ap.add_argument("--which", default="small", choices=["small", "busy"],
+                    help="free the smallest primes, or the primes in the most residual runs")
+    ap.add_argument("--seeds", type=int, default=5)
+    ap.add_argument("--maxdeg", type=int, default=0)
+    ap.add_argument("--selftest", action="store_true")
+    a = ap.parse_args()
+    if a.selftest:
+        selftest()
+        return
+    k = a.k
+    ps = primes_upto(a.y)
+    forms = [run_forms(k, 3, ps, int(r)) for r in open(a.runs)]
+    n = a.nfree
+    maxdeg = a.maxdeg or n * (k - 1) + 3 * (k - 1)
+    for seed in range(a.seeds):
+        rng = random.Random(seed)
+        if a.which == "small":
+            free = list(range(n))
+        else:
+            cnt = [0] * len(ps)
+            for tri in forms:
+                for q in {q for v in tri for q in v}:
+                    cnt[q] += 1
+            free = sorted(range(len(ps)), key=lambda q: -cnt[q])[:n]
+        fix = {q: rng.randrange(k) for q in range(len(ps)) if q not in free}
+        runs, triv = restrict(k, forms, fix, free)
+        if triv:
+            print(f"seed={seed} free={[ps[q] for q in free]} trivially UNSAT (a run is fixed all-zero)")
+            continue
+        nsol = brute_force_sat(k, n, runs)
+        polys = [run_poly(k, n, r) for r in runs]
+        polys = [P for P in polys if P.any()]
+        _, deg, _ = _tables(k, n)
+        dmax = max((int(deg[np.nonzero(P)[0]].max()) for P in polys), default=0)
+        D = None
+        if nsol == 0:
+            for d in range(0, maxdeg + 1):
+                if nullstellensatz_refutes(k, n, polys, d):
+                    D = d
+                    break
+        print(f"seed={seed} free={[ps[q] for q in free]} residual_runs={len(runs)} nonzero_polys={len(polys)} "
+              f"max_deg_P={dmax} solutions={nsol} NS_degree={D} (trivial bound n(k-1)={n * (k - 1)})", flush=True)
 
 
 if __name__ == "__main__":
