@@ -403,14 +403,32 @@ theorem esum_le_three {K : Finset Pt} {d : ℝ}
 
 /-- **Vesztergombi 1987** (for the two largest distances `Δ > Δ₂`): `2 μ(Δ₂) ≤ 3 |X|`.
 
-TODO: prove.
-What's missing: `two_mul_multS`, `esum_eq_esum_L12`, `esum_le_core`, `esum_le_three` on the core
-(degrees from `deg_core_L2`, `deg_core_L1_le_four`, `two_le_mid`).
-Acceptance: no `sorry`.
-Depends on: `esum_le_three`, `two_le_mid`. -/
+Proof: `two_mul_multS`, `esum_eq_esum_L12`, `esum_le_core`, and `esum_le_three` on the core
+(degrees from `deg_core_L2`, `deg_core_L1_le_four`, `two_le_mid`). -/
 theorem ve87 {X : Finset Pt} {Δ Δ₂ : ℝ} (hT : TwoLargest X Δ Δ₂) :
     2 * multS X Δ₂ ≤ 3 * X.card := by
-  sorry
+  set W := L1 X ∪ L2 X with hW
+  set K := core W Δ₂ with hK
+  have hKW : K ⊆ W := core_subset W Δ₂
+  have e1 : 2 * multS X Δ₂ = esum W Δ₂ := by rw [two_mul_multS hT.pos, esum_eq_esum_L12 hT]
+  have e2 : esum W Δ₂ ≤ esum K Δ₂ + 2 * (W \ K).card := esum_le_core hT.pos.ne' W
+  have hL2 : ∀ v ∈ K, v ∉ L1 X → (nbr K Δ₂ v).card = 2 := fun v hv h1 => by
+    have hv2 : v ∈ L2 X := by
+      rcases mem_union.1 (hKW hv) with h | h
+      · exact absurd h h1
+      · exact h
+    exact deg_core_L2 hT hv2 hv
+  have e3 : esum K Δ₂ ≤ 3 * K.card := by
+    refine esum_le_three (minDeg2_core W Δ₂) (fun v hv => ?_) (fun v hv h4 => ?_)
+    · by_cases h1 : v ∈ L1 X
+      · exact deg_core_L1_le_four hT h1 hv
+      · rw [hL2 v hv h1]; norm_num
+    · by_cases h1 : v ∈ L1 X
+      · exact two_le_mid hT h1 h4
+      · rw [hL2 v hv h1] at h4; norm_num at h4
+  have e4 : (W \ K).card + K.card = W.card := card_sdiff_add_card_eq_card hKW
+  have e5 : W.card ≤ X.card := card_le_card (union_subset (L1_subset X) (L2_subset X))
+  omega
 
 /-! ## The statement in the shape of `Erdos132Main.vesztergombi87` -/
 
