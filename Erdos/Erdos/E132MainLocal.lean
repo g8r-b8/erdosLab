@@ -610,19 +610,213 @@ theorem good_subset_T_union_rungs (hX : Normal X) (F : DirField X) (hτ : 2 * be
 
 /-! ## Turning measure -/
 
-/-- **Lemma 3.4 (multiplicity)**: if every boundary point lies in at most `M` of the sets
-`γ_i ⊆ ∂K`, then `Σ turning(γ_i) ≤ 2πM`.
+/-! ### Support-point uniqueness for all but countably many directions -/
 
-TODO: prove.
-What's missing: for all but countably many directions `ν` the support point `y_ν` is unique;
-`ν ∈ N(γ_i) ⟺ y_ν ∈ γ_i`; integrate the indicator sum over `ν ∈ [0, 2π)`.
-Acceptance: no `sorry`.
-Depends on: measure theory on `ℝ`, support functions of convex bodies. Difficulty L. -/
+theorem norm_dirVec (θ : ℝ) : ‖dirVec θ‖ = 1 := by
+  have h := norm_sq_coord (dirVec θ)
+  have h2 : (dirVec θ) 0 ^ 2 + (dirVec θ) 1 ^ 2 = 1 := by simp [dirVec]
+  rw [h2] at h
+  nlinarith [norm_nonneg (dirVec θ)]
+
+theorem dirVec_injOn : Set.InjOn dirVec (Set.Ico 0 (2 * π)) := by
+  intro θ hθ θ' hθ' h
+  have hc : Real.cos θ = Real.cos θ' := by
+    have := congrArg (fun v : Pt => v 0) h; simpa [dirVec] using this
+  have hs : Real.sin θ = Real.sin θ' := by
+    have := congrArg (fun v : Pt => v 1) h; simpa [dirVec] using this
+  obtain ⟨k, hk⟩ := Real.Angle.angle_eq_iff_two_pi_dvd_sub.1 (Real.Angle.cos_sin_inj hc hs)
+  have hpi := Real.pi_pos
+  obtain ⟨h1, h2⟩ := hθ
+  obtain ⟨h3, h4⟩ := hθ'
+  have hk1 : (k : ℝ) < 1 := by nlinarith
+  have hk2 : (-1 : ℝ) < k := by nlinarith
+  have hk0 : k = 0 := by
+    have a : k < 1 := by exact_mod_cast hk1
+    have b : -1 < k := by exact_mod_cast hk2
+    omega
+  rw [hk0] at hk; simp at hk; linarith
+
+/-- Directions `θ ∈ [0, 2π)` whose support set in `K` has at least two points. -/
+def exceptDirs (K : Set Pt) : Set ℝ :=
+  {θ | θ ∈ Set.Ico 0 (2 * π) ∧ ∃ x ∈ K, ∃ y ∈ K, x ≠ y ∧ dirVec θ ∈ normalCone K x ∧
+    dirVec θ ∈ normalCone K y}
+
+/-- A direction with a non-trivial support face owns an open set of points `z` whose
+nearest-point direction is `θ`; distinct directions own disjoint sets, hence countability. -/
+theorem exceptDirs_countable {K : Set Pt} (hK : Convex ℝ K) : (exceptDirs K).Countable := by
+  obtain ⟨D, hDc, hDd⟩ := TopologicalSpace.exists_countable_dense Pt
+  have key : ∀ θ ∈ exceptDirs K, ∃ z ∈ D, ∃ q ∈ K, ∃ s : ℝ, 0 < s ∧ z - q = s • dirVec θ ∧
+      dirVec θ ∈ normalCone K q := by
+    rintro θ ⟨-, x, hx, y, hy, hxy, hnx, hny⟩
+    have hd : ‖dirVec θ‖ = 1 := norm_dirVec θ
+    have h0 : inner ℝ (y - x) (dirVec θ) = 0 := by
+      have a := hnx y hy; have b := hny x hx; rw [inner_sub_swap] at b; linarith
+    have hdec := decomp hd (y - x)
+    rw [h0, zero_smul, zero_add, det2_eq_inner_perp] at hdec
+    set d := dirVec θ
+    set e := perp d
+    set b := inner ℝ (y - x) e
+    have hc : b ≠ 0 := by
+      intro hc; apply hxy
+      rw [hc, zero_smul] at hdec; exact (sub_eq_zero.1 hdec).symm
+    have hde : inner ℝ d e = 0 := by rw [← det2_eq_inner_perp]; simp [det2]; ring
+    have hdd : inner ℝ d d = 1 := by rw [real_inner_self_eq_norm_sq, hd]; norm_num
+    let U : Set Pt := {z | 0 < inner ℝ (z - x) d ∧ 0 < inner ℝ (z - x) e / b ∧
+      inner ℝ (z - x) e / b < 1}
+    have hUo : IsOpen U := by
+      have c1 : Continuous fun z : Pt => inner ℝ (z - x) d := by fun_prop
+      have c2 : Continuous fun z : Pt => inner ℝ (z - x) e / b := by fun_prop
+      exact (isOpen_lt continuous_const c1).inter
+        ((isOpen_lt continuous_const c2).inter (isOpen_lt c2 continuous_const))
+    have hUn : U.Nonempty := by
+      refine ⟨x + (1 / 2 : ℝ) • (y - x) + d, ?_, ?_, ?_⟩ <;>
+      · rw [show x + (1 / 2 : ℝ) • (y - x) + d - x = (1 / 2 : ℝ) • (y - x) + d by abel,
+          inner_add_left, real_inner_smul_left]
+        try rw [h0, hdd]
+        try rw [hde, add_zero, mul_div_assoc, div_self hc]
+        norm_num
+    obtain ⟨z, hzD, hzU⟩ := hDd.exists_mem_open hUo hUn
+    obtain ⟨ha, hl0, hl1⟩ := hzU
+    set a := inner ℝ (z - x) d
+    set c := inner ℝ (z - x) e
+    have hz := decomp hd (z - x)
+    rw [det2_eq_inner_perp] at hz
+    refine ⟨z, hzD, x + (c / b) • (y - x), hK.add_smul_sub_mem hx hy ⟨hl0.le, hl1.le⟩, a, ha,
+      ?_, ?_⟩
+    · have : (c / b) • (y - x) = c • e := by
+        rw [hdec, smul_smul, div_mul_cancel₀ c hc]
+      rw [show z - (x + (c / b) • (y - x)) = (z - x) - (c / b) • (y - x) by abel, this, hz]
+      abel
+    · intro k hk
+      rw [show k - (x + (c / b) • (y - x)) = (k - x) - (c / b) • (y - x) by abel,
+        inner_sub_left, real_inner_smul_left, h0, mul_zero, sub_zero]
+      exact hnx k hk
+  choose! f hfD q hqK s hs hzs hqN using key
+  refine Set.MapsTo.countable_of_injOn (f := f) (fun θ hθ => hfD θ hθ) ?_ hDc
+  intro θ hθ θ' hθ' hff
+  have e1 := hzs θ hθ
+  have e2 := hzs θ' hθ'
+  rw [hff] at e1
+  have n1 := hqN θ hθ (q θ') (hqK θ' hθ')
+  have n2 := hqN θ' hθ' (q θ) (hqK θ hθ)
+  have hs1 := hs θ hθ
+  have hs2 := hs θ' hθ'
+  have A : inner ℝ (q θ' - q θ) (f θ' - q θ) ≤ 0 := by
+    rw [e1, real_inner_smul_right]; nlinarith
+  have B : inner ℝ (q θ - q θ') (f θ' - q θ') ≤ 0 := by
+    rw [e2, real_inner_smul_right]; nlinarith
+  have C : inner ℝ (q θ' - q θ) (f θ' - q θ) + inner ℝ (q θ - q θ') (f θ' - q θ') =
+      ‖q θ' - q θ‖ ^ 2 := by
+    rw [← real_inner_self_eq_norm_sq, show q θ - q θ' = -(q θ' - q θ) by abel, inner_neg_left,
+      ← sub_eq_add_neg, ← inner_sub_right]
+    congr 1; abel
+  have hqq : q θ' = q θ := by
+    have : ‖q θ' - q θ‖ ^ 2 ≤ 0 := by linarith
+    have : ‖q θ' - q θ‖ = 0 := by nlinarith [norm_nonneg (q θ' - q θ)]
+    exact sub_eq_zero.1 (norm_eq_zero.1 this)
+  rw [hqq] at e2
+  have hsd : s θ • dirVec θ = s θ' • dirVec θ' := by rw [← e1, ← e2]
+  have hss : s θ = s θ' := by
+    have := congrArg norm hsd
+    rwa [norm_smul, norm_smul, norm_dirVec, norm_dirVec, Real.norm_of_nonneg hs1.le,
+      Real.norm_of_nonneg hs2.le, mul_one, mul_one] at this
+  rw [hss] at hsd
+  exact dirVec_injOn hθ.1 hθ'.1 (smul_right_injective Pt hs2.ne' hsd)
+
+/-- The set of directions normal to a compact set of points is closed. -/
+theorem isClosed_normalDirs {K γ : Set Pt} (hγ : IsCompact γ) :
+    IsClosed {θ : ℝ | ∃ x ∈ γ, dirVec θ ∈ normalCone K x} := by
+  have : CompactSpace γ := isCompact_iff_compactSpace.1 hγ
+  have hS : IsClosed {p : ℝ × γ | dirVec p.1 ∈ normalCone K p.2} := by
+    have : {p : ℝ × γ | dirVec p.1 ∈ normalCone K p.2} =
+        ⋂ y ∈ K, {p : ℝ × γ | (y 0 - (p.2 : Pt) 0) * Real.cos p.1 +
+          (y 1 - (p.2 : Pt) 1) * Real.sin p.1 ≤ 0} := by
+      ext p; simp [normalCone, inner_coord, dirVec]
+    rw [this]
+    refine isClosed_biInter fun y _ => isClosed_le ?_ continuous_const
+    fun_prop
+  have := isClosedMap_fst_of_compactSpace _ hS
+  convert this using 1
+  ext θ; simp
+
+/-- **Lemma 3.4 (multiplicity)**: if every boundary point lies in at most `M` of the *closed*
+sets `γ_i ⊆ ∂K`, then `Σ turning(γ_i) ≤ 2πM`.
+
+STATEMENT CHANGE (2026-09-23): added `hγc : ∀ i ∈ A, IsClosed (γ i)`.  Without it the lemma
+is false: `turning` is an outer measure, and for `K` the unit disc and a Bernstein set
+`B ⊆ [0, 2π)`, `γ₁ = dirVec '' B`, `γ₂ = dirVec '' Bᶜ` give `M = 1` but turnings `2π + 2π`.
+The paper only uses closed arcs, and every downstream arc is `γ '' Icc a b` (compact).
+
+Proved: off the countable set `exceptDirs K` (directions with a non-singleton support face,
+`exceptDirs_countable`) the support point is unique; integrate the indicator sum. -/
 theorem turning_sum_le {K : Set Pt} (hK : Convex ℝ K) (hKc : IsCompact K) {ι : Type*}
-    (A : Finset ι) (γ : ι → Set Pt) (hγ : ∀ i ∈ A, γ i ⊆ frontier K) (M : ℕ)
+    (A : Finset ι) (γ : ι → Set Pt) (hγ : ∀ i ∈ A, γ i ⊆ frontier K)
+    (hγc : ∀ i ∈ A, IsClosed (γ i)) (M : ℕ)
     (hM : ∀ x, (A.filter (fun i => x ∈ γ i)).card ≤ M) :
     ∑ i ∈ A, turning K (γ i) ≤ 2 * π * M := by
-  sorry
+  classical
+  set I : Set ℝ := Set.Ico 0 (2 * π)
+  let C : ι → Set ℝ := fun i => {θ | θ ∈ I ∧ ∃ x ∈ γ i, dirVec θ ∈ normalCone K x}
+  have hKcl : IsClosed K := hKc.isClosed
+  have hγK : ∀ i ∈ A, γ i ⊆ K := fun i hi => (hγ i hi).trans hKcl.frontier_subset
+  have hCm : ∀ i ∈ A, MeasurableSet (C i) := fun i hi =>
+    measurableSet_Ico.inter
+      (isClosed_normalDirs (hKc.of_isClosed_subset (hγc i hi) (hγK i hi))).measurableSet
+  have hE : MeasureTheory.volume (exceptDirs K) = 0 :=
+    (exceptDirs_countable hK).measure_zero _
+  -- pointwise bound off the exceptional directions
+  have hpt : ∀ᵐ θ ∂MeasureTheory.volume,
+      ∑ i ∈ A, (C i).indicator (fun _ => (1 : ENNReal)) θ ≤
+        I.indicator (fun _ => (M : ENNReal)) θ := by
+    refine MeasureTheory.measure_mono_null (fun θ hθ => ?_) hE
+    simp only [Set.mem_compl_iff, Set.mem_setOf_eq, not_le] at hθ
+    by_contra hθE
+    by_cases hI : θ ∈ I
+    · rw [Set.indicator_of_mem hI] at hθ
+      simp only [Set.indicator_apply] at hθ
+      rw [Finset.sum_boole] at hθ
+      have hne : (A.filter (fun i => θ ∈ C i)).Nonempty := by
+        rw [Finset.nonempty_iff_ne_empty]; intro h0; rw [h0] at hθ; simp at hθ
+      obtain ⟨i₀, hi₀⟩ := hne
+      obtain ⟨hi₀A, -, x₀, hx₀, hn₀⟩ := Finset.mem_filter.1 hi₀
+      have hsub : A.filter (fun i => θ ∈ C i) ⊆ A.filter (fun i => x₀ ∈ γ i) := by
+        intro i hi
+        obtain ⟨hiA, -, x, hx, hn⟩ := Finset.mem_filter.1 hi
+        refine Finset.mem_filter.2 ⟨hiA, ?_⟩
+        by_contra hx0
+        have hne : x₀ ≠ x := fun h => hx0 (h ▸ hx)
+        exact hθE ⟨hI, x₀, hγK i₀ hi₀A hx₀, x, hγK i hiA hx, hne, hn₀, hn⟩
+      have := (Finset.card_le_card hsub).trans (hM x₀)
+      have : ((A.filter (fun i => θ ∈ C i)).card : ENNReal) ≤ M := by exact_mod_cast this
+      exact absurd hθ (not_lt.2 this)
+    · rw [Set.indicator_of_notMem hI] at hθ
+      have : ∀ i ∈ A, (C i).indicator (fun _ => (1 : ENNReal)) θ = 0 := fun i _ =>
+        Set.indicator_of_notMem (fun h => hI h.1) _
+      rw [Finset.sum_eq_zero this] at hθ
+      exact lt_irrefl _ hθ
+  have hsum : ∑ i ∈ A, MeasureTheory.volume (C i) ≤ M * ENNReal.ofReal (2 * π) := by
+    calc ∑ i ∈ A, MeasureTheory.volume (C i)
+        = ∑ i ∈ A, ∫⁻ θ, (C i).indicator (fun _ => (1 : ENNReal)) θ := by
+          refine Finset.sum_congr rfl fun i hi => ?_
+          rw [MeasureTheory.lintegral_indicator_const (hCm i hi), one_mul]
+      _ = ∫⁻ θ, ∑ i ∈ A, (C i).indicator (fun _ => (1 : ENNReal)) θ := by
+          rw [MeasureTheory.lintegral_finsetSum]
+          exact fun i hi => measurable_const.indicator (hCm i hi)
+      _ ≤ ∫⁻ θ, I.indicator (fun _ => (M : ENNReal)) θ := MeasureTheory.lintegral_mono_ae hpt
+      _ = M * ENNReal.ofReal (2 * π) := by
+          rw [MeasureTheory.lintegral_indicator_const measurableSet_Ico, Real.volume_Ico,
+            sub_zero]
+  have hfin : ∀ i ∈ A, MeasureTheory.volume (C i) ≠ ⊤ := fun i _ =>
+    ne_top_of_le_ne_top (by rw [Real.volume_Ico]; exact ENNReal.ofReal_ne_top)
+      (MeasureTheory.measure_mono (fun θ h => h.1))
+  have h1 : ∑ i ∈ A, turning K (γ i) = (∑ i ∈ A, MeasureTheory.volume (C i)).toReal := by
+    rw [ENNReal.toReal_sum hfin]; rfl
+  rw [h1]
+  have h2 := ENNReal.toReal_mono (ENNReal.mul_ne_top (ENNReal.natCast_ne_top M)
+    ENNReal.ofReal_ne_top) hsum
+  rw [ENNReal.toReal_mul, ENNReal.toReal_natCast,
+    ENNReal.toReal_ofReal (by positivity)] at h2
+  linarith
 
 /-- The turning of a connected boundary arc is at least the angle between (outward) normals at
 its ends.
