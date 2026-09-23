@@ -1,0 +1,4 @@
+[    22.9s] R=1500000 SAT solve=14.9s first_run=1500120  (k=5 l=3 R=1500000 N=1500002 vars=1794574 clauses=9663281 primes_with_vars=60238 full_composites=11825 z_only=1374021)
+[    60.0s] R=2250000 SAT solve=24.3s first_run=2250583  (k=5 l=3 R=2250000 N=2250002 vars=2671724 clauses=14414937 primes_with_vars=87520 full_composites=15671 z_only=2068249)
+[   121.2s] R=3375000 SAT solve=41.5s first_run=3375198  (k=5 l=3 R=3375000 N=3375002 vars=3979906 clauses=21515436 primes_with_vars=127262 full_composites=20800 z_only=3112334)
+[   211.5s] R=5062500 SAT solve=63.8s first_run=5062794  (k=5 l=3 R=5062500 N=5062502 vars=5931726 clauses=32129824 primes_with_vars=185215 full_composites=27619 z_only=4682341)
