@@ -1,4 +1,5 @@
 import Erdos.E132MainDefs
+import Erdos.E132ConvexCurve
 import Mathlib.Geometry.Euclidean.Angle.Unoriented.TriangleInequality
 import Mathlib.Analysis.LocallyConvex.Separation
 import Mathlib.Analysis.InnerProductSpace.Dual
@@ -1688,38 +1689,163 @@ theorem c9 :
   have hp := Real.pi_lt_d4
   refine ⟨?_, ?_, ?_, ?_, ?_⟩ <;> norm_num [beta, cBad] <;> linarith
 
-/-- **KK bound** `#KK-bad < 1.28·10⁵`.
+/-! ### Helpers for the counts KK, DD, (c2) (via `E132ConvexCurve`) -/
 
-TODO: prove (blocked on `lens_arc_length` and the boundary parametrisation, see there).
-Plan (available pieces marked ✓):
-* `w_p = w_q` ⇒ `∠(u_p, u_q) ≤ 2 arcsin(1/(2Δ₂)) < β` ([C3] `c3`), so the edge is good;
-* else `K ⊆ Λ(w_p, w_q)` (from `KBall`), `R = Δ₂`, `0 < d = |w_p w_q| ≤ Δ ≤ 1.94Δ₂`,
-  `cos φ₀ ≤ 0.97`, `ρ₀ ≤ 8.2` (`c7_kk` ✓), hypothesis `R ≥ 89` from `Δ₂ ≥ 10⁴`;
-* `lens_corner` ✓ + `lens_arc_length` give an arc `γ_pq ⊆ ∂K` of length `≤ 2ρ₀`;
-* `-u_p ∈ N_K(p)`, `-u_q ∈ N_K(q)` (as `hn2` in `card_badC1_le`), so `turning_ge_angle` ✓
-  gives turning `> β` (needs `interior K ≠ ∅`; otherwise `|S ∖ D| ≤ 1` and there is no edge);
-* multiplicity `M ≤ 6(4ρ₀ + 1)` via `card_le_arcLength` ✓ on the boundary parametrisation and
-  the kissing bound `card_partners_minDist_le`; `turning_sum_le` ✓ (arcs are compact);
-  small-perimeter case (`< 1202`) separately: `≤ 6·1203` edges.
+theorem mem_edges_mk {p q : Pt} (h : s(p, q) ∈ edges X) :
+    p ∈ Sset X ∧ q ∈ Sset X ∧ p ≠ q ∧ dist p q = minDist X := by
+  obtain ⟨hP, hd⟩ := mem_filter.1 h
+  simp only [pairsS, mem_filter, Finset.mk_mem_sym2_iff, Sym2.mk_isDiag_iff] at hP
+  exact ⟨hP.1.1, hP.1.2, hP.2, hd⟩
+
+theorem lt_ang_of_bad (F : DirField X) {p q : Pt} (h : s(p, q) ∈ bad X F) :
+    beta < ang (F.u p) (F.u q) := by
+  have hng := (mem_filter.1 h).2
+  simp only [IsGood, not_forall, not_le] at hng
+  obtain ⟨a, b, hab, hlt⟩ := hng
+  rcases Sym2.eq_iff.1 hab with ⟨rfl, rfl⟩ | ⟨rfl, rfl⟩
+  · exact hlt
+  · rwa [ang, InnerProductGeometry.angle_comm]
+
+/-- Kissing: a family of `δ`-edges has degree `≤ 6` at every point. -/
+theorem card_filter_mem_le_six {E : Finset (Sym2 Pt)} (hE : E ⊆ edges X) (p : Pt) :
+    (E.filter (fun e => p ∈ e)).card ≤ 6 := by
+  have hsub : E.filter (fun e => p ∈ e) ⊆
+      (partners X (minDist X) p).image (fun q => s(p, q)) := by
+    intro e he
+    obtain ⟨heE, hpe⟩ := mem_filter.1 he
+    obtain ⟨q, rfl⟩ := Sym2.mem_iff_exists.1 hpe
+    obtain ⟨-, hq, hpq, hd⟩ := mem_edges_mk (hE heE)
+    exact mem_image.2 ⟨q, mem_partners.2 ⟨mem_of_mem_Sset hq, Ne.symm hpq, hd⟩, rfl⟩
+  exact (card_le_card hsub).trans (card_image_le.trans (card_partners_minDist_le X p))
+
+/-- `|n_p + n_q| ≥ κ` for outward normals `−u` from `|u_p − u_q| ≤ L`, `κ² + L² ≤ 4`. -/
+theorem norm_neg_add_ge {a b : Pt} (ha : ‖a‖ = 1) (hb : ‖b‖ = 1) {L κ : ℝ} (h : ‖a - b‖ ≤ L)
+    (hκ : 0 ≤ κ) (hL : κ ^ 2 + L ^ 2 ≤ 4) : κ ≤ ‖-a + -b‖ := by
+  rw [← neg_add, norm_neg]
+  have h1 := norm_add_sq_real a b
+  have h2 := norm_sub_sq_real a b
+  rw [ha, hb] at h1 h2
+  have h3 : ‖a - b‖ ^ 2 ≤ L ^ 2 := pow_le_pow_left₀ (norm_nonneg _) h 2
+  exact (sq_le_sq₀ hκ (norm_nonneg _)).1 (by nlinarith)
+
+/-- The outward normals `−u` on `S ∖ D` form a normal configuration (Lemma 3.2(b)). -/
+theorem normalConfig_K (hX : Normal X) (F : DirField X) :
+    Curve.NormalConfig ((Sset X).filter (fun p => p ∉ Dset X)) (fun p => -F.u p) := by
+  refine ⟨fun v hv => ?_, fun v hv w hw hvw => ?_, fun v hv w hw hvw => ?_⟩
+  · rw [norm_neg]; exact F.norm_u' (mem_filter.1 hv).1
+  · have := minDist_le_dist (mem_of_mem_Sset (mem_filter.1 hv).1)
+      (mem_of_mem_Sset (mem_filter.1 hw).1) hvw
+    rwa [hX.minDist_eq] at this
+  · obtain ⟨hvS, -⟩ := mem_filter.1 hv
+    obtain ⟨hwS, hwD⟩ := mem_filter.1 hw
+    rw [inner_neg_right, neg_lt_zero]
+    rcases inner_pos_or_exc F hvS (mem_of_mem_Sset hwS) (Ne.symm hvw) with h | h
+    · exact h
+    · exact absurd h.2.2 hwD
+
+/-- The outward normals `−u` on `S ∩ D` form a normal configuration (Lemma 3.2(a)). -/
+theorem normalConfig_D (hX : Normal X) (F : DirField X) :
+    Curve.NormalConfig ((Sset X).filter (fun p => p ∈ Dset X)) (fun p => -F.u p) := by
+  refine ⟨fun v hv => ?_, fun v hv w hw hvw => ?_, fun v hv w hw hvw => ?_⟩
+  · rw [norm_neg]; exact F.norm_u' (mem_filter.1 hv).1
+  · have := minDist_le_dist (mem_of_mem_Sset (mem_filter.1 hv).1)
+      (mem_of_mem_Sset (mem_filter.1 hw).1) hvw
+    rwa [hX.minDist_eq] at this
+  · obtain ⟨hvS, hvD⟩ := mem_filter.1 hv
+    obtain ⟨hwS, -⟩ := mem_filter.1 hw
+    rw [inner_neg_right, neg_lt_zero]
+    have h := exact_identity_a F hvS hvD (mem_of_mem_Sset hwS)
+    have hpos := diam_pos_of_mem_Sset hvS
+    have hd : 0 < dist w v := dist_pos.2 (Ne.symm hvw)
+    exact lt_of_lt_of_le (by positivity) h
+
+/-- `|u_p − u_q| ≤ (Δ + 1)/r` when both partners are at distance `r` and `|pq| = 1`. -/
+theorem norm_u_sub_le (F : DirField X) {p q : Pt} {r : ℝ} (hr : 0 < r) (hp : p ∈ Sset X)
+    (hq : q ∈ Sset X) (hpr : dist p (F.partner p) = r) (hqr : dist q (F.partner q) = r)
+    (hpq : dist p q = 1) : ‖F.u p - F.u q‖ ≤ r⁻¹ * (diam X + 1) := by
+  have e : F.u p - F.u q = r⁻¹ • ((F.partner p - F.partner q) + (q - p)) := by
+    rw [DirField.u, DirField.u, hpr, hqr, ← smul_sub]; congr 1; abel
+  rw [e, norm_smul, Real.norm_of_nonneg (inv_nonneg.2 hr.le)]
+  refine mul_le_mul_of_nonneg_left ((norm_add_le _ _).trans (add_le_add ?_ ?_))
+    (inv_nonneg.2 hr.le)
+  · rw [← dist_eq_norm]; exact dist_le_diam (F.partner_mem p hp) (F.partner_mem q hq)
+  · rw [← dist_eq_norm, dist_comm, hpq]
+
+/-- **KK bound** `#KK-bad < 1.28·10⁵` (proved: `≤ 6000π < 18850`).
+
+TODO: none — proved.
+Proof (differs from the paper, no arc length): the outward normals `n_p = −u_p` on `S ∖ D`
+satisfy the strict chord inequalities of Lemma 3.2(b) (`normalConfig_K`); a bad KK edge has
+`∠(n_p, n_q) > β` and `|u_p − u_q| ≤ (Δ + 1)/Δ₂ ≤ 1.9401`, hence `|n_p + n_q| ≥ 0.48`.  The cap of
+directions between `n_p` and `n_q` has measure `∠(n_p, n_q)`, and a direction lies in the caps
+of at most `6·5` oriented edges (`Curve.NormalConfig.card_mul_le_of_edges`: the points of `S ∖ D`
+with normals in one cap are separated by `≥ |n_p + n_q|/2` along the cap's tangent, inside an
+interval of length `|n_p + n_q|`).  So `#KK · β ≤ 2π·30`.
 Acceptance: no `sorry`.
-Depends on: `lens_arc_length` (open) and a boundary arc-length parametrisation of `K`;
-`lens_corner`, `turning_ge_angle`, `turning_sum_le`, `card_le_arcLength`, `c3`, `c7_kk`, `c9`
-(proved). Difficulty XL. -/
+Depends on: `Curve.NormalConfig.card_mul_le_of_edges`, `normalConfig_K`, kissing. -/
 theorem card_badKK_le (hX : Normal X) (F : DirField X) : ((badKK X F).card : ℝ) ≤ 128000 := by
-  sorry
+  have hV := normalConfig_K hX F
+  have hE : ∀ p q, s(p, q) ∈ badKK X F → p ∈ (Sset X).filter (fun p => p ∉ Dset X) ∧
+      q ∈ (Sset X).filter (fun p => p ∉ Dset X) ∧ dist p q = 1 ∧
+      beta < ang (-F.u p) (-F.u q) ∧ (0.48 : ℝ) ≤ ‖-F.u p + -F.u q‖ := by
+    intro p q he
+    obtain ⟨hbad, hall⟩ := mem_filter.1 he
+    obtain ⟨hp, hq, -, hd⟩ := mem_edges_mk (mem_filter.1 hbad).1
+    have hpD := hall p (Sym2.mem_mk_left _ _)
+    have hqD := hall q (Sym2.mem_mk_right _ _)
+    have hd1 : dist p q = 1 := by rw [hd, hX.minDist_eq]
+    refine ⟨mem_filter.2 ⟨hp, hpD⟩, mem_filter.2 ⟨hq, hqD⟩, hd1, ?_, ?_⟩
+    · rw [ang, InnerProductGeometry.angle_neg_neg]; exact lt_ang_of_bad F hbad
+    · have h2 := dist2_pos_of_mem_Sset hp
+      have hL := norm_u_sub_le F h2 hp hq (F.partner_K p hp hpD) (F.partner_K q hq hqD) hd1
+      have hL' : (dist2 X)⁻¹ * (diam X + 1) ≤ 1.9401 := by
+        rw [inv_mul_le_iff₀ h2]; have := hX.nondeg; have := hX.large; nlinarith
+      exact norm_neg_add_ge (F.norm_u' hp) (F.norm_u' hq) (hL.trans hL') (by norm_num)
+        (by norm_num)
+  have hdeg : ∀ p, ((badKK X F).filter (fun e => p ∈ e)).card ≤ 6 := fun p =>
+    card_filter_mem_le_six (fun e he => (mem_filter.1 (mem_filter.1 he).1).1) p
+  have h := hV.card_mul_le_of_edges (D := 6) (N := 5) hE hdeg (by norm_num [beta])
+    (by norm_num) (by norm_num)
+  have hpi := Real.pi_lt_d4
+  rw [beta] at h
+  push_cast at h
+  nlinarith
 
-/-- **DD bound** `#DD-bad < 3.4·10⁴` (same argument on `∂P₁`, lens radius `Δ`, `ρ₀ ≤ 2`).
+/-- **DD bound** `#DD-bad < 3.4·10⁴` (proved: `≤ 2400π < 7540`).
 
-TODO: prove (blocked exactly as `card_badKK_le`).
-Plan: `P₁ = convexHull ℝ X` (compact, `mem_normalCone_convexHull` ✓ gives `-u_z ∈ N_{P₁}(z)`,
-`mem_frontier_of_normal` ✓ puts `z ∈ ∂P₁`); `x_p = x_q` ⇒ good (`< 2/Δ < β`); else lens
-`D(x_p, Δ) ∩ D(x_q, Δ) ⊇ P₁` with `d ≤ Δ`, `cos φ₀ ≤ 1/2`, `ρ₀ ≤ 2`, hypothesis `R ≥ 5.5`;
-then `lens_arc_length` + `turning_ge_angle` ✓ + multiplicity `6·9` + `turning_sum_le` ✓.
+TODO: none — proved.
+Proof: as `card_badKK_le` on `S ∩ D` with the normals `−u` of Lemma 3.2(a) (`normalConfig_D`);
+here `|u_p − u_q| ≤ (Δ + 1)/Δ ≤ 1.0001`, so `|n_p + n_q| ≥ 1.7` and a direction lies in at
+most `6·2` caps: `#DD · β ≤ 2π·12`.
 Acceptance: no `sorry`.
-Depends on: as `card_badKK_le`, with `convexHull ℝ X` in place of `K`. Difficulty XL
-(shares the machinery with KK: L once KK is done). -/
+Depends on: `Curve.NormalConfig.card_mul_le_of_edges`, `normalConfig_D`, kissing. -/
 theorem card_badDD_le (hX : Normal X) (F : DirField X) : ((badDD X F).card : ℝ) ≤ 34000 := by
-  sorry
+  have hV := normalConfig_D hX F
+  have hE : ∀ p q, s(p, q) ∈ badDD X F → p ∈ (Sset X).filter (fun p => p ∈ Dset X) ∧
+      q ∈ (Sset X).filter (fun p => p ∈ Dset X) ∧ dist p q = 1 ∧
+      beta < ang (-F.u p) (-F.u q) ∧ (1.7 : ℝ) ≤ ‖-F.u p + -F.u q‖ := by
+    intro p q he
+    obtain ⟨hbad, hall⟩ := mem_filter.1 he
+    obtain ⟨hp, hq, -, hd⟩ := mem_edges_mk (mem_filter.1 hbad).1
+    have hpD := hall p (Sym2.mem_mk_left _ _)
+    have hqD := hall q (Sym2.mem_mk_right _ _)
+    have hd1 : dist p q = 1 := by rw [hd, hX.minDist_eq]
+    refine ⟨mem_filter.2 ⟨hp, hpD⟩, mem_filter.2 ⟨hq, hqD⟩, hd1, ?_, ?_⟩
+    · rw [ang, InnerProductGeometry.angle_neg_neg]; exact lt_ang_of_bad F hbad
+    · have h2 := diam_pos_of_mem_Sset hp
+      have hL := norm_u_sub_le F h2 hp hq (F.partner_D p hp hpD) (F.partner_D q hq hqD) hd1
+      have hL' : (diam X)⁻¹ * (diam X + 1) ≤ 1.0001 := by
+        rw [inv_mul_le_iff₀ h2]; have := hX.large; have := dist2_le_diam X; nlinarith
+      exact norm_neg_add_ge (F.norm_u' hp) (F.norm_u' hq) (hL.trans hL') (by norm_num)
+        (by norm_num)
+  have hdeg : ∀ p, ((badDD X F).filter (fun e => p ∈ e)).card ≤ 6 := fun p =>
+    card_filter_mem_le_six (fun e he => (mem_filter.1 (mem_filter.1 he).1).1) p
+  have h := hV.card_mul_le_of_edges (D := 6) (N := 2) hE hdeg (by norm_num [beta])
+    (by norm_num) (by norm_num)
+  have hpi := Real.pi_lt_d4
+  rw [beta] at h
+  push_cast at h
+  nlinarith
 
 /-! ### Helpers for (c1) -/
 
