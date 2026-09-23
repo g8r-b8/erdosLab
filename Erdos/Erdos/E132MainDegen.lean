@@ -758,8 +758,12 @@ theorem degen_step3 (h4 : 4 ≤ X.card) (hdeg : 1.94 * dist2 X < diam X) {y : Pt
 
 /-- **Step 4 (incidence bound)** `I ≤ |B| + |W|`.
 
-TODO: none — proved (Phase 2).
-What's missing: each `J_w = C(w, Δ₂) ∩ K` is a single arc; no point is interior to two arcs
+TODO: none — proved.  The Lean proof is a local form of the paper's arc argument: an
+incidence `(b, w)` is charged to `b` if some `b₁ ∈ B ∩ C(w, Δ₂)` precedes `b` counter-clockwise
+about `w` (`orient w b₁ b > 0`), and to `w` otherwise.  `star_pt` (the `K`-arcs of two equal
+circles through `b` cannot both arrive at `b` from the same side) makes the first map injective;
+`coll_pt` (two points of `J_w` are never collinear with `w`) makes the second injective.
+Paper argument: each `J_w = C(w, Δ₂) ∩ K` is a single arc; no point is interior to two arcs
 (internally tangent equal circles coincide); nondegenerate arcs are edges of `∂K`; injective
 map `b ↦` following edge.
 Acceptance: no `sorry`.
