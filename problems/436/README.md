@@ -1,7 +1,8 @@
 # Erdős Problem #436: consecutive k-th power residues (triples, k = 5)
 
 **Status (ours):** computational attack on the smallest open case Λ(5,3). No resolution.
-New: Λ(5,3) ≥ 5,062,794; brute-force finiteness certificate estimated at ~1e18 nodes (infeasible).
+New: **Λ(5,3) ≥ 1,000,007,372** (warm-start local search, witness in `witnesses/`, independently verified); brute-force
+finiteness certificate estimated at ~1e18 nodes (infeasible; see THEORY.md).
 **Site status:** OPEN (erdosproblems.com/436, rechecked 2026-09-23).
 
 ## Statement (erdosproblems.com/436, verbatim in substance)
@@ -145,3 +146,15 @@ Purpose: locate the SAT→hard transition. A quick SAT result raises the lower b
   says nothing about whether S(5.795M) is SAT or UNSAT. It is also not evidence that the smallest UNSAT R is near here. The seed
   twins were exact duplicates (the lucky phase ignores the seed), so they were killed. Relaunched 5.7725M and 5.795M with
   `KOPTS="--lucky=false --preprocess=false --sat"` (new `probe.sh` KOPTS/KTAG env, tag suffix `cd`) to get real CDCL search.
+- 2026-09-23 13:55–16:34 — **Warm-start local search** (`scripts/warmls.c`, `warmchain.sh`, `smoothfix.py`; details in WARMSTART.md)
+  starting from the 5.75M kissat model. It repairs zero triples above the old bound by changing f on large primes, and moves f on a few small
+  primes when 1000- or 3000-smooth triples block it. Steps take seconds to minutes. Verified bounds:
+  6,000,730 · 7,000,020 · 10,000,150 · 20,000,330 · 30,000,887 · 45,000,953 · 70,005,949 · 100,009,485 · 150,005,898 · 200,011,716 ·
+  300,001,271 · 400,006,178 · 500,003,685 · 700,026,741 · **1,000,007,372**. So **Λ(5,3) ≥ 1,000,007,372** (Chebotarev, k odd).
+  Every bound was decoded by `lamenc run` and `checkf.py` (agent). The parent session also checked each bound from 15M on (the 1e9 bound included)
+  with its own code: a prime-power accumulation checker up to 5e8 and `scripts/verify_pp.py` (segmented, 500M/700M/1e9). The 1e9 witness is
+  `witnesses/k5l3_first1000007372.{map,model}.xz`, SHA-256 of the uncompressed files: map 3482af99…, model d5ceb688…
+  Interpretation: the full-instance "threshold" was a solver artifact. Nothing in the computations so far points toward finiteness.
+- 2026-09-23 — **Theory route** (THEORY.md): no finiteness certificate. "f(2)=0 forced" is false (models with f(2)=1 up to ~1e6). Tree
+  estimates stay ~1e18 under every branching order: the primes ≤ 97 alone leave ~2e14 consistent assignments. The F_5 Nullstellensatz route
+  looks like a dead end at this scale. Best idea: a conditional reduction to three-point logarithmic Elliott correlations.
