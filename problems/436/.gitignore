@@ -7,3 +7,4 @@ logs/probes/*.log
 scripts/mrvdfs
 scripts/segcheck
 scripts/warmls
+data/
