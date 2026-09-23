@@ -77,3 +77,18 @@ n pairs? Must the number of such distances → ∞ (perhaps ≥ n^{1−o(1)})?
     ienjoymath's even-m ring is tight (= 3n exactly). Heuristic proof via Δ₂-points on thin
     convex curve + Euler face-length deficit of the min-distance graph (2 per Δ₂ point).
 - E: literature and claim audit  → `frontier.md` (DONE)
+
+## Follow-up (2026-09-23)
+- A2 → `angle_A2.md`: unconditional (54/37)n + C₀ for CDL Problem 1.6 (beats 3/2; lower bound 9/7).
+  Referee `REFEREE_A2.md`: CORRECT WITH FIXABLE GAPS (symmetric R2, (c2) angle bound, KK constant,
+  Vesztergombi citation, lens-corner length). Not yet novelty-audited.
+- A1 check → `VERIFY_A1.md`: Cor A1 holds, conditional on Vesztergombi Prop 3 (same dependence as CDL).
+- B2 → `angle_B2.md`: convex even n ≥ 6 has ≥ 3 rare distances (Thm A, via Fishburn); convex n = 9 too
+  (Thm B); odd n reduces to one configuration (Prop B, C1–C5); Kneser cocircular stability (Lemma K).
+- B2 check → `VERIFY_B2.md`: all proved items VERIFIED; small gaps (Fishburn original, Cap Lemma on-circle
+  case, Theorem D step 2).
+
+## Next steps
+1. Rule-4 novelty audit of the 54/37 bound (A2) and B2 Theorem A.
+2. Close the REFEREE_A2 gaps → write-up of 54/37 (the strongest "nontrivial result" candidate for the prize).
+3. n = 7 convex k ≥ 3 by exact classification of 7-point convex 4-distance sets.
