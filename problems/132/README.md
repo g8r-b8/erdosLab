@@ -93,6 +93,11 @@ n pairs? Must the number of such distances → ∞ (perhaps ≥ n^{1−o(1)})?
   B2 Thm A NEW as a statement but a parity-sharpened CDL Thm 1.2, so present it as a corollary. Risks: ienjoymath's
   announced "LP analysis" note, which hasn't appeared yet (re-check before posting), and paywalled Erdős–Fishburn 1995 / Fishburn papers
   that might cover convex n=6.
+  TODO (user): save these PDFs into novelty_sources/. ScienceDirect blocks automated access from
+  here; the papers are likely in Elsevier's free open archive, so use a normal browser:
+  Erdős–Fishburn DAM 60 (1995) 141–147 https://www.sciencedirect.com/science/article/pii/0166218X9400046G ;
+  Erdős–Fishburn "Intervertex distances in convex polygons" DAM 60 https://www.sciencedirect.com/science/article/pii/0166218X9400047H ;
+  Fishburn "Convex polygons with few intervertex distances" CGTA 5 (1995) 65–93 https://www.sciencedirect.com/science/article/pii/092577219400020V
 - Referee gaps closed → WRITEUP_A2.md + scripts/writeup_a2_checks.py
 - Convex n = 7 (and maybe 11) → angle_B3.md
 
