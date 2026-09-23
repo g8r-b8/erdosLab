@@ -34,14 +34,36 @@ theorem mem_hull3 {P A B C : Pt} {w0 w1 w2 : ℝ} (h0 : 0 ≤ w0) (h1 : 0 ≤ w1
     (hs : w0 + w1 + w2 = 1) (hx : P 0 = w0 * A 0 + w1 * B 0 + w2 * C 0)
     (hy : P 1 = w0 * A 1 + w1 * B 1 + w2 * C 1) :
     P ∈ convexHull ℝ ({A, B, C} : Set Pt) := by
-  sorry
+  have hP : P = w0 • A + w1 • B + w2 • C := by
+    ext i
+    fin_cases i
+    · simp [hx]
+    · simp [hy]
+  rw [hP]
+  have := (convex_convexHull ℝ ({A, B, C} : Set Pt)).sum_mem (t := Finset.univ)
+    (w := ![w0, w1, w2]) (z := ![A, B, C]) ?_ ?_ ?_
+  · simpa [Fin.sum_univ_three, add_assoc] using this
+  · intro i _; fin_cases i <;> simp [h0, h1, h2]
+  · simp [Fin.sum_univ_three, hs]
+  · intro i _; fin_cases i <;> exact subset_convexHull ℝ _ (by simp)
 
 /-- Barycentric coordinates: if `P` is on the inner side of all three sides of the positively
 oriented triangle `ABC`, then `P ∈ conv{A, B, C}`. -/
 theorem hull_of_orient {P A B C : Pt} (h1 : 0 ≤ orient P B C) (h2 : 0 ≤ orient A P C)
     (h3 : 0 ≤ orient A B P) (hD : 0 < orient A B C) :
     P ∈ convexHull ℝ ({A, B, C} : Set Pt) := by
-  sorry
+  have hsum : orient P B C + orient A P C + orient A B P = orient A B C := by
+    simp only [orient]; ring
+  refine mem_hull3 (w0 := orient P B C / orient A B C) (w1 := orient A P C / orient A B C)
+    (w2 := orient A B P / orient A B C) (div_nonneg h1 hD.le) (div_nonneg h2 hD.le)
+    (div_nonneg h3 hD.le) ?_ ?_ ?_
+  · rw [← add_div, ← add_div, hsum, div_self hD.ne']
+  · rw [div_mul_eq_mul_div, div_mul_eq_mul_div, div_mul_eq_mul_div, ← add_div,
+      ← add_div, eq_div_iff hD.ne']
+    simp only [orient]; ring
+  · rw [div_mul_eq_mul_div, div_mul_eq_mul_div, div_mul_eq_mul_div, ← add_div,
+      ← add_div, eq_div_iff hD.ne']
+    simp only [orient]; ring
 
 /-! ## Consequences of convex position -/
 
@@ -50,19 +72,66 @@ def NotInHull (S : Finset Pt) : Prop := ∀ x ∈ S, x ∉ convexHull ℝ ((S : 
 
 theorem notInHull_of_convexIndependent {S : Finset Pt}
     (hS : ConvexIndependent ℝ ((↑) : S → Pt)) : NotInHull S := by
-  sorry
+  exact convexIndependent_set_iff_notMem_convexHull_sdiff.1 hS
 
 /-- A point of `S` is not in the hull of three other points of `S`. -/
 theorem not_mem_hull3 {S : Finset Pt} (hS : NotInHull S) {P A B C : Pt} (hP : P ∈ S)
     (hA : A ∈ S) (hB : B ∈ S) (hC : C ∈ S) (hPA : P ≠ A) (hPB : P ≠ B) (hPC : P ≠ C) :
     P ∉ convexHull ℝ ({A, B, C} : Set Pt) := by
-  sorry
+  intro h
+  refine hS P hP (convexHull_mono ?_ h)
+  intro x hx
+  simp only [Set.mem_insert_iff, Set.mem_singleton_iff] at hx
+  rcases hx with rfl | rfl | rfl
+  · exact ⟨mem_coe.2 hA, fun h => hPA (Set.mem_singleton_iff.1 h).symm⟩
+  · exact ⟨mem_coe.2 hB, fun h => hPB (Set.mem_singleton_iff.1 h).symm⟩
+  · exact ⟨mem_coe.2 hC, fun h => hPC (Set.mem_singleton_iff.1 h).symm⟩
 
 /-- No three distinct points of a convex-position set are collinear. -/
 theorem orient_ne_zero {S : Finset Pt} (hS : NotInHull S) {x y z : Pt} (hx : x ∈ S)
     (hy : y ∈ S) (hz : z ∈ S) (hxy : x ≠ y) (hxz : x ≠ z) (hyz : y ≠ z) :
     orient x y z ≠ 0 := by
-  sorry
+  intro hc
+  simp only [orient] at hc
+  have hN : 0 < (y 0 - x 0) ^ 2 + (y 1 - x 1) ^ 2 := by
+    by_contra hle
+    apply hxy
+    have h0 : y 0 - x 0 = 0 := by nlinarith [sq_nonneg (y 0 - x 0), sq_nonneg (y 1 - x 1)]
+    have h1 : y 1 - x 1 = 0 := by nlinarith [sq_nonneg (y 0 - x 0), sq_nonneg (y 1 - x 1)]
+    ext i; fin_cases i
+    · simp; linarith
+    · simp; linarith
+  set t := ((y 0 - x 0) * (z 0 - x 0) + (y 1 - x 1) * (z 1 - x 1)) /
+    ((y 0 - x 0) ^ 2 + (y 1 - x 1) ^ 2) with ht
+  have e0 : z 0 - x 0 = t * (y 0 - x 0) := by
+    rw [ht, div_mul_eq_mul_div, eq_div_iff hN.ne']
+    linear_combination (-(y 1 - x 1)) * hc
+  have e1 : z 1 - x 1 = t * (y 1 - x 1) := by
+    rw [ht, div_mul_eq_mul_div, eq_div_iff hN.ne']
+    linear_combination (y 0 - x 0) * hc
+  clear_value t
+  rcases lt_or_ge t 0 with htn | htn
+  · -- `x` lies between `z` and `y`
+    have h1t : 0 < 1 - t := by linarith
+    refine not_mem_hull3 hS hx hz hy hy hxz hxy hxy (mem_hull3 (w0 := 1 / (1 - t))
+      (w1 := -t / (1 - t)) (w2 := 0) (by positivity) (div_nonneg (by linarith) h1t.le) le_rfl
+      ?_ ?_ ?_)
+    · rw [add_zero, ← add_div, div_eq_one_iff_eq h1t.ne']; ring
+    · field_simp; linear_combination (-1 : ℝ) * e0
+    · field_simp; linear_combination (-1 : ℝ) * e1
+  rcases le_or_gt t 1 with ht1 | ht1
+  · -- `z` lies between `x` and `y`
+    refine not_mem_hull3 hS hz hx hy hy (Ne.symm hxz) (Ne.symm hyz) (Ne.symm hyz)
+      (mem_hull3 (w0 := 1 - t) (w1 := t) (w2 := 0) (by linarith) htn le_rfl (by ring) ?_ ?_)
+    · linear_combination e0
+    · linear_combination e1
+  · -- `y` lies between `x` and `z`
+    have ht0 : 0 < t := by linarith
+    refine not_mem_hull3 hS hy hx hz hz (Ne.symm hxy) hyz hyz (mem_hull3 (w0 := 1 - 1 / t)
+      (w1 := 1 / t) (w2 := 0) ?_ (by positivity) le_rfl (by ring) ?_ ?_)
+    · rw [sub_nonneg, div_le_one ht0]; exact ht1.le
+    · field_simp; linear_combination (-1 : ℝ) * e0
+    · field_simp; linear_combination (-1 : ℝ) * e1
 
 /-! ## The angular order around a vertex -/
 
@@ -70,14 +139,33 @@ theorem orient_ne_zero {S : Finset Pt} (hS : NotInHull S) {x y z : Pt} (hx : x �
 theorem orient_trans {S : Finset Pt} (hS : NotInHull S) {p₀ a b c : Pt} (h₀ : p₀ ∈ S)
     (ha : a ∈ S) (hb : b ∈ S) (hc : c ∈ S) (ha₀ : a ≠ p₀) (hb₀ : b ≠ p₀) (hc₀ : c ≠ p₀)
     (hab : 0 < orient p₀ a b) (hbc : 0 < orient p₀ b c) : 0 < orient p₀ a c := by
-  sorry
+  by_contra hac
+  rw [not_lt] at hac
+  have e2 : orient a p₀ c = - orient p₀ a c := by simp only [orient]; ring
+  have e3 : orient a b p₀ = orient p₀ a b := by simp only [orient]; ring
+  have e4 : orient a b c = orient p₀ b c + orient a p₀ c + orient a b p₀ := by
+    simp only [orient]; ring
+  exact not_mem_hull3 hS h₀ ha hb hc ha₀.symm hb₀.symm hc₀.symm
+    (hull_of_orient hbc.le (by linarith) (by linarith) (by linarith))
 
 /-- `≺`-increasing triples are positively oriented. -/
 theorem orient_pos_of_lt {S : Finset Pt} (hS : NotInHull S) {p₀ a b c : Pt} (h₀ : p₀ ∈ S)
     (ha : a ∈ S) (hb : b ∈ S) (hc : c ∈ S) (hb₀ : b ≠ p₀)
     (hab : 0 < orient p₀ a b) (hbc : 0 < orient p₀ b c) (hac : 0 < orient p₀ a c) :
     0 < orient a b c := by
-  sorry
+  by_contra h
+  rw [not_lt] at h
+  have hba : b ≠ a := by
+    rintro rfl
+    have : orient p₀ b b = 0 := by simp only [orient]; ring
+    linarith
+  have hbc' : b ≠ c := by
+    rintro rfl
+    have : orient p₀ b b = 0 := by simp only [orient]; ring
+    linarith
+  have e1 : orient b a c = - orient a b c := by simp only [orient]; ring
+  exact not_mem_hull3 hS hb h₀ ha hc hb₀ hba hbc'
+    (hull_of_orient (by linarith) hbc.le hab.le hac)
 
 /-- **Bridge.** A finite set in convex position can be listed as a strictly convex polygon. -/
 theorem exists_strictConvexPolygon {S : Finset Pt} (hS : NotInHull S) :
