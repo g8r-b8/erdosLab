@@ -94,6 +94,9 @@ theorem eq_or_eq_neg_of_det2_eq_zero {a b : Pt} (ha : ‖a‖ = 1) (hb : ‖b‖
     have hn : ‖-b‖ = 1 := by rw [norm_neg, hb]
     exact eq_of_one_le_inner ha hn (by rw [inner_neg_right, real_inner_comm]; linarith)
 
+theorem det2_sub_left (u v e : Pt) : det2 (u - v) e = det2 u e - det2 v e := by
+  simp only [det2, PiLp.sub_apply]; ring
+
 /-- Grassmann–Plücker relation in the plane. -/
 theorem plucker (w u n h : Pt) :
     det2 w n * det2 u h = det2 w u * det2 n h + det2 w h * det2 u n := by
@@ -734,13 +737,77 @@ theorem walk_close {v x y m nv ny : Pt} {R : ℝ} (hR : 10 ^ 4 ≤ R) (hm : ‖m
     (hcv : inner ℝ (y - v) nv < 0) (hcy : 0 < inner ℝ (y - v) ny)
     (hsep : 99 / 100 * ‖y - v‖ ≤ |det2 m (y - v)|)
     (hside : det2 m (y - v) * det2 m (x - v) < 0) : ‖y - v‖ ≤ 412 := by
-  sorry
+  set d := y - v with hd_def
+  set e := x - v with he_def
+  set ρ := dist v x with hρ_def
+  set nd := ‖d‖ with hnd_def
+  have hρ0 : 9999 ≤ ρ := by linarith
+  have he : ‖e‖ = ρ := by rw [he_def, ← dist_eq_norm, dist_comm]
+  have hnd0 : 0 ≤ nd := norm_nonneg _
+  -- `d` is nearly orthogonal to `m`
+  have hdm : |inner ℝ d m| ≤ nd / 800 := by
+    have a1 : inner ℝ d m = inner ℝ d nv + inner ℝ d (m - nv) := by rw [inner_sub_right]; ring
+    have a2 : inner ℝ d m = inner ℝ d ny + inner ℝ d (m - ny) := by rw [inner_sub_right]; ring
+    have b1 := abs_real_inner_le_norm d (m - nv)
+    have b2 := abs_real_inner_le_norm d (m - ny)
+    rw [norm_sub_rev m nv] at b1
+    rw [norm_sub_rev m ny] at b2
+    have c1 : nd * ‖nv - m‖ ≤ nd * (1 / 800) := mul_le_mul_of_nonneg_left hnv hnd0
+    have c2 : nd * ‖ny - m‖ ≤ nd * (1 / 800) := mul_le_mul_of_nonneg_left hny hnd0
+    rw [abs_le] at b1 b2 ⊢
+    constructor <;> linarith
+  -- `x − v` is far from parallel to `m`
+  have hme : ρ * (1 / 201 - 1 / 800) ≤ |det2 m e| := by
+    have e1 : det2 m e = det2 nv e - det2 (nv - m) e := by rw [det2_sub_left]; ring
+    have e2 := abs_det2_le (nv - m) e
+    rw [he] at e2
+    have e3 : ρ * ‖nv - m‖ ≤ ρ * (1 / 800) := mul_le_mul_of_nonneg_left hnv (by linarith)
+    have e4 := abs_sub_abs_le_abs_sub (det2 nv e) (det2 (nv - m) e)
+    rw [← e1] at e4
+    linarith
+  -- the frame decomposition of `d · e`
+  have hframe := inner_frame hm d e
+  have hem : |inner ℝ e m| ≤ ρ := by
+    have := abs_real_inner_le_norm e m; rw [he, hm, mul_one] at this; exact this
+  have t1 : inner ℝ d m * inner ℝ e m ≤ nd / 800 * ρ := by
+    have := abs_mul (inner ℝ d m) (inner ℝ e m)
+    have h2 : |inner ℝ d m| * |inner ℝ e m| ≤ nd / 800 * ρ :=
+      mul_le_mul hdm hem (abs_nonneg _) (by positivity)
+    linarith [le_abs_self (inner ℝ d m * inner ℝ e m)]
+  have t2 : det2 m d * det2 m e ≤ -(99 / 100 * nd * (ρ * (1 / 201 - 1 / 800))) := by
+    have h1 : |det2 m d * det2 m e| = -(det2 m d * det2 m e) := abs_of_neg hside
+    rw [abs_mul] at h1
+    have h2 : 99 / 100 * nd * (ρ * (1 / 201 - 1 / 800)) ≤ |det2 m d| * |det2 m e| :=
+      mul_le_mul hsep hme (by nlinarith) (abs_nonneg _)
+    linarith
+  have hde : inner ℝ d e ≤ -(ρ * nd / 411) := by
+    rw [hframe]; nlinarith
+  -- `y` would leave the disc `D(x, R)`
+  have hyx2 : ‖d - e‖ ^ 2 ≤ R ^ 2 := by
+    have : d - e = y - x := by rw [hd_def, he_def]; abel
+    rw [this, ← dist_eq_norm]; exact pow_le_pow_left₀ dist_nonneg hyx 2
+  have hexp : ‖d - e‖ ^ 2 = nd ^ 2 - 2 * inner ℝ d e + ρ ^ 2 := by
+    rw [norm_sub_sq_real, he]
+  have hkey : 2 * ρ * nd / 411 ≤ 2 * ρ + 1 := by nlinarith
+  by_contra hcon
+  push Not at hcon
+  nlinarith
 
 /-- The side of the walk is well defined: `det(m, x − v) ≠ 0`. -/
-theorem walk_side_ne {v x m nv : Pt} {R : ℝ} (hR : 10 ^ 4 ≤ R) (hm : ‖m‖ = 1)
+theorem walk_side_ne {v x m nv : Pt} {R : ℝ} (hR : 10 ^ 4 ≤ R)
     (hnv : ‖nv - m‖ ≤ 1 / 800) (hR1 : R - 1 ≤ dist v x)
     (hs : dist v x / 201 ≤ |det2 nv (x - v)|) : det2 m (x - v) ≠ 0 := by
-  sorry
+  have hρ : 0 < dist v x := by linarith
+  have e1 : det2 m (x - v) = det2 nv (x - v) - det2 (nv - m) (x - v) := by
+    rw [det2_sub_left]; ring
+  have e2 := abs_det2_le (nv - m) (x - v)
+  rw [← dist_eq_norm, dist_comm] at e2
+  have e3 : dist v x * ‖nv - m‖ ≤ dist v x * (1 / 800) := mul_le_mul_of_nonneg_left hnv hρ.le
+  intro h0
+  rw [h0] at e1
+  have : |det2 nv (x - v)| = |det2 (nv - m) (x - v)| := by rw [show det2 nv (x - v) =
+    det2 (nv - m) (x - v) by linarith]
+  linarith
 
 /-- **Walk count** ((c2)): points `v ∈ W ⊆ V` at depth `≤ 1` in a disc `D(x_v, R) ⊇ V` with
 `|det(n_v, x_v − v)| ≥ |x_v − v|/201` satisfy `#W/400 ≤ 2π·834`. -/
@@ -749,7 +816,97 @@ theorem NormalConfig.card_walk_mul_le (hV : NormalConfig V nrm) {W : Finset Pt} 
     (hx : ∀ v ∈ W, ∃ x : Pt, (∀ y ∈ V, dist y x ≤ R) ∧ R - 1 ≤ dist v x ∧
       dist v x / 201 ≤ |det2 (nrm v) (x - v)|) :
     (W.card : ℝ) * (1 / 400) ≤ 2 * π * 834 := by
-  sorry
+  have hmeas : ∀ v ∈ W, 1 / 400 ≤ dirMeasure (window (nrm v) (1 / 800)) := fun v hv => by
+    have := two_mul_le_dirMeasure_window (hV.unit v (hW hv)) (ε := 1 / 800) (by norm_num)
+      (by linarith [Real.pi_gt_three])
+    linarith
+  have hM : ∀ θ : ℝ, (W.filter (fun v => dirVec θ ∈ window (nrm v) (1 / 800))).card ≤ 834 := by
+    intro θ
+    have hm : ‖dirVec θ‖ = 1 := norm_dirVec θ
+    set m := dirVec θ
+    set A := W.filter (fun v => m ∈ window (nrm v) (1 / 800)) with hA_def
+    have hAV : ∀ v ∈ A, v ∈ V := fun v hv => hW (mem_filter.1 hv).1
+    have hAw : ∀ v ∈ A, ‖nrm v - m‖ ≤ 1 / 800 := fun v hv => by
+      have := (mem_filter.1 hv).2; rw [norm_sub_rev]; exact this
+    have hAc : ∀ v ∈ A, 99 / 100 ≤ inner ℝ (nrm v) m := by
+      intro v hv
+      have h1 := hAw v hv
+      have h2 := norm_sub_sq_real (nrm v) m
+      rw [hV.unit v (hAV v hv), hm] at h2
+      have : ‖nrm v - m‖ ^ 2 ≤ (1 / 800) ^ 2 := pow_le_pow_left₀ (norm_nonneg _) h1 2
+      nlinarith
+    have hsepA : ∀ v ∈ A, ∀ w ∈ A, v ≠ w → 99 / 100 * dist w v ≤ |det2 m (w - v)| :=
+      fun v hv w hw hvw => hV.sep_abs (by norm_num) (hAV v hv) (hAV w hw) hvw (hAc v hv) (hAc w hw)
+    -- the walk: each `v ∈ A` has a short side
+    have hwalk : ∀ v ∈ A, ∀ y ∈ A, ∀ x : Pt, (∀ y ∈ V, dist y x ≤ R) → R - 1 ≤ dist v x →
+        dist v x / 201 ≤ |det2 (nrm v) (x - v)| →
+        det2 m (y - v) * det2 m (x - v) < 0 → dist y v ≤ 412 := by
+      intro v hv y hy x hxV hR1 hs hside
+      have hyv : y ≠ v := by
+        rintro rfl; rw [sub_self] at hside; simp [det2] at hside
+      rw [dist_eq_norm]
+      refine walk_close hR hm (hAw v hv) (hAw y hy) (hxV v (hAV v hv)) hR1 hs (hxV y (hAV y hy))
+        (hV.chord v (hAV v hv) y (hAV y hy) hyv.symm) ?_ ?_ hside
+      · have := hV.chord y (hAV y hy) v (hAV v hv) hyv
+        have e : inner ℝ (v - y) (nrm y) = - inner ℝ (y - v) (nrm y) := by
+          rw [← inner_neg_left, neg_sub]
+        linarith
+      · have := hsepA v hv y hy hyv.symm
+        rwa [dist_eq_norm] at this
+    set Gp := A.filter (fun v => ∀ y ∈ A, 0 < det2 m (y - v) → dist y v ≤ 412)
+    set Gm := A.filter (fun v => ∀ y ∈ A, det2 m (y - v) < 0 → dist y v ≤ 412)
+    have hcover : A ⊆ Gp ∪ Gm := by
+      intro v hv
+      obtain ⟨x, hxV, hR1, hs⟩ := hx v (mem_filter.1 hv).1
+      have hne := walk_side_ne hR (hAw v hv) hR1 hs
+      rcases lt_or_gt_of_ne hne with h | h
+      · refine mem_union_left _ (mem_filter.2 ⟨hv, fun y hy hpos => ?_⟩)
+        exact hwalk v hv y hy x hxV hR1 hs (mul_neg_of_pos_of_neg hpos h)
+      · refine mem_union_right _ (mem_filter.2 ⟨hv, fun y hy hneg => ?_⟩)
+        exact hwalk v hv y hy x hxV hR1 hs (mul_neg_of_neg_of_pos hneg h)
+    have hdet_le : ∀ v w : Pt, |det2 m (w - v)| ≤ dist w v := by
+      intro v w
+      have := abs_det2_le m (w - v); rwa [hm, mul_one, ← dist_eq_norm] at this
+    have hGp : (Gp.card : ℝ) ≤ 412 / (99 / 100) + 1 := by
+      refine card_le_of_oneSided (fun y => det2 m y) (by norm_num) (by norm_num) ?_ ?_
+      · intro v hv w hw hvw
+        have hv' := (mem_filter.1 hv).1
+        have hw' := (mem_filter.1 hw).1
+        have h1 := hsepA v hv' w hw' hvw
+        have h2 := hV.sep w (hAV w hw') v (hAV v hv') (Ne.symm hvw)
+        rw [det2_sub_right, abs_sub_comm] at h1
+        nlinarith
+      · intro v hv w hw hlt
+        have hpos : 0 < det2 m (w - v) := by rw [det2_sub_right]; linarith
+        have h1 := (mem_filter.1 hv).2 w (mem_filter.1 hw).1 hpos
+        have h2 := hdet_le v w
+        rw [det2_sub_right] at h2
+        linarith [le_abs_self (det2 m w - det2 m v)]
+    have hGm : (Gm.card : ℝ) ≤ 412 / (99 / 100) + 1 := by
+      refine card_le_of_oneSided (fun y => - det2 m y) (by norm_num) (by norm_num) ?_ ?_
+      · intro v hv w hw hvw
+        have hv' := (mem_filter.1 hv).1
+        have hw' := (mem_filter.1 hw).1
+        have h1 := hsepA v hv' w hw' hvw
+        have h2 := hV.sep w (hAV w hw') v (hAV v hv') (Ne.symm hvw)
+        rw [det2_sub_right] at h1
+        have : |-det2 m v - -det2 m w| = |det2 m w - det2 m v| := by congr 1; ring
+        rw [this]
+        nlinarith
+      · intro v hv w hw hlt
+        have hneg : det2 m (w - v) < 0 := by rw [det2_sub_right]; linarith
+        have h1 := (mem_filter.1 hv).2 w (mem_filter.1 hw).1 hneg
+        have h2 := hdet_le v w
+        rw [det2_sub_right] at h2
+        linarith [neg_abs_le (det2 m w - det2 m v)]
+    have hA : (A.card : ℝ) ≤ Gp.card + Gm.card := by
+      exact_mod_cast (card_le_card hcover).trans (card_union_le _ _)
+    have : (A.card : ℝ) < 835 := by linarith
+    exact_mod_cast Nat.lt_succ_iff.1 (by exact_mod_cast this)
+  have := card_mul_le_of_dirMeasure W (fun v => window (nrm v) (1 / 800))
+    (fun _ _ => isClosed_window _ _) 834 hM hmeas
+  push_cast at this
+  exact this
 
 end
 
