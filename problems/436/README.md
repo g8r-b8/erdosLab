@@ -163,11 +163,15 @@ Purpose: locate the SAT→hard transition. A quick SAT result raises the lower b
   SHA-256 of the uncompressed files: map 85e3c19a…, model 1bfef1c5… Method: WARMSTART.md. Every stall above 1.5e8 was a triple of 3000-smooth
   numbers. These were resolved by re-solving f on primes ≤ 3000 against all smooth triples up to X (`smoothfix.py`). **Open computational question for
   finiteness:** is F_y(∞) satisfiable for every y? A single UNSAT y proves Λ(5,3) < ∞. Local search cannot give an upper bound.
-- 2026-09-23 17:50 — **F_100(∞) is satisfiable.** Luca–Najman (Math. Comp. 80 (2011), doi:10.1090/S0025-5718-2010-02381-6; table at the end
-  of §4) list the largest run of k consecutive 100-smooth integers. For k = 3 it is x = 97,524. So every 100-smooth triple lies below
-  ~1e5, and the 2e9 witness restricted to primes ≤ 100 avoids all of them. Caveat: their erratum (doi:10.1090/S0025-5718-2013-02696-8, not
-  obtained; ResearchGate is behind a CAPTCHA) adds 49 missed pairs. The k=3 maximum should be re-checked against the corrected list before
-  it is cited. Consequence: a finiteness certificate via F_y(∞) needs y well above 100. Complete smooth-triple lists at that size need ~2^π(y) Pell equations
+- 2026-09-23 17:50 (corrected 18:45) — **F_100(∞) is satisfiable.** Luca–Najman (Math. Comp. 80 (2011), doi:10.1090/S0025-5718-2010-02381-6,
+  Corollary 6) give the largest x with P(x(x+1)…(x+n)) < 100. For n = 2 (triples) it is **x = 407,498,958** (checked: largest prime factors 83, 41, 89).
+  The row x = 97,524 is n = 3, i.e. runs of four (matches OEIS A193945). An earlier version of this note misread it as the triple bound.
+  Their erratum (Math. Comp. 83 (2014) 337, doi:10.1090/S0025-5718-2013-02696-8; copy in novelty_sources/) adds 56 missed solutions of
+  P(x²−1) < 100 and states that the other numerical results are unchanged. Checked here: exactly one missed x is itself 100-smooth, x = 43,184,401,
+  giving the triple 43,184,400 = 2⁴·3·5²·7·53·97, 43,184,401 = 13²·59·61·71, 43,184,402 = 2·37·79·83·89. It lies below 407,498,958, so the
+  maximum stands. The 2e9 witness restricted to primes ≤ 100 avoids zeros on all triples up to 2e9 ⊇ all 100-smooth triples, so F_100(∞) is SAT.
+  This assumes the corrected Luca–Najman list is complete (Conrey–Holmstrom–McLaughlin's independent computation is what led to the erratum).
+  Consequence: a finiteness certificate via F_y(∞) needs y well above 100. Complete smooth-triple lists at that size need ~2^π(y) Pell equations
   (y ≈ 500: ~2^95), which is infeasible.
 - References (DOIs checked on Crossref): Tschebotareff, Math. Ann. 95 (1926) 191–228, doi:10.1007/BF01206606 (GDZ scan in
   novelty_sources/); Neukirch, ANT, doi:10.1007/978-3-662-03983-0; Lang, Algebra, doi:10.1007/978-1-4613-0041-0; LLMS 1962,
