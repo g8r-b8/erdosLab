@@ -1,12 +1,14 @@
 """Independent verifier for a candidate f (numpy; shares no code with lamenc.c / warmls.c).
 
-  python checkf.py K L LIM MAP MODEL
+  python checkf.py K L LIM MAP MODEL [sieve]
 
 MAP: lines "p base"; MODEL: solver "v" lines. f(p) = v iff literal base+v is true; primes not in MAP
 get f(p) = 1 (the convention of `lamenc run`).  Recomputes f(n) for n <= LIM+L-1 by complete
-additivity from a smallest-prime-factor sieve (lamenc uses largest prime factors) and prints the
-first r <= LIM with f(r) = ... = f(r+L-1) = 0, or "NONE LIM".
+additivity and prints the first r <= LIM with f(r) = ... = f(r+L-1) = 0, or "NONE LIM".
+Default: segmented trial division by prime powers <= sqrt(N) (memory O(segment + #listed primes));
+"sieve": whole-range smallest-prime-factor sieve (lamenc uses largest prime factors).
 """
+import math
 import sys
 
 import numpy as np
@@ -99,15 +101,59 @@ def first_run(f: np.ndarray, l: int, lim: int):
     return None
 
 
+def first_run_segmented(k: int, l: int, lim: int, pv: dict, seg: int = 1 << 22):
+    """Least r <= lim with f(r) = ... = f(r+l-1) = 0, computing f segment by segment (O(seg) memory).
+
+    In each segment every n is divided by all prime powers p^j <= n with p <= isqrt(N), adding f(p)
+    each time; what remains is 1 or a single prime q > isqrt(N) (two such factors would exceed N),
+    whose value is looked up in the sorted table of primes listed in the map (default 1).
+    Shares no code with the sieve path above and none with lamenc.c / warmls.c.
+    """
+    n = lim + l - 1
+    B = math.isqrt(n)
+    sp = spf_sieve(B)
+    small = [p for p in range(2, B + 1) if sp[p] == 0]
+    keys = np.array(sorted(pv), dtype=np.int64)
+    kv = np.array([pv[p] for p in sorted(pv)], dtype=np.int64)
+    tail = np.zeros(0, dtype=bool)
+    for lo in range(1, n + 1, seg):
+        hi = min(n + 1, lo + seg)
+        rem = np.arange(lo, hi, dtype=np.int64)
+        acc = np.zeros(hi - lo, dtype=np.int64)
+        for p in small:
+            fp = pv.get(p, 1)
+            pk = p
+            while pk < hi:
+                st = (-lo) % pk
+                rem[st::pk] //= p
+                if fp:
+                    acc[st::pk] += fp
+                pk *= p
+        big = rem > 1
+        q = rem[big]
+        idx = np.minimum(np.searchsorted(keys, q), len(keys) - 1)
+        acc[big] += np.where(keys[idx] == q, kv[idx], 1)
+        z = np.concatenate([tail, acc % k == 0])
+        base = lo - len(tail)
+        run = z[:len(z) - l + 1].copy()
+        for j in range(1, l):
+            run &= z[j:len(z) - l + 1 + j]
+        hit = np.nonzero(run)[0]
+        if len(hit) and base + int(hit[0]) <= lim:
+            return base + int(hit[0])
+        tail = z[len(z) - (l - 1):]
+    return None
+
+
 def main() -> None:
     k, l, lim = int(sys.argv[1]), int(sys.argv[2]), int(sys.argv[3])
-    n = lim + l - 1
-    spf = spf_sieve(n)
     pv = load_prime_values(k, sys.argv[4], sys.argv[5])
-    f = compute_f(k, n, spf, pv)
-    r = first_run(f, l, lim)
+    if len(sys.argv) > 6 and sys.argv[6] == "sieve":  # original whole-range path (~7 bytes per n)
+        n = lim + l - 1
+        r = first_run(compute_f(k, n, spf_sieve(n), pv), l, lim)
+    else:
+        r = first_run_segmented(k, l, lim, pv)
     print(r if r is not None else f"NONE {lim}")
-
 
 if __name__ == "__main__":
     main()
