@@ -461,58 +461,122 @@ theorem esum_eq_esum_L12 {X : Finset Pt} {Δ Δ₂ : ℝ} (hT : TwoLargest X Δ 
 
 /-! ## Planar lemmas in normalised coordinates -/
 
-/-- TODO: prove.
-What's missing: all three points satisfy `2 P·t = 1 + |t|² − D` and `(t × P)² = |t|² − (P·t)²`;
-two of the three values `t × Pᵢ` coincide; a point is determined by `P·t` and `t × P`.
-Acceptance: two distinct circles (centres `0` and `t ≠ 0`) meet in at most two points.
-Depends on: nothing. -/
+/-- Two distinct circles (centres `0` and `t ≠ 0`) meet in at most two points. -/
 theorem circle3_real {x₁ y₁ x₂ y₂ x₃ y₃ tx ty D : ℝ} (ht : 0 < tx ^ 2 + ty ^ 2)
     (h₁ : x₁ ^ 2 + y₁ ^ 2 = 1) (h₂ : x₂ ^ 2 + y₂ ^ 2 = 1) (h₃ : x₃ ^ 2 + y₃ ^ 2 = 1)
     (d₁ : (x₁ - tx) ^ 2 + (y₁ - ty) ^ 2 = D) (d₂ : (x₂ - tx) ^ 2 + (y₂ - ty) ^ 2 = D)
     (d₃ : (x₃ - tx) ^ 2 + (y₃ - ty) ^ 2 = D) :
     (x₁ = x₂ ∧ y₁ = y₂) ∨ (x₁ = x₃ ∧ y₁ = y₃) ∨ (x₂ = x₃ ∧ y₂ = y₃) := by
-  sorry
+  have eqpt : ∀ {a b c e : ℝ}, a * tx + b * ty = c * tx + e * ty →
+      tx * b - ty * a = tx * e - ty * c → a = c ∧ b = e := by
+    intro a b c e hk hl
+    have hx : (tx ^ 2 + ty ^ 2) * (a - c) = 0 := by linear_combination tx * hk - ty * hl
+    have hy : (tx ^ 2 + ty ^ 2) * (b - e) = 0 := by linear_combination ty * hk + tx * hl
+    exact ⟨by linarith [(mul_eq_zero.1 hx).resolve_left ht.ne'],
+      by linarith [(mul_eq_zero.1 hy).resolve_left ht.ne']⟩
+  have k12 : x₁ * tx + y₁ * ty = x₂ * tx + y₂ * ty := by
+    linear_combination (-1/2 : ℝ) * d₁ + (1/2 : ℝ) * h₁ + (1/2 : ℝ) * d₂ - (1/2 : ℝ) * h₂
+  have k13 : x₁ * tx + y₁ * ty = x₃ * tx + y₃ * ty := by
+    linear_combination (-1/2 : ℝ) * d₁ + (1/2 : ℝ) * h₁ + (1/2 : ℝ) * d₃ - (1/2 : ℝ) * h₃
+  have l12 : (tx * y₁ - ty * x₁) ^ 2 = (tx * y₂ - ty * x₂) ^ 2 := by
+    linear_combination (tx ^ 2 + ty ^ 2) * h₁ - (tx ^ 2 + ty ^ 2) * h₂ -
+      (x₁ * tx + y₁ * ty + x₂ * tx + y₂ * ty) * k12
+  have l13 : (tx * y₁ - ty * x₁) ^ 2 = (tx * y₃ - ty * x₃) ^ 2 := by
+    linear_combination (tx ^ 2 + ty ^ 2) * h₁ - (tx ^ 2 + ty ^ 2) * h₃ -
+      (x₁ * tx + y₁ * ty + x₃ * tx + y₃ * ty) * k13
+  rcases sq_eq_sq_iff_eq_or_eq_neg.1 l12 with e12 | e12
+  · exact Or.inl (eqpt k12 e12)
+  rcases sq_eq_sq_iff_eq_or_eq_neg.1 l13 with e13 | e13
+  · exact Or.inr (Or.inl (eqpt k13 e13))
+  · exact Or.inr (Or.inr (eqpt (k12.symm.trans k13) (by linarith)))
 
-/-- TODO: prove.
-What's missing: `|r − a|² − 1 = 2 x_r (1 − x_a) − 2 y_r y_a`, both terms `≥ 0`, not both zero.
-Acceptance: Lemma M (opposite-side lemma) with `p = 0`, `b = (1, 0)`, `|pa| = |br| = 1`.
-Depends on: nothing. -/
+/-- **Lemma M** (opposite-side lemma) with `p = 0`, `b = (1, 0)`, `|pa| = |br| = 1`: if `a` is strictly below the axis and `r ≠ p` is not, then `|ar| > 1`. -/
 theorem lemmaM_real {xa ya xr yr : ℝ} (ha : xa ^ 2 + ya ^ 2 = 1) (hya : ya < 0)
     (hr : (xr - 1) ^ 2 + yr ^ 2 = 1) (hyr : 0 ≤ yr) (hr0 : 0 < xr ^ 2 + yr ^ 2) :
     1 < (xr - xa) ^ 2 + (yr - ya) ^ 2 := by
-  sorry
+  have hxr : 0 < xr := by nlinarith
+  have hxa : xa < 1 := by nlinarith
+  nlinarith [mul_pos hxr (sub_pos.2 hxa), mul_nonneg hyr (neg_nonneg.2 hya.le)]
 
-/-- TODO: prove.
-What's missing: identity `(A·W − A·B)(1 + W·B) = (W×B)(A×W + A×B)` for unit vectors, and
-`1 + W·B > 0` because `W × B ≠ 0`.
-Acceptance: chord monotonicity: if `W` and then `B` follow `A` counter-clockwise within a half-turn,
-`|AB| > |AW|`.
-Depends on: nothing. -/
-theorem chord_real {a0 a1 w0 w1 b0 b1 : ℝ} (ha : a0 ^ 2 + a1 ^ 2 = 1) (hw : w0 ^ 2 + w1 ^ 2 = 1)
+/-- Chord monotonicity: if `W` and then `B` follow `A` counter-clockwise within a half-turn, then `A·B < A·W`, i.e. `|AB| > |AW|`.  Uses `(A·W − A·B)(1 + W·B) = (W×B)(A×W + A×B)` (no condition on `|A|` needed). -/
+theorem chord_real {a0 a1 w0 w1 b0 b1 : ℝ} (_ha : a0 ^ 2 + a1 ^ 2 = 1) (hw : w0 ^ 2 + w1 ^ 2 = 1)
     (hb : b0 ^ 2 + b1 ^ 2 = 1) (haw : 0 < a0 * w1 - a1 * w0) (hab : 0 < a0 * b1 - a1 * b0)
     (hwb : 0 < w0 * b1 - w1 * b0) : a0 * b0 + a1 * b1 < a0 * w0 + a1 * w1 := by
-  sorry
+  have key : (a0 * w0 + a1 * w1 - (a0 * b0 + a1 * b1)) * (1 + (w0 * b0 + w1 * b1)) =
+      (w0 * b1 - w1 * b0) * ((a0 * w1 - a1 * w0) + (a0 * b1 - a1 * b0)) := by
+    linear_combination (a0 * b0 + a1 * b1) * hw - (a0 * w0 + a1 * w1) * hb
+  have hlag : (w0 * b0 + w1 * b1) ^ 2 + (w0 * b1 - w1 * b0) ^ 2 = 1 := by
+    linear_combination (b0 ^ 2 + b1 ^ 2) * hw + hb
+  have h1 : 0 < 1 + (w0 * b0 + w1 * b1) := by nlinarith
+  have hpos : 0 < (a0 * w0 + a1 * w1 - (a0 * b0 + a1 * b1)) * (1 + (w0 * b0 + w1 * b1)) := by
+    rw [key]; exact mul_pos hwb (add_pos haw hab)
+  have := (pos_iff_pos_of_mul_pos hpos).2 h1
+  linarith
 
-/-- TODO: prove.
-What's missing: (VERIFY_A1b Case 3, `b = (1,0)` the middle neighbour, `t` in the closed half-plane
-`x ≤ 0`, WLOG `y_t ≥ 0`): `t·c < 0` and `t·b ≤ 0` force `|tb|² = |tc|² = D`; then
-`t ∥ −(b + c)` gives `t·a ≤ 0` (because `a·b + a·c ≥ 0`), so `|ta|² = D` too, and
-`circle3_real` gives a contradiction.
-Acceptance: Case 3 core computation.
-Depends on: `circle3_real`. -/
-theorem case3_real {xa ya xc yc xt yt D : ℝ} (hD : 1 < D)
+/-- `x ≥ 1/2 → x² ≥ 1/4`. -/
+theorem sq_ge_quarter {x : ℝ} (h : 1 / 2 ≤ x) : 1 / 4 ≤ x ^ 2 := by nlinarith
+
+/-- A unit vector within distance `1` of `(1, 0)` has first coordinate `≥ 1/2`. -/
+theorem half_le_of_close {x y : ℝ} (h : x ^ 2 + y ^ 2 = 1) (h' : (x - 1) ^ 2 + y ^ 2 ≤ 1) :
+    1 / 2 ≤ x := by
+  have : (x - 1) ^ 2 + y ^ 2 = 2 - 2 * x := by linear_combination h
+  linarith
+
+/-- `x, y ≥ 1/2 → xy ≥ 1/4`. -/
+theorem quarter_le_mul {x y : ℝ} (hx : 1 / 2 ≤ x) (hy : 1 / 2 ≤ y) : 1 / 4 ≤ x * y := by
+  have h := mul_nonneg (sub_nonneg.2 hx) (sub_nonneg.2 hy)
+  have e : (x - 1 / 2) * (y - 1 / 2) = x * y - x / 2 - y / 2 + 1 / 4 := by ring
+  linarith
+
+/-- VERIFY_A1b **Case 3** core computation (`b = (1,0)` the middle neighbour, `t` in the closed half-plane `x ≤ 0` with `y_t ≥ 0`): `|tb|² = |tc|² = D`, then `t ∥ −(b + c)` and `a·b + a·c ≥ 0` give `|ta|² = D`, and three points on two distinct circles is impossible. -/
+theorem case3_real {xa ya xc yc xt yt D : ℝ} (_hD : 1 < D)
     (ha : xa ^ 2 + ya ^ 2 = 1) (hc : xc ^ 2 + yc ^ 2 = 1)
     (hab : (xa - 1) ^ 2 + ya ^ 2 ≤ 1) (hcb : (xc - 1) ^ 2 + yc ^ 2 ≤ 1)
     (hya : 0 < ya) (hyc : yc < 0) (hxt : xt ≤ 0) (ht0 : 0 < xt ^ 2 + yt ^ 2) (hyt : 0 ≤ yt)
     (ga : (xt - xa) ^ 2 + (yt - ya) ^ 2 ≤ 1 ∨ (xt - xa) ^ 2 + (yt - ya) ^ 2 = D)
     (gb : (xt - 1) ^ 2 + yt ^ 2 ≤ 1 ∨ (xt - 1) ^ 2 + yt ^ 2 = D)
     (gc : (xt - xc) ^ 2 + (yt - yc) ^ 2 ≤ 1 ∨ (xt - xc) ^ 2 + (yt - yc) ^ 2 = D) : False := by
-  sorry
+  have hxa := half_le_of_close ha hab
+  have hxc := half_le_of_close hc hcb
+  have sc : (xt - xc) ^ 2 + (yt - yc) ^ 2 = xt ^ 2 + yt ^ 2 - 2 * (xt * xc + yt * yc) + 1 := by
+    linear_combination hc
+  have sa : (xt - xa) ^ 2 + (yt - ya) ^ 2 = xt ^ 2 + yt ^ 2 - 2 * (xt * xa + yt * ya) + 1 := by
+    linear_combination ha
+  have sb : (xt - 1) ^ 2 + yt ^ 2 = xt ^ 2 + yt ^ 2 - 2 * xt + 1 := by ring
+  have p1 : xt * xc ≤ 0 := mul_nonpos_of_nonpos_of_nonneg hxt (by linarith)
+  have p2 : yt * yc ≤ 0 := mul_nonpos_of_nonneg_of_nonpos hyt hyc.le
+  have ec : (xt - xc) ^ 2 + (yt - yc) ^ 2 = D := gc.resolve_left (by linarith)
+  have eb : (xt - 1) ^ 2 + yt ^ 2 = D := gb.resolve_left (by linarith)
+  have hbc : (1 - xc) * xt = yt * yc := by linarith
+  have hu := quarter_le_mul hxa hxc
+  have hya2 : ya ^ 2 ≤ 3 / 4 := by linarith [sq_ge_quarter hxa]
+  have hyc2 : yc ^ 2 ≤ 3 / 4 := by linarith [sq_ge_quarter hxc]
+  have hyy : -(3 / 4) ≤ ya * yc := by
+    have := sq_nonneg (ya + yc)
+    have e : (ya + yc) ^ 2 = ya ^ 2 + 2 * (ya * yc) + yc ^ 2 := by ring
+    linarith
+  have hsum : 0 ≤ xa + xa * xc + ya * yc := by linarith
+  have key : (1 - xc ^ 2) * (xt * xa + yt * ya) = yt * yc * (xa + xa * xc + ya * yc) := by
+    linear_combination xa * (1 + xc) * hbc - ya * yt * hc
+  have hpos : 0 < 1 - xc ^ 2 := by
+    have : 0 < yc ^ 2 := by rw [sq]; exact mul_pos_of_neg_of_neg hyc hyc
+    linarith
+  have hta : xt * xa + yt * ya ≤ 0 := by
+    have hR : yt * yc * (xa + xa * xc + ya * yc) ≤ 0 :=
+      mul_nonpos_of_nonpos_of_nonneg p2 hsum
+    by_contra hh
+    push Not at hh
+    have := mul_pos hpos hh
+    linarith
+  have ea : (xt - xa) ^ 2 + (yt - ya) ^ 2 = D := ga.resolve_left (by linarith)
+  rcases circle3_real (x₁ := xa) (y₁ := ya) (x₂ := 1) (y₂ := 0) (x₃ := xc) (y₃ := yc)
+    (tx := xt) (ty := yt) (D := D) ht0 ha (by norm_num) hc (by linear_combination ea)
+    (by linear_combination eb) (by linear_combination ec) with h | h | h
+  · linarith [h.2]
+  · linarith [h.2]
+  · linarith [h.2]
 
-/-- TODO: prove.
-What's missing: reduce to `case3_real` by the reflection `y ↦ −y` and/or swapping `a ↔ c`.
-Acceptance: Case 3 with `a, c` on opposite sides (`y_a y_c < 0`) and no sign condition on `y_t`.
-Depends on: `case3_real`. -/
+/-- Case 3 with `a, c` on opposite sides of the axis and no sign condition on `y_t` (reflections of `case3_real`). -/
 theorem case3_real' {xa ya xc yc xt yt D : ℝ} (hD : 1 < D)
     (ha : xa ^ 2 + ya ^ 2 = 1) (hc : xc ^ 2 + yc ^ 2 = 1)
     (hab : (xa - 1) ^ 2 + ya ^ 2 ≤ 1) (hcb : (xc - 1) ^ 2 + yc ^ 2 ≤ 1)
@@ -520,21 +584,106 @@ theorem case3_real' {xa ya xc yc xt yt D : ℝ} (hD : 1 < D)
     (ga : (xt - xa) ^ 2 + (yt - ya) ^ 2 ≤ 1 ∨ (xt - xa) ^ 2 + (yt - ya) ^ 2 = D)
     (gb : (xt - 1) ^ 2 + yt ^ 2 ≤ 1 ∨ (xt - 1) ^ 2 + yt ^ 2 = D)
     (gc : (xt - xc) ^ 2 + (yt - yc) ^ 2 ≤ 1 ∨ (xt - xc) ^ 2 + (yt - yc) ^ 2 = D) : False := by
-  sorry
+  have rf : ∀ u v : ℝ, (-u - -v) ^ 2 = (u - v) ^ 2 := fun u v => by ring
+  have rf0 : ∀ u : ℝ, (-u) ^ 2 = u ^ 2 := fun u => by ring
+  rcases lt_or_gt_of_ne (show ya ≠ 0 by rintro rfl; simp at hopp) with hya | hya
+  · have hyc : 0 < yc := by
+      by_contra hh; push Not at hh
+      linarith [mul_nonneg_of_nonpos_of_nonpos hya.le hh]
+    rcases le_or_gt 0 yt with hyt | hyt
+    · exact case3_real hD hc ha hcb hab hyc hya hxt ht0 hyt gc gb ga
+    · refine case3_real (xa := xa) (ya := -ya) (xc := xc) (yc := -yc) (yt := -yt) hD
+        (by rw [rf0]; exact ha) (by rw [rf0]; exact hc) (by rw [rf0]; exact hab)
+        (by rw [rf0]; exact hcb) (by linarith) (by linarith) hxt (by rw [rf0]; exact ht0)
+        (by linarith) (by rw [rf]; exact ga) (by rw [rf0]; exact gb) (by rw [rf]; exact gc)
+  · have hyc : yc < 0 := by
+      by_contra hh; push Not at hh
+      linarith [mul_nonneg hya.le hh]
+    rcases le_or_gt 0 yt with hyt | hyt
+    · exact case3_real hD ha hc hab hcb hya hyc hxt ht0 hyt ga gb gc
+    · refine case3_real (xa := xc) (ya := -yc) (xc := xa) (yc := -ya) (yt := -yt) hD
+        (by rw [rf0]; exact hc) (by rw [rf0]; exact ha) (by rw [rf0]; exact hcb)
+        (by rw [rf0]; exact hab) (by linarith) (by linarith) hxt (by rw [rf0]; exact ht0)
+        (by linarith) (by rw [rf]; exact gc) (by rw [rf0]; exact gb) (by rw [rf]; exact ga)
 
-/-- TODO: prove.
-What's missing: with `x_a, x_c ≥ 1/2`, `y_a y_c > 0`: `|ac|² ≤ 1` via `(a×c)² ≤ 3/4`, `a·c > 0`;
-the one of `a, c` with smaller `|y|` separates `b = (1,0)` from the other one.
-Acceptance: when both non-middle points are on the same side, the configuration can be relabelled
-so that the middle point separates the other two.
-Depends on: nothing. -/
+/-- If `a, c` lie on the same side of the axis within `60°` of `(1,0)` and `|y_a| < |y_c|`, then `a` separates `(1,0)` from `c`. -/
+theorem middle_real {xa ya xc yc : ℝ} (ha : xa ^ 2 + ya ^ 2 = 1) (hc : xc ^ 2 + yc ^ 2 = 1)
+    (hxa : 1 / 2 ≤ xa) (hxc : 1 / 2 ≤ xc) (hsame : 0 < ya * yc) (h : ya ^ 2 < yc ^ 2) :
+    (-ya) * (xa * yc - ya * xc) < 0 := by
+  have hx : xc < xa := by
+    by_contra hh; push Not at hh
+    have := mul_self_le_mul_self (by linarith) hh
+    rw [← sq, ← sq] at this
+    linarith
+  have hya0 : ya ≠ 0 := by rintro rfl; simp at hsame
+  have hy0 : 0 < ya ^ 2 := by positivity
+  have hyy : ya ^ 2 ≤ ya * yc := by
+    by_contra hh; push Not at hh
+    have h1 : (ya * yc) ^ 2 < (ya ^ 2) ^ 2 := pow_lt_pow_left₀ hh hsame.le (by norm_num)
+    have h2 : ya ^ 2 * ya ^ 2 < ya ^ 2 * yc ^ 2 := mul_lt_mul_of_pos_left h hy0
+    have e1 : (ya * yc) ^ 2 = ya ^ 2 * yc ^ 2 := by ring
+    have e2 : (ya ^ 2) ^ 2 = ya ^ 2 * ya ^ 2 := by ring
+    linarith
+  have M1 := mul_pos (sub_pos.2 hx) hsame
+  have M2 := mul_nonneg (by linarith : (0:ℝ) ≤ xc) (sub_nonneg.2 hyy)
+  have e : (-ya) * (xa * yc - ya * xc) = -((xa - xc) * (ya * yc) + xc * (ya * yc - ya ^ 2)) := by
+    ring
+  linarith
+
+/-- If both non-middle neighbours lie on the same side, they are within distance `1` of each other and one of them separates the other two. -/
 theorem case3_select_real {xa ya xc yc : ℝ}
     (ha : xa ^ 2 + ya ^ 2 = 1) (hc : xc ^ 2 + yc ^ 2 = 1)
     (hab : (xa - 1) ^ 2 + ya ^ 2 ≤ 1) (hcb : (xc - 1) ^ 2 + yc ^ 2 ≤ 1)
     (hsame : 0 < ya * yc) (hne : ¬ (xa = xc ∧ ya = yc)) :
     (xa - xc) ^ 2 + (ya - yc) ^ 2 ≤ 1 ∧
       ((-ya) * (xa * yc - ya * xc) < 0 ∨ (-yc) * (xc * ya - yc * xa) < 0) := by
-  sorry
+  have hxa := half_le_of_close ha hab
+  have hxc := half_le_of_close hc hcb
+  have hu := sq_ge_quarter hxa
+  have hv := sq_ge_quarter hxc
+  have hu1 : xa ^ 2 ≤ 1 := by linarith [sq_nonneg ya]
+  have hv1 : xc ^ 2 ≤ 1 := by linarith [sq_nonneg yc]
+  have hxy : 0 < xa * xc * (ya * yc) := mul_pos (by positivity) hsame
+  have e : (xa * yc - ya * xc) ^ 2 = xa ^ 2 + xc ^ 2 - 2 * (xa ^ 2 * xc ^ 2) -
+      2 * (xa * xc * (ya * yc)) := by linear_combination xa ^ 2 * hc + xc ^ 2 * ha
+  have hcr : (xa * yc - ya * xc) ^ 2 ≤ 3 / 4 := by
+    have A := mul_nonneg (sub_nonneg.2 hu) (sub_nonneg.2 hv)
+    have B := mul_nonneg (sub_nonneg.2 hu1) (sub_nonneg.2 hv1)
+    have eA : (xa ^ 2 - 1 / 4) * (xc ^ 2 - 1 / 4) =
+        xa ^ 2 * xc ^ 2 - xa ^ 2 / 4 - xc ^ 2 / 4 + 1 / 16 := by ring
+    have eB : (1 - xa ^ 2) * (1 - xc ^ 2) = 1 - xa ^ 2 - xc ^ 2 + xa ^ 2 * xc ^ 2 := by ring
+    linarith
+  have hxx := quarter_le_mul hxa hxc
+  set s := xa * xc + ya * yc with hs
+  have hlag : s ^ 2 + (xa * yc - ya * xc) ^ 2 = 1 := by
+    rw [hs]; linear_combination (xc ^ 2 + yc ^ 2) * ha + hc
+  have hdot : 0 < s := by rw [hs]; linarith
+  have hdot' : 1 / 2 ≤ s := by
+    by_contra hh; push Not at hh
+    have := mul_pos (sub_pos.2 hh) (by linarith : (0:ℝ) < 1 / 2 + s)
+    have e' : (1 / 2 - s) * (1 / 2 + s) = 1 / 4 - s ^ 2 := by ring
+    linarith
+  have sac : (xa - xc) ^ 2 + (ya - yc) ^ 2 = 2 - 2 * s := by
+    rw [hs]; linear_combination ha + hc
+  refine ⟨by linarith, ?_⟩
+  rcases lt_trichotomy (ya ^ 2) (yc ^ 2) with h | h | h
+  · exact Or.inl (middle_real ha hc hxa hxc hsame h)
+  · exfalso
+    have hy : ya = yc := by
+      have : (ya - yc) * (ya + yc) = 0 := by linear_combination h
+      rcases mul_eq_zero.1 this with h' | h'
+      · linarith
+      · have hyc' : yc = -ya := by linarith
+        rw [hyc'] at hsame
+        have : ya * -ya = -(ya ^ 2) := by ring
+        linarith [sq_nonneg ya]
+    have hx : xa = xc := by
+      have : (xa - xc) * (xa + xc) = 0 := by rw [hy] at ha; linear_combination ha - hc
+      rcases mul_eq_zero.1 this with h' | h'
+      · linarith
+      · linarith
+    exact hne ⟨hx, hy⟩
+  · exact Or.inr (middle_real hc ha hxc hxa (by linarith [mul_comm ya yc]) h)
 
 /-- TODO: prove.
 What's missing: (VERIFY_A1b Case 2 with the apex `v₁ = (1, 0)`): `x₂ = x₃ = −c`, `y₃ = −y₂`,
