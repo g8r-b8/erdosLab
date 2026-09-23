@@ -24,16 +24,39 @@
 #include <stdint.h>
 #include <time.h>
 
+// small open-addressing hash map long -> uint32 (value 0 = absent); used instead of O(N) arrays
+// for sparse per-window / per-prime data (dense arrays got every page touched: ~12 bytes per N).
+typedef struct { long *k; uint32_t *v; long cap, n; } HMap;
+static void hm_init(HMap *h, long cap) { h->cap = cap; h->n = 0; h->k = calloc(cap, sizeof(long)); h->v = calloc(cap, sizeof(uint32_t)); }
+static long hm_slot(const HMap *h, long key) {
+  unsigned long i = ((unsigned long)key * 0x9E3779B97F4A7C15UL) & (h->cap - 1);
+  while (h->k[i] && h->k[i] != key) i = (i + 1) & (h->cap - 1);
+  return (long)i;
+}
+static uint32_t hm_get(const HMap *h, long key) { long i = hm_slot(h, key); return h->k[i] ? h->v[i] : 0; }
+static void hm_set(HMap *h, long key, uint32_t val) {
+  long i = hm_slot(h, key);
+  if (!h->k[i]) {
+    if (2 * (h->n + 1) > h->cap) {  // grow
+      HMap g; hm_init(&g, 2 * h->cap);
+      for (long j = 0; j < h->cap; j++) if (h->k[j]) { long t = hm_slot(&g, h->k[j]); g.k[t] = h->k[j]; g.v[t] = h->v[j]; g.n++; }
+      free(h->k); free(h->v); *h = g; i = hm_slot(h, key);
+    }
+    h->k[i] = key; h->n++;
+  }
+  h->v[i] = val;
+}
+
 typedef struct {
   int K, L;            // modulus and run length (L = 3 supported)
   long R, N;           // runs r <= R are forbidden; N = R + L - 1
   uint16_t *lpf;       // smallest prime factor of n (fits: N < 65536^2), 0 if n is prime
   uint8_t *f;          // f[n] in Z/K for 1 <= n <= N (f[1] = 0)
   int32_t *badlist;    // list of bad r (N < 2^31)
-  int32_t *badpos;     // 1 + position of r in badlist, or 0 (calloc: pages touched lazily)
+  HMap badpos;         // r -> 1 + position of r in badlist (0 = not bad)
   long nbad;
-  uint32_t *w;         // breakout weight of window r is 1 + w[r] (calloc: lazy)
-  uint32_t *tabu;      // tabu[p] = step until which p may not be changed (indexed by prime)
+  HMap w;              // breakout weight of window r is 1 + w(r)
+  HMap tabu;           // p -> step until which p may not be changed
   long pmin;
   uint64_t rng;
 } State;
@@ -43,13 +66,13 @@ static int window_bad(const State *s, long r) {
   return 1;
 }
 static void bad_add(State *s, long r) {
-  if (s->badpos[r]) return;
-  s->badlist[s->nbad++] = (int32_t)r; s->badpos[r] = (int32_t)s->nbad;
+  if (hm_get(&s->badpos, r)) return;
+  s->badlist[s->nbad++] = (int32_t)r; hm_set(&s->badpos, r, (uint32_t)s->nbad);
 }
 static void bad_del(State *s, long r) {
-  long i = s->badpos[r] - 1; if (i < 0) return;
+  long i = (long)hm_get(&s->badpos, r) - 1; if (i < 0) return;
   long last = s->badlist[--s->nbad];
-  s->badlist[i] = (int32_t)last; s->badpos[last] = (int32_t)(i + 1); s->badpos[r] = 0;
+  s->badlist[i] = (int32_t)last; hm_set(&s->badpos, last, (uint32_t)(i + 1)); hm_set(&s->badpos, r, 0);
 }
 static uint64_t rnd(State *s) { s->rng ^= s->rng << 13; s->rng ^= s->rng >> 7; s->rng ^= s->rng << 17; return s->rng; }
 
@@ -130,9 +153,9 @@ static void compute_f(State *s) {
  * Depends on: compute_f.
  */
 static void init_bad(State *s) {
-  s->badpos = calloc(s->R + 1, sizeof(int32_t));
-  s->badlist = malloc((s->R + 1) * sizeof(int32_t));
-  if (!s->badpos || !s->badlist) { perror("bad"); exit(4); }
+  hm_init(&s->badpos, 1 << 16);
+  s->badlist = malloc((s->R + 1) * sizeof(int32_t));  // touched only up to nbad
+  if (!s->badlist) { perror("bad"); exit(4); }
   s->nbad = 0;
   for (long r = 1; r <= s->R; r++) {
     if (window_bad(s, r)) bad_add(s, r);
@@ -173,7 +196,7 @@ static void score_prime(State *s, long p, long gain[]) {
       unsigned mask = window_mask(s, r, p);
       int b0 = mask & 1;
       if (mask == 0 || mask == (1u << s->K) - 1) continue;
-      for (int d = 1; d < s->K; d++) { int x = (int)((mask >> d) & 1) - b0; gain[d] += x; gain[s->K + d] += x * (1 + (long)s->w[r]); }
+      for (int d = 1; d < s->K; d++) { int x = (int)((mask >> d) & 1) - b0; gain[d] += x; gain[s->K + d] += x * (1 + (long)hm_get(&s->w, r)); }
     }
     if (hi > last) last = hi;
   }
@@ -217,10 +240,7 @@ static void dump_window(const State *s, long r) {
  * Depends on: score_prime, apply_move.
  */
 static int search(State *s, long maxsteps, int noise_permille) {
-  s->tabu = calloc(s->N + 1, sizeof(uint32_t));
-  s->w = calloc(s->R + 1, sizeof(uint32_t));
-  if (!s->w) { perror("w"); exit(4); }
-  if (!s->tabu) { perror("tabu"); exit(4); }
+  hm_init(&s->tabu, 1 << 16); hm_init(&s->w, 1 << 16);
   long best = s->nbad; time_t t0 = time(0), tl = t0;
   long cand[64]; long gain[32];
   long step; int dbg = getenv("WARMLS_DEBUG") != 0;
@@ -247,20 +267,20 @@ static int search(State *s, long maxsteps, int noise_permille) {
       score_prime(s, cand[i], gain);
       for (int d = 1; d < s->K; d++) {
         long g = gain[s->K + d];
-        if (s->tabu[cand[i]] > (uint32_t)step && s->nbad + gain[d] >= best) continue;
+        if (hm_get(&s->tabu, cand[i]) > (uint32_t)step && s->nbad + gain[d] >= best) continue;
         if (g < bg) { bg = g; bp = cand[i]; bd = d; ties = 1; }
         else if (g == bg && rnd(s) % (++ties) == 0) { bp = cand[i]; bd = d; }
       }
     }
     if (!bp || bg >= 0) {  // local minimum for this window: breakout (raise its weight), sometimes move anyway
-      s->w[r]++;
+      hm_set(&s->w, r, hm_get(&s->w, r) + 1);
       if (!bp || (long)(rnd(s) % 1000) >= noise_permille) continue;
     }
     long before = s->nbad, pg = 0;
     if (dbg) { score_prime(s, bp, gain); pg = gain[bd]; }  // unweighted
     apply_move(s, bp, bd);
     if (dbg && s->nbad - before != pg) { fprintf(stderr, "gain mismatch p=%ld d=%d pred=%ld got=%ld\n", bp, bd, pg, s->nbad - before); exit(5); }
-    s->tabu[bp] = (uint32_t)(step + 5 + rnd(s) % 10);
+    hm_set(&s->tabu, bp, (uint32_t)(step + 5 + rnd(s) % 10));
     if (s->nbad < best) best = s->nbad;
     if ((step & 255) == 0 && time(0) - tl >= 10) {
       tl = time(0);
