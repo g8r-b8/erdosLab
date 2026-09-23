@@ -338,7 +338,22 @@ TODO: prove (via `cos(A + B) > 1/2`).
 Acceptance: no `sorry`.
 Depends on: `Real.arcsin` bounds. Difficulty M. -/
 theorem c4_window : Real.arcsin (√3 / 2 - 2 * beta) + Real.arcsin beta < π / 3 := by
-  sorry
+  have hb : beta = 1 / 100 := rfl
+  have h3 : √3 < 1.7321 := by rw [Real.sqrt_lt' (by norm_num)]; norm_num
+  have h3' : (1.732 : ℝ) < √3 := by rw [Real.lt_sqrt (by norm_num)]; norm_num
+  have hπ := Real.pi_gt_three
+  have hB0 : 0 ≤ Real.arcsin beta := Real.arcsin_nonneg.2 (by rw [hb]; norm_num)
+  have hB1 : Real.arcsin beta ≤ π / 2 := Real.arcsin_le_pi_div_two _
+  have key : Real.arcsin (√3 / 2 - 2 * beta) < π / 3 - Real.arcsin beta := by
+    rw [Real.arcsin_lt_iff_lt_sin ⟨by rw [hb]; linarith, by rw [hb]; linarith⟩
+      ⟨by linarith, by linarith⟩]
+    rw [Real.sin_sub, Real.sin_pi_div_three, Real.cos_pi_div_three, Real.cos_arcsin,
+      Real.sin_arcsin (by rw [hb]; norm_num) (by rw [hb]; norm_num)]
+    have hs : 1 - beta ^ 2 ≤ √(1 - beta ^ 2) := by
+      rw [Real.le_sqrt (by rw [hb]; norm_num) (by rw [hb]; norm_num)]; rw [hb]; norm_num
+    rw [hb] at hs ⊢
+    nlinarith
+  linarith
 
 /-- **Region I degree bound**: every `p ∈ S` has at most two good `δ`-edges (one per side of
 `ℝu_p`; none on the line).
@@ -406,7 +421,26 @@ Acceptance: no `sorry`.
 Depends on: `tau_sub_tgap`. Difficulty M. -/
 theorem c5_tgap (hX : Normal X) (hτ : √3 / 2 + 3 * beta ≤ tau X) :
     0.886 ≤ tgap X - Real.arcsin beta := by
-  sorry
+  have hb : beta = 1 / 100 := rfl
+  have h3' : (1.73205 : ℝ) < √3 := by rw [Real.lt_sqrt (by norm_num)]; norm_num
+  have hpos := hX.dist2_pos
+  have ht : √3 / 2 + 3 * beta ≤ tgap X := by
+    by_cases h1 : tgap X ≤ 1
+    · have e := tau_sub_tgap X
+      have : (tgap X ^ 2 - 1) / (2 * dist2 X) ≤ 0 := by
+        apply div_nonpos_of_nonpos_of_nonneg _ (by linarith)
+        have : 0 ≤ tgap X := by
+          have := (two_of_pos hpos).lt; unfold tgap; linarith
+        nlinarith
+      linarith
+    · have h3 : √3 < 1.7321 := by rw [Real.sqrt_lt' (by norm_num)]; norm_num
+      rw [hb]; linarith
+  have hy : Real.arcsin beta < 0.01002 := by
+    rw [Real.arcsin_lt_iff_lt_sin ⟨by rw [hb]; norm_num, by rw [hb]; norm_num⟩
+      ⟨by linarith [Real.pi_gt_three], by linarith [Real.pi_gt_three]⟩]
+    have := Real.sin_gt_sub_cube (x := 0.01002) (by norm_num)
+    rw [hb]; norm_num at this ⊢; linarith
+  rw [hb] at ht; linarith
 
 /-- **[C5]** `2π·10/0.886 < 71`.
 
