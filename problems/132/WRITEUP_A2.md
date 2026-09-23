@@ -511,7 +511,7 @@ With C ≤ 10⁸ + C_V, all the constants are ≤ 54/37 **[C1]**. The theorem ho
 
 **No mathematical error was found.**
 
-**Remaining dependence.** The result depends on the exact statement of [Ve87], which we have not read in the original. Any additive constant is absorbed. A hypothesis such as m ≥ m₀ would also be harmless, because S is large whenever μ(Δ₂) is large.
+**Remaining dependence: none (updated 2026-09-23).** [Ve87] has now been read in the original: n₂ ≤ (3/2)n for every n-point planar set, with no threshold and no additive term (NOVELTY.md Audit 5), so C_V = 0. (Earlier text:) The result depended on the exact statement of [Ve87], which we had not read in the original. Any additive constant is absorbed. A hypothesis such as m ≥ m₀ would also be harmless, because S is large whenever μ(Δ₂) is large.
 
 Two parts are the least standard and deserve an independent check:
 - the ownership/pairing bookkeeping (§7.2);

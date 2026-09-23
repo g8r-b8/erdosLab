@@ -104,7 +104,8 @@ n pairs? Must the number of such distances → ∞ (perhaps ≥ n^{1−o(1)})?
   interval checks pass, ~90% confidence; weakest spots §7.2 pairing and §8 Step 4. Referee's citation complaint was
   wrong (CDL [23] = Ve87). Second independent referee (REFEREE2_A2.md, 5b87a82): CORRECT — §7.2 exhaustively
   checked (max exactly 4/3), §8 Step 4 adversarially tight (max μ(Δ₂)−n = 0), assembly exact. Ve87's 3n/2 corroborated
-  by Pach's Handbook ch. 1; original still unread (DOI 10.1016/0012-365X(87)90027-6 — ask the user for the PDF).
+  by Pach's Handbook ch. 1; original READ (NOVELTY Audit 5): n₂ ≤ (3/2)n exactly, for all n, with no constant. 54/37 now has no unread dependencies.
+  Lead: Ve87's inner-point degree argument may make Cor A1 unconditional (to verify).
 - Convex n = 7 (and maybe 11) → angle_B3.md — DONE (f8b09f7). Convex n = 7 ⇒ k ≥ 3 (k = number of rare distances), proved two ways: from the literature
   ([EF95b] r₂ ≤ n plus Altman), and self-contained. **n = 11 ⇒ k ≥ 3: NEW, computer-assisted** — a SAT refutation of ordinal
   distance-rank colourings under the convex-quadrilateral inequality only, with the DRUP proof checked by our own RUP checker.

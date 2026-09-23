@@ -494,3 +494,18 @@ Their statements have a different conclusion (≥ 2, not ≥ 3) on a larger clas
 1. Fishburn's chapter "Distances in convex polygons" (1997) and the EF94 postscript are unread. At most they might tabulate r₂⁽ⁿ⁾ for n = 9, 10. That would make n = 9/10 corollaries; it would not reach n = 11, 13.
 2. Present the ordinal phenomenon with explicit credit: "in the spirit of Morić–Pritchard's abstract search (arXiv:1103.0412), using only their Fact 3.1". Do not call the method new.
 3. Before posting, re-check the #132 thread (anchor after post-8100) and Lean Pool / lyfar repos, which are very active.
+
+## Audit 5: Vesztergombi 1987 read in the original (2026-09-23; PDF supplied by the user, gitignored)
+
+K. Vesztergombi, *On large distances in planar sets*, Discrete Math. 67 (1987) 191–198, doi 10.1016/0012-365X(87)90027-6.
+- **Main Theorem, exact form:** "For any set S of n points in R², n₂ ≤ (3/2)n."
+  - It holds for every n, with no threshold and no additive constant.
+  - The text extraction garbles the fractions. The proof's last line, (3/2)(p₁+p₂) = (3/2)n, and the sharpness example fix the reading: a regular m-gon v₁..v_m plus u₁..u_m with d(vᵢ,uᵢ) = d(uᵢ,vᵢ₊₁) = d₂ gives n = 2m and n₂ = 3m.
+- **Consequence for WRITEUP_A2:** the black box holds exactly as used, with C_V = 0. The last unread dependency of the 54/37 bound is now closed.
+- **Proof structure:**
+  - Props 1–4: red edges join hull points; the forbidden "N" comes from the quadrilateral inequality; every blue edge has a hull endpoint.
+  - Then: an inner point of blue-degree ≥ 3 either forces a neighbour of degree 1 (Cases 1 and 2) or is impossible (Case 3).
+  - Props 5–8 and the middle-edge digraph G then give the count.
+- **Lead for Cor A1** (not verified): Cor A1 relies on CDL's citation of [Ve96, Prop 3], "every L₂′ vertex has degree exactly 2 in the 2-core G′".
+  - Ve87's inner-point argument, Cases 1–3, looks like it proves exactly "degree ≤ 2" for interior points inside a min-degree-2 subgraph. Points used only as distance witnesses may stay in S even after they are pruned from the graph.
+  - If this transfers, Cor A1 becomes unconditional, with Ve87 as its citation. It needs a careful check. Note in particular that Ve87 proceeds by deleting points, and deleting a point can remove every d₁ pair; Hopf–Pannwitz covers that case.
