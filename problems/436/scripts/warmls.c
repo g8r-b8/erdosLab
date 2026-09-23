@@ -27,7 +27,7 @@
 typedef struct {
   int K, L;            // modulus and run length (L = 3 supported)
   long R, N;           // runs r <= R are forbidden; N = R + L - 1
-  int32_t *lpf;        // largest prime factor, lpf[n] for 2 <= n <= N
+  uint16_t *lpf;       // smallest prime factor of n (fits: N < 65536^2), 0 if n is prime
   uint8_t *f;          // f[n] in Z/K for 1 <= n <= N (f[1] = 0)
   int32_t *badlist;    // list of bad r (N < 2^31)
   int32_t *badpos;     // 1 + position of r in badlist, or 0 (calloc: pages touched lazily)
@@ -54,15 +54,17 @@ static void bad_del(State *s, long r) {
 static uint64_t rnd(State *s) { s->rng ^= s->rng << 13; s->rng ^= s->rng >> 7; s->rng ^= s->rng << 17; return s->rng; }
 
 /* sieve_lpf
- * fill lpf[n] = largest prime factor of n for 2 <= n <= N.
+ * fill lpf[n] = smallest prime factor of composite n (0 for primes), 2 <= n <= N < 65536^2.
+ * (Was an int32 largest-prime-factor table; uint16 spf halves memory to 2 bytes per n.)
  * What's missing: body.
- * Acceptance: lpf[p] == p iff p prime; lpf[12] == 3; lpf[1] unused.
+ * Acceptance: lpf[p] == 0 iff p prime; lpf[12] == 2; lpf[1] unused.
  * Depends on: nothing.
  */
-static int32_t *sieve_lpf(long N) {
-  int32_t *lpf = calloc(N + 1, sizeof(int32_t));
+static uint16_t *sieve_lpf(long N) {
+  if (N >= 65536L * 65536L) { fprintf(stderr, "N too large for uint16 spf\n"); exit(4); }
+  uint16_t *lpf = calloc(N + 1, sizeof(uint16_t));
   if (!lpf) { perror("lpf"); exit(4); }
-  for (long p = 2; p <= N; p++) if (!lpf[p]) for (long j = p; j <= N; j += p) lpf[j] = (int32_t)p;
+  for (long p = 2; p * p <= N; p++) if (!lpf[p]) for (long j = p * p; j <= N; j += p) if (!lpf[j]) lpf[j] = (uint16_t)p;
   return lpf;
 }
 
@@ -78,7 +80,7 @@ static void load_warm(State *s, const char *map, const char *model) {
   long N = s->N;
   s->f = calloc(N + 1, 1);
   if (!s->f) { perror("f"); exit(4); }
-  for (long p = 2; p <= N; p++) if (s->lpf[p] == p) s->f[p] = 1;
+  for (long p = 2; p <= N; p++) if (!s->lpf[p]) s->f[p] = 1;
   long cap = 1 << 20, cnt = 0, p, b, maxv = 0;
   long *ps = malloc(cap * sizeof(long)), *bs = malloc(cap * sizeof(long));
   FILE *mp = fopen(map, "r"); if (!mp) { perror(map); exit(4); }
@@ -108,7 +110,7 @@ static void load_warm(State *s, const char *map, const char *model) {
 }
 
 /* compute_f
- * f[n] = f[lpf[n]] + f[n/lpf[n]] mod K for composite n, increasing n.
+ * f[n] = f[q] + f[n/q] mod K for composite n (q = lpf[n]), increasing n.
  * What's missing: body.
  * Acceptance: f completely additive on [1, N].
  * Depends on: sieve_lpf, load_warm.
@@ -117,7 +119,7 @@ static void compute_f(State *s) {
   s->f[1] = 0;
   for (long n = 2; n <= s->N; n++) {
     long P = s->lpf[n];
-    if (P != n) s->f[n] = (uint8_t)((s->f[P] + s->f[n / P]) % s->K);
+    if (P) s->f[n] = (uint8_t)((s->f[P] + s->f[n / P]) % s->K);
   }
 }
 
@@ -199,7 +201,7 @@ static void dump_window(const State *s, long r) {
   fprintf(stderr, "bad r=%ld:", r);
   for (long j = r; j < r + s->L; j++) {
     fprintf(stderr, " %ld=", j); long n = j; int firstf = 1;
-    while (n > 1) { long q = s->lpf[n]; int e = 0; while (n % q == 0) { n /= q; e++; }
+    while (n > 1) { long q = s->lpf[n] ? s->lpf[n] : n; int e = 0; while (n % q == 0) { n /= q; e++; }
       fprintf(stderr, "%s%ld^%d(f=%d)", firstf ? "" : "*", q, e, s->f[q]); firstf = 0; }
   }
   fputc('\n', stderr);
@@ -229,7 +231,7 @@ static int search(State *s, long maxsteps, int noise_permille) {
       for (long j = r; j < r + s->L; j++) {
         long n = j;
         while (n > 1) {
-          long q = s->lpf[n]; int e = 0; while (n % q == 0) { n /= q; e++; }
+          long q = s->lpf[n] ? s->lpf[n] : n; int e = 0; while (n % q == 0) { n /= q; e++; }
           if ((pass || q >= s->pmin) && e % s->K) {
             int dup = 0; for (int i = 0; i < nc; i++) if (cand[i] == q) dup = 1;
             if (!dup && nc < 64) cand[nc++] = q;
@@ -287,7 +289,7 @@ static void write_result(State *s, const char *omap, const char *omodel) {
   if (!mp || !md) { perror("output"); exit(4); }
   long i = 0, col = 0;
   for (long p = 2; p <= s->N; p++) {
-    if (s->lpf[p] != p || s->f[p] == 1) continue;
+    if (s->lpf[p] || s->f[p] == 1) continue;
     long b = (long)s->K * i + 1; i++;
     fprintf(mp, "%ld %ld\n", p, b);
     if (col == 0) fputs("v", md);
