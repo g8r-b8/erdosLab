@@ -818,6 +818,136 @@ theorem turning_sum_le {K : Set Pt} (hK : Convex ℝ K) (hKc : IsCompact K) {ι 
     ENNReal.toReal_ofReal (by positivity)] at h2
   linarith
 
+/-! ### Turning at a single point -/
+
+theorem exists_dirVec {n : Pt} (hn : ‖n‖ = 1) : ∃ θ : ℝ, dirVec θ = n := by
+  set z : ℂ := ⟨n 0, n 1⟩
+  have hsq := norm_sq_coord n
+  rw [hn] at hsq
+  have hz : ‖z‖ = 1 := by
+    rw [Complex.norm_def, Complex.normSq_apply]
+    simp only [z]
+    rw [show n 0 * n 0 + n 1 * n 1 = 1 by nlinarith, Real.sqrt_one]
+  have hz0 : z ≠ 0 := by intro h; rw [h, norm_zero] at hz; norm_num at hz
+  refine ⟨Complex.arg z, ?_⟩
+  ext i; fin_cases i
+  · simp [dirVec, Complex.cos_arg hz0, hz, z]
+  · simp [dirVec, Complex.sin_arg, hz, z]
+
+theorem dirVec_add (θ φ : ℝ) :
+    dirVec (θ + φ) = Real.cos φ • dirVec θ + Real.sin φ • perp (dirVec θ) := by
+  ext i; fin_cases i <;> simp [dirVec, perp, Real.cos_add, Real.sin_add] <;> ring
+
+theorem dirVec_add_int_mul (θ : ℝ) (k : ℤ) : dirVec (θ + k * (2 * π)) = dirVec θ := by
+  simp [dirVec, Real.cos_add_int_mul_two_pi, Real.sin_add_int_mul_two_pi]
+
+theorem normalCone_add_smul {K : Set Pt} {x n₁ n₂ : Pt} (h₁ : n₁ ∈ normalCone K x)
+    (h₂ : n₂ ∈ normalCone K x) {a b : ℝ} (ha : 0 ≤ a) (hb : 0 ≤ b) :
+    a • n₁ + b • n₂ ∈ normalCone K x := by
+  intro y hy
+  rw [inner_add_right, real_inner_smul_right, real_inner_smul_right]
+  nlinarith [h₁ y hy, h₂ y hy]
+
+/-- If the directions `[c, c + α]` (`α ≤ 2π`) are all normal at a point of `γ`, the turning of
+`γ` is at least `α`. -/
+theorem le_turning_of_Icc {K γ : Set Pt} {x : Pt} (hx : x ∈ γ) {c α : ℝ} (hα : 0 ≤ α)
+    (hα' : α ≤ 2 * π) (h : ∀ θ ∈ Set.Icc c (c + α), dirVec θ ∈ normalCone K x) :
+    α ≤ turning K γ := by
+  have hpi := Real.pi_pos
+  set k : ℤ := ⌊c / (2 * π)⌋
+  set c' := c - k * (2 * π)
+  have hk1 : (k : ℝ) ≤ c / (2 * π) := Int.floor_le _
+  have hk2 : c / (2 * π) < k + 1 := Int.lt_floor_add_one _
+  have hc0 : 0 ≤ c' := by
+    have := (le_div_iff₀ (by positivity : (0 : ℝ) < 2 * π)).1 hk1; simp only [c']; linarith
+  have hc1 : c' < 2 * π := by
+    have := (div_lt_iff₀ (by positivity : (0 : ℝ) < 2 * π)).1 hk2; simp only [c']; linarith
+  have h' : ∀ θ ∈ Set.Icc c' (c' + α), dirVec θ ∈ normalCone K x := by
+    intro θ hθ
+    rw [← dirVec_add_int_mul θ k]
+    exact h _ ⟨by simp only [c'] at hθ; linarith [hθ.1], by simp only [c'] at hθ; linarith [hθ.2]⟩
+  set T : Set ℝ := {θ | θ ∈ Set.Ico 0 (2 * π) ∧ ∃ x ∈ γ, dirVec θ ∈ normalCone K x}
+  have hT1 : Set.Ico c' (min (c' + α) (2 * π)) ⊆ T := fun θ hθ =>
+    ⟨⟨by linarith [hθ.1], lt_of_lt_of_le hθ.2 (min_le_right _ _)⟩, x, hx,
+      h' θ ⟨hθ.1, (lt_of_lt_of_le hθ.2 (min_le_left _ _)).le⟩⟩
+  have hT2 : Set.Ico 0 (c' + α - 2 * π) ⊆ T := fun θ hθ => by
+    refine ⟨⟨hθ.1, by linarith [hθ.2]⟩, x, hx, ?_⟩
+    rw [← dirVec_add_int_mul θ 1]
+    exact h' _ ⟨by push_cast; linarith [hθ.1], by push_cast; linarith [hθ.2]⟩
+  have hdisj : Disjoint (Set.Ico c' (min (c' + α) (2 * π))) (Set.Ico 0 (c' + α - 2 * π)) := by
+    rw [Set.disjoint_left]; intro θ h1 h2; linarith [h1.1, h2.2]
+  have hvol : MeasureTheory.volume (Set.Ico c' (min (c' + α) (2 * π)) ∪
+      Set.Ico 0 (c' + α - 2 * π)) = ENNReal.ofReal α := by
+    rw [MeasureTheory.measure_union hdisj measurableSet_Ico, Real.volume_Ico, Real.volume_Ico]
+    rcases le_or_gt (c' + α) (2 * π) with hle | hlt
+    · rw [min_eq_left hle, sub_zero,
+        ENNReal.ofReal_of_nonpos (show c' + α - 2 * π ≤ 0 by linarith), add_zero,
+        add_sub_cancel_left]
+    · rw [min_eq_right hlt.le, sub_zero, ← ENNReal.ofReal_add (by linarith) (by linarith)]
+      congr 1; ring
+  have hTfin : MeasureTheory.volume T ≠ ⊤ :=
+    ne_top_of_le_ne_top (by rw [Real.volume_Ico]; exact ENNReal.ofReal_ne_top)
+      (MeasureTheory.measure_mono (fun θ h => h.1))
+  have hle := MeasureTheory.measure_mono (μ := MeasureTheory.volume) (Set.union_subset hT1 hT2)
+  rw [hvol] at hle
+  have := ENNReal.toReal_mono hTfin hle
+  rwa [ENNReal.toReal_ofReal hα] at this
+
+/-- Two unit normals at one point of `γ`, at angle `< π`: the turning of `γ` is at least
+their angle. -/
+theorem ang_le_turning_of_normals {K γ : Set Pt} {x n₁ n₂ : Pt} (hx : x ∈ γ)
+    (h₁ : n₁ ∈ normalCone K x) (h₂ : n₂ ∈ normalCone K x) (hn₁ : ‖n₁‖ = 1) (hn₂ : ‖n₂‖ = 1)
+    (hlt : ang n₁ n₂ < π) : ang n₁ n₂ ≤ turning K γ := by
+  set α := ang n₁ n₂
+  have hα0 : 0 ≤ α := InnerProductGeometry.angle_nonneg _ _
+  rcases hα0.eq_or_lt with h0 | hpos
+  · rw [← h0]; exact ENNReal.toReal_nonneg
+  have hsin : 0 < Real.sin α := Real.sin_pos_of_pos_of_lt_pi hpos hlt
+  have hcos : Real.cos α = inner ℝ n₁ n₂ := by
+    have := InnerProductGeometry.cos_angle_mul_norm_mul_norm n₁ n₂
+    rwa [hn₁, hn₂, mul_one, mul_one] at this
+  obtain ⟨θ₁, hθ₁⟩ := exists_dirVec hn₁
+  have hlag := lagrange n₂ n₁
+  rw [hn₁, hn₂, real_inner_comm, ← hcos] at hlag
+  have hdet2 : det2 n₁ n₂ ^ 2 = Real.sin α ^ 2 := by nlinarith [Real.sin_sq_add_cos_sq α]
+  have hdec := decomp hn₁ n₂
+  rw [real_inner_comm, ← hcos] at hdec
+  -- `det2 n₁ n₂ = σ sin α`
+  obtain ⟨σ, hσ, hdσ⟩ : ∃ σ : ℝ, (σ = 1 ∨ σ = -1) ∧ det2 n₁ n₂ = σ * Real.sin α := by
+    rcases mul_self_eq_mul_self_iff.1 (show det2 n₁ n₂ * det2 n₁ n₂ = Real.sin α * Real.sin α by
+      nlinarith) with h | h
+    · exact ⟨1, Or.inl rfl, by linarith⟩
+    · exact ⟨-1, Or.inr rfl, by linarith⟩
+  have key : ∀ t ∈ Set.Icc 0 α, dirVec (θ₁ + σ * t) ∈ normalCone K x := by
+    intro t ht
+    have hdir : dirVec (θ₁ + σ * t) =
+        (Real.sin α)⁻¹ • (Real.sin (α - t) • n₁ + Real.sin t • n₂) := by
+      rw [dirVec_add, hθ₁, hdec, hdσ]
+      have hc : Real.cos (σ * t) = Real.cos t := by
+        rcases hσ with rfl | rfl <;> simp
+      have hs : Real.sin (σ * t) = σ * Real.sin t := by
+        rcases hσ with rfl | rfl <;> simp
+      rw [hc, hs, Real.sin_sub, eq_inv_smul_iff₀ hsin.ne']
+      ext i
+      simp only [PiLp.add_apply, PiLp.smul_apply, smul_eq_mul]
+      ring
+    rw [hdir]
+    obtain ⟨ht0, ht1⟩ := ht
+    have s1 : 0 ≤ Real.sin (α - t) :=
+      Real.sin_nonneg_of_nonneg_of_le_pi (by linarith) (by linarith)
+    have s2 : 0 ≤ Real.sin t := Real.sin_nonneg_of_nonneg_of_le_pi ht0 (by linarith)
+    have hn := normalCone_add_smul h₁ h₂ s1 s2
+    intro y hy
+    rw [real_inner_smul_right]
+    exact mul_nonpos_of_nonneg_of_nonpos (inv_nonneg.2 hsin.le) (hn y hy)
+  rcases hσ with rfl | rfl
+  · refine le_turning_of_Icc hx hα0 (by linarith [Real.pi_pos]) (c := θ₁) fun θ hθ => ?_
+    have := key (θ - θ₁) ⟨by linarith [hθ.1], by linarith [hθ.2]⟩
+    rwa [one_mul, add_sub_cancel] at this
+  · refine le_turning_of_Icc hx hα0 (by linarith [Real.pi_pos]) (c := θ₁ - α) fun θ hθ => ?_
+    have := key (θ₁ - θ) ⟨by linarith [hθ.2], by linarith [hθ.1]⟩
+    rwa [neg_one_mul, neg_sub, add_sub_cancel] at this
+
 /-- The turning of a connected boundary arc is at least the angle between (outward) normals at
 its ends.
 
