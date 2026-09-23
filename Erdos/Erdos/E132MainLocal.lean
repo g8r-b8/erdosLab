@@ -454,7 +454,38 @@ Acceptance: no `sorry`.
 Depends on: `DirField.norm_u`. Difficulty M. -/
 theorem T1 (hX : Normal X) (F : DirField X) {σ : ℝ} {p q₁ q₂ : Pt} (hσ : σ = 1 ∨ σ = -1)
     (h₁ : IsSideT F σ p q₁) (h₂ : IsSideT F σ p q₂) : q₁ = q₂ := by
-  sorry
+  by_contra hne
+  obtain ⟨hp, hq₁, hd₁, -, ⟨ha₁, ha₁', -⟩, hs₁⟩ := h₁
+  obtain ⟨-, hq₂, hd₂, -, ⟨ha₂, ha₂', -⟩, hs₂⟩ := h₂
+  have hmin := minDist_le_dist (mem_of_mem_Sset hq₁) (mem_of_mem_Sset hq₂) hne
+  rw [hX.minDist_eq] at hmin
+  have hu := F.norm_u' hp
+  have l₁ := lagrange (q₁ - p) (F.u p)
+  have l₂ := lagrange (q₂ - p) (F.u p)
+  have l₃ := lagrange (q₁ - q₂) (F.u p)
+  rw [hu, ← dist_eq_norm, dist_comm q₁ p, hd₁] at l₁
+  rw [hu, ← dist_eq_norm, dist_comm q₂ p, hd₂] at l₂
+  rw [hu, ← dist_eq_norm, show q₁ - q₂ = (q₁ - p) - (q₂ - p) by abel, inner_sub_left,
+    det2_sub_right] at l₃
+  set a₁ := inner ℝ (q₁ - p) (F.u p)
+  set a₂ := inner ℝ (q₂ - p) (F.u p)
+  set b₁ := det2 (F.u p) (q₁ - p)
+  set b₂ := det2 (F.u p) (q₂ - p)
+  have hβ : beta = 1 / 100 := rfl
+  rw [hβ] at ha₁' ha₂'
+  have hσ2 : σ * σ = 1 := by rcases hσ with rfl | rfl <;> norm_num
+  have hbb : 0 < b₁ * b₂ := by
+    have := mul_pos hs₁ hs₂
+    calc 0 < σ * b₁ * (σ * b₂) := this
+      _ = (σ * σ) * (b₁ * b₂) := by ring
+      _ = b₁ * b₂ := by rw [hσ2, one_mul]
+  have e1 : 1 - (1 / 100 : ℝ) ^ 2 ≤ b₁ ^ 2 := by nlinarith
+  have e2 : 1 - (1 / 100 : ℝ) ^ 2 ≤ b₂ ^ 2 := by nlinarith
+  have hsq : (1 - (1 / 100 : ℝ) ^ 2) ^ 2 ≤ (b₁ * b₂) ^ 2 := by
+    rw [mul_pow]; nlinarith
+  have hb : 1 - (1 / 100 : ℝ) ^ 2 ≤ b₁ * b₂ := by nlinarith
+  have hd : 1 ≤ dist q₁ q₂ ^ 2 := by nlinarith
+  nlinarith
 
 /-- **(T2)** if `q` is the right T-neighbour of `p`, then `p` is the left T-neighbour of `q`.
 
@@ -463,7 +494,24 @@ Acceptance: no `sorry`.
 Depends on: `DirField.norm_u`. Difficulty M. -/
 theorem T2 (hX : Normal X) (F : DirField X) {p q : Pt} (h : IsSideT F (-1) p q) :
     IsSideT F 1 q p := by
-  sorry
+  obtain ⟨hp, hq, hd, hg, hT, hs⟩ := h
+  refine ⟨hq, hp, by rw [dist_comm]; exact hd,
+    by rw [ang, InnerProductGeometry.angle_comm]; exact hg, hT.symm, ?_⟩
+  have hl := lagrange (q - p) (F.u p)
+  rw [F.norm_u' hp, ← dist_eq_norm, dist_comm q p, hd] at hl
+  have hβ : beta = 1 / 100 := rfl
+  obtain ⟨ha, ha', -⟩ := hT
+  rw [hβ] at ha' hg
+  have hb : det2 (F.u p) (q - p) ≤ -(1 - (1 / 100) ^ 2) := by nlinarith
+  have hdiff := abs_det2_le (F.u q - F.u p) (q - p)
+  rw [det2_sub_left, ← dist_eq_norm, dist_comm q p, hd, one_mul] at hdiff
+  have hn : ‖F.u q - F.u p‖ ≤ 1 / 100 := by
+    refine (norm_sub_le_ang (F.norm_u' hq) (F.norm_u' hp)).trans ?_
+    rw [ang, InnerProductGeometry.angle_comm]; exact hg
+  have := abs_le.1 (hdiff.trans hn)
+  have hneg : det2 (F.u q) (p - q) = - det2 (F.u q) (q - p) := by
+    rw [show p - q = -(q - p) by abel]; simp only [det2, PiLp.neg_apply]; ring
+  rw [hneg]; nlinarith
 
 /-- T-edges number at most `|S|` (each vertex has `≤ 2` T-edges by (T1)).
 
@@ -471,7 +519,47 @@ TODO: prove.
 Acceptance: no `sorry`.
 Depends on: `T1`, `two_mul_card_le_of_deg_le`. Difficulty M. -/
 theorem card_tEdges_le (hX : Normal X) (F : DirField X) : (tEdges X F).card ≤ (Sset X).card := by
-  sorry
+  have h := two_mul_card_le_of_deg_le (V := Sset X) (E := tEdges X F) (k := 2) ?_ ?_
+  · omega
+  · intro z hz
+    have hz' : z ∈ edges X := (mem_filter.1 (mem_filter.1 hz).1).1
+    simp only [edges, pairsS, mem_filter] at hz'
+    obtain ⟨⟨hs, hnd⟩, -⟩ := hz'
+    exact ⟨hnd, fun p hp => Finset.mem_sym2_iff.1 hs p hp⟩
+  · intro p _
+    have hsub : (tEdges X F).filter (fun z => p ∈ z) ⊆
+        ((Sset X).filter (IsSideT F 1 p) ∪ (Sset X).filter (IsSideT F (-1) p)).image
+          (fun q => s(p, q)) := by
+      intro z hz
+      obtain ⟨hzT, hpz⟩ := mem_filter.1 hz
+      obtain ⟨q, rfl⟩ := Sym2.mem_iff_exists.1 hpz
+      obtain ⟨hzg, hT⟩ := mem_filter.1 hzT
+      obtain ⟨hze, hg⟩ := mem_filter.1 hzg
+      obtain ⟨hzP, hzd⟩ := mem_filter.1 hze
+      simp only [pairsS, mem_filter, Finset.mk_mem_sym2_iff, Sym2.mk_isDiag_iff] at hzP
+      obtain ⟨⟨hp, hq⟩, -⟩ := hzP
+      have hd : dist p q = 1 := by rw [← hX.minDist_eq]; exact hzd
+      have hT' := hT p q rfl
+      have hg' := hg p q rfl
+      rw [mem_image]
+      refine ⟨q, ?_, rfl⟩
+      have hl := lagrange (q - p) (F.u p)
+      rw [F.norm_u' hp, ← dist_eq_norm, dist_comm q p, hd] at hl
+      have hβ : beta = 1 / 100 := rfl
+      have ha := hT'.2.1
+      have ha0 := hT'.1
+      rw [hβ] at ha
+      rcases lt_or_gt_of_ne (show det2 (F.u p) (q - p) ≠ 0 by
+        intro h0; rw [h0] at hl; nlinarith) with hb | hb
+      · exact mem_union_right _ (mem_filter.2 ⟨hq, hp, hq, hd, hg', hT', by linarith⟩)
+      · exact mem_union_left _ (mem_filter.2 ⟨hq, hp, hq, hd, hg', hT', by linarith⟩)
+    have c1 : ((Sset X).filter (IsSideT F 1 p)).card ≤ 1 :=
+      card_le_one.2 fun a ha b hb =>
+        T1 hX F (Or.inl rfl) (mem_filter.1 ha).2 (mem_filter.1 hb).2
+    have c2 : ((Sset X).filter (IsSideT F (-1) p)).card ≤ 1 :=
+      card_le_one.2 fun a ha b hb =>
+        T1 hX F (Or.inr rfl) (mem_filter.1 ha).2 (mem_filter.1 hb).2
+    exact (card_le_card hsub).trans (card_image_le.trans ((card_union_le _ _).trans (by omega)))
 
 /-- `edges = good ⊔ bad`.
 
@@ -488,7 +576,21 @@ Acceptance: no `sorry`.
 Depends on: `good_dichotomy`. Difficulty S–M. -/
 theorem good_subset_T_union_rungs (hX : Normal X) (F : DirField X) (hτ : 2 * beta < tau X) :
     good X F ⊆ tEdges X F ∪ rungs X F := by
-  sorry
+  intro z hz
+  obtain ⟨hze, hg⟩ := mem_filter.1 hz
+  obtain ⟨hzP, hzd⟩ := mem_filter.1 hze
+  induction z using Sym2.ind with
+  | _ p q =>
+  simp only [pairsS, mem_filter, Finset.mk_mem_sym2_iff, Sym2.mk_isDiag_iff] at hzP
+  obtain ⟨⟨hp, hq⟩, -⟩ := hzP
+  have hd : dist p q = 1 := by rw [← hX.minDist_eq]; exact hzd
+  rcases good_dichotomy hX F hτ hp hq hd (hg p q rfl) with h | h | h
+  · refine mem_union_left _ (mem_filter.2 ⟨hz, fun a b hab => ?_⟩)
+    rcases Sym2.eq_iff.1 hab with ⟨rfl, rfl⟩ | ⟨rfl, rfl⟩
+    · exact h
+    · exact h.symm
+  · exact mem_union_right _ (mem_filter.2 ⟨hz, p, q, rfl, h⟩)
+  · exact mem_union_right _ (mem_filter.2 ⟨hz, q, p, Sym2.eq_swap, h⟩)
 
 /-! ## Turning measure -/
 
