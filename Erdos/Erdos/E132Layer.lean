@@ -1132,52 +1132,149 @@ theorem prop3_case3 {X : Finset Pt} {Δ Δ₂ : ℝ} (hT : TwoLargest X Δ Δ₂
             fy q v₂ v₃ * fx q v₂ v₁)) * (Δ₂ ^ 2 * Δ₂ ^ 2) := by ring
         rw [e]; exact mul_neg_of_neg_of_pos hmid this
 
-/-- TODO: prove.
-What's missing: frame at `q` with axis `v₁`; transport; apply `case2_real`.
-Acceptance: Case 2 (exactly two `Δ`-pairs, apex `v₁`): `v₁` has no `Δ₂`-neighbour besides `q`.
-Depends on: frame lemmas, `dist_le_snd_of_not_isExt`, `case2_real`. -/
+/-- Distinct points have distinct frame coordinates. -/
+theorem frame_inj {q v : Pt} (h : q ≠ v) {P Q : Pt} (hPQ : P ≠ Q) :
+    ¬ (fx q v P = fx q v Q ∧ fy q v P = fy q v Q) := by
+  rintro ⟨hx, hy⟩
+  have := frame_sqd h P Q
+  rw [hx, hy, sub_self, sub_self] at this
+  have h0 : sqd P Q = 0 :=
+    (div_eq_zero_iff.1 (by rw [← this]; norm_num)).resolve_right (sqd_pos_of_ne h).ne'
+  exact (sqd_pos_of_ne hPQ).ne' h0
+
+/-- **Case 2** (exactly two `Δ`-pairs, apex `v₁`): in the frame at `q` with axis `v₁`, `case2_real` shows that `v₁` has no `Δ₂`-neighbour besides `q`. -/
 theorem prop3_case2 {X : Finset Pt} {Δ Δ₂ : ℝ} (hT : TwoLargest X Δ Δ₂) {q v₁ v₂ v₃ r : Pt}
-    (hq : q ∈ X) (hqe : ¬ IsExt X q) (h₁ : v₁ ∈ X) (h₂ : v₂ ∈ X) (h₃ : v₃ ∈ X)
+    (hq : q ∈ X) (hqe : ¬ IsExt X q) (_h₁ : v₁ ∈ X) (h₂ : v₂ ∈ X) (h₃ : v₃ ∈ X)
     (h23 : v₂ ≠ v₃) (d₁ : dist q v₁ = Δ₂) (d₂ : dist q v₂ = Δ₂) (d₃ : dist q v₃ = Δ₂)
     (s12 : sqd v₁ v₂ = Δ ^ 2) (s13 : sqd v₁ v₃ = Δ ^ 2) (s23 : sqd v₂ v₃ ≤ Δ₂ ^ 2)
     (hr : r ∈ X) (hrq : r ≠ q) (hr₁ : dist v₁ r = Δ₂) : False := by
-  sorry
+  have hpos := hT.pos
+  have hs0 : 0 < Δ₂ ^ 2 := by positivity
+  have hne := ne_of_dist_snd hpos d₁
+  have hs : sqd q v₁ = Δ₂ ^ 2 := (dist_eq_iff_sqd hpos.le).1 d₁
+  obtain ⟨m0, m1⟩ := frame_axis hne
+  have N := frame_nsq hne hs
+  have Nn := frame_norm' hne hs
+  have unit : ∀ P, dist q P = Δ₂ → fx q v₁ P ^ 2 + fy q v₁ P ^ 2 = 1 := fun P hP => by
+    rw [Nn, (dist_eq_iff_sqd hpos.le).1 hP, div_self hs0.ne']
+  have gap : ∀ P ∈ X, ∀ Q ∈ X, (fx q v₁ P - fx q v₁ Q) ^ 2 + (fy q v₁ P - fy q v₁ Q) ^ 2 ≤ 1 ∨
+      (fx q v₁ P - fx q v₁ Q) ^ 2 + (fy q v₁ P - fy q v₁ Q) ^ 2 = Δ ^ 2 / Δ₂ ^ 2 :=
+    fun P hP Q hQ => by rw [N]; exact hT.ngap hP hQ
+  have h12' : (1 - fx q v₁ v₂) ^ 2 + fy q v₁ v₂ ^ 2 = Δ ^ 2 / Δ₂ ^ 2 := by
+    have := N v₁ v₂; rw [m0, m1, s12] at this; linear_combination this
+  have h13' : (1 - fx q v₁ v₃) ^ 2 + fy q v₁ v₃ ^ 2 = Δ ^ 2 / Δ₂ ^ 2 := by
+    have := N v₁ v₃; rw [m0, m1, s13] at this; linear_combination this
+  have h23' : (fx q v₁ v₂ - fx q v₁ v₃) ^ 2 + (fy q v₁ v₂ - fy q v₁ v₃) ^ 2 ≤ 1 := by
+    rw [N]; exact div_le_one_of_le₀ s23 hs0.le
+  have hr1 : (fx q v₁ r - 1) ^ 2 + fy q v₁ r ^ 2 = 1 := by
+    have := N r v₁
+    rw [m0, m1, sub_zero, sqd_comm, (dist_eq_iff_sqd hpos.le).1 hr₁, div_self hs0.ne'] at this
+    exact this
+  have hrn : fx q v₁ r ^ 2 + fy q v₁ r ^ 2 ≤ 1 := by
+    rw [Nn]
+    exact div_le_one_of_le₀ ((dist_le_iff_sqd hpos.le).1 (dist_le_snd_of_not_isExt hT hq hqe hr))
+      hs0.le
+  have hr0 : 0 < fx q v₁ r ^ 2 + fy q v₁ r ^ 2 := by
+    rw [Nn]; exact div_pos (sqd_pos_of_ne (Ne.symm hrq)) hs0
+  exact case2_real hT.one_lt (unit v₂ d₂) (unit v₃ d₃) h12' h13' h23' (frame_inj hne h23) hr1 hrn
+    hr0 (gap r hr v₂ h₂) (gap r hr v₃ h₃)
 
-/-- TODO: prove.
-What's missing: frame at `q` with axis `v₁`; transport; apply `case1_real`.
-Acceptance: Case 1 (all three pairs at `Δ`): not all three `vᵢ` have a second neighbour.
-Depends on: frame lemmas, `dist_le_snd_of_not_isExt`, `case1_real`. -/
+/-- **Case 1** (all three pairs at `Δ`): in the frame at `q` with axis `v₁`, `case1_real` shows that the three second neighbours `rᵢ` cannot coexist. -/
 theorem prop3_case1 {X : Finset Pt} {Δ Δ₂ : ℝ} (hT : TwoLargest X Δ Δ₂) {q v₁ v₂ v₃ r₁ r₂ r₃ : Pt}
     (hq : q ∈ X) (hqe : ¬ IsExt X q) (h₁ : v₁ ∈ X) (h₂ : v₂ ∈ X) (h₃ : v₃ ∈ X)
     (d₁ : dist q v₁ = Δ₂) (d₂ : dist q v₂ = Δ₂) (d₃ : dist q v₃ = Δ₂)
     (s12 : sqd v₁ v₂ = Δ ^ 2) (s13 : sqd v₁ v₃ = Δ ^ 2) (s23 : sqd v₂ v₃ = Δ ^ 2)
     (hr₁ : r₁ ∈ X) (hr₂ : r₂ ∈ X) (hr₃ : r₃ ∈ X) (hrq₁ : r₁ ≠ q) (hrq₂ : r₂ ≠ q) (hrq₃ : r₃ ≠ q)
     (e₁ : dist v₁ r₁ = Δ₂) (e₂ : dist v₂ r₂ = Δ₂) (e₃ : dist v₃ r₃ = Δ₂) : False := by
-  sorry
+  have hpos := hT.pos
+  have hs0 : 0 < Δ₂ ^ 2 := by positivity
+  have hne := ne_of_dist_snd hpos d₁
+  have hs : sqd q v₁ = Δ₂ ^ 2 := (dist_eq_iff_sqd hpos.le).1 d₁
+  obtain ⟨m0, m1⟩ := frame_axis hne
+  have N := frame_nsq hne hs
+  have Nn := frame_norm' hne hs
+  have unit : ∀ P, dist q P = Δ₂ → fx q v₁ P ^ 2 + fy q v₁ P ^ 2 = 1 := fun P hP => by
+    rw [Nn, (dist_eq_iff_sqd hpos.le).1 hP, div_self hs0.ne']
+  have inn : ∀ P ∈ X, fx q v₁ P ^ 2 + fy q v₁ P ^ 2 ≤ 1 := fun P hP => by
+    rw [Nn]
+    exact div_le_one_of_le₀ ((dist_le_iff_sqd hpos.le).1 (dist_le_snd_of_not_isExt hT hq hqe hP))
+      hs0.le
+  have pos : ∀ P, P ≠ q → 0 < fx q v₁ P ^ 2 + fy q v₁ P ^ 2 := fun P hP => by
+    rw [Nn]; exact div_pos (sqd_pos_of_ne (Ne.symm hP)) hs0
+  have one : ∀ P Q, dist Q P = Δ₂ →
+      (fx q v₁ P - fx q v₁ Q) ^ 2 + (fy q v₁ P - fy q v₁ Q) ^ 2 = 1 := fun P Q h => by
+    rw [N, sqd_comm, (dist_eq_iff_sqd hpos.le).1 h, div_self hs0.ne']
+  have far : ∀ P Q, sqd P Q = Δ ^ 2 →
+      (fx q v₁ P - fx q v₁ Q) ^ 2 + (fy q v₁ P - fy q v₁ Q) ^ 2 = Δ ^ 2 / Δ₂ ^ 2 := fun P Q h => by
+    rw [N, h]
+  have gap : ∀ P ∈ X, ∀ Q ∈ X, (fx q v₁ P - fx q v₁ Q) ^ 2 + (fy q v₁ P - fy q v₁ Q) ^ 2 ≤ 1 ∨
+      (fx q v₁ P - fx q v₁ Q) ^ 2 + (fy q v₁ P - fy q v₁ Q) ^ 2 = Δ ^ 2 / Δ₂ ^ 2 :=
+    fun P hP Q hQ => by rw [N]; exact hT.ngap hP hQ
+  have h12' : (1 - fx q v₁ v₂) ^ 2 + fy q v₁ v₂ ^ 2 = Δ ^ 2 / Δ₂ ^ 2 := by
+    have := far v₁ v₂ s12; rw [m0, m1] at this; linear_combination this
+  have h13' : (1 - fx q v₁ v₃) ^ 2 + fy q v₁ v₃ ^ 2 = Δ ^ 2 / Δ₂ ^ 2 := by
+    have := far v₁ v₃ s13; rw [m0, m1] at this; linear_combination this
+  have hr1 : (fx q v₁ r₁ - 1) ^ 2 + fy q v₁ r₁ ^ 2 = 1 := by
+    have := one r₁ v₁ e₁; rw [m0, m1, sub_zero] at this; exact this
+  have g21 := gap r₂ hr₂ v₁ h₁
+  rw [m0, m1, sub_zero] at g21
+  have g31 := gap r₃ hr₃ v₁ h₁
+  rw [m0, m1, sub_zero] at g31
+  exact case1_real hT.one_lt (unit v₂ d₂) (unit v₃ d₃) h12' h13' (far v₂ v₃ s23) hr1
+    (one r₂ v₂ e₂) (one r₃ v₃ e₃) (inn r₁ hr₁) (inn r₂ hr₂) (inn r₃ hr₃) (pos r₁ hrq₁)
+    (pos r₂ hrq₂) (pos r₃ hrq₃) (gap r₁ hr₁ v₂ h₂) (gap r₁ hr₁ v₃ h₃) g21 (gap r₂ hr₂ v₃ h₃) g31
+    (gap r₃ hr₃ v₂ h₂) (gap r₁ hr₁ r₂ hr₂) (gap r₁ hr₁ r₃ hr₃)
 
-/-- TODO: prove.
-What's missing: split on which of the three pairs are at distance `Δ` (`TwoLargest.sqd_gap`) and
-call `prop3_case1/2/3` with the right labelling.
-Acceptance: a non-extreme point cannot have three `Δ₂`-neighbours that each have a further
-`Δ₂`-neighbour.
-Depends on: `prop3_case1`, `prop3_case2`, `prop3_case3`. -/
+/-- A non-extreme point cannot have three `Δ₂`-neighbours that each have a further `Δ₂`-neighbour: split on which of the three pairs are at distance `Δ` and relabel. -/
 theorem prop3_three {X : Finset Pt} {Δ Δ₂ : ℝ} (hT : TwoLargest X Δ Δ₂) {q v₁ v₂ v₃ r₁ r₂ r₃ : Pt}
     (hq : q ∈ X) (hqe : ¬ IsExt X q) (h₁ : v₁ ∈ X) (h₂ : v₂ ∈ X) (h₃ : v₃ ∈ X)
     (h12 : v₁ ≠ v₂) (h13 : v₁ ≠ v₃) (h23 : v₂ ≠ v₃)
     (d₁ : dist q v₁ = Δ₂) (d₂ : dist q v₂ = Δ₂) (d₃ : dist q v₃ = Δ₂)
     (hr₁ : r₁ ∈ X) (hr₂ : r₂ ∈ X) (hr₃ : r₃ ∈ X) (hrq₁ : r₁ ≠ q) (hrq₂ : r₂ ≠ q) (hrq₃ : r₃ ≠ q)
     (e₁ : dist v₁ r₁ = Δ₂) (e₂ : dist v₂ r₂ = Δ₂) (e₃ : dist v₃ r₃ = Δ₂) : False := by
-  sorry
+  have c := sqd_comm
+  rcases hT.sqd_gap h₁ h₂ with p12 | p12 <;> rcases hT.sqd_gap h₁ h₃ with p13 | p13 <;>
+    rcases hT.sqd_gap h₂ h₃ with p23 | p23
+  · exact prop3_case3 hT hq hqe h₁ h₂ h₃ h12 h13 h23 d₁ d₂ d₃ p12 p23
+  · -- only `v₂ v₃` far: middle `v₁`
+    exact prop3_case3 hT hq hqe h₂ h₁ h₃ (Ne.symm h12) h23 h13 d₂ d₁ d₃ (by rw [c]; exact p12) p13
+  · -- only `v₁ v₃` far: middle `v₂`
+    exact prop3_case3 hT hq hqe h₁ h₂ h₃ h12 h13 h23 d₁ d₂ d₃ p12 p23
+  · -- `v₁ v₃`, `v₂ v₃` far: apex `v₃`
+    exact prop3_case2 hT hq hqe h₃ h₁ h₂ h12 d₃ d₁ d₂ (by rw [c]; exact p13) (by rw [c]; exact p23)
+      p12 hr₃ hrq₃ e₃
+  · -- only `v₁ v₂` far: middle `v₃`
+    exact prop3_case3 hT hq hqe h₁ h₃ h₂ h13 h12 (Ne.symm h23) d₁ d₃ d₂ p13
+      (by rw [c]; exact p23)
+  · -- `v₁ v₂`, `v₂ v₃` far: apex `v₂`
+    exact prop3_case2 hT hq hqe h₂ h₁ h₃ h13 d₂ d₁ d₃ (by rw [c]; exact p12) p23 p13 hr₂ hrq₂ e₂
+  · -- `v₁ v₂`, `v₁ v₃` far: apex `v₁`
+    exact prop3_case2 hT hq hqe h₁ h₂ h₃ h23 d₁ d₂ d₃ p12 p13 p23 hr₁ hrq₁ e₁
+  · exact prop3_case1 hT hq hqe h₁ h₂ h₃ d₁ d₂ d₃ p12 p13 p23 hr₁ hr₂ hr₃ hrq₁ hrq₂ hrq₃ e₁ e₂ e₃
 
-/-- TODO: prove.
-What's missing: `≥ 2` from `minDeg2_core`; three core neighbours `v₁, v₂, v₃` would each have a
-core neighbour `rᵢ ≠ q`, contradicting `prop3_three` (`q ∈ L₂` is not extreme in `X`).
-Acceptance: **Prop 3**: every `q ∈ L₂ ∩ V(G′)` has `deg_{G′} q = 2`.
-Depends on: `prop3_three`, `minDeg2_core`, `core_subset`, `mem_L2`, `disjoint_L1_L2`. -/
+/-- **Prop 3**: every `q ∈ L₂ ∩ V(G′)` has `deg_{G′} q = 2`. -/
 theorem deg_core_L2 {X : Finset Pt} {Δ Δ₂ : ℝ} (hT : TwoLargest X Δ Δ₂) {q : Pt}
     (hq : q ∈ L2 X) (hK : q ∈ core (L1 X ∪ L2 X) Δ₂) :
     (nbr (core (L1 X ∪ L2 X) Δ₂) Δ₂ q).card = 2 := by
-  sorry
+  set K := core (L1 X ∪ L2 X) Δ₂ with hKdef
+  have hKX : K ⊆ X := (core_subset _ _).trans (union_subset (L1_subset X) (L2_subset X))
+  have hqX : q ∈ X := L2_subset X hq
+  have hqe : ¬ IsExt X q := fun h => disjoint_left.1 (disjoint_L1_L2 X) (mem_L1.2 h) hq
+  have h2 : 2 ≤ (nbr K Δ₂ q).card := minDeg2_core _ _ q hK
+  by_contra hne
+  have h3 : 2 < (nbr K Δ₂ q).card := by omega
+  obtain ⟨v₁, hv₁, v₂, hv₂, v₃, hv₃, h12, h13, h23⟩ := two_lt_card.1 h3
+  have extra : ∀ v ∈ nbr K Δ₂ q, v ∈ X ∧ dist q v = Δ₂ ∧ ∃ r ∈ X, r ≠ q ∧ dist v r = Δ₂ := by
+    intro v hv
+    obtain ⟨hvK, hvd⟩ := mem_nbr.1 hv
+    have hv2 : 2 ≤ (nbr K Δ₂ v).card := minDeg2_core _ _ v hvK
+    obtain ⟨r, hr, hrq⟩ := exists_mem_ne (by omega : 1 < (nbr K Δ₂ v).card) q
+    obtain ⟨hrK, hrd⟩ := mem_nbr.1 hr
+    exact ⟨hKX hvK, hvd, r, hKX hrK, hrq, hrd⟩
+  obtain ⟨x₁, d₁, r₁, hr₁, hrq₁, e₁⟩ := extra v₁ hv₁
+  obtain ⟨x₂, d₂, r₂, hr₂, hrq₂, e₂⟩ := extra v₂ hv₂
+  obtain ⟨x₃, d₃, r₃, hr₃, hrq₃, e₃⟩ := extra v₃ hv₃
+  exact prop3_three hT hqX hqe x₁ x₂ x₃ h12 h13 h23 d₁ d₂ d₃ hr₁ hr₂ hr₃ hrq₁ hrq₂ hrq₃ e₁ e₂ e₃
 
 /-! ## Degree at most 4 on `L₁′` (Lemma M, Lemma F) -/
 
