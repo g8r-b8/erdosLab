@@ -86,30 +86,43 @@ theorem exact_identity_b (F : DirField X) {p y : Pt} (hp : p ∈ Sset X) (hpD : 
 
 /-- **Rung identity, algebra** [C2]: `(1 + Δ₂² − Δ²)/(2Δ₂) = −τ` with `t = Δ − Δ₂`.
 
-TODO: fill (Phase 2 leaf: `field_simp; ring`).
+TODO: none — proved (Phase 2).
 Acceptance: no `sorry`.
 Depends on: nothing. Difficulty S. -/
 theorem rung_identity_alg (Δ Δ₂ : ℝ) (h : Δ₂ ≠ 0) :
     (1 + Δ₂ ^ 2 - Δ ^ 2) / (2 * Δ₂) =
       -((Δ - Δ₂) - (1 - (Δ - Δ₂) ^ 2) / (2 * Δ₂)) := by
-  sorry
+  field_simp
+  ring
 
 /-- [C2] `τ − t = (t² − 1)/(2Δ₂)`.
 
-TODO: fill (Phase 2 leaf).
+TODO: none — proved (Phase 2).
 Acceptance: no `sorry`.
 Depends on: nothing. Difficulty S. -/
 theorem tau_sub_tgap (X : Finset Pt) : tau X - tgap X = (tgap X ^ 2 - 1) / (2 * dist2 X) := by
-  sorry
+  rw [tau]; ring
 
 /-- [C2] `τ > 1 ⟺ t > 1` (for `t ≥ 0`, `Δ₂ > 0`).
 
-TODO: fill (Phase 2 leaf).
+TODO: none — proved (Phase 2).
 Acceptance: no `sorry`.
 Depends on: nothing. Difficulty S. -/
 theorem one_lt_tau_iff_alg {t Δ₂ : ℝ} (ht : 0 ≤ t) (hΔ : 0 < Δ₂) :
     1 < t - (1 - t ^ 2) / (2 * Δ₂) ↔ 1 < t := by
-  sorry
+  have e : t - (1 - t ^ 2) / (2 * Δ₂) - 1 = (t - 1) * (1 + (t + 1) / (2 * Δ₂)) := by
+    field_simp; ring
+  have hf : 0 < 1 + (t + 1) / (2 * Δ₂) := by positivity
+  constructor
+  · intro h
+    by_contra h'
+    push Not at h'
+    have : (t - 1) * (1 + (t + 1) / (2 * Δ₂)) ≤ 0 :=
+      mul_nonpos_of_nonpos_of_nonneg (by linarith) hf.le
+    linarith
+  · intro h
+    have : 0 < (t - 1) * (1 + (t + 1) / (2 * Δ₂)) := mul_pos (by linarith) hf
+    linarith
 
 /-- **Lemma 3.2(c)** Exception at distance 1: `(y − p)·u_p = −τ` **exactly**.
 
@@ -205,11 +218,11 @@ theorem card_tEdges_le (hX : Normal X) (F : DirField X) : (tEdges X F).card ≤ 
 
 /-- `edges = good ⊔ bad`.
 
-TODO: fill (`filter_card_add_filter_neg_card_eq_card`).
+TODO: none — proved (Phase 2).
 Acceptance: no `sorry`.
 Depends on: definitions. Difficulty S. -/
 theorem card_good_add_bad (F : DirField X) : (good X F).card + (bad X F).card = eS X := by
-  sorry
+  rw [good, bad, card_filter_add_card_filter_not]; rfl
 
 /-- For `τ > 2β`: `good ⊆ tEdges ∪ rungs`.
 
@@ -308,19 +321,20 @@ theorem lens_arc_length {c₁ c₂ p q : Pt} {R : ℝ} {K' : Set Pt} (hK' : Conv
 
 /-- **[C7]** KK lens constants: `2/(1 − 0.97) < 8.2²`.
 
-TODO: fill (Phase 2 leaf).
+TODO: none — proved (Phase 2).
 Acceptance: no `sorry`.
 Depends on: nothing. Difficulty S. -/
 theorem c7_kk : (2 : ℝ) / (1 - 0.97) < 8.2 ^ 2 := by
-  sorry
+  norm_num
 
 /-- **[C3]** `2/Δ₂ ≤ β/2` for `Δ₂ ≥ 10⁴`.
 
-TODO: fill (Phase 2 leaf).
+TODO: none — proved (Phase 2).
 Acceptance: no `sorry`.
 Depends on: nothing. Difficulty S. -/
 theorem c3 {Δ₂ : ℝ} (h : 10 ^ 4 ≤ Δ₂) : 2 / Δ₂ ≤ beta / 2 := by
-  sorry
+  have hpos : (0 : ℝ) < Δ₂ := by linarith
+  rw [div_le_iff₀ hpos, beta]; linarith
 
 /-! ## §5.2 Bad-edge counts -/
 
@@ -344,24 +358,37 @@ def badC2 (X : Finset Pt) (F : DirField X) : Finset (Sym2 Pt) :=
 
 /-- Every bad edge is KK, DD, (c1) or (c2).
 
-TODO: prove (case split on the ends of `e ∈ Sym2`).
+TODO: none — proved (Phase 2).
 Acceptance: no `sorry`.
 Depends on: definitions. Difficulty S. -/
 theorem bad_subset (F : DirField X) :
     bad X F ⊆ badKK X F ∪ badDD X F ∪ badC1 X F ∪ badC2 X F := by
-  sorry
+  intro e he
+  simp only [mem_union, badKK, badDD, badC1, badC2, mem_filter]
+  induction e using Sym2.ind with
+  | _ a b =>
+  by_cases ha : a ∈ Dset X <;> by_cases hb : b ∈ Dset X
+  · exact Or.inl (Or.inl (Or.inr ⟨he, by simp [ha, hb]⟩))
+  · by_cases hc : dist a (F.partner b) = diam X
+    · exact Or.inl (Or.inr ⟨he, b, a, Sym2.eq_swap, hb, ha, hc⟩)
+    · exact Or.inr ⟨he, b, a, Sym2.eq_swap, hb, ha, hc⟩
+  · by_cases hc : dist b (F.partner a) = diam X
+    · exact Or.inl (Or.inr ⟨he, a, b, rfl, ha, hb, hc⟩)
+    · exact Or.inr ⟨he, a, b, rfl, ha, hb, hc⟩
+  · exact Or.inl (Or.inl (Or.inl ⟨he, by simp [ha, hb]⟩))
 
 /-- **[C9]** numeric constants of §5: KK `12π(4·8.2+1)/β < 1.28·10⁵`, DD `12π·9/β < 3.4·10⁴`,
 (c1) `24π/β < 7600`, (c2) `48π(2·600+1)/β < 1.82·10⁷`, and the total `< cBad`.
 
-TODO: fill (Phase 2 leaf, `pi_lt_d4`).
+TODO: none — proved (Phase 2).
 Acceptance: no `sorry`.
 Depends on: nothing. Difficulty S. -/
 theorem c9 :
     12 * π * (4 * 8.2 + 1) / beta < 128000 ∧ 12 * π * 9 / beta < 34000 ∧
       24 * π / beta < 7600 ∧ 48 * π * (2 * 600 + 1) / beta < 18200000 ∧
       (128000 + 34000 + 7600 + 18200000 : ℝ) ≤ cBad := by
-  sorry
+  have hp := Real.pi_lt_d4
+  refine ⟨?_, ?_, ?_, ?_, ?_⟩ <;> norm_num [beta, cBad] <;> linarith
 
 /-- **KK bound** `#KK-bad < 1.28·10⁵`.
 
@@ -396,21 +423,25 @@ theorem card_badC1_le (hX : Normal X) (F : DirField X) : ((badC1 X F).card : ℝ
 
 /-- **[C8]** `cos α ≥ −0.8821` on `ρ ∈ [1 − 10⁻⁴, 1]` (step 3 of (c2)).
 
-TODO: fill (Phase 2 leaf).
+TODO: none — proved (Phase 2).
 Acceptance: no `sorry`.
 Depends on: nothing. Difficulty S. -/
 theorem c8_cos {ρ : ℝ} (h0 : 1 - 1 / 10 ^ 4 ≤ ρ) (h1 : ρ ≤ 1) :
     -0.8821 ≤ (1 + ρ ^ 2 - 1.94 ^ 2) / (2 * ρ) := by
-  sorry
+  have hpos : 0 < 2 * ρ := by norm_num at h0; linarith
+  rw [le_div_iff₀ hpos]
+  norm_num at h0 ⊢
+  nlinarith
 
 /-- **[C8]** the walk leaves the disc: `(Δ₂ − d₀)² + (2/5)(Δ₂ − d₀)·L·β > Δ₂²` at `L = 6/β`.
 
-TODO: fill (Phase 2 leaf).
+TODO: none — proved (Phase 2).
 Acceptance: no `sorry`.
 Depends on: nothing. Difficulty S. -/
 theorem c8_walk {Δ₂ d₀ : ℝ} (h : 10 ^ 4 ≤ Δ₂) (h0 : 0 ≤ d₀) (h1 : d₀ ≤ 1) :
     Δ₂ ^ 2 < (Δ₂ - d₀) ^ 2 + 2 / 5 * (Δ₂ - d₀) * (6 / beta) * beta := by
-  sorry
+  norm_num [beta]
+  nlinarith
 
 /-- **(c2) bound** `< 48π(2L + 1)/β < 1.82·10⁷` (`L = 600`).
 
