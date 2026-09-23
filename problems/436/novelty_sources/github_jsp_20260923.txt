@@ -1,0 +1,109 @@
+## repos: erdos436
+[]
+## repos: erdos-436
+[{"fullName":"vibemathing/problem-um-ep-436-erd-s-problem-436-307cb7f1","updatedAt":"2026-09-06T14:10:58Z"}]
+## repos: erdos problem 436
+[{"fullName":"vibemathing/problem-um-ep-436-erd-s-problem-436-307cb7f1","updatedAt":"2026-09-06T14:10:58Z"}]
+## repos: consecutive power residues
+[]
+## repos: consecutive kth power residues
+[]
+[{"createdAt":"2026-09-16T20:36:24Z","number":278,"state":"open","title":"JSP-000355: submit Lean formalization of Λ(2,2) = 9 for runs of quadratic residues (Erdős #436, scoped component)"},{"createdAt":"2026-09-22T08:32:08Z","number":3388,"state":"open","title":"JSP-000436: register Lean formalization"}]
+[{"number":436,"state":"closed","title":"Erdős Problem 234","updatedAt":"2026-01-16T10:05:38Z"},{"number":731,"state":"open","title":"Erdős Problem 436","updatedAt":"2026-01-16T09:56:47Z"},{"number":5473,"state":"closed","title":"Generic and maximal rank of 3-tensors","updatedAt":"2026-09-23T00:10:40Z"}]
+=== PR 3388 body+comments
+{"body":"## Submission type\n\n- [ ] Mathematical solver information\n- [x] Lean proof or formalization author information\n\n## Submission status and current guidance\n\nThis PR is submitted under the [submission guidance](https://github.com/TheJustinSunPrize/awards/blob/main/CONTRIBUTING.md) reviewed on 2026-09-23. Its diff changes only the relevant catalog entry's **Lean proof** and **Attribution basis** fields. The Lean source and build materials are hosted in the external repository pinned below. This is not a new source-code submission or a claim to a new priority date.\n\nMathematical review must pass before Lean acceptance. Solver registration or an award claim by the mathematical solver is not a prerequisite for Lean verification or Lean candidate registration. The two contribution types can be registered independently.\n\nThe [`lean-verify` self-check is optional](https://github.com/TheJustinSunPrize/awards/blob/main/docs/verification.md#recommended-lean-pre-submission-check) under the current rules.\n\n## Problem and proposed change\n\n**Problem ID:** JSP-000436 (Erdős Problem #436).\n\n**Current entry:** `Lean proof | No`. **Proposed change:** mark `Lean proof | Yes` (pending verification), link the pinned source below, and credit the formalization contributors. The undersigned is the catalog editor only, not the proof author — this PR records an existing third-party formalization; no authorship or award eligibility is claimed by this PR.\n\n**Scope:** This PR changes only the Lean proof and Attribution basis fields. The current status, eligibility, and solver credit are unchanged. No bounty, award eligibility, or original authorship is claimed.\n\n## Proof source\n\n```json\n[\n  {\n    \"repository\": \"https://github.com/plby/lean-proofs\",\n    \"branch\": \"main\",\n    \"commit\": \"8822f7ddef30fadbd92e1c6ab4ed897af356af5e\"\n  }\n]\n```\n\n- **Theorem/file:** `src/latest/ErdosProblems/Erdos436.lean` — see the repository for the full theorem list and supporting modules.\n- **Formalization authors:** plby/lean-proofs (formal authors per file header: Codex, GPT-5.x). The undersigned is the catalog editor only; no authorship or award eligibility is claimed by this PR.\n- **Build instructions:** standard Lean 4 project; see the repository's `lakefile`/`lean-toolchain` and README. Run `lake exe cache get && lake build` to verify.\n- **Toolchain:** leanprover/lean4:v4.33.0, Mathlib v4.33.0 (as pinned in the source repository's `lean-toolchain`).\n- **Axiom hygiene:** no `sorry`/`admit`/`native_decide` in the file or its supporting tree; `#print axioms` audited at source. Every audited theorem depends only on `propext`, `Classical.choice` and `Quot.sound`.\n- **Problem mapping:** JSP-000436 = Erdős Problem #436\n\n## Reproducibility\n\nThe pinned commit `8822f7ddef30` on branch `main` of `plby/lean-proofs` contains the complete formalization. To reproduce:\n\n```bash\ngit clone https://github.com/plby/lean-proofs.git\ncd lean-proofs\ngit checkout 8822f7ddef30fadbd92e1c6ab4ed897af356af5e\nlake exe cache get\nlake build\n```\n\nThese are submitter-recorded verification references, not an organizer or independent human attestation. Mathematical review by the organizers is not asserted complete.\n\n## Attribution\n\n- The formalization was prepared by the authors of `plby/lean-proofs` with AI assistance (Codex, GPT-5.x), as stated in the repository's file headers.\n- This PR records an existing third-party formalization; the undersigned is the catalog editor only.\n- No solver credit is changed. No award eligibility or priority date is claimed by this PR.\n- Mathematical review must pass before Lean acceptance.\n\n## Submission checklist\n\n- [x] I changed only Lean proof information and supporting attribution sources in the relevant catalog.\n- [x] I supplied the evidence required for the formalization information above.\n- [x] The pinned proof is complete for the stated original problem, without `sorry`, `admit` or additional unproved assumptions.\n- [x] This PR contains no proof source files, archives, binaries or vendored dependencies.\n- [x] Each proof reference identifies a commit contained in its named branch and the exact version selected for review.\n- [x] All text is in English; candidate text does not announce an award.\n- [x] No private contacts, payment details, assessment criteria or deliberations appear in files or commit history.\n\nMaintainer review of the statement correspondence, prior work, attribution and concrete contribution is requested. This submission does not establish candidate status, an award decision or a right to payment.","comments":[{"id":"IC_kwDOUUnDac8AAAABWUP-Ag","author":{"login":"Federico2014"},"authorAssociation":"CONTRIBUTOR","body":"Thank you for your Lean proof submission! We apologize that our earlier submission instructions were not clear enough and for the extra work this causes.\n\n**Please do not submit Lean source code directly to our repository.** Instead, please:\n\n1. Open a new PR following the [latest PR template](https://github.com/TheJustinSunPrize/awards/blob/main/.github/PULL_REQUEST_TEMPLATE.md) and complete the required fields. Host your Lean source code in your own public repository and provide its URL, branch, and full commit SHA.\n2. Link this original PR in your new submission to preserve the submission history.\n3. Once the new PR is open, please close this PR with a link to the replacement.\n\n**Resubmitting will not reset your priority for award consideration.** We will assess priority based on the original source-code submission time or the verifiable completion time of the proof in your repository, as applicable—not the date of the replacement PR.\n\nThank you for your understanding and your contribution!","createdAt":"2026-09-23T09:45:04Z","includesCreatedEdit":false,"isMinimized":false,"minimizedReason":"","reactionGroups":[],"url":"https://github.com/TheJustinSunPrize/awards/pull/3388#issuecomment-5792595458","viewerDidAuthor":false}],"createdAt":"2026-09-22T08:32:08Z","files":[{"path":"problems/catalog-0401-0500.md","additions":1,"deletions":1,"changeType":"MODIFIED"},{"path":"submissions/JSP-000436/.gitignore","additions":2,"deletions":0,"changeType":"ADDED"},{"path":"submissions/JSP-000436/Erdos436.lean","additions":19,"deletions":0,"changeType":"ADDED"},{"path":"submissions/JSP-000436/lakefile.toml","additions":10,"deletions":0,"changeType":"ADDED"},{"path":"submissions/JSP-000436/lean-toolchain","additions":1,"deletions":0,"changeType":"ADDED"},{"path":"submissions/JSP-000436/verification/axioms.txt","additions":1,"deletions":0,"changeType":"ADDED"},{"path":"submissions/JSP-000436/verification/sha256.txt","additions":1,"deletions":0,"changeType":"ADDED"},{"path":"submissions/JSP-000436/verification/toolchain.txt","additions":2,"deletions":0,"changeType":"ADDED"}],"state":"OPEN","title":"JSP-000436: register Lean formalization"}
+
+=== PR 3388 diff
+diff --git a/problems/catalog-0401-0500.md b/problems/catalog-0401-0500.md
+index f8833abd4..558fdcbd6 100644
+--- a/problems/catalog-0401-0500.md
++++ b/problems/catalog-0401-0500.md
+@@ -627,7 +627,7 @@
+ | Mathematical area | Graph theory / Ramsey theory |
+ | Problem description | Which graph with a prescribed number of edges has the largest Ramsey number? |
+ | Current status | Progress |
+-| Lean proof | No |
++| Lean proof | Yes — [Lean source](https://github.com/dcdreamy-code/awards/blob/89cbba3c2b1e5bccfc4c6b05fdbdd8f421984812/submissions/JSP-000436/Erdos436.lean)<br>Formalization contributors: dcdreamy-code. |
+ | Eligible to claim | No |
+ | Historical bounty |  |
+ | Elapsed years (as recorded) | 51 years (1975→2026)&#91;Proposed year is an upper bound; Assumed solution year: 2026&#93; |
+diff --git a/submissions/JSP-000436/.gitignore b/submissions/JSP-000436/.gitignore
+new file mode 100644
+index 000000000..f19f997fa
+--- /dev/null
++++ b/submissions/JSP-000436/.gitignore
+@@ -0,0 +1,2 @@
++build/
++/.lake/
+diff --git a/submissions/JSP-000436/Erdos436.lean b/submissions/JSP-000436/Erdos436.lean
+new file mode 100644
+index 000000000..24b88204d
+--- /dev/null
++++ b/submissions/JSP-000436/Erdos436.lean
+@@ -0,0 +1,19 @@
++/-!
++# JSP-000436: Scoped formalization
++
++All theorems use decide or norm_num with no sorry or additional axioms.
++  See: https://www.erdosproblems.com/436
++-/
++
++import Mathlib
++
++open Nat
++
++theorem two_prime : Nat.Prime 2 := by decide
++theorem three_prime : Nat.Prime 3 := by decide
++theorem five_prime : Nat.Prime 5 := by decide
++theorem seven_prime : Nat.Prime 7 := by decide
++theorem eleven_prime : Nat.Prime 11 := by decide
++theorem prime_sum : 2 + 3 + 5 + 7 = 17 := by norm_num
++theorem primorial : 2 * 3 * 5 * 7 = 210 := by norm_num
++theorem mod3_436 : 436 % 3 = 1 := by norm_num
+diff --git a/submissions/JSP-000436/lakefile.toml b/submissions/JSP-000436/lakefile.toml
+new file mode 100644
+index 000000000..453b6d13f
+--- /dev/null
++++ b/submissions/JSP-000436/lakefile.toml
+@@ -0,0 +1,10 @@
++name = "erdos-436"
++version = "0.1.0"
++defaultTargets = ["erdos-436"]
++
++[[require]]
++name = "mathlib"
++scope = "mixed"
++
++[[lean_lib]]
++name = "erdos-436"
+diff --git a/submissions/JSP-000436/lean-toolchain b/submissions/JSP-000436/lean-toolchain
+new file mode 100644
+index 000000000..12359f928
+--- /dev/null
++++ b/submissions/JSP-000436/lean-toolchain
+@@ -0,0 +1 @@
++leanprover/lean4:v4.34.0
+diff --git a/submissions/JSP-000436/verification/axioms.txt b/submissions/JSP-000436/verification/axioms.txt
+new file mode 100644
+index 000000000..34520e1dd
+--- /dev/null
++++ b/submissions/JSP-000436/verification/axioms.txt
+@@ -0,0 +1 @@
++All theorems proved by decide/norm_num.
+diff --git a/submissions/JSP-000436/verification/sha256.txt b/submissions/JSP-000436/verification/sha256.txt
+new file mode 100644
+index 000000000..076f38271
+--- /dev/null
++++ b/submissions/JSP-000436/verification/sha256.txt
+@@ -0,0 +1 @@
++88374c5ce260c71ea0df10a2216d235c344e98b1668505725e1c1bc523838a9a  Erdos436.lean
+diff --git a/submissions/JSP-000436/verification/toolchain.txt b/submissions/JSP-000436/verification/toolchain.txt
+new file mode 100644
+index 000000000..f245eed75
+--- /dev/null
++++ b/submissions/JSP-000436/verification/toolchain.txt
+@@ -0,0 +1,2 @@
++leanprover/lean4:v4.34.0
++mathlib4:v4.34.0
+=== PR 278
+{"body":"## Change\n\nSubmit a Lean formalization of a **scoped component of Erdős Problem #436** (runs of power residues) for **JSP-000355** / [Erdős Problem #436](https://www.erdosproblems.com/436) for intake and review: with `r(2,2,p)` the least `r` such that `r` and `r + 1` are quadratic residues modulo the prime `p` and `Λ(2,2) = limsup_{p→∞} r(2,2,p)`, the package proves **`Λ(2,2) = 9`** (D. H. Lehmer and E. Lehmer, *On runs of residues*, Proc. AMS 13 (1962), 102–106), via `runStart_le_nine` (every prime `p ≥ 11` has `r(2,2,p) ≤ 9`: one of `(1,2)`, `(4,5)`, `(9,10)` is a run because the quadratic character is multiplicative) and `exists_prime_gt_runStart_eq_nine` (arbitrarily large primes `p ≡ 43 (mod 840)` have `r(2,2,p) = 9`: Dirichlet's theorem plus quadratic reciprocity make `2, 3, 5, 7` non-residues). `Λ(2,2)` is defined as a `limsup` in `ℕ` along the filter of large primes; the proof supplies both the eventual bound and the frequent equality. All definitions are written in this package.\n\n**Scope.** This is a scoped component of a record whose status is Progress, not closure of the catalog question: Hildebrand's finiteness of `Λ(k,2)` for all `k`, the open finiteness of `Λ(k,3)` for odd `k ≥ 5`, the growth of these functions and the other exact values are not formalized or claimed.\n\nProof route: `IsQR p r` = nonzero square in `ZMod p`; multiplicativity of `quadraticChar`; Mathlib's second supplement and quadratic reciprocity (`ZMod.exists_sq_eq_two_iff`, `ZMod.exists_sq_eq_prime_iff_of_mod_four_eq_*`); `Nat.forall_exists_prime_gt_and_modEq`; `limsup` bounds in `ℕ`.\n\n[Immutable proof](https://github.com/CollinYuanjieRen/awards/blob/72db08f50436a34ef8eb91377b8bc30485b3f634/submissions/jsp-000355-cyr/Proof/Main.lean) · [Statement, attribution and reproduction](https://github.com/CollinYuanjieRen/awards/blob/72db08f50436a34ef8eb91377b8bc30485b3f634/submissions/jsp-000355-cyr/README.md) · [Verification output](https://github.com/CollinYuanjieRen/awards/blob/72db08f50436a34ef8eb91377b8bc30485b3f634/submissions/jsp-000355-cyr/verification.txt)\n\n## Record or policy impact\n\nThis PR requests operator intake and review under the published Lean-submission requirement. The `submissions/` directory is proposed intake packaging, not a new official record format; please redirect if a different location is required. No catalog flags, candidate or award records, recipient profiles, decisions or payment statuses are changed.\n\nProposed formalizer: `RECIPIENT-jsp-000355-cyr-A`, confirmation pending. No solver nomination is made (the mathematics is Lehmer–Lehmer's). Claude Code (Anthropic) assisted preparation and local checking. This is a self-submission with a direct interest in the review outcome; local checks are not an official independent attestation.\n\n## Checks\n\n- [x] All submitted text is English; no award is announced.\n- [x] The proposed recipient uses a placeholder. No private contacts, payment details, internal assessment material or credentials appear in the contribution or its commit.\n- [x] Verification artifacts are externally archived with ID, SHA-256 and byte count: release [`jsp-000355-cyr-72db08f`](https://github.com/CollinYuanjieRen/awards/releases/tag/jsp-000355-cyr-72db08f) on the source fork, asset `jsp-000355-cyr-72db08f.tar.gz` (7,921 bytes, SHA-256 `b447f355910119655a37ee6f388eefa0a612f641873dfbb094475b28d599b2bf`), a deterministic `git archive` of `submissions/jsp-000355-cyr` at commit 72db08f50436a34ef8eb91377b8bc30485b3f634. The same tree is permanently archived by Software Heritage as [`swh:1:dir:21749d1ac5ed6d228ee1b28da3d77b859ff67620`](https://archive.softwareheritage.org/swh:1:dir:21749d1ac5ed6d228ee1b28da3d77b859ff67620) (fork snapshot [`swh:1:snp:6d36b5b1d7f019128760769fe838ac03347a2fc7`](https://archive.softwareheritage.org/swh:1:snp:6d36b5b1d7f019128760769fe838ac03347a2fc7), archived 2026-09-16).\n- [x] Existing published statements, decisions and history are preserved.\n- [x] `python scripts/manage.py validate` and `python scripts/manage.py links` pass.\n- [x] `python scripts/manage.py build` ran and `python scripts/manage.py check` passes; generated data is unchanged.\n- [x] All 22 repository tests pass, and `history --base f4e7173d89dfe91022a185427d63452c8ffbf6ae` passes after the commit.\n- [x] Exported `lake build` and `lake env lean Audit.lean` pass. All three root theorems' axiom sets are exactly `[propext, Classical.choice, Quot.sound]` (Lean's standard foundational axioms, disclosed for the offline axiom audit); no `sorry`, custom axioms or native-evaluation shortcuts are used (finite-field facts use kernel `decide`), and the roots have no hypotheses beyond those of the stated theorems.\n- [x] Two independent audits (statement alignment against the problem page and the Lehmer–Lehmer argument; proof completeness, axiom closure and reproducibility) were run locally before submission; the complete commit was reviewed for private material. Repository CI does not verify this Lean package.\n\nToolchain: Lean `4.34.0-rc1`; Mathlib `1fe0a51a5ecdee23c424b6e29ecb1d40eb35316d`, with all dependency revisions pinned. Local checks used upstream dependency caches on arm64 macOS. No clean network-disabled dependency rebuild, independent checker implementation, or operator-approved minimum safe version is claimed. These remain matters for the required official verification process.\n\n## Reviewer decision\n\nPending substantive review, scope assessment (scoped component), any required independent verification, recipient confirmation, and committee decision. A local proof check or green repository CI is not an award decision or payment authorization.\n\n🤖 Generated with [Claude Code](https://claude.com/claude-code)\n","comments":[{"id":"IC_kwDOUUnDac8AAAABVpip1w","author":{"login":"Federico2014"},"authorAssociation":"CONTRIBUTOR","body":"Thank you for your Lean proof submission! We apologize that our earlier submission instructions were not clear enough and for the extra work this causes.\n\n**Please do not submit Lean source code directly to our repository.** Instead, please:\n\n1. Open a new PR following the [latest PR template](https://github.com/TheJustinSunPrize/awards/blob/main/.github/PULL_REQUEST_TEMPLATE.md) and complete the required fields. Host your Lean source code in your own public repository and provide its URL, branch, and full commit SHA.\n2. Link this original PR in your new submission to preserve the submission history.\n3. Once the new PR is open, please close this PR with a link to the replacement.\n\n**Resubmitting will not reset your priority for award consideration.** We will assess priority based on the original source-code submission time or the verifiable completion time of the proof in your repository, as applicable—not the date of the replacement PR.\n\nThank you for your understanding and your contribution!","createdAt":"2026-09-20T05:14:33Z","includesCreatedEdit":false,"isMinimized":false,"minimizedReason":"","reactionGroups":[],"url":"https://github.com/TheJustinSunPrize/awards/pull/278#issuecomment-5747812823","viewerDidAuthor":false},{"id":"IC_kwDOUUnDac8AAAABVrZkyg","author":{"login":"Federico2014"},"authorAssociation":"CONTRIBUTOR","body":"Thank you for your submission. Our current requirements call for a complete solution to the original problem and, for Lean submissions, a complete formalization of that solution. Submissions that provide only partial progress toward a solution or a partial Lean formalization do not meet these requirements.\n\nWe are therefore closing this PR. You are welcome to submit a complete solution once the remaining gaps have been addressed.","createdAt":"2026-09-20T12:21:04Z","includesCreatedEdit":false,"isMinimized":false,"minimizedReason":"","reactionGroups":[],"url":"https://github.com/TheJustinSunPrize/awards/pull/278#issuecomment-5749761226","viewerDidAuthor":false}],"state":"OPEN"}

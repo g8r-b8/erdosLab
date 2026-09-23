@@ -1,0 +1,151 @@
+436 Discussion Thread | Erdős Problems
+Forum
+Inbox
+Favourites
+Tags
+More
+FAQ
+Prizes
+Problem Lists
+Definitions
+Links
+Forum
+Menu
+Inbox
+Favourites
+Tags
+FAQ
+Prizes
+Problem Lists
+Definitions
+Links
+Go
+Go
+Dual View
+Random Solved
+Random Open
+OPEN
+This is open, and cannot be resolved with a finite computation.
+If $p$ is a prime and $k,m\geq 2$ then let $r(k,m,p)$ be the minimal $r$ such that $r,r+1,\ldots,r+m-1$ are all $k$th power residues modulo $p$. Let\[\Lambda(k,m)=\limsup_{p\to \infty} r(k,m,p).\]Is it true that $\Lambda(k,2)$ is finite for all $k$? Is $\Lambda(k,3)$ finite for all odd $k$? How large are they?
+#436
+:
+[ErGr80]
+number theory
+Asked by Lehmer and Lehmer
+[LeLe62]
+, who note that for example $\Lambda(2,2)=9$ - indeed, $9$ is always a quadratic residue, and if $10$ isn't then either $2$ or $5$ is, and hence at least one of $1,2$ or $4,5$ or $9,10$ is a consecutive pair of quadratic residues (and similarly there are infinitely many $p$ for which there are no consecutive quadratic residues below $9,10$).
+A similar argument of Dunton
+[Du65]
+proves $\Lambda(3,2)=77$, and Bierstedt and Mills
+[BiMi63]
+proved $\Lambda(4,2)=1224$. Lehmer and Lehmer proved that $\Lambda(k,3)=\infty$ for all even $k$ and $\Lambda(k,4)=\infty$ for all $k\leq 1048909$.
+Lehmer, Lehmer, and Mills
+[LLM63]
+proved $\Lambda(5,2)=7888$ and $\Lambda(6,2)=202124$. Brillhart, Lehmer, and Lehmer
+[BLL64]
+proved $\Lambda(7,2)=1649375$. Lehmer, Lehmer, Mills, and Selfridge
+[LLMS62]
+proved that $\Lambda(3,3)=23532$.
+Graham
+[Gr64g]
+proved that $\Lambda(k,l)=\infty$ for all $k\geq 2$ and $l\geq 4$.
+Hildebrand
+[Hi91]
+resolved the first question, proving that $\Lambda(k,2)$ is finite for all $k$: in other words, for any $k\geq 2$, if $p$ is sufficiently large then there exists a pair of consecutive $k$th power residues modulo $p$ in $[1,O_k(1)]$.
+The remaining questions are to examine whether $\Lambda(k,3)$ is finite for all odd $k\geq 5$, and the growth rate of $\Lambda(k,2)$ and $\Lambda(k,3)$ as functions of $k$.
+Additional thanks to
+: Sarosh Adenwalla
+Proof expositions (0)
+If you would like to contribute an exposition of a proof related to this problem, please message a moderator or leave your exposition as a comment.
+No proof expositions yet.
+Comments (3)
+Proof claims (0)
+More information and links
+This page was last edited 25 October 2025.
+(
+View history
+) (
+View the LaTeX source
+)
+When referring to this problem, please use the original sources of Erdős. If you wish to acknowledge this website, the recommended citation format is:
+T. F. Bloom, Erdős Problem #436, https://www.erdosproblems.com/436, accessed 2026-09-23
+From the
+external database
+. (You can
+help update
+this.)
+Formalised statement?
+No
+(
+create one
+)
+OEIS
+A000445
+,
+possible
+Reactions
+Likes
+None
+Open to collaboration
+None
+Currently working on
+None
+Looks difficult
+Dogmachine
+Looks tractable
+None
+Could be formalisable
+None
+Working on formalising
+None
+Order by
+oldest first
+or
+newest first
+. (The most recent comments are highlighted in a red border.)
+In
+Machine Proof of a Theorem on Cubic Residues
+, Lehmer, Lehmer, Mills and Selfridge showed that $\Delta(3,3)=23532$.
+(The site has been updated to address this comment.)
+Adenwalla
+—
+21:46 on 24 Oct 2025
+👍
+0
+📝
+1
+🤖
+0
+Thanks! It's interesting from a modern perspective to read this paper (from 1962) on a 'machine proof'.
+In particular they write:
+"The referee comments that the proof of Theorem 1, described below,
+is "not a machine proof in the sense of the theorem-proving programs now being developed." This is true. The aim of most writers on this subject is to consider a very general program enabling a digital computer to prove a wide class of theorems at a very low level, beginning with the axioms, setting its own goals, and trying to achieve them without human intervention. This is, in a way, a simulation problem. Speculations about such programs involve (significantly) such notions as decidability. Meanwhile, no really new theorems seem to emerge. Perhaps too
+much is expected of a single program."
+The last sentence in particular strikes a chord...
+Thomas Bloom
+—
+13:00 on 25 Oct 2025
+👍
+0
+📝
+0
+🤖
+0
+A lot has changed in 60 years, but not everything!
+Just for reference, I thought I would include a link to
+Number Theory papers relevant to VDW theorem
+where many of these papers are listed under 'Papers about Residues'. There are also some related problems explored in these papers.
+I found this page using ChatGPT.
+Adenwalla
+—
+14:21 on 25 Oct 2025
+👍
+1
+📝
+0
+🤖
+0
+All comments are the responsibility of the user. Comments appearing on this page are not verified for correctness. Please keep posts mathematical and on topic.
+Log in
+to add a comment.
+Back to the forum

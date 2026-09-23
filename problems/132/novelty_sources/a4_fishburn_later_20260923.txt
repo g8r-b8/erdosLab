@@ -1,0 +1,28 @@
+https://openalex.org/A5109079434 Peter C. Fishburn 528
+https://openalex.org/A5034958174 C Fishburn Peter 1
+https://openalex.org/A5104795448 Peter C. Fishburn 1
+1994 | A postscript on distances in convexn-gons | https://doi.org/10.1007/bf02573998
+1995 | Convex polygons with few intervertex distances | https://doi.org/10.1016/0925-7721(94)00020-v
+1995 | Multiplicities of interpoint distances in finite planar sets | https://doi.org/10.1016/0166-218x(94)00046-g
+1995 | Intervertex distances in convex polygons | https://doi.org/10.1016/0166-218x(94)00047-h
+1996 | Maximum planar sets that determine k distances | https://doi.org/10.1016/0012-365x(95)00153-n
+1996 | Convex nonagons with five intervertex distances | https://doi.org/10.1007/bf00147368
+1996 | Sum Set Cardinalities of Line Restricted Planar Sets | https://doi.org/10.1007/978-1-4612-2418-1_9
+1997 | Distinct distances in finite planar sets | https://doi.org/10.1016/s0012-365x(96)00145-8
+1997 | Minimum planar sets with maximum equidistance counts | https://doi.org/10.1016/0925-7721(95)00050-x
+1997 | Distances in Convex Polygons | https://doi.org/10.1007/978-3-642-60406-5_25
+2002 | A remarkable eight-point planar configuration | https://doi.org/10.1016/s0012-365x(01)00134-0
+CHAPTER Distances in Convex Polygons 3 abstract? False
+  cites-chapter: 1997 Distinct distances in finite planar sets
+  cites-chapter: 2006 On Distinct Distances from a Vertex of a Convex Polygon
+  cites-chapter: 2025 On multiplicities of interpoint distances
+
+=== Semantic Scholar
+{"paperId": "247c55de7108f0745695ba535266b6cb1b625683", "title": "A postscript on distances in convexn-gons", "year": 1994, "openAccessPdf": {"url": "https://link.springer.com/content/pdf/10.1007/BF02573998.pdf", "status": "BRONZE", "license": null, "disclaimer": "Notice: The following paper fields have been elided by the publisher: {'abstract'}. Paper or abstract available at https://api.unpaywall.org/v2/10.1007/BF02573998?email=<INSERT_YOUR_EMAIL> or https://doi.org/10.1007/BF02573998, which is subject to the license by the author or copyright owner provided with this content. Please go to the source to verify the license and copyright information for your use."}, "tldr": {"model": "tldr@v2.0.0", "text": "It is proved that g(n)=[n/3]+1 forn\u22654.1 and an extension of a 1952 construction of Leo Moser for a related planar problem shows thatg (n)\u2265[n/ 3]+1."}, "authors": [{"authorId": null, "name": "Paul Erdos"}, {"authorId": "1730628", "name": "P. Fishburn"}], "abstract": null}
+
+{"error":"Paper with id DOI:10.1007/978-3-642-60406-5_25 not found"}
+
+{"paperId": "1caf894b33fa0ae31a0e6b1d5a159707611fcbe0", "title": "Distinct distances in finite planar sets", "year": 1997, "openAccessPdf": {"url": "https://doi.org/10.1016/s0012-365x(96)00145-8", "status": "BRONZE", "license": null, "disclaimer": "Notice: The following paper fields have been elided by the publisher: {'abstract'}. Paper or abstract available at https://api.unpaywall.org/v2/10.1016/S0012-365X(96)00145-8?email=<INSERT_YOUR_EMAIL> or https://doi.org/10.1016/S0012-365X(96)00145-8, which is subject to the license by the author or copyright owner provided with this content. Please go to the source to verify the license and copyright information for your use."}, "tldr": null, "authors": [{"authorId": "7887775", "name": "P. Erd\u00f6s"}, {"authorId": "1730628", "name": "P. Fishburn"}], "abstract": null}
+
+{"paperId": "f66cd49ee57887cb3c6960e8ede3d95bd072acb4", "title": "Minimum Planar Sets with Maximum Equidistance Counts", "year": 1997, "openAccessPdf": {"url": "https://doi.org/10.1016/0925-7721(95)00050-x", "status": "BRONZE", "license": null, "disclaimer": "Notice: The following paper fields have been elided by the publisher: {'abstract'}. Paper or abstract available at https://api.unpaywall.org/v2/10.1016/0925-7721(95)00050-X?email=<INSERT_YOUR_EMAIL> or https://doi.org/10.1016/0925-7721(95)00050-X, which is subject to the license by the author or copyright owner provided with this content. Please go to the source to verify the license and copyright information for your use."}, "tldr": {"model": "tldr@v2.0.0", "text": "It is proved that g (3) = 6, g (4) = 8 and g (5) \u2264 16 is the smallest integer n for which there are n planar points each of which has k others equidistant from it."}, "authors": [{"authorId": "7887775", "name": "P. Erd\u00f6s"}, {"authorId": "1730628", "name": "P. Fishburn"}], "abstract": null}
+

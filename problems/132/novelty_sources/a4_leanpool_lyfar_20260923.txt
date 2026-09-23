@@ -1,0 +1,191 @@
+# Lean Pool (github.com/Vilin97/lean-pool, HEAD pushed 2026-09-23T16:05Z) Erdos132 entries, fetched 2026-09-23
+=== LeanPool/Erdos132ConvexK3.lean
+/-
+Copyright (c) 2026 Egor Lyfar. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Egor Lyfar
+-/
+module
+
+public import LeanPool.Erdos132ConvexK3.Assembly
+public import LeanPool.Erdos132ConvexK3.GlobalClosure
+public import LeanPool.Erdos132ConvexK3.RegressionWitnesses
+public import LeanPool.Erdos132ConvexK3.UseSite
+public import LeanPool.Erdos132ConvexK3.Witnesses
+import Mathlib.Algebra.Order.Algebra
+import Mathlib.Algebra.Order.BigOperators.Expect
+import Mathlib.Analysis.Complex.Order
+import Mathlib.Data.EReal.Inv
+import Mathlib.Tactic.ContinuousFunctionalCalculus
+import Mathlib.Tactic.Positivity.Finset
+
+/-!
+# Convex Three-Distance Degree-Six Theorem and Exceptional-Word Closures
+
+Source: doi:10.1007/BF02187746, url:https://www.erdosproblems.com/132
+Authors: Egor Lyfar
+Status: verified
+Main declarations: `LeanPool.Erdos132ConvexK3.convex_top_three_degree_six`
+Tags: discrete-geometry, distance-graphs, erdos-problems, convexity
+MSC: 52C10, 05C12
+-/
+
+@[expose] public section
+
+/-!
+# Exceptional-Word Closures for the Convex Three-Distance Case of Erdős Problem 132
+
+This project proves the convex three-distance degree-six theorem. A maximal-gap
+choice and the five-row enumeration route all thirteen canonical words through
+four shared geometric realization predicates. Full-two-rung, terminal,
+anti-saturation, and four-edge kernels close every route, so the source-facing
+reduction is unconditional. The development also records exceptional-branch
+rigidity, an explicit majorant counterexample, and rational regression
+witnesses. The general-k suggestion and Erdős problem 132 remain open.
+-/
+=== LeanPool/Erdos132ThreeChain.lean
+/-
+Copyright (c) 2026 Egor Lyfar. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Egor Lyfar
+-/
+module
+
+public import LeanPool.Erdos132ThreeChain.HopfPannwitz
+public import LeanPool.Erdos132ThreeChain.Statement
+public import LeanPool.Erdos132ThreeChain.Witnesses
+import Mathlib.Algebra.Order.Algebra
+import Mathlib.Algebra.Order.Field.Power
+import Mathlib.Analysis.Normed.Group.Basic
+import Mathlib.Analysis.Real.Sqrt
+import Mathlib.Data.EReal.Inv
+import Mathlib.Tactic.Positivity.Finset
+
+/-!
+# Planar Point Sets Whose Non-Diameter Distances Form a Geometric 3-Chain
+
+Source: url:https://www.erdosproblems.com/132
+Authors: Egor Lyfar
+Status: verified
+Main declarations: `Erdos132ThreeChain.nonDiameterSqDists_ne_chain`
+Tags: discrete-geometry, distance-geometry, erdos-problems
+MSC: 52C10, 52C35, 05C69
+-/
+
+@[expose] public section
+=== LeanPool/Erdos132N14.lean
+/-
+Copyright (c) 2026 Egor Lyfar. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Egor Lyfar
+-/
+module
+
+public import LeanPool.Erdos132N14.Main
+import Mathlib.Analysis.SpecialFunctions.Log.Basic
+
+/-!
+# A Conditional Fourteen-Point Case of Erdős Problem 132
+
+Source: doi:10.37236/8565, url:https://www.erdosproblems.com/132
+Authors: Egor Lyfar
+Status: verified
+Main declarations: `LeanPool.Erdos132N14.erdos132_for_fourteen_of_published_inputs`
+Tags: discrete-geometry, few-distance-sets, erdos-problems, planar-configurations
+MSC: 52C10, 05D99
+-/
+
+@[expose] public section
+
+/-!
+# A conditional fourteen-point case of Erdős Problem 132
+
+This project formalizes the planar Hopf--Pannwitz diameter bound and proves the
+`n = 14` conclusion conditional on exactly two remaining published interfaces:
+the known maximum cardinalities of planar sets with at most six distances and
+the Szöllősi--Östergård thirteen-point classification. The exact six-distance
+cardinality result is due to Wei. The general problem remains open.
+-/
+=== lyfar/rare-distance-fields README.md
+# Rare-distance bounds over specified coordinate fields
+
+A Lean 4 formalization of a completed restricted result motivated by [Erdős problem 132](https://www.erdosproblems.com/132).
+
+For a finite set of **n distinct planar points**, call an occurring positive Euclidean distance **rare** if at most n unordered pairs realize it. Let r count all such distances. This project proves
+
+**n ≤ 2^r**
+
+in each of two settings:
+
+1. Both coordinates of every point belong to **Q(sqrt(2))**.
+2. Both coordinates belong to the image of a real Q-algebra embedding of **FractionRing (MvPolynomial sigma Q)**: a purely transcendental field **Q(T)**, with T algebraically independent over Q.
+
+The two settings are stated separately. The results imply two rare distances for n ≥ 3 and at least k rare distances whenever n ≥ 2^k. Multiplicity always counts the complete unordered class in the original point set.
+
+The project also proves exact rational specialization of finite configurations over Q(T), preserving every equality and disequality of distances. It does not preserve numerical ordering of lengths.
+
+## Scope
+
+This does **not** solve unrestricted Erdős #132. It does not cover arbitrary algebraic extensions of Q(T), the compositum Q(sqrt(2))(T), or all real configurations with rational squared distances. No mathematical novelty claim is made. This source package contains the complete arithmetic-coordinate project; other branches of the original research are outside its scope.
+
+Proof provenance: **AI**, developed with Codex under Egor Lyfar's direction. License: Apache-2.0.
+
+## Proof structure
+
+- A bichromatic maximal-distance bound supplies the geometric counting step.
+- Dyadic and octagonal integer descent construct a binary partition with decreasing integer height; height is separate from Euclidean length.
+- The binary counting theorem yields n ≤ 2^r. Clearing denominators transports it to Q(sqrt(2)).
+- Finite polynomial specialization preserves the distance-equality pattern. Clearing rational-function denominators extends the rational result to Q(T).
+
+The public entry point is `LeanPool.RareDistanceFields.bounds`. Explicit results and their precise hypotheses are in `OctagonalRational.lean`, `DistancePattern.lean`, and `PureTranscendental.lean`; `project.yml` lists their fully qualified names.
+
+## Reproduction
+
+This repository is a source snapshot with a Lean Pool integration patch. Compile it in the pinned Lean Pool checkout below; it is not a separate Lake package.
+
+Requirements: Git, elan, and the Lean toolchain pinned by Lean Pool. The pinned base uses Lean and Mathlib v4.34.0-rc1. A first cache download requires disk space for Mathlib.
+
+```sh
+git clone https://github.com/lyfar/rare-distance-fields.git
+git clone https://github.com/Vilin97/lean-pool.git lean-pool-verification
+cd lean-pool-verification
+git checkout c8ddda0a64f21cb019720cdda48c94354d4091e7
+git apply ../rare-distance-fields/lean-pool.patch
+lake exe cache get
+lake build LeanPool.RareDistanceFields
+lake exe runLinter LeanPool.RareDistanceFields
+lake exe lint-style LeanPool.RareDistanceFields
+lake exe mk_all --check
+```
+
+For the additional axiom, compiled-environment, metadata, and static quality checks, install Lean Pool's pinned Python environment as described in its CONTRIBUTING.md, then run from `lean-pool-verification`:
+
+```sh
+python/.venv/bin/python ../rare-distance-fields/verify_project.py static
+python/.venv/bin/python ../rare-distance-fields/verify_project.py axioms
+python/.venv/bin/python ../rare-distance-fields/verify_project.py environment
+```
+
+The script calls the pinned pool's checker functions unchanged. Static checks cover the repository; declaration and environment audits target this project and its imported pool dependencies. These are project-scoped local checks. Full-pool CI and admission review are separate.
+
+`manifest.json` identifies every included Lean file by SHA-256 and records the validation scope. The patch adds precisely the same Lean files, their project registry entry, and generated imports.
+
+## Dependencies and source roles
+
+The formalization reuses Mathlib and the existing angular-order geometry in `LeanPool.Erdos132N14.HopfPannwitzGeometry` (and its `Basic` dependency), from the pinned Lean Pool base. The conditional n=14 theorem is not imported.
+
+[Erdős #132](https://www.erdosproblems.com/132) is motivation. D. R. Woodall, *Distances realized by sets covering the plane*, JCTA 14 (1973), 187–200, [DOI](https://doi.org/10.1016/0097-3165(73)90020-4), and David A. Madore, *The Hadwiger–Nelson problem over certain fields* (2015), [arXiv:1509.07023](https://arxiv.org/abs/1509.07023), provide rational/quadratic-field coloring background. They are not cited as sources asserting the rare-distance bounds proved here.
+
+The bounded search record is in `PRIOR_ART.md`. It does not establish mathematical novelty or exhaust all prior formalizations.
+=== lyfar/rare-distance-fields PRIOR_ART.md
+# Bounded prior-art screen — 2026-09-08
+
+Scope: the arithmetic-coordinate rare-distance project, not unrestricted Erdős #132.
+No claim of new mathematics. This is a search record, not proof of nonduplication.
+
+- Existing Lean Pool registry and declaration text screened for rare-distance results, rational and quadratic coordinates, and distance-pattern specialization. Closest existing projects are Erdos132ConvexK3, Erdos132N14, and Erdos132ThreeChain. None of those registered headlines is this coordinate-field theorem.
+- Focused GitHub code searches against mathlib for rareDistances, low-multiplicity distances, rational distances, squared-distance specialization, and bichromatic distances returned no matching code hits in this bounded screen. Lean Pool SamePattern screen also returned no match outside this package.
+- Built-in LeanSearch ran three semantic queries: rational-coordinate rare-distance bounds; Q(sqrt(2)) rare distances; specialization of algebraically independent parameters preserving finite polynomial equality/disequality. It returned Besicovitch packing/multiplicity lemmas, finite projective-plane counts, and AlgebraicIndependent API results. These results do not state the proposed quantitative rare-distance bounds. Raw query and result files are retained locally.
+- LeanExplore API credentials were unavailable; that service was not run. CI/maintainer novelty review remains pending.
+
+Sources: https://www.erdosproblems.com/132 is motivation only. David A. Madore, The Hadwiger–Nelson problem over certain fields (2015), https://arxiv.org/abs/1509.07023, supplies quadratic-field coloring background. Woodall, Distances realized by sets covering the plane (1973), DOI 10.1016/0097-3165(73)90020-4, is historical coloring background; its full text was not freshly verified in this publication pass. Neither is cited as a source for the rare-distance bound proved here.

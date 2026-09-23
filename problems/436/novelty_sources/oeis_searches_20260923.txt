@@ -1,0 +1,74 @@
+## A000445
+%I A000445 M4652 N1991 #61 Oct 17 2025 20:11:31
+%N A000445 Latest possible occurrence of the first consecutive pair of n-th power residues, modulo any prime.
+%I A000236 M2737 N1099 #38 May 30 2026 16:39:40
+%N A000236 Maximum m such that there are no two adjacent elements belonging to the same n-th power residue class modulo some prime p in the sequence 1,2,...,m (equivalently, there is no n-th power residue modulo p in the sequence 1/2,2/3,...,(m-1)/m).
+%I A097160 #28 May 30 2026 16:40:11
+%N A097160 Greatest prime p such that there are n, but not n+1, consecutive quadratic residues mod p, or -1 if no such prime exists.
+%I A111931 #16 Oct 19 2017 10:38:28
+%N A111931 Smallest prime p such that 1/2, 2/3, 3/4, ..., (m-1)/m are n-th power non-residues modulo p for maximum possible m (=A000236(n)).
+%I A125607 #14 May 30 2026 16:40:31
+%N A125607 Lesser of the smallest pair of consecutive positive reduced quadratic residues modulo p = prime(n) > 5.
+## consecutive+residues
+%I A080378 #19 Jul 07 2022 16:19:42
+%N A080378 Residues mod 4 of the n-th difference between consecutive primes.
+%I A002307 M0418 N0160 #28 May 30 2026 16:39:44
+%N A002307 Consecutive quadratic residues mod p: a(n) is the maximal number of positive reduced quadratic residues which appear consecutively for n-th prime.
+%I A097159 #11 Jan 21 2026 14:20:27
+%N A097159 Smallest prime p such that the maximum run length of consecutive positive quadratic residues modulo p is n.
+%I A000445 M4652 N1991 #61 Oct 17 2025 20:11:31
+%N A000445 Latest possible occurrence of the first consecutive pair of n-th power residues, modulo any prime.
+%I A054763 #24 Mar 06 2017 03:48:49
+%N A054763 Residues of consecutive prime differences modulo 6.
+%I A048280 #47 Feb 19 2026 17:48:29
+%N A048280 Length of longest run of consecutive quadratic residues mod prime(n).
+%I A097160 #28 May 30 2026 16:40:11
+%N A097160 Greatest prime p such that there are n, but not n+1, consecutive quadratic residues mod p, or -1 if no such prime exists.
+%I A097161 #6 Mar 30 2012 17:31:05
+%N A097161 Number of primes modulo which the largest number of consecutive quadratic residues is n.
+%I A025046 #11 Jan 10 2026 14:38:48
+%N A025046 a(n) is the least odd prime p such that the maximum run length of consecutive quadratic residues modulo p is n.
+%I A210242 #29 Sep 14 2019 06:36:25
+%N A210242 Pairs of consecutive primes {p,q} for which the numbers of distinct residues of all factorials mod p and mod q coincide.
+## consecutive+quintic
+%I A188384 #6 Mar 30 2012 17:22:57
+%N A188384 Primes for which there are not three consecutive nonzero quintic residues.
+%I A184986 #35 Nov 23 2019 02:50:14
+%N A184986 Quintic residues modulo 3331, sorted.
+%I A000045 M0692 N0256 #2589 Aug 27 2026 10:07:07
+%N A000045 Fibonacci numbers: F(n) = F(n-1) + F(n-2) with F(0) = 0 and F(1) = 1.
+## consecutive+power+residues
+%I A000445 M4652 N1991 #61 Oct 17 2025 20:11:31
+%N A000445 Latest possible occurrence of the first consecutive pair of n-th power residues, modulo any prime.
+%I A000236 M2737 N1099 #38 May 30 2026 16:39:40
+%N A000236 Maximum m such that there are no two adjacent elements belonging to the same n-th power residue class modulo some prime p in the sequence 1,2,...,m (equivalently, there is no n-th power residue modulo p in the sequence 1/2,2/3,...,(m-1)/m).
+%I A111931 #16 Oct 19 2017 10:38:28
+%N A111931 Smallest prime p such that 1/2, 2/3, 3/4, ..., (m-1)/m are n-th power non-residues modulo p for maximum possible m (=A000236(n)).
+%I A374015 #141 Aug 27 2026 11:01:23
+%N A374015 Residue modulo 5 of n! divided by the highest power of 10 which divides n!.
+%I A000975 #615 Sep 01 2026 09:30:07
+%N A000975 a(2n) = 2*a(2n-1), a(2n+1) = 2*a(2n)+1 (also a(n) is the n-th number without consecutive equal binary digits).
+%I A364678 #47 Apr 27 2025 03:23:30
+%N A364678 Maximum number of primes between consecutive multiples of n, as permitted by divisibility considerations.
+%I A070034 #12 Aug 04 2021 12:27:41
+%N A070034 Numbers n such that n! reduced modulo 2^n is also a power of 2.
+%I A295865 #45 Mar 29 2018 10:10:14
+%N A295865 Numbers k, the smallest of at least 4 consecutive numbers x, for which phi(x) <= phi(x+1).
+%I A000045 M0692 N0256 #2589 Aug 27 2026 10:07:07
+%N A000045 Fibonacci numbers: F(n) = F(n-1) + F(n-2) with F(0) = 0 and F(1) = 1.
+%I A000005 M0246 N0086 #627 Sep 17 2026 16:29:29
+%N A000005 d(n) (also called tau(n) or sigma_0(n)), the number of divisors of n.
+## Lehmer+residues+runs
+%I A095847 #21 Feb 16 2025 08:32:53
+%N A095847 Lucas-Lehmer residues for Mersenne numbers with prime indices.
+%I A008330 #58 Aug 11 2025 05:05:43
+%N A008330 phi(p-1), as p runs through the primes.
+%I A097160 #28 May 30 2026 16:40:11
+%N A097160 Greatest prime p such that there are n, but not n+1, consecutive quadratic residues mod p, or -1 if no such prime exists.
+%I A125607 #14 May 30 2026 16:40:31
+%N A125607 Lesser of the smallest pair of consecutive positive reduced quadratic residues modulo p = prime(n) > 5.
+%I A000045 M0692 N0256 #2589 Aug 27 2026 10:07:07
+%N A000045 Fibonacci numbers: F(n) = F(n-1) + F(n-2) with F(0) = 0 and F(1) = 1.
+%I A001481 M0968 N0361 #280 Aug 01 2026 09:58:54
+%N A001481 Numbers that are the sum of 2 squares.
+## %22consecutive%22+%22power+residues%22+triples

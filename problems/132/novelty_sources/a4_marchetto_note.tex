@@ -1,0 +1,1309 @@
+% !TEX program = pdflatex
+% Erdős #132, cases 7 <= n <= 13 — integrated draft (2026-07-03, evening pass)
+\documentclass[11pt]{article}
+
+\usepackage[margin=1.1in]{geometry}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage{booktabs}
+\usepackage{xcolor}
+\usepackage[colorlinks=true,linkcolor=blue!60!black,citecolor=blue!60!black,urlcolor=blue!60!black]{hyperref}
+
+% ---- todo marker (self-contained; no todonotes dependency) ----
+\newcommand{\todo}[1]{\textcolor{red!70!black}{\textbf{[TODO: #1]}}}
+
+\newtheorem{theorem}{Theorem}[section]
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{corollary}[theorem]{Corollary}
+\newtheorem{proposition}[theorem]{Proposition}
+\theoremstyle{definition}
+\newtheorem{definition}[theorem]{Definition}
+\theoremstyle{remark}
+\newtheorem{remark}[theorem]{Remark}
+
+\newcommand{\R}{\mathbb{R}}
+\newcommand{\Q}{\mathbb{Q}}
+\newcommand{\Z}{\mathbb{Z}}
+\newcommand{\Lat}{L_{\Delta}}
+\DeclareMathOperator{\diam}{diam}
+
+\title{On distances of low multiplicity:\\ the cases $7 \le n \le 13$ of a problem of Erd\H{o}s}
+\author{Juan Patricio Marchetto\thanks{Independent researcher.}}
+\date{July 2026}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+Let $A \subset \R^2$ be a set of $n \ge 5$ points. Erd\H{o}s asked whether there
+must be at least two distances that occur at least once and between at most $n$ pairs of
+points (Erd\H{o}s problem \#132); Hopf and Pannwitz proved that the diameter is always such
+a distance. Erd\H{o}s and Fishburn settled $n = 5, 6$; for unrestricted point sets every
+case $n \ge 7$ had remained open. We combine an elementary counting reduction (which
+forces at most $\lfloor n/2 \rfloor$ distinct distances in any counterexample, with a
+rigid multiplicity profile when $n$ is even) with a descent lemma along the diameter
+graph and with the published classifications of planar few-distance sets
+(Erd\H{o}s--Fishburn; Shinohara; Wei; Sz\"oll\H{o}si--\"Osterg\aa rd) to prove the
+conjecture for $n \in \{7, 8, 9, 10, 13\}$ unconditionally, and for $n = 11$ and $n = 12$
+conditionally on Wei's classification of $11$-point $5$-distance sets \cite{Wei11}: the
+sole nontrivial branch of $n = 12$ (a rigid six-distance profile) reduces by descent to a
+finite exact extension search over a single explicitly described $11$-point configuration
+(the regular $11$-gon), which we have carried out in exact arithmetic in the field
+$\Q(\zeta_{11})^+$, with no solution. The case $n = 10$ is closed by the same method ---
+descent to the classified $9$-point $4$-distance sets of Erd\H{o}s--Fishburn, then an exact
+extension search over the regular nonagon in $\Q(\zeta_9)^+$ with no solution --- so it
+depends on no classification beyond the fully-proved $E_9(4)$. The entire range
+$7 \le n \le 13$ is thus settled;
+the only input that is not self-contained is the classification $E_{11}(5)$ of
+\cite{Wei11}, on which the cases $n = 11$ and $n = 12$ depend and whose sole published
+source omits several of its proofs for length; we therefore accompany them with an
+independent exhaustive re-derivation, in exact arithmetic, of the triangular-lattice part
+of that classification. The counting reduction,
+the case $n = 7$, and the reduction of $n = 8$ to the profile $(1,9,9,9)$ are due to
+Zeraoulia; the relevance of the $8$-point $4$-distance classification to $n = 8$ was first
+observed in a forum comment by Chojecki. As by-products we record an erratum to Wei's
+classification of $10$-point $5$-distance sets (two of the twenty listed configurations
+are similar, so the list has $19$ classes), to our knowledge the first published
+multiplicity tables for the complete $8$-point $4$-distance classification, and exact
+multiplicity profiles for
+the four classes of $E_{11}(5)$ together with the independent re-derivation of its three
+triangular-lattice classes. All finite verifications are carried out in exact arithmetic
+and are reproducible from the ancillary files.
+\end{abstract}
+
+\section{Introduction}\label{sec:intro}
+
+For a finite set $A \subset \R^2$ of $n$ points, call a distance $\delta$ realized by $A$
+\emph{$n$-good} if $1 \le m(\delta) \le n$, where $m(\delta)$ denotes the number of pairs
+$\{x,y\} \subseteq A$ with $|xy| = \delta$. Erd\H{o}s \cite{Er84c} asked whether a
+second such distance must always exist; Erd\H{o}s and Pach \cite{ErPa90} asked further
+whether the number of such distances must tend to infinity
+(see also \cite{ErFi95,Bloom132}):
+
+\begin{quote}
+\emph{Let $A \subset \R^2$ be a set of $n$ points. Must there be two distances which occur
+at least once but between at most $n$ pairs of points? Must the number of such distances
+tend to infinity as $n \to \infty$?}
+\end{quote}
+
+Hopf and Pannwitz \cite{HoPa34} proved that the largest distance (the diameter) occurs at
+most $n$ times, so the diameter is always $n$-good; the question is whether a
+\emph{second} $n$-good distance must exist. Erd\H{o}s \cite{Er84c} believed this holds for
+all $n \ge 5$; it fails for $n = 4$: two unit equilateral triangles glued along an edge (a
+rhombus with angles $60^\circ$ and $120^\circ$) realize the distance $1$ on five pairs
+and the long diagonal $\sqrt{3}$ on one pair, so the multiplicity vector, ordered by
+decreasing distance, is $(1,5)$, and the diameter is the \emph{only} $4$-good distance
+($5 > 4$). Erd\H{o}s and Fishburn \cite{ErFi95} proved the statement for $n = 5$ and
+$n = 6$. Recently Clemen, Dumitrescu and Liu \cite{CDL25} proved it for all point sets in
+convex position (and for ``not too convex'' sets); for unrestricted point sets every case
+$n \ge 7$ has remained open. Erd\H{o}s offered \$100 for ``any nontrivial result''
+\cite{Er97e}. For the state of the problem see the curated page of Bloom \cite{Bloom132}.
+
+Our main result is the following.
+
+\begin{theorem}[main]\label{thm:main}
+Let $A \subset \R^2$ be a set of $n$ points.
+\begin{enumerate}
+\item[(i)] If $n \in \{7, 8, 9, 10, 13\}$, then $A$ has at least two $n$-good distances.
+\item[(ii)] If $n = 12$, then $A$ has at least two $12$-good distances, conditionally on
+the classification $E_{11}(5)$ of $11$-point $5$-distance sets \cite[Theorem~13]{Wei11}: a
+failure would force exactly six distinct distances with the rigid multiplicity vector,
+ordered by decreasing distance, $(1, 13, 13, 13, 13, 13)$; by descent this branch is
+equivalent to adjoining one point to a single $11$-point configuration, the regular
+$11$-gon $R_{11}$ (the only class in the relevant window, forcing the degree pattern
+$a = (2,2,2,2,2)$), and the resulting finite exact extension search over $R_{11}$ in
+$\Q(\zeta_{11})^+$ has no solution (zero survivors); hence no such $A$ exists (Corollary
+\ref{cor:extension}, Proposition \ref{prop:n12search} and Section \ref{sec:n12}).
+\item[(iii)] If $n = 11$, then $A$ has at least two $11$-good distances, conditionally on
+the classification $E_{11}(5)$ of $11$-point $5$-distance sets \cite[Theorem~13]{Wei11}:
+a failure would reduce to five distinct distances with diameter multiplicity in
+$\{2, \dots, 7\}$ and a non-star diameter graph, hence to an $11$-point $5$-distance set,
+and none of the four similarity classes of $E_{11}(5)$ has such a multiplicity profile
+(Section \ref{sec:n11}).
+\end{enumerate}
+\end{theorem}
+
+Both parts (ii) and (iii) rest on the classification $E_{11}(5)$ of $11$-point
+$5$-distance sets due to Wei \cite{Wei11} (Theorem~13: four similarity classes ---
+the regular $11$-gon $R_{11}$ and three triangular-lattice patches). We have obtained the
+primary source (a scan of the printed paper); it establishes $E_{11}(5)$ but omits several
+of its proofs for length (Section \ref{sec:n11}, Remark \ref{rem:weiomit}), so we treat
+$n = 11$ and $n = 12$ as closed \emph{conditionally} on \cite{Wei11} and independently
+re-derive the triangular-lattice part of the classification in exact arithmetic. Given
+$E_{11}(5)$, part (iii) is a finite profile check (Section \ref{sec:n11}), and part (ii)
+is a finite exact extension search (Corollary \ref{cor:extension} and Section
+\ref{sec:n12}) which the same profile analysis reduces to the single candidate $R_{11}$;
+we have executed that search in exact arithmetic over $\Q(\zeta_{11})^+$ (the descent
+computation \texttt{e12\_descent} of \texttt{rust/fewdist}, Section \ref{sec:n12}), and it
+returns no extension --- zero survivors --- so the branch is empty and $n = 12$ is closed.
+Consequently the entire range $7 \le n \le 13$ is now settled; nothing in it remains open
+by computation. The one ingredient that is not self-contained is the citation of
+\cite{Wei11} for $E_{11}(5)$ (used by both $n = 11$ and $n = 12$), which we re-derive in
+part --- its triangular-lattice classes --- but not in full.
+
+\subsection*{Attribution and history of the cases $n = 7, 8$}
+
+Scrupulous attribution is essential here, since partial claims on this problem were posted
+publicly in January 2026.
+
+\begin{itemize}
+\item \textbf{Zeraoulia (2026).} The counting (pigeonhole) reduction, the complete proof
+of the case $n = 7$, and the reduction of $n = 8$ to the rigid multiplicity profile
+$(1,9,9,9)$ are due to Rafik Zeraoulia, in a self-published working draft on ResearchGate
+\cite{Zeraoulia26} (January 28, 2026) and in a comment on the problem's discussion forum.
+We have verified his proof of $n = 7$ step by step; it is correct and complete, resting
+only on refereed literature (he quotes the classification of $7$-point $3$-distance sets
+from \cite[\S 1]{Wei12}; the primary source is \cite[Theorem~1]{ErFi96}, see Remark
+\ref{rem:E73}). His note is not on arXiv and has not been refereed; we reproduce the
+statements we use with proofs, and none of Sections
+\ref{sec:counting}--\ref{sec:n8} up to and including the profile reduction for $n=8$
+should be credited to us.
+\item \textbf{Chojecki (2026).} Three hours after Zeraoulia's comment, Przemek Chojecki
+posted on the same forum thread \cite{Chojecki26} an output of the language model GPT-5.2
+sketching a closure of $n = 8$ via ``the classification of planar 8-point 4-distance
+sets''. That classification does exist --- it is Theorem 1.2(a) of Shinohara's
+uniqueness paper \cite{Shinohara08} --- but the posted sketch cites no source, exhibits no
+multiplicity tables, and has no author of record; we cite it as a communication for the
+\emph{observation} that \cite{Shinohara08} is the relevant reference, and we supply the
+verification independently. Remark \ref{rem:gpt} records the exact comparison between
+the posted sketch and the paper.
+\item \textbf{Classification literature.} The finite-case analysis below consumes the
+classifications of planar $k$-distance sets: the $7$-point $3$-distance sets and the
+$9$-point $4$-distance sets, together with the values $g(k)$ for $k \le 5$
+(Erd\H{o}s--Fishburn \cite{ErFi96}); all planar $3$-distance sets (Shinohara
+\cite{Shinohara04}); the $7$-point $4$-distance sets (Lan--Wei \cite{LanWei13}); the
+$8$-point $4$-distance sets and the uniqueness of the maximum $12$-point $5$-distance
+set (Shinohara \cite{Shinohara08}); the value $g(6) = 13$, together with the $10$-point
+$5$-distance sets used for $n = 10$ only as an independent corroboration (Remark
+\ref{rem:n10wei}), the main proof for $n = 10$ descending instead to $E_9(4)$
+(Wei \cite{Wei12}); the $11$-point $5$-distance sets (Wei \cite{Wei11}); and the
+$13$-point $6$-distance sets (Sz\"oll\H{o}si--\"Osterg\aa rd \cite{SzOs20}, agreeing
+with \cite{Wei12}). Every classification statement used below has been checked against the
+full text of its primary source, and every multiplicity profile has been recomputed in
+exact arithmetic; the one caveat is \cite{Wei11}, whose printed text (a scan, now in hand)
+states the classification $E_{11}(5)$ but omits several of its proofs for length (``some
+proofs are omitted because of the restriction of the length of the paper'',
+\cite[p.~506]{Wei11}). We therefore re-derive its triangular-lattice part independently
+and flag the case $n = 11$ as conditional on \cite{Wei11} (Section \ref{sec:n11}).
+\end{itemize}
+
+\subsection*{Reproducibility (ancillary files)}
+
+No decision in any finite verification below relies on floating-point arithmetic. The
+computations are packaged as ancillary files (in the arXiv sense) in the directory
+\texttt{tools/} accompanying this note:
+\texttt{n8\_descent.py} (the exact descent search that closes $n = 8$, Section
+\ref{sec:n8}; pure standard library, with an optional independent re-verification layer
+on top of \texttt{sympy});
+\texttt{n9\_profiles.py} (exact multiplicity profiles of the four $9$-point $4$-distance
+sets, Section \ref{sec:n9});
+\texttt{n13\_profiles.py} (exact profiles of the three $13$-point $6$-distance sets,
+Section \ref{sec:n13});
+\texttt{extract\_figs.py}, \texttt{match\_figs.py} and \texttt{nonlattice\_exact.py}
+(extraction of the configurations of \cite[Figure~2]{Wei12}, matching against an
+independent exhaustive re-derivation of the triangular-lattice classes, and exact
+profiles of the non-lattice classes over $\Q(\sqrt5)$, Section \ref{sec:n10});
+\texttt{n11\_profiles.py} (exact multiplicity profiles of the four $11$-point $5$-distance
+sets of \cite[Theorem~13]{Wei11} and the window checks that close $n = 11$ and locate the
+$n = 12$ candidate, Sections \ref{sec:n11}--\ref{sec:n12});
+together with the reference outputs \texttt{figs.json}, \texttt{e10\_M100.txt},
+\texttt{e10\_brute\_output.txt}, \texttt{e11\_lattice.json} (the exhaustive
+triangular-lattice re-derivation of the three lattice classes of $E_{11}(5)$, produced by
+the standalone crate \texttt{wei-xcheck} described below) and
+\texttt{eleven\_point\_five\_distance.json} (the exact coordinates and multiplicity
+profiles of the four classes of $E_{11}(5)$ used in Section \ref{sec:n11}).
+Finally, the exact extension searches are packaged as the Rust crate \texttt{rust/fewdist}
+(module \texttt{extend12.rs}): the bin \texttt{e12\_descent -{}-n10} runs the unconditional
+$n = 10$ search over the regular nonagon $R_9$ in $\Q(\zeta_9)^+ = \Q(\beta)$,
+$\beta = 2\cos(2\pi/9)$ (minimal polynomial $t^3 - 3t + 1$; Section \ref{sec:n10},
+Proposition \ref{prop:n10search}; $855$ closed-Cayley--Menger prunings, $9$ $z$-candidates,
+zero survivors), and the bin \texttt{e12\_descent -{}-r11} runs the search that closes the
+six-distance branch of $n = 12$ over $R_{11}$ in $\Q(\alpha)$, $\alpha = 2\cos(2\pi/11)$
+(Section \ref{sec:n12}; $2310$ prunings, zero survivors); all arithmetic is exact in the
+respective field and its quadratic tower. Separately, the standalone crate
+\texttt{wei-xcheck} re-derives
+the triangular-lattice classes of $E_{11}(5)$ exhaustively in exact Loeschian arithmetic
+(output \texttt{e11\_lattice.json}).
+
+\subsection*{Notation}
+
+$P \subset \R^2$, $|P| = n \ge 5$, points distinct. The distinct distances of $P$ are
+$\delta_1 > \delta_2 > \dots > \delta_k$ ($\delta_1 = \diam P$), with multiplicities
+$m_i = \#\{\{x,y\} \subseteq P : |xy| = \delta_i\}$ and $d := m_1$. Thus
+$\sum_{i=1}^k m_i = \binom{n}{2}$. Multiplicity vectors are always ordered by
+\emph{decreasing} distance, so the first entry is the diameter multiplicity. Let $g(k)$
+denote the maximum size of a planar set with exactly $k$ distinct distances; we use
+$g(1)=3$, $g(2)=5$, $g(3)=7$, $g(4)=9$, $g(5)=12$ \cite{ErFi96} and $g(6)=13$
+\cite{Wei12}. All of $g(2), \dots, g(5)$ are \emph{proved} in \cite{ErFi96} (Theorem 1;
+$g(4)=9$ in their Section 3, $g(5)=12$ in their Section 4 --- we have verified this
+against the full text; what that paper leaves open is only the uniqueness of the
+$12$-point $5$-distance set, later proved in \cite{Shinohara08}, and $g(6)$, later
+proved in \cite{Wei12}). $\Lat$ denotes the triangular lattice, embedded by
+$(a,b) \mapsto a(1,0) + b(\tfrac12, \tfrac{\sqrt3}{2})$, with squared distances the
+Loeschian numbers $a^2+ab+b^2$.
+
+\begin{definition}[failure profile]\label{def:failure}
+$P$ \emph{fails} the conjecture for $n$ if it has at most one $n$-good distance. Since the
+diameter is always $n$-good \cite{HoPa34}, this holds if and only if
+\[
+m_i \ge n+1 \quad \text{for all } i \in \{2, \dots, k\}, \qquad 1 \le d \le n .
+\]
+(For $n \ge 5$ we have $k \ge 2$ because $g(1) = 3$, so the equivalence is exact.)
+\end{definition}
+
+\section{The counting reduction}\label{sec:counting}
+
+The following lemma, in the special cases $n = 7, 8$, is due to Zeraoulia
+\cite{Zeraoulia26}; the general form and the parity rigidity (iii) appear to be new.
+
+\begin{lemma}[counting reduction]\label{lem:counting}
+Let $P$, $|P| = n \ge 5$, fail the conjecture. Then:
+\begin{enumerate}
+\item[(i)] $d + \sum_{i=2}^k m_i = \binom{n}{2}$, with $1 \le d \le n$ and $m_i \ge n+1$
+for $i \ge 2$.
+\item[(ii)] $(k-1)(n+1) \le \binom{n}{2} - d \le \binom{n}{2} - 1 = \frac{(n+1)(n-2)}{2}$,
+and consequently $k \le \lfloor n/2 \rfloor$.
+\item[(iii)] (parity rigidity) If $n$ is even and $k = n/2$, then $d = 1$ and $m_i = n+1$
+for all $i \ge 2$; the multiplicity vector is exactly $(1, n+1, \dots, n+1)$.
+\item[(iv)] In general $d \le \binom{n}{2} - (k-1)(n+1)$ and the vector is
+$(d,\, n+1+e_2, \dots, n+1+e_k)$ with $e_i \ge 0$ and
+$\sum_i e_i = \binom{n}{2} - d - (k-1)(n+1)$.
+\item[(v)] $k \ge \kappa(n) := \min\{k : g(k) \ge n\}$.
+\end{enumerate}
+\end{lemma}
+
+\begin{proof}
+(i) Partition the $\binom{n}{2}$ pairs into distance classes; $d \le n$ is Hopf--Pannwitz
+\cite{HoPa34}; $m_i \ge n+1$ is the negation of the conjecture (Definition
+\ref{def:failure}); $d \ge 1$ since the diameter is realized.
+
+(ii) From (i), $\sum_{i=2}^{k} m_i = \binom{n}{2} - d$ is a sum of $k-1$ terms each
+$\ge n+1$, whence $(k-1)(n+1) \le \binom{n}{2} - d \le \binom{n}{2} - 1$. The algebraic
+identity $\binom{n}{2} - 1 = \frac{n^2-n-2}{2} = \frac{(n+1)(n-2)}{2}$ gives
+$k-1 \le \frac{n-2}{2}$. If $n$ is even this reads $k \le n/2$; if $n$ is odd,
+$\frac{n-2}{2}$ is not an integer while $k - 1$ is, so $k - 1 \le \frac{n-3}{2}$, i.e.\
+$k \le \frac{n-1}{2}$. In both cases $k \le \lfloor n/2 \rfloor$.
+
+(iii) If $n$ is even and $k = n/2$, then
+$(k-1)(n+1) = \frac{(n-2)(n+1)}{2} = \binom{n}{2} - 1$, so by (ii),
+$\binom{n}{2} - d \ge \binom{n}{2} - 1$ forces $d = 1$; then
+$\sum_{i \ge 2} m_i = \binom{n}{2} - 1 = (k-1)(n+1)$ with every summand $\ge n+1$ forces
+term-by-term equality.
+
+(iv) Immediate rewriting of (i) with $e_i := m_i - (n+1) \ge 0$.
+
+(v) If $k < \kappa(n)$ then $g(k) < n = |P|$ and $P$ would be a $k$-distance set larger
+than the maximum, a contradiction. Note this uses the external values of $g$, not the
+counting.
+\end{proof}
+
+\begin{table}[ht]
+\centering
+\caption{Forced parameters of a hypothetical failure $P$, $7 \le n \le 13$. ``$k$
+forced'' uses Lemma \ref{lem:counting}(ii),(v) together with the values of $g(k)$;
+the ranges of $d$ additionally use Corollary \ref{cor:size} (star exclusion) where marked
+$d \ge 2$. All arithmetic verified mechanically.}
+\label{tab:profiles}
+\begin{tabular}{@{}clll@{}}
+\toprule
+$n$ & $\binom{n}{2}$; fail $\Rightarrow m_i \ge$ & $k$ forced & multiplicity vector \\
+\midrule
+$7$ & $21$; $m_i \ge 8$ & $k = 3$ & $(d, m_2, m_3)$, $d \in \{2,\dots,5\}$ (10 vectors) \\
+$8$ & $28$; $m_i \ge 9$ & $k = 4$ & rigid: $(1, 9, 9, 9)$ \\
+$9$ & $36$; $m_i \ge 10$ & $k = 4$ & $(d, 10{+}e_2, 10{+}e_3, 10{+}e_4)$, $d \in \{2,\dots,6\}$ (35 vectors) \\
+$10$ & $45$; $m_i \ge 11$ & $k = 5$ & rigid: $(1, 11, 11, 11, 11)$ \\
+$11$ & $55$; $m_i \ge 12$ & $k = 5$ & $(d, 12{+}e_2, \dots, 12{+}e_5)$, $d \in \{2,\dots,7\}$ (126 vectors) \\
+$12$ & $66$; $m_i \ge 13$ & $k \in \{5, 6\}$ & $k{=}6$: rigid $(1, 13, 13, 13, 13, 13)$; $k{=}5$: $d \in \{2,\dots,12\}$ \\
+$13$ & $78$; $m_i \ge 14$ & $k = 6$ & $(d, 14{+}e_2, \dots, 14{+}e_6)$, $d \le 8$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{remark}[asymptotic limitation]
+The counting only gives $k \le \lfloor n/2 \rfloor$ under failure, whereas the minimum
+number of distinct distances of $n$ planar points grows like $n/\log n$ up to constants
+\cite{GuthKatz15}, far below $n/2$. The reduction is therefore an instrument exclusively
+for small $n$; it says nothing about the general conjecture or the $\to \infty$ version.
+\end{remark}
+
+\section{Descent along the diameter graph}\label{sec:descent}
+
+\begin{lemma}[descent]\label{lem:descent}
+Let $P$, $|P| = n$, have $k \ge 2$ distinct distances with multiplicity vector
+$(d, m_2, \dots, m_k)$. Assume:
+\begin{itemize}
+\item[\emph{(H1)}] $m_i \ge n$ for all $i \ge 2$ (under the failure profile the stronger
+$m_i \ge n+1$ holds);
+\item[\emph{(H2)}] some $v \in P$ is incident to \emph{all} diameter edges (equivalently,
+the diameter graph is a star $K_{1,d}$ with center $v$; if $d = 1$ either endpoint
+serves).
+\end{itemize}
+Let $P' = P \setminus \{v\}$. Then:
+\begin{enumerate}
+\item[(a)] $|P'| = n - 1$.
+\item[(b)] The distances of $P'$ are \emph{exactly} $\{\delta_2, \dots, \delta_k\}$;
+i.e.\ $P'$ is a $(k-1)$-distance set of $n-1$ points.
+\item[(c)] $m_i' = m_i - \deg_i(v)$ for $i \ge 2$, where
+$\deg_i(v) = \#\{p \in P' : |vp| = \delta_i\}$ and
+$\sum_{i \ge 2} \deg_i(v) = n - 1 - d$. In particular
+$m_i' \ge m_i - (n-1-d) \ge d + 1 \ge 2$ under (H1) (and $\ge d + 2 \ge 3$ under the
+failure profile), and $\sum_{i \ge 2} m_i' = \binom{n-1}{2}$.
+\item[(d)] $\diam P' = \delta_2$, and Hopf--Pannwitz applied to $P'$ gives
+$m_2' \le n - 1$, hence $\deg_2(v) \ge m_2 - (n-1) \ge 2$ under the failure profile.
+\end{enumerate}
+\end{lemma}
+
+\begin{proof}
+(a) Trivial. (b) Every diameter edge is incident to $v$ by (H2), so all of them disappear
+with $v$ and no pair of $P'$ realizes $\delta_1$; deleting a point creates no new
+distances, so the distances of $P'$ are contained in $\{\delta_2, \dots, \delta_k\}$; that
+each survives follows from (c), $m_i' > 0$. (c) $v$ is incident to $n-1$ pairs: $d$ of
+them diameter edges (by (H2) all diameter edges pass through $v$, and if $d \ge 2$ they go
+to $d$ distinct points), and the remaining $n-1-d$ distributed among classes
+$2, \dots, k$. Hence $\deg_i(v) \le n-1-d$ for each $i \ge 2$, and
+$m_i' = m_i - \deg_i(v) \ge n - (n-1-d) = d+1 \ge 2 > 0$ under (H1). The control sum:
+$\sum_{i \ge 2} m_i' = \binom{n}{2} - d - (n-1-d) = \binom{n}{2} - (n-1) =
+\binom{n-1}{2}$. (d) The maximum distance of $P'$ is $\delta_2$ by (b); Hopf--Pannwitz on
+the $(n-1)$-point set $P'$ gives $m_2' \le n-1$, so
+$\deg_2(v) = m_2 - m_2' \ge (n+1) - (n-1) = 2$ under the failure profile.
+\end{proof}
+
+\begin{remark}
+Hypothesis (H1) is essential in (b): in general, deleting a vertex can also kill a
+non-diameter class of low multiplicity, and $P'$ would have fewer than $k-1$ distances.
+Under the failure profile every non-diameter class survives with at least $3$ edges.
+\end{remark}
+
+\begin{corollary}[size contradiction]\label{cor:size}
+If moreover $n - 1 > g(k-1)$, then \emph{(H1)}$\,\wedge\,$\emph{(H2)} is impossible: $P'$
+would be a $(k-1)$-distance set of $n-1 > g(k-1)$ points. Under the failure profile this
+excludes every configuration whose diameter graph is a star --- in particular all
+configurations with $d = 1$ --- whenever $n - 1 > g(k-1)$.
+\end{corollary}
+
+\begin{proof}
+Immediate from Lemma \ref{lem:descent}(b) and the definition of $g$.
+\end{proof}
+
+\begin{corollary}[decidable extension]\label{cor:extension}
+Suppose $n - 1 \le g(k-1)$ and the $(n-1)$-point $(k-1)$-distance sets are completely
+classified: a finite list up to similarity, with algebraic coordinates. Then every
+counterexample $P$ satisfying \emph{(H2)} is obtained by adjoining one point $v$ to a set
+$K$ from the list, subject to:
+\begin{enumerate}
+\item the $n-1-d$ non-diameter distances from $v$ to $K$ take values among the $k-1$
+distances of $K$ (finitely many assignments, at most $(k-1)^{\,n-1-d}$);
+\item the remaining $d$ distances from $v$ are all equal to a new value
+$\delta_1 > \delta_2(K)$;
+\item the final profile satisfies $m_1 = d$ and $m_i = m_i(K) + \deg_i(v) \ge n+1$, with
+$\deg_2(v) \ge 2$ by Lemma \ref{lem:descent}(d);
+\item $v$ is determined (at most $2$ candidates per pair of constraints) as an
+intersection of two circles with distinct centers in $K$ and radii among the distances of
+$K$; all candidates and all remaining verifications live in $\overline{\Q}$.
+\end{enumerate}
+Hence the existence of such a $P$ is decidable by a finite exact-arithmetic search.
+\end{corollary}
+
+\begin{proof}
+The logical direction is deletion: if $P$ is a counterexample satisfying (H2), then
+$K := P \setminus \{v\}$ is an $(n-1)$-point $(k-1)$-distance set (Lemma
+\ref{lem:descent}), hence appears in the classification up to similarity. Fix a
+representative of $K$ with algebraic coordinates; then $P = K \cup \{v\}$ with $v$
+satisfying constraints 1--4. Since $n - 1 - d \ge 2$ in all cases of interest
+($n \ge 7$, $d \le n - 3$), there are at least two constraints of the form ``$v$ lies on
+the circle of center $p \in K$ and radius $\delta_j(K)$'' with distinct centers; two
+distinct circles meet in at most $2$ points, so the candidates $v$ are finite for each
+radius assignment, and the assignments are finite. All remaining checks (the other
+distances, the new value $\delta_1 > \delta_2$, equality of the $d$ far distances, the
+multiplicity profile, $v \notin K$) are identities and inequalities over algebraic
+numbers, hence decidable exactly. Similarity is harmless: the constraints are covariant
+under similarity and the multiplicity profile is invariant.
+\end{proof}
+
+\begin{remark}[when (H2) fails]\label{rem:nostar}
+Two diameter segments always intersect (share an endpoint or cross properly)
+\cite{HoPa34}; and if in a family of edges every two share a vertex but no vertex lies in
+all of them, the family is a triangle. Hence, in a counterexample where Corollary
+\ref{cor:size} excludes the star (below: $n \in \{7, 9, 11\}$ and $n = 12$, $k = 5$), the
+diameter graph contains either two properly crossing diameter edges or an equilateral
+triangle of side $\delta_1$ (the latter only if $d \ge 3$). We record this as structural
+ammunition; it is not used in the main line.
+\end{remark}
+
+\section{The case $n = 7$ (Zeraoulia)}\label{sec:n7}
+
+\begin{theorem}[{Zeraoulia \cite{Zeraoulia26}}]\label{thm:n7}
+Every set of $7$ points in the plane has at least two $7$-good distances.
+\end{theorem}
+
+\begin{proof}
+Suppose $P$, $|P| = 7$, fails. By Lemma \ref{lem:counting}(ii) with $\binom{7}{2} = 21$
+and $m_i \ge 8$: $(k-1) \cdot 8 \le 20$, so $k \le 3$. The case $k = 2$ is excluded by
+$g(2) = 5 < 7$, and $k = 1$ by $g(1) = 3$; hence $k = 3$ exactly, and by Lemma
+\ref{lem:counting}(iv), $d \le 21 - 2 \cdot 8 = 5$. Moreover, by Corollary \ref{cor:size}
+with $g(2) = 5$: a star diameter graph (in particular $d = 1$) would yield a $2$-distance
+set of $6 > 5$ points; hence $d \in \{2, \dots, 5\}$. (This last improvement is not needed
+for the conclusion but sharpens the profile; it is not in \cite{Zeraoulia26}.)
+
+Now $P$ itself is a $3$-distance set of $7 = g(3)$ points, hence maximum, and the
+classification of $7$-point $3$-distance sets (\cite[Theorem~1]{ErFi96}: ``the only
+7-point sets that determine three distances are $R_7$ and $R_6^+$''; independently
+\cite{Shinohara04}, quoted in \cite[\S1]{Wei12}) gives exactly two configurations: the
+regular heptagon $R_7$ and the regular hexagon with center $R_6^+$. Their multiplicity
+vectors, ordered by decreasing distance, are
+\[
+R_7 : (7, 7, 7), \qquad R_6^+ : (3, 6, 12),
+\]
+($R_6^+$ with side $a$: diameter $2a$ with $3$ pairs, $\sqrt{3}\,a$ with $6$ pairs, $a$
+with $6$ sides $+$ $6$ radii $= 12$ pairs; both vectors sum to $21$). In $R_7$ every class
+has multiplicity $7 \le 7$; in $R_6^+$ the classes $3$ and $6$ are $\le 7$. Neither
+matches the failure profile ($m_i \ge 8$ for $i \ge 2$), a contradiction.
+\end{proof}
+
+\begin{remark}[status of the input $E_7(3)$]\label{rem:E73}
+The load-bearing list $E_7(3) = \{R_7, R_6^+\}$ is \emph{proved} in Erd\H{o}s--Fishburn
+\cite{ErFi96} itself (Theorem 1, p.~116; proof in their Section 2, pp.~118--119), which
+we have verified against the full text. Zeraoulia quotes the list from the survey
+paragraph of \cite[\S1]{Wei12}; Shinohara's classification of all planar three-distance
+sets \cite{Shinohara04} and \cite[Lemma~2.2(b)]{Shinohara08} provide independent
+confirmations. The case $n = 7$ is therefore closed unconditionally.
+\end{remark}
+
+\section{The case $n = 8$}\label{sec:n8}
+
+\begin{proposition}[reduction; {Zeraoulia \cite{Zeraoulia26}}]\label{prop:n8red}
+If $P$, $|P| = 8$, fails the conjecture, then $P$ has exactly $4$ distinct distances with
+multiplicity vector exactly $(1, 9, 9, 9)$; in particular the diameter is realized by a
+unique pair.
+\end{proposition}
+
+\begin{proof}
+$\binom{8}{2} = 28$ and $m_i \ge 9$ under failure. Lemma \ref{lem:counting}(ii):
+$(k-1) \cdot 9 \le 27$ gives $k \le 4$; $k \le 3$ is excluded by $g(3) = 7 < 8$ and
+$g(2) = 5 < 8$; hence $k = 4$. This is the case $n$ even, $k = n/2$ of Lemma
+\ref{lem:counting}(iii): $d = 1$ and $m_2 = m_3 = m_4 = 9$.
+\end{proof}
+
+\begin{theorem}\label{thm:n8}
+Every set of $8$ points in the plane has at least two $8$-good distances.
+\end{theorem}
+
+We give two logically independent proofs. Route B (Section \ref{sec:n8B}) is
+self-contained modulo the classification $E_7(3) = \{R_7, R_6^+\}$ of
+\cite[Theorem~1]{ErFi96} and a finite exact computation reproduced in the ancillary file
+\texttt{n8\_descent.py}; we present it as the main proof. Route A (Section
+\ref{sec:n8A}) closes the case against Shinohara's classification of $8$-point
+$4$-distance sets \cite{Shinohara08} and serves as an independent verification.
+
+\subsection{Route B: descent to the heptagon (main proof)}\label{sec:n8B}
+
+\begin{proposition}\label{prop:n8descent}
+If $P$, $|P| = 8$, fails the conjecture, then $P = R_7 \cup \{v\}$ for a regular
+heptagon $R_7$, where $v$ has exactly two vertices of $R_7$ at each of the three
+distances of the heptagon (covering $6$ of its vertices), and the distance from $v$ to
+the seventh vertex is a new value $\delta_1$ strictly larger than the heptagon's
+diameter, realized only by that pair.
+\end{proposition}
+
+\begin{proof}
+By Proposition \ref{prop:n8red}, $d = 1$, so (H2) holds automatically and Lemma
+\ref{lem:descent} applies: deleting either endpoint $v$ of the unique diameter edge
+leaves $K$, a set of $7$ points with exactly $3$ distances (each class survives with
+$m_i' = 9 - a_i \ge 3$, where $a_i := \deg_i(v)$ and $\sum_{i \ge 2} a_i = 6$). There is
+no size contradiction ($7 = g(3)$), but $K$ is a \emph{maximum} $7$-point $3$-distance
+set, hence $K \in \{R_7, R_6^+\}$ by \cite[Theorem~1]{ErFi96}. Lemma
+\ref{lem:descent}(d) gives $a_2 \ge 2$ and $m_i(K) = 9 - a_i \in [3, 9]$ with
+$m_2(K) \le 7$.
+\begin{itemize}
+\item Base $R_6^+$, vector $(3, 6, 12)$: would require $9 - a_4 = 12$, i.e.\ $a_4 = -3 <
+0$. Impossible by pure counting.
+\item Base $R_7$, vector $(7,7,7)$: forces $a = (2,2,2)$ (consistent with $a_2 \ge 2$).
+\end{itemize}
+This is the statement.
+\end{proof}
+
+It remains to show that no such point $v$ exists. Normalize $R_7$ to circumradius $1$
+with center $O$ (admissible: all constraints and the multiplicity profile are invariant
+under similarity) and write $V_0, \dots, V_6$ for the vertices and
+$D_s = 4\sin^2(s\pi/7)$, $s = 1, 2, 3$, for the three squared distances of $R_7$
+($D_1 < D_2 < D_3$; $\delta_2^2 = D_3$).
+
+\begin{lemma}[bisector rigidity]\label{lem:bisector}
+Suppose $v \in \R^2$ has exactly two vertices of $R_7$ at each of the three squared
+distances $D_1, D_2, D_3$. Then either
+$v = O$, or $v$ lies on an axis of symmetry of $R_7$; in the latter case, if $V_w$ is
+the vertex on that axis, the three equidistant pairs are the mirror pairs
+$\{V_{w+1}, V_{w-1}\}$, $\{V_{w+2}, V_{w-2}\}$, $\{V_{w+3}, V_{w-3}\}$ (indices mod
+$7$), and the leftover vertex is $V_w$.
+\end{lemma}
+
+\begin{proof}
+If $|vP| = |vQ|$ with $P, Q$ on the unit circle centered at $O$, then $v$ lies on the
+perpendicular bisector of $PQ$, which passes through $O$. The three equidistant pairs
+give three such bisectors through $O$ all containing $v$; hence either $v = O$ or all
+three bisectors are one and the same line $\ell \ni O$. The bisector of
+$\{V_i, V_j\}$ is the line through $O$ with direction angle $\pi(i+j)/7 \pmod{\pi}$
+(well defined: in a $7$-gon no chord is a diameter of the circumcircle), so two
+bisectors coincide iff the index sums $i+j$ are congruent mod $7$. Among the $105$
+partitions of $\Z_7$ into three pairs and a singleton, exactly $7$ have all three pair
+sums congruent mod $7$ (mechanically verified, and by hand: if the singleton is $w$,
+the total sum $21 \equiv 0$ forces the common pair sum to be $\equiv 2w \pmod 7$, and a
+pair $\{w+a, w+b\}$ with $a + b \equiv 0 \pmod 7$, $a, b \in \pm\{1,2,3\}$, forces
+$b = -a$): they are precisely the mirror partitions around the axis through $V_w$ and
+$O$, one for each $w \in \Z_7$.
+\end{proof}
+
+\begin{proposition}[exact search]\label{prop:n8search}
+No point $v \in \R^2 \setminus R_7$ has exactly two vertices of $R_7$ at each of the
+three distances of the heptagon. Consequently the point $v$ of Proposition
+\ref{prop:n8descent} does not exist.
+\end{proposition}
+
+\begin{proof}
+The case $v = O$ of Lemma \ref{lem:bisector} is impossible: all seven distances from
+$O$ equal the circumradius. (In passing, $R_7^+ = R_7 \cup \{O\}$ has profile
+$(7,7,7,7)$, not $(1,9,9,9)$.) So $v = t\,u$ with $u$ the unit vector toward $V_w$,
+$t \in \R$, and the pairs are the mirror pairs. The entire computation lives in the
+totally real cubic field $K = \Q(y)$, $y = 2\cos(\pi/7)$, with minimal polynomial
+$x^3 - x^2 - 2x + 1$: writing $z_m = 2\cos(m\pi/7) \in K$ (Chebyshev recurrence
+$z_{m+1} = y z_m - z_{m-1}$), we have $D_s = 2 - z_{2s}$, explicitly
+$D_1 = 4 - y^2$, $D_2 = y^2 - y + 1$, $D_3 = 2 + y$, with $0 < D_1 < D_2 < D_3$
+certified exactly (signs in $K$ are decided by rational interval isolation of $y$, with
+no floating point in any decision). The mirror pair $\{V_{w \pm r}\}$ lies at angular
+distance $2\pi r/7$ from $V_w$, so assigning the squared distance $D_{\sigma(r)}$ to
+that pair, for a bijection $\sigma$ of $\{1,2,3\}$, reads
+\[
+t^2 - 2\cos(2\pi r/7)\, t + 1 = D_{\sigma(r)}, \qquad r = 1, 2, 3 .
+\]
+The three cosines are distinct, so subtracting two of the equations determines
+$t \in K$ uniquely; the remaining equation, and finally the checks on
+$x := |v - V_w|^2 = (t-1)^2$ (namely $x \ne 0$, i.e.\ $v \notin R_7$, and
+$x > D_3$ for a new diameter), are exact conditions in $K$. By the rotational symmetry
+the $7$ axes behave identically, leaving $6$ assignments $\sigma$ to check. The result
+of the exact enumeration (ancillary file \texttt{n8\_descent.py}): five of the six
+assignments fail one of the three equalities with a nonzero residue in $K$ (nonzero
+because its coordinates in the basis $\{1, y, y^2\}$ are not all zero --- an exact
+criterion); the single assignment that satisfies all three equalities is the natural
+one (pair $\{V_{w\pm r}\}$ at distance $D_r$), which is the expected positive control:
+it forces $x = 0$, i.e.\ $v = V_w \in R_7$, so there is no eighth point. Survivors:
+none.
+\end{proof}
+
+\begin{proof}[Proof of Theorem \ref{thm:n8} (Route B)]
+If $P$ failed, Propositions \ref{prop:n8red} and \ref{prop:n8descent} would produce a
+point $v \notin R_7$ with exactly two heptagon vertices at each heptagon distance,
+contradicting Proposition \ref{prop:n8search}.
+\end{proof}
+
+\begin{remark}[redundant verifications]\label{rem:n8redundant}
+The enumeration of Proposition \ref{prop:n8search} is cross-checked in three
+independent ways (all in \texttt{n8\_descent.py}). (1) A second, structure-free
+enumeration in the spirit of Corollary \ref{cor:extension}: every valid $v$ lies on the
+intersection of two circles centered at distinct vertices with radii among the
+$\sqrt{D_s}$; all $\binom{7}{2} \times 3^2 = 189$ circle pairs are enumerated
+exactly over $K(\sqrt{\Delta})$ ($21$ pairs have no real intersection; of the $336$
+real candidates, $231$ fail the required distance multiset and $105$ satisfy the
+equalities but are degenerate). The $105$ degenerate candidates are \emph{exactly} the
+seven vertices $V_w$, each recovered $\binom{6}{2} = 15$ times --- an exact internal
+consistency check, and a proof that the machinery does find solutions when they exist.
+(2) A Hopf--Pannwitz consistency check: a candidate passing the equalities with
+$0 < x < D_3$ would yield a planar $8$-point set whose diameter has multiplicity
+$7 + 2 = 9 > 8$, contradicting \cite{HoPa34}; coherently, no case fell in that branch.
+(3) With \texttt{sympy} available, the full enumeration is re-run independently over
+\texttt{QQ.algebraic\_field}$(2\cos(\pi/7))$, with the minimal polynomial re-derived
+independently; the verdict ($35$ failures, $7$ degenerate cases, $0$ survivors) is
+identical.
+\end{remark}
+
+\subsection{Route A: the classification of $8$-point $4$-distance sets (independent
+verification)}\label{sec:n8A}
+
+Shinohara \cite[Theorem~1.2(a), p.~3049]{Shinohara08} proves (as an intermediate result
+toward the uniqueness of the maximum $12$-point $5$-distance set) that every $8$-point
+four-distance set in $\R^2$ is similar to $R_8$, $R_7^+$, the configuration of his
+Fig.~1(e), or an $8$-point subset of a $9$-point four-distance set. The relevance of
+this classification to the profile $(1,9,9,9)$ was first observed in the forum comment
+\cite{Chojecki26}. We have verified the statement against the full text and computed
+the exact multiplicity vector of every class.
+
+The $9$-point parents are the four configurations $R_9$, $B_9$, $A_9$, $T_9$ of
+\cite[Theorem~1]{ErFi96} (see Section \ref{sec:n9} for their description and profiles).
+Every $8$-point subset of a $9$-point $4$-distance set automatically has exactly $4$
+distances (with $3$ distances it would be an $8$-point $3$-distance set, contradicting
+$g(3) = 7$), so all $36$ vertex deletions are candidates; up to similarity they fall
+into $12$ classes ($R_9$: one class; $B_9$: six; $A_9$: three; $T_9$: three; minus one
+cross-parent coincidence: $B_9$ minus a far off-axis vertex is similar to $A_9$ minus a
+spike, so that $8$-point set extends to a $9$-point $4$-distance set in two
+inequivalent ways). The configuration of Fig.~1(e) is the unit square with the apex of
+an equilateral triangle erected outward on each side (within the $D_4$-symmetric
+one-parameter family, the four-distance condition forces the equilateral apex height
+--- checked exactly; the paper gives the configuration only as a figure). Table
+\ref{tab:e84} lists the resulting $15$ similarity classes with their exact
+multiplicity vectors (computed over $\Q(\sqrt3)$ for the lattice-based configurations
+and by orbit counting with exact chord-separation certificates for the regular
+polygons; each vector sums to $28$; Hopf--Pannwitz $m_1 \le 8$ holds throughout).
+
+\begin{table}[ht]
+\centering
+\caption{The $15$ similarity classes of $8$-point $4$-distance sets
+(\cite[Theorem~1.2(a)]{Shinohara08} plus \cite[Theorem~1]{ErFi96}), with exact
+multiplicity vectors ordered by decreasing distance. Parents: $B_9 = (4,7,9,16)$,
+$A_9 = (6,6,9,15)$, $T_9 = (6,6,18,6)$, $R_9 = (9,9,9,9)$.}
+\label{tab:e84}
+\begin{tabular}{@{}rll@{}}
+\toprule
+\# & configuration & vector \\
+\midrule
+1 & $R_8$ (regular octagon; sporadic) & $(4,8,8,8)$ \\
+2 & $R_7^+$ (regular heptagon with center; sporadic) & $(7,7,7,7)$ \\
+3 & square with four equilateral apexes (Fig.~1(e); sporadic) & $(2,12,2,12)$ \\
+4 & $R_9$ minus a vertex & $(7,7,7,7)$ \\
+5 & $B_9$ minus the center & $(4,7,7,10)$ \\
+6 & $B_9$ minus the near axial vertex & $(4,6,7,11)$ \\
+7 & $B_9$ minus a vertex adjacent to one spike & $(4,5,7,12)$ \\
+8 & $B_9$ minus a far off-axis vertex ($\cong A_9$ minus a spike) & $(3,5,7,13)$ \\
+9 & $B_9$ minus the opposite axial vertex & $(2,6,7,13)$ \\
+10 & $B_9$ minus a spike ($= R_6^+$ plus one spike) & $(2,5,7,14)$ \\
+11 & $A_9$ minus a corner & $(5,4,7,12)$ \\
+12 & $A_9$ minus an interior point & $(6,5,7,10)$ \\
+13 & $T_9$ minus an inner vertex & $(6,5,14,3)$ \\
+14 & $T_9$ minus an intermediate vertex & $(5,4,14,5)$ \\
+15 & $T_9$ minus an outer vertex & $(3,5,14,6)$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Classes 2 and 4 have equal vectors but are not similar ($R_7^+$ has a point with seven
+equal distances, $R_9$ minus a vertex has none; their chord fields are distinct cubic
+fields). Classes 7 and 11 (and likewise 13 and 15) have equal multiplicity
+\emph{multisets} but assign the diameter differently, so they are not similar either.
+
+\begin{proof}[Proof of Theorem \ref{thm:n8} (Route A)]
+If $P$ failed, it would be an $8$-point $4$-distance set with vector $(1,9,9,9)$
+(Proposition \ref{prop:n8red}), hence similar to one of the $15$ classes of Table
+\ref{tab:e84}. The multiplicity vector is a similarity invariant, and none of the $15$
+vectors is $(1,9,9,9)$ --- not even as a multiset (no vector contains a $1$, and none
+contains a $9$). Contradiction.
+\end{proof}
+
+\begin{remark}[comparison with the posted GPT-5.2 sketch]\label{rem:gpt}
+Checked point by point against \cite{Shinohara08}, the sketch posted in
+\cite{Chojecki26} matches the paper $1{:}1$ on every claim that can be checked: the
+classification exists (Theorem 1.2(a), uncited in the sketch); the three sporadic
+configurations are $R_8$, $R_7^+$ and ``the square with four equilateral bumps''
+(which is exactly Fig.~1(e)); the profiles it stated spontaneously --- $R_8$ with
+multiset $\{8,8,8,4\}$, $R_7^+$ with $(7,7,7,7)$, two classes of multiplicity $2$ for
+the square with bumps --- are all correct. What the post was not is a verifiable
+result: it cited no source, asserted ``multiplicity tables'' without exhibiting any,
+and did not cover the deletions of the non-lattice parent $T_9$ --- whose profiles
+$(6,5,14,3)$, $(5,4,14,5)$, $(3,5,14,6)$ had, to our knowledge, never been published
+and appear for the first time in Table \ref{tab:e84}. The gap between ``substantially
+correct'' and ``verified against the primary source in exact arithmetic'' is exactly
+what this section closes.
+\end{remark}
+
+\section{The case $n = 9$}\label{sec:n9}
+
+\begin{proposition}[reduction]\label{prop:n9red}
+If $P$, $|P| = 9$, fails, then $P$ has exactly $4$ distinct distances,
+$d \in \{2, \dots, 6\}$, and its diameter graph is not a star.
+\end{proposition}
+
+\begin{proof}
+$\binom{9}{2} = 36$, $m_i \ge 10$. Lemma \ref{lem:counting}(ii): $(k-1) \cdot 10 \le 35$
+gives $k \le 4$; $k \in \{2,3\}$ are excluded by $g(2) = 5 < 9$, $g(3) = 7 < 9$; hence
+$k = 4$, and $d \le 36 - 30 = 6$. Corollary \ref{cor:size} with $g(3) = 7$: a star
+diameter graph (in particular $d = 1$) would yield an $8$-point $3$-distance set,
+impossible; hence $d \ge 2$ and no star.
+\end{proof}
+
+The possible vectors are $(d, 10+e_2, 10+e_3, 10+e_4)$ with $\sum e_i = 6 - d$,
+$d \in \{2, \dots, 6\}$: $35$ vectors in total. None of them survives:
+
+\begin{theorem}\label{thm:n9}
+Every set of $9$ points in the plane has at least two $9$-good distances.
+\end{theorem}
+
+\begin{proof}
+Suppose $P$, $|P| = 9$, fails. By Proposition \ref{prop:n9red}, $P$ is a $9$-point
+$4$-distance set with $9 = g(4)$, hence maximum, and by the classification of
+\cite[Theorem~1 and Fig.~1]{ErFi96} (verified against the full text) $P$ is similar to
+one of exactly \emph{four} configurations:
+\begin{itemize}
+\item $R_9$, the regular nonagon;
+\item $B_9 \subset \Lat$, the regular hexagon with center plus two adjacent spikes of
+the hexagram;
+\item $A_9 \subset \Lat$, the lattice piece with rows $2/3/3/1$;
+\item $T_9$, three concentric equilateral triangles \emph{not} contained in $\Lat$
+(inner and intermediate triangles pointing one way, outer triangle the other;
+normalizing the inner circumradius to $1$, the circumradii are $1$, $1+\sqrt3$,
+$2+\sqrt3$, and the four squared distances are $3$, $6+3\sqrt3$, $12+6\sqrt3$,
+$21+12\sqrt3$).
+\end{itemize}
+Their exact multiplicity vectors, ordered by decreasing distance (ancillary file
+\texttt{n9\_profiles.py}; Loeschian norms for $A_9, B_9$, the field $\Q(\sqrt3)$ for
+$T_9$, orbit counting with chord monotonicity for $R_9$; each sums to $36$), are
+\[
+R_9 : (9,9,9,9), \qquad B_9 : (4,7,9,16), \qquad A_9 : (6,6,9,15), \qquad
+T_9 : (6,6,18,6).
+\]
+The minimum non-diameter multiplicity is $9$, $7$, $6$, $6$ respectively --- in every
+case $< 10$, so none matches the failure profile. Contradiction.
+\end{proof}
+
+\begin{remark}[independent support]\label{rem:n9support}
+An exhaustive exact search over the triangular lattice returns exactly $\{A_9, B_9\}$
+as the $9$-point $4$-distance subsets of $\Lat$ up to similarity, matching the two
+lattice configurations of \cite[Fig.~1]{ErFi96}; the existence of $T_9$ and the fact
+that it realizes exactly four distances are certified in $\Q(\sqrt3)$. What is not
+independently re-derived here is the completeness of the non-lattice part of the
+classification (that $R_9$ and $T_9$ are the only non-lattice examples); that rests on
+the case analysis of \cite{ErFi96}, which the subsequent literature
+(\cite{Shinohara08,Wei12,LanWei13}) treats as established. As a sanity check, the
+multiplicity $18$ in $T_9$ attains Harborth's maximum for $9$ points and does not
+exceed it. Note also that $B_9$ and $A_9$ show the failure window $d \in \{2,\dots,6\}$
+of Proposition \ref{prop:n9red} is inhabited by real configurations ($d = 4$ and $6$);
+they fail the profile only through their small classes.
+\end{remark}
+
+\section{The case $n = 10$}\label{sec:n10}
+
+\begin{proposition}[reduction]\label{prop:n10red}
+If $P$, $|P| = 10$, fails, then $P$ has exactly $5$ distinct distances with multiplicity
+vector exactly $(1, 11, 11, 11, 11)$.
+\end{proposition}
+
+\begin{proof}
+$\binom{10}{2} = 45$, $m_i \ge 11$. Lemma \ref{lem:counting}(ii): $(k-1) \cdot 11 \le 44$
+gives $k \le 5$; $k \le 4$ is excluded by $g(4) = 9 < 10$ (and $g(3), g(2)$); hence
+$k = 5$, the even rigid case of Lemma \ref{lem:counting}(iii): $d = 1$,
+$m_i = 11$ for $i \ge 2$.
+\end{proof}
+
+\begin{theorem}\label{thm:n10}
+Every set of $10$ points in the plane has at least two $10$-good distances.
+\end{theorem}
+
+We prove this \emph{unconditionally}, by descent to the completely classified $9$-point
+$4$-distance sets of \cite[Theorem~1]{ErFi96} followed by a finite exact extension search.
+The proof uses only $E_9(4)$ (a fully-proved classification, Section \ref{sec:n9}) and
+Hopf--Pannwitz; it does \emph{not} depend on Wei's classification $E_{10}(5)$ \cite{Wei12}.
+An independent corroboration against \cite[Theorem~11]{Wei12} --- which also yields an
+erratum to \cite{Wei12} --- is recorded afterwards (Remark \ref{rem:n10wei}).
+
+\emph{Descent to $E_9(4)$: a counting argument leaving only $R_9$.} Suppose $P$,
+$|P| = 10$, fails; by Proposition \ref{prop:n10red} it is a $10$-point $5$-distance set
+with the rigid vector $(1,11,11,11,11)$. Since $d = 1$, hypothesis (H2) holds
+automatically and Lemma \ref{lem:descent} descends: deleting either endpoint $v$ of the
+unique diameter edge leaves a $9$-point $4$-distance set $K = P \setminus \{v\}$ with
+$m_i(K) = 11 - a_i$, where $a_i = \deg_i(v) \ge 0$ and $\sum_i a_i = 8$; thus
+$m_i(K) \in \{3, \dots, 11\}$ for all four classes, and Hopf--Pannwitz on the $9$-point
+set $K$ gives $m_1(K) \le 9$. Now $9 = g(4)$, so $K$ is a \emph{maximum} $9$-point
+$4$-distance set, hence by \cite[Theorem~1]{ErFi96} (the classification of Section
+\ref{sec:n9}, verified against the full text) $K$ is similar to $R_9$, $B_9$, $A_9$ or
+$T_9$, with the exact multiplicity vectors
+\[
+R_9 : (9,9,9,9), \quad B_9 : (4,7,9,16), \quad A_9 : (6,6,9,15), \quad T_9 : (6,6,18,6)
+\]
+of Section \ref{sec:n9}. Adjoining one point can only \emph{add} edges to each class, so
+$a_i \ge 0$ forces $m_i(K) \le 11$ for every class; but $B_9$, $A_9$ and $T_9$ each carry
+a class of multiplicity $16$, $15$ and $18$ respectively, all $> 11$, so none can be the
+base of a descent from $(1,11^4)$ --- they are excluded by pure counting, with no search.
+Only $R_9$ survives: $(9,9,9,9)$ has every class $\le 11$, and the degrees of $v$ are then
+forced with no freedom, $a_i = 11 - 9 = 2$ for each of the four chord classes
+($\sum_i a_i = 8$, meeting $a_2 \ge 2$ of Lemma \ref{lem:descent}(d) with equality). Hence
+$K \cong R_9$ and $v$ has exactly two vertices of $R_9$ at each of its four chord lengths
+($8$ edges), plus one edge to its diameter partner $u \in K$ at a new value
+$\delta_1 > \diam R_9$ (so $m_1(P) = 1$). This is exactly Corollary \ref{cor:extension}
+with $K = R_9$, the degree-$4$ analogue of the closed cases $n = 8$ (Route B, Proposition
+\ref{prop:n8search}: $K = R_7$, $a = (2,2,2)$) and $n = 12$, $k = 6$ (Proposition
+\ref{prop:n12search}: $K = R_{11}$, $a = (2,2,2,2,2)$).
+
+\begin{proposition}[exact extension search over $R_9$]\label{prop:n10search}
+No point $v \in \R^2 \setminus R_9$ has exactly two vertices of the regular nonagon $R_9$
+at each of its four chord lengths together with a single farther vertex $u \in R_9$ at a
+new value $\delta_1 > \diam R_9$. Consequently no $10$-point set fails the conjecture.
+\end{proposition}
+
+\begin{proof}
+This is the finite exact search of Corollary \ref{cor:extension} for $K = R_9$ with the
+forced degree pattern $a = (2,2,2,2)$. It is carried out with no floating point, in the
+degree-$3$ field $\Q(\zeta_9)^+ = \Q(\beta)$, $\beta = 2\cos(2\pi/9)$ (minimal polynomial
+$t^3 - 3t + 1$; the four squared chord lengths of $R_9$ are
+$4\sin^2(s\pi/9) = 2 - 2\cos(2\pi s/9)$, $s = 1, \dots, 4$, written exactly over $\beta$),
+extended by the quadratic tower $\Q(\beta)(\sqrt{\Delta})$ that carries the
+circle-intersection candidate. Up to the dihedral symmetry of $R_9$ the diameter partner
+$u \in R_9$ ranges over $9$ choices, all enumerated; for each, the eight remaining vertices
+are partitioned into four pairs, one at each chord length, and the resulting colouring pins
+$v$ as an intersection of two circles centred at vertices of $R_9$ with radii among its
+chord lengths. Each candidate is then filtered by exact necessary conditions: the closed
+four-point Cayley--Menger determinants vanish (planarity), the characteristic polynomial of
+the Gram matrix certifies it positive semidefinite of rank $\le 2$, the squared far
+distance $z := |vu|^2$ solves its quadratic in the tower and strictly exceeds every squared
+chord length of $R_9$ (a genuinely new diameter), and the final multiplicity profile equals
+$(1,11,11,11,11)$. The enumeration (bin \texttt{e12\_descent
+-{}-n10} of \texttt{rust/fewdist}, the same descent engine as Proposition
+\ref{prop:n12search}) runs over all $9$ diameter partners, triggers $855$
+closed-Cayley--Menger prunings and $9$ surviving $z$-candidates, and returns \emph{zero}
+survivors. The engine is the one validated by the synthetic positive control of the
+\texttt{-{}-self-check} analogue and by the planted extension recovered in the
+\texttt{-{}-r11} run, so the empty output is a true non-existence rather than a vacuous one.
+\end{proof}
+
+\begin{proof}[Proof of Theorem \ref{thm:n10}]
+If $P$ failed, the descent above would produce a point $v \notin R_9$ with exactly two
+nonagon vertices at each of the four chord lengths of $R_9$ and one farther vertex at a new
+diameter, contradicting Proposition \ref{prop:n10search}. The proof invokes only
+\cite[Theorem~1]{ErFi96} (the classification $E_9(4)$, whose proofs are complete) and
+Hopf--Pannwitz \cite{HoPa34}; hence $n = 10$ is closed unconditionally.
+\end{proof}
+
+\begin{remark}[independent corroboration via $E_{10}(5)$, and an erratum to
+{\cite{Wei12}}]\label{rem:n10wei}
+The same conclusion follows independently from Wei's classification of the $10$-point
+$5$-distance sets, and that route uncovers an erratum in \cite{Wei12}. Wei
+\cite[Theorem~11]{Wei12} classifies the $10$-point $5$-distance sets: every one is similar
+to $R_9^+$, $R_{10}$, $R_{11}{-}1$ (the regular $11$-gon minus a vertex), the double $R_5$
+of his Figure 2q (a regular pentagon together with the five intersection points of its
+diagonals), or one of the sixteen configurations in $\Lat$ of his Figures 2a--2p. Up to
+similarity this list comprises $19$ classes (not $20$: see Remark \ref{rem:weierratum});
+their exact multiplicity vectors are given in Table \ref{tab:e105}. None is
+$(1,11,11,11,11)$: the only classes with diameter multiplicity $1$ are those of
+Figures 2a, 2c ($=$ 2h) and 2f, whose vectors $(1,6,8,11,19)$, $(1,7,8,11,18)$ and
+$(1,6,9,11,18)$ each have at least two non-diameter entries $\le 9 < 11$. (Moreover
+every lattice class has an entry $\ge 13$; $R_9^+$ and $R_{11}{-}1$ have constant
+vector $(9,9,9,9,9)$; and all multiplicities of $R_{10}$ and of the double $R_5$ are
+divisible by $5$, so they could never contain a $1$ or an $11$.) This reproves Theorem
+\ref{thm:n10} through a wholly different classification, and along the way records the
+count $19$ rather than Wei's $20$ (Remark \ref{rem:weierratum}).
+\end{remark}
+
+\begin{table}[ht]
+\centering
+\caption{The $19$ similarity classes of $10$-point $5$-distance sets
+(\cite[Theorem~11]{Wei12}, corrected per Remark \ref{rem:weierratum}), with exact
+multiplicity vectors ordered by decreasing distance. All lattice classes have squared
+distances $9 > 7 > 4 > 3 > 1$ (Loeschian norms).}
+\label{tab:e105}
+\begin{tabular}{@{}llll@{}}
+\toprule
+Wei figure & vector & Wei figure & vector \\
+\midrule
+2a & $(1,6,8,11,19)$ & 2j & $(3,12,8,9,13)$ \\
+2b & $(2,7,8,11,17)$ & 2k & $(3,10,8,9,15)$ \\
+2c $\cong$ 2h & $(1,7,8,11,18)$ & 2l & $(2,9,8,10,16)$ \\
+2d & $(2,6,8,11,18)$ & 2m & $(2,9,8,11,15)$ \\
+2e & $(2,7,8,10,18)$ & 2n & $(2,9,9,10,15)$ \\
+2f & $(1,6,9,11,18)$ & 2o & $(3,10,8,10,14)$ \\
+2g ($=T_{10}$, side-3 triangle) & $(3,6,9,9,18)$ & 2p & $(2,8,8,10,17)$ \\
+2i & $(3,8,9,9,16)$ & & \\
+\midrule
+$R_9^+$ & $(9,9,9,9,9)$ & $R_{11}{-}1$ & $(9,9,9,9,9)$ \\
+$R_{10}$ & $(5,10,10,10,10)$ & double $R_5$ (2q) & $(5,5,15,15,5)$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{remark}[erratum to {\cite[Theorem~11]{Wei12}}]\label{rem:weierratum}
+Wei's Figures 2c and 2h depict mirror images of one and the same chiral similarity
+class (verified exactly: their canonical forms agree up to reflection and differ
+without it). Since ``isomorphic'' in \cite{Wei12} means similar --- and Wei's own list
+identifies mirror images, as seven of the eight chiral lattice classes appear exactly
+once --- the sixteen lattice figures represent fifteen similarity classes, and
+$E_{10}(5)$ has $19$ classes, not $20$. No convention rescues the count of sixteen:
+with reflections the lattice classes number $15$; without them they would number $23$.
+\end{remark}
+
+\begin{remark}[independent re-derivation of the lattice part of $E_{10}(5)$]\label{rem:weiverif}
+The lattice part of Wei's theorem was re-derived here independently and exhaustively:
+a search over all similarity classes of $10$-point subsets of $\Lat$ with exactly $5$
+distances (exact integer arithmetic on Loeschian norms; canonical forms via primitive
+reduction and the order-$12$ point group; a lemma showing lattice similarity classes
+coincide with congruence classes of primitive representatives) finds exactly the $15$
+classes of Table \ref{tab:e105}, stable for primitive diameter$^2 \le M$ with
+$M = 30, 60, 100$; a second, prune-free brute-force enumeration ($94{,}143{,}280$
+subsets) returns the identical list, and the structural split of Wei's proof (classes
+containing a similar copy of $R_6^+$ versus not: $7 + 8$) is reproduced. The figures
+2a--2q were extracted from the published PDF at 600\,dpi and matched exactly
+(\texttt{extract\_figs.py}, \texttt{match\_figs.py}); the non-lattice profiles are
+exact over $\Q(\sqrt5)$ and by orbit counting (\texttt{nonlattice\_exact.py}).
+This re-derivation, the profiles of Table \ref{tab:e105} and the erratum of Remark
+\ref{rem:weierratum} all belong to the \emph{corroboration} of Remark \ref{rem:n10wei}:
+the main proof of Theorem \ref{thm:n10} (descent to $E_9(4)$ and the exact extension
+search over $R_9$, Proposition \ref{prop:n10search}) does not invoke \cite{Wei12} at all,
+so \emph{nothing in the case $n = 10$ rests on Wei's classification of $E_{10}(5)$}. In
+particular the one point that the corroboration route would leave on Wei alone --- the
+completeness statement that no non-lattice class exists beyond the four listed and no
+lattice class has primitive diameter$^2 > 100$ (all known ones have diameter$^2 = 9$) ---
+is no longer load-bearing for the theorem. Wei's proof in turn draws on
+\cite{Shinohara04,Shinohara08,ErFi96,LanWei13}, on Lemmas 7--8 of \cite{Wei11}, and on the
+diameter-graph analysis later published as \cite{WeiLiCongGao14}.
+\end{remark}
+
+\section{The case $n = 11$}\label{sec:n11}
+
+\begin{proposition}[reduction]\label{prop:n11red}
+If $P$, $|P| = 11$, fails, then $P$ has exactly $5$ distinct distances,
+$d \in \{2, \dots, 7\}$, and its diameter graph is not a star.
+\end{proposition}
+
+\begin{proof}
+$\binom{11}{2} = 55$, $m_i \ge 12$. Lemma \ref{lem:counting}(ii): $(k-1) \cdot 12 \le 54$
+gives $k \le 5$; $k \le 4$ excluded by $g(4) = 9 < 11$ (and below); hence $k = 5$,
+$d \le 55 - 48 = 7$. Corollary \ref{cor:size} with $g(4) = 9$: a star (in particular
+$d = 1$) would yield a $10$-point $4$-distance set, impossible; so $d \ge 2$, no star.
+\end{proof}
+
+This is the reduction half of part (iii) of Theorem \ref{thm:main}. The possible vectors
+$(d, 12+e_2, \dots, 12+e_5)$, $\sum e_i = 7 - d$, number $126$; abbreviate the resulting
+constraint on the multiplicity vector (ordered by decreasing distance) of a hypothetical
+$11$-point failure as
+\[
+\textbf{(T1)}\qquad m_1 = d \in \{2, \dots, 7\}, \qquad m_i \ge 12 \ \ (2 \le i \le 5).
+\]
+Here $11 < g(5) = 12$, so $P$ is not a maximum $5$-distance set and the descent of Section
+\ref{sec:descent} produces no extension problem (it only excludes the star). What closes
+the case is instead the classification of \emph{all} $11$-point $5$-distance sets.
+
+\begin{theorem}[{Wei \cite[Theorem~13, p.~514]{Wei11}}]\label{thm:e115}
+Every $11$-point $5$-distance set in the plane is similar to one of exactly four
+configurations: the regular $11$-gon $R_{11}$, or one of the three triangular-lattice
+patches $W_1, W_2, W_3 \subset \Lat$ of \cite[Figure~4, p.~515]{Wei11}.
+\end{theorem}
+
+In the embedding $(a,b) \mapsto a(1,0) + b(\tfrac12, \tfrac{\sqrt3}{2})$ of $\Lat$ (squared
+distances the Loeschian norms $a^2+ab+b^2$), representatives of the three lattice classes
+are
+\begin{align*}
+W_1 &: (0,0),(0,1),(0,2),(1,-1),(1,0),(1,1),(1,2),(2,-1),(2,0),(2,1),(3,-1); \\
+W_2 &: (0,0),(0,1),(0,2),(1,-1),(1,0),(1,1),(1,2),(2,-1),(2,0),(3,-1),(3,0); \\
+W_3 &: (0,0),(0,1),(0,2),(1,-1),(1,0),(1,1),(1,2),(2,-1),(2,1),(3,-1),(3,0).
+\end{align*}
+All three have squared-distance set $\{1,3,4,7,9\}$ and diameter$^2 = 9$; $W_1$ is chiral,
+$W_2$ and $W_3$ are achiral. The remaining class $R_{11}$ is not contained in $\Lat$
+(Remark \ref{rem:weiverif11}); we record its profile separately, since it is the only
+class in the $n = 12$ window (Section \ref{sec:n12}) and its distances are algebraic of
+degree $5$.
+
+\begin{lemma}[profile of $R_{11}$]\label{lem:r11}
+The regular $11$-gon determines exactly five distances, each realized by exactly $11$
+pairs: its multiplicity vector, ordered by decreasing distance, is $(11,11,11,11,11)$,
+and its diameter is the step-$5$ chord.
+\end{lemma}
+
+\begin{proof}
+Label the vertices by $\Z/11$, $V_j = (\cos 2\pi j/11, \sin 2\pi j/11)$; the dihedral
+group $D_{11}$ (rotation $r: j \mapsto j+1$, reflection $j \mapsto -j$) acts by isometries.
+For $i \ne j$ the \emph{step} $s(\{i,j\}) := \min\bigl((i-j) \bmod 11, (j-i) \bmod 11\bigr)
+\in \{1, \dots, 5\}$ is well defined ($11$ is odd, so the two residues are distinct), and
+$|V_iV_j| = 2\sin(s\pi/11)$ depends only on $s$. The orbit of $\{0, s\}$ under the rotation
+subgroup $C_{11}$ has $11$ elements, since $r^t\{0,s\} = \{0,s\}$ would force
+$2s \equiv 0 \pmod{11}$, impossible for $1 \le s \le 5$; so each of the five step classes
+contains exactly $11$ pairs, and $5 \cdot 11 = 55 = \binom{11}{2}$ accounts for every
+pair. The five values $2\sin(s\pi/11)$, $s = 1, \dots, 5$, are strictly increasing (as
+$5\pi/11 < \pi/2$ and $\sin$ is increasing on $[0,\pi/2]$), so there are exactly five
+distinct distances and the diameter is the step-$5$ chord. Algebraically, with
+circumradius $1$ the five squared distances $2 - 2\cos(2\pi s/11)$ are the roots of
+$u^5 - 11u^4 + 44u^3 - 77u^2 + 55u - 11$, obtained from the minimal polynomial
+$y^5 + y^4 - 4y^3 - 3y^2 + 3y + 1$ of $2\cos(2\pi/11)$ by the substitution $y = 2 - u$;
+this quintic is Eisenstein at $11$, hence irreducible and separable, confirming that the
+five squared distances are distinct and generate the real subfield $\Q(\zeta_{11})^+$ of
+degree $5$ over $\Q$.
+\end{proof}
+
+\begin{table}[ht]
+\centering
+\caption{The four similarity classes of $E_{11}(5)$ (\cite[Theorem~13]{Wei11}), with
+exact multiplicity vectors ordered by decreasing distance (each summing to $55$; ancillary
+file \texttt{n11\_profiles.py}). The three lattice classes have squared distances
+$9 > 7 > 4 > 3 > 1$ (Loeschian norms) and diameter$^2 = 9$; $R_{11}$ has the five squared
+chord lengths $2 - 2\cos(2\pi s/11)$, $s = 1, \dots, 5$ (Lemma \ref{lem:r11}).}
+\label{tab:e115}
+\begin{tabular}{@{}llll@{}}
+\toprule
+class & Wei Figure~4 & vector & chiral \\
+\midrule
+$R_{11}$ & --- (non-lattice) & $(11,11,11,11,11)$ & no \\
+$W_1$ & right (zigzag with notch) & $(2,9,10,13,21)$ & yes \\
+$W_2$ & centre (trapezoid) & $(3,10,10,12,20)$ & no \\
+$W_3$ & left (hexagon with hole) & $(3,12,10,12,18)$ & no \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{theorem}\label{thm:n11}
+Conditionally on the classification $E_{11}(5)$ of Wei \cite[Theorem~13]{Wei11}
+(Theorem \ref{thm:e115}), every set of $11$ points in the plane has at least two
+$11$-good distances.
+\end{theorem}
+
+\begin{proof}
+Suppose $P$, $|P| = 11$, fails. By Proposition \ref{prop:n11red} its multiplicity vector
+satisfies (T1) and $P$ is an $11$-point $5$-distance set, hence by Theorem \ref{thm:e115}
+similar to $R_{11}$, $W_1$, $W_2$ or $W_3$. The multiplicity vector is a similarity
+invariant, and the four vectors (Table \ref{tab:e115}) are $(11,11,11,11,11)$,
+$(2,9,10,13,21)$, $(3,10,10,12,20)$ and $(3,12,10,12,18)$; none satisfies (T1). Indeed
+each lattice class has a non-diameter entry $\le 10 < 12$ ($W_1$ has $m_2 = 9$ and
+$m_3 = 10$; $W_2$ has $m_2 = m_3 = 10$; $W_3$ has $m_3 = 10$), while $R_{11}$ has
+$m_1 = 11 > 7$ and every entry equal to $11 < 12$. Contradiction.
+\end{proof}
+
+This proves part (iii) of Theorem \ref{thm:main}.
+
+\begin{remark}[independent verification of the lattice part, and what rests on
+\cite{Wei11}]\label{rem:weiverif11}
+The lattice part of Theorem \ref{thm:e115} was re-derived here independently and
+exhaustively up to primitive diameter$^2 \le 300$: a search over all similarity classes of $11$-point subsets of $\Lat$ with
+exactly $5$ distances (exact integer arithmetic on Loeschian norms; canonical forms via
+primitive Eisenstein reduction and the order-$12$ point group, as in Section
+\ref{sec:n10}) returns exactly the three classes $W_1, W_2, W_3$ of Table \ref{tab:e115},
+stable for primitive diameter$^2 \le M$ with $M = 30, 60, 100, 147, 300$; the same
+enumerator reproduces the fifteen lattice classes of $E_{10}(5)$ as a sanity check, and
+each of $W_1, W_2, W_3$ matches a figure of \cite[Figure~4]{Wei11} by exact canonical form
+--- a clean bijection, with no erratum of the kind found for $E_{10}(5)$ (Remark
+\ref{rem:weierratum}). The four multiplicity profiles are recomputed in exact arithmetic
+(ancillary file \texttt{n11\_profiles.py}; Loeschian norms for $W_1, W_2, W_3$, the orbit
+argument of Lemma \ref{lem:r11} for $R_{11}$), each summing to $55$; and $R_{11}$ is
+similar to no lattice set, since in $\Lat$ every ratio of squared distances is rational
+whereas $\delta_2^2/\delta_1^2 = 2 + 2\cos(2\pi/11)$ for $R_{11}$ is irrational of degree
+$5$ over $\Q$. What still rests on \cite{Wei11} alone is the completeness of the
+non-lattice part --- that $R_{11}$ is the only similarity class outside $\Lat$ --- and the
+absence of lattice classes with primitive diameter$^2 > 300$ (all three known ones have
+diameter$^2 = 9$); such a full plane-wide re-derivation of $E_{11}(5)$, in the exact style
+of \cite{SzOs20}, would in principle remove the conditional and appears feasible, but we
+have not carried it out --- our exhaustive re-derivation covers the triangular-lattice
+part only.
+\end{remark}
+
+\begin{remark}[on the source \cite{Wei11}]\label{rem:weiomit}
+Unlike the other classification inputs of this note, \cite{Wei11} states at the outset
+that ``in the following some proofs are omitted because of the restriction of the length
+of the paper'' \cite[p.~506]{Wei11}, and several steps of its case analysis (the end of
+its Lemma~7, the non-$4P_2$ cases of its Lemma~8, and parts of its Theorem~13) are only
+sketched. This is the same editorial style as \cite{Wei12}, in which the present note
+found a genuine erratum (Remark \ref{rem:weierratum}); it is why $n = 11$ is stated
+conditionally on \cite{Wei11} (Theorem \ref{thm:n11}) and accompanied by the independent
+verification of Remark \ref{rem:weiverif11}. We found no error in \cite{Wei11}: the three
+lattice classes it lists are exactly the three we re-derive.
+\end{remark}
+
+\section{The case $n = 12$}\label{sec:n12}
+
+\begin{proposition}[reduction]\label{prop:n12red}
+If $P$, $|P| = 12$, fails, then either
+\begin{itemize}
+\item[(a)] $k = 6$ and the multiplicity vector is exactly $(1, 13, 13, 13, 13, 13)$, or
+\item[(b)] $k = 5$, $d \in \{2, \dots, 12\}$, and the diameter graph is not a star.
+\end{itemize}
+\end{proposition}
+
+\begin{proof}
+$\binom{12}{2} = 66$, $m_i \ge 13$. Lemma \ref{lem:counting}(ii): $(k-1) \cdot 13 \le 65$
+gives $k \le 6$; $k \le 4$ excluded by $g(4) = 9 < 12$ (and below); so $k \in \{5, 6\}$.
+If $k = 6$: even rigid case, $d = 1$, all $m_i = 13$ --- branch (a). If $k = 5$:
+$d \le 66 - 52 = 14$, cut to $d \le 12$ by Hopf--Pannwitz; Corollary \ref{cor:size} with
+$g(4) = 9$ excludes the star (an $11$-point $4$-distance set would result), so
+$d \ge 2$ --- branch (b).
+\end{proof}
+
+\begin{proposition}[branch (b) is impossible]\label{prop:n12k5}
+No $P$ with $|P| = 12$ fails the conjecture with $k = 5$.
+\end{proposition}
+
+\begin{proof}
+In branch (b), $|P| = 12 = g(5)$ (proved in \cite[Section~4]{ErFi96}), so $P$ is a
+maximum $5$-distance set. By the uniqueness theorem of Shinohara
+\cite[Theorem~1.2(b), p.~3049]{Shinohara08} --- verbatim: ``The configuration given in
+Fig.~1(d) is the only 12-point five-distance set in $\R^2$'' (proof in his \S4(II),
+p.~3054; verified against the full text) --- $P$ is similar to the triangular-lattice
+patch
+\begin{align*}
+T_{12} = {}& \{(0,2),(1,2)\} \cup \{(0,1),(1,1),(2,1)\} \\
+& {} \cup \{(0,0),(1,0),(2,0),(3,0)\} \cup \{(1,-1),(2,-1),(3,-1)\} \;\subset\; \Lat
+\end{align*}
+(rows $2/3/4/3$). Its exact multiplicity vector, computed over the Loeschian norms
+(squared distances $9 > 7 > 4 > 3 > 1$ with multiplicities $3, 12, 12, 15, 24$, summing
+to $66$), is
+\[
+T_{12} : (3, 12, 12, 15, 24) \quad\text{ordered by decreasing distance.}
+\]
+Its second and third classes have multiplicity $12 < 13$, so $T_{12}$ does not match
+the failure profile (indeed it has three $12$-good distances). Contradiction.
+\end{proof}
+
+\begin{remark}
+$T_{12}$ shows the threshold ``$\le n$'' in the problem statement is tight at $n = 12$:
+two of its distances have multiplicity exactly $n$. Historical note: Erd\H{o}s and
+Fishburn proved $g(5) = 12$ but explicitly left the uniqueness of the $12$-set open
+(\cite[p.~123]{ErFi96}: ``we presently have no guarantee that the 12-set of Fig.~1 is
+the only realizer of $g(5)=12$''); Shinohara's Theorem 1.2(b) supplies exactly that
+piece, and its proof is based on his classification of $8$-point $4$-distance sets ---
+the same input as Route A of Section \ref{sec:n8A}.
+\end{remark}
+
+Together with Proposition \ref{prop:n12red}, Proposition \ref{prop:n12k5} proves part
+(ii) of Theorem \ref{thm:main}: any failure at $n = 12$ lives in branch (a), with the
+rigid vector $(1, 13^5)$.
+
+\emph{Branch (a), $k = 6$: a finite exact extension search over $R_{11}$, with no
+solution.} With $d = 1$, (H2) is automatic and Lemma \ref{lem:descent} descends: deleting either endpoint
+$v$ of the unique diameter edge leaves an $11$-point $5$-distance set $K = P \setminus
+\{v\}$ with $m_i(K) = 13 - a_i$, where $a_i = \deg_i(v) \ge 0$ and $\sum_i a_i = 10$; thus
+$m_i(K) \in \{3, \dots, 13\}$ for all five classes, and Hopf--Pannwitz on the $11$-point
+set $K$ gives $m_1(K) \le 11$. Abbreviate this window on the profile of $K$ (ordered by
+decreasing distance) as
+\[
+\textbf{(T2)}\qquad m_i(K) \in \{3, \dots, 13\} \ \text{for all } i, \qquad m_1(K) \in
+\{3, \dots, 11\}.
+\]
+By Theorem \ref{thm:e115}, $K$ is similar to $R_{11}$, $W_1$, $W_2$ or $W_3$; comparing
+with the profiles of Table \ref{tab:e115}, each of the three lattice classes has a class
+of multiplicity $21$, $20$ or $18$, all $> 13$, so \emph{only $R_{11}$ satisfies (T2)}.
+Hence $K \cong R_{11}$, and the degrees of $v$ are then forced with no counting freedom:
+$a_i = 13 - m_i(R_{11}) = 13 - 11 = 2$ for every class, i.e.\ $v$ has exactly two vertices
+of $R_{11}$ at each of its five chord lengths ($10$ edges), plus one edge to its diameter
+partner $u \in K$ at a new value $\delta_1 > \diam R_{11}$ (so $m_1(P) = 1$); the value
+$a_2 = 2$ meets the bound $a_2 \ge 2$ of Lemma \ref{lem:descent}(d) with equality. This is
+exactly the situation of Corollary \ref{cor:extension} with $K = R_{11}$, and the
+degree-$5$ analogue of the closed case $n = 8$ (Route B, Proposition \ref{prop:n8search},
+where $K = R_7$ and $a = (2,2,2)$): the candidates $v$ are the finitely many intersections
+of pairs of circles centred at vertices of $R_{11}$ with radii among its five chord
+lengths, and every remaining check is an exact identity or inequality in the degree-$5$
+field $\Q(\zeta_{11})^+$ (Lemma \ref{lem:r11}). Note that $E_{12}(6)$ itself is \emph{not}
+classified in the literature; it is the descent, together with the profile analysis of
+Section \ref{sec:n11}, that reduces this branch to a single $11$-point configuration.
+
+\begin{proposition}[exact extension search over $R_{11}$]\label{prop:n12search}
+No point $v \in \R^2 \setminus R_{11}$ has exactly two vertices of $R_{11}$ at each of its
+five chord lengths together with a single farther vertex $u$ at a new value
+$\delta_1 > \diam R_{11}$. Consequently branch \emph{(a)} is empty: no $12$-point set
+fails the conjecture with $k = 6$.
+\end{proposition}
+
+\begin{proof}
+This is the finite exact search of Corollary \ref{cor:extension} for $K = R_{11}$ with the
+forced degree pattern $a = (2,2,2,2,2)$. It is carried out with no floating point, in the
+degree-$5$ field $\Q(\zeta_{11})^+ = \Q(\alpha)$, $\alpha = 2\cos(2\pi/11)$ (minimal
+polynomial $y^5 + y^4 - 4y^3 - 3y^2 + 3y + 1$, Lemma \ref{lem:r11}), extended by the
+quadratic tower $\Q(\alpha)(\sqrt{\Delta})$ that carries the circle-intersection candidate.
+Up to the dihedral symmetry of $R_{11}$ the diameter partner $u \in R_{11}$ ranges over
+$11$ choices, all enumerated; for each, the ten remaining vertices are partitioned into
+five pairs, one at each chord length, and the resulting colouring pins $v$ as an
+intersection of two circles centred at vertices of $R_{11}$ with radii among its chord
+lengths. Each candidate is then filtered by exact necessary conditions: the closed
+four-point Cayley--Menger determinants vanish (planarity), the characteristic polynomial of
+the Gram matrix certifies it positive semidefinite of rank $\le 2$, the squared far
+distance $z := |vu|^2$ solves its quadratic in the tower and satisfies $z$ strictly greater
+than every squared chord length of $R_{11}$ (a genuinely new diameter), and the final
+multiplicity profile equals $(1, 13^5)$. The enumeration (bin \texttt{e12\_descent -{}-r11}
+of \texttt{rust/fewdist}) runs over all $11$ diameter partners, triggers $2310$
+closed-Cayley--Menger prunings, and returns \emph{zero} survivors. As a
+positive control, the same search recovers a planted synthetic extension, so the empty
+output is a true non-existence rather than a vacuous one.
+\end{proof}
+
+Together with Proposition \ref{prop:n12k5}, this closes both branches and proves part (ii)
+of Theorem \ref{thm:main}: conditionally on \cite{Wei11}, no $12$-point set fails the
+conjecture. The classification input $E_{11}(5)$ is now in hand (Section \ref{sec:n11}), so
+the last remaining dependence is on the completeness of \cite[Theorem~13]{Wei11}, which a
+full plane-wide re-derivation of $E_{11}(5)$ (Remark \ref{rem:weiverif11}) would also
+discharge if carried out.
+
+\section{The case $n = 13$}\label{sec:n13}
+
+\begin{theorem}\label{thm:n13}
+Every set of $13$ points in the plane has at least two $13$-good distances.
+\end{theorem}
+
+\begin{proof}
+Suppose $P$, $|P| = 13$, fails; $\binom{13}{2} = 78$, $m_i \ge 14$. Lemma
+\ref{lem:counting}(ii): $(k-1) \cdot 14 \le 77$ gives $k - 1 \le 5.5$, so $k \le 6$; and
+$k \le 5$ is excluded by $g(5) = 12 < 13$ \cite{ErFi96}. Hence $k = 6$ and $P$ is a
+$13$-point $6$-distance set with $13 = g(6)$ \cite{Wei12}, i.e.\ maximum. By the
+classification of Sz\"oll\H{o}si and \"Osterg\aa rd \cite[Theorem~16]{SzOs20} (in
+agreement with \cite{Wei12}), there are exactly three such configurations up to
+isometry (of the normalized sets; i.e.\ up to similarity): the regular $13$-gon
+$R_{13}$, the regular $12$-gon with center $R_{12}^+$, and the regular hexagram with
+center. Their exact multiplicity vectors, ordered by decreasing distance (ancillary
+file \texttt{n13\_profiles.py}; each sums to $78$), are
+\[
+R_{13} : (13, 13, 13, 13, 13, 13), \qquad
+R_{12}^+ : (6, 12, 12, 12, 24, 12), \qquad
+\text{hexagram}^+ : (3, 6, 12, 15, 18, 24).
+\]
+In detail: $R_{13}$ has $13$ pairs in each chord class, the chords
+$2\sin(j\pi/13)$ being strictly increasing in $j$. For $R_{12}^+$ with circumradius
+$1$ the squared distances are $4 > 2+\sqrt3 > 3 > 2 > 1 > 2-\sqrt3$; the center-vertex
+distance $1$ coincides exactly with the step-$2$ chord ($|V_0V_2|^2 = 1$), which is the
+structural coincidence keeping $k = 6$ and giving that class $12 + 12 = 24$ pairs. The
+hexagram with center lies in $\Lat$ (hexagon of norm $1$, spikes of norm $3$, center),
+with squared distances $12 > 9 > 7 > 4 > 3 > 1$ and multiplicities
+$3, 6, 12, 15, 18, 24$. The diameter multiplicities $13, 6, 3$ all satisfy
+Hopf--Pannwitz. The minimum non-diameter multiplicities are $13$, $12$ and $6$
+respectively --- in every case $< 14$, so none matches the failure profile (indeed the
+three configurations have $6$, $5$ and $3$ thirteen-good distances). Contradiction.
+\end{proof}
+
+\begin{remark}
+We cite the journal numbering of \cite{SzOs20}: their Theorem 16 is Theorem 4.6 of the
+arXiv version (1804.06040); the two carry the same classification statement.
+The classification is computer-assisted (isomorph-free exhaustive generation plus
+Gr\"obner-basis computations); we did not re-derive it, but the three profiles above
+are re-derived here in exact arithmetic (integer orbit counting for $R_{13}$;
+$\Z[\sqrt3]$ for $R_{12}^+$; Loeschian norms for the hexagram), confirming the
+$g(6) = 13$ landscape of \cite{Wei12}.
+\end{remark}
+
+\section{Concluding remarks}\label{sec:remarks}
+
+\begin{itemize}
+\item \textbf{Status of the range.} Every case $7 \le n \le 13$ is now closed. Two of them
+are settled by descent to a classified maximum set followed by a finite exact extension
+search: $n = 10$, closed \emph{unconditionally} by descent to $E_9(4)$ of \cite{ErFi96}
+(only the regular nonagon $R_9$ survives the counting, and the extension search over $R_9$
+with the forced pattern $a = (2,2,2,2)$ over $\Q(\zeta_9)^+$ returns no solution,
+Proposition \ref{prop:n10search}, Section \ref{sec:n10}); and the $k = 6$ branch of
+$n = 12$ (Theorem \ref{thm:main}(ii)), the extension search adjoining one point to the
+regular $11$-gon $R_{11}$ with the forced pattern $a = (2,2,2,2,2)$ over $\Q(\zeta_{11})^+$,
+likewise with no solution (Proposition \ref{prop:n12search}, Section \ref{sec:n12}). What
+is \emph{not} self-contained is the classification $E_{11}(5)$ of \cite{Wei11}, on which
+$n = 11$ (Theorem \ref{thm:main}(iii)) and $n = 12$ both rest \emph{conditionally}, and
+whose printed proofs are partly omitted for length (Remark \ref{rem:weiomit}); its
+triangular-lattice part we have re-derived exactly (Remark \ref{rem:weiverif11}). The case
+$n = 10$ no longer depends on Wei at all (its old route via $E_{10}(5)$ \cite{Wei12} is now
+kept only as an independent corroboration, Remark \ref{rem:n10wei}). A full independent
+re-derivation of $E_{11}(5)$ in the plane, in the exact style of \cite{SzOs20}, would make
+both $n = 11$ and $n = 12$ unconditional.
+\item \textbf{$n \ge 14$.} For $n = 14$ the counting forces $k = 7$, and $7$-distance
+sets are not classified (\cite{SzOs20} describe such a classification as feasible ``in
+the near-term future''); this is the current hard frontier of the finite-case method.
+\item \textbf{Asymptotics.} Nothing in this note touches the second question of Erd\H{o}s
+and Pach (the number of $n$-good distances tending to infinity); by \cite{GuthKatz15} the
+counting reduction is void for large $n$. As the problem page notes, the general question
+``cannot be resolved with a finite computation''; the finite cases are partial results of
+exactly the kind Erd\H{o}s rewarded for $n = 5, 6$ \cite{ErFi95}.
+\item \textbf{Multiplicity constructions.} Bhowmick \cite{Bhowmick24} constructs $n$-point
+sets with $\lfloor n/4 \rfloor$ distances each of multiplicity $> n$; the failure profile
+of Table \ref{tab:profiles} would require about $n/2 - 1$ such rich classes, twice what is
+known to be constructible --- consistent with, but far from proving, the conjecture.
+\item \textbf{Formalization.} The statement of the problem and of the variants studied
+here is formalized in Lean~4 in the \textsc{Formal Conjectures} project
+\cite{FormalConjectures}; the proofs of the finite cases are not formalized, as they rest
+on classification results outside the current Lean libraries.
+\end{itemize}
+
+\subsection*{Acknowledgements}
+The author thanks R.\ Zeraoulia, whose working note \cite{Zeraoulia26} first posted the
+counting reduction, the case $n = 7$, and the reduction of $n = 8$ to the profile
+$(1,9,9,9)$; P.\ Chojecki, whose forum comment \cite{Chojecki26} pointed to the
+classification of planar $8$-point $4$-distance sets as closing $n = 8$; and T.\ F.\ Bloom
+for maintaining the Erd\H{o}s problems database \cite{Bloom132}.
+
+The proofs, the exact-arithmetic computations (the accompanying \texttt{Rust} and
+\texttt{Python} code), and the exposition of this note were developed with substantial
+assistance from Anthropic's Claude language models. The author directed the work, verified
+the results, and is solely responsible for any remaining errors.
+
+\bibliographystyle{plain}
+\bibliography{refs}
+
+\end{document}

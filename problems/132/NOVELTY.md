@@ -401,3 +401,96 @@ Findings:
 - **[EF95a] Conj. 4 / Thm 5** is the n = 5, 6 case of #132, as already known.
 - **[EF95b] §2:** m*(n) = minimum number of distances for a convex n-gon with no 4 concyclic points; m*(5) = 4, and they conjecture m*(n)/n → ∞. This is relevant to Conjecture C1's hypothesis.
 - Nothing in these papers touches Problem 1.6 or the 54/37 bound.
+
+## Audit 4: convex n = 11, 13 ⇒ ≥ 3 rare distances; ordinal Q suffices (angle_B3)
+
+Audit date: 2026-09-23. All URLs below were accessed on that date. New raw material in `novelty_sources/`:
+- `a4_forum132_20260923.txt`, `a4_proofclaims132_20260923.txt` (the latter includes the claim-218 comments fragment);
+- `a4_siblings_20260923.txt`;
+- `a4_arxiv_queries_20260923.txt`;
+- `a4_github_20260923.txt`;
+- `a4_leanpool_lyfar_20260923.txt`;
+- `a4_fishburn_later_20260923.txt`;
+- `a4_marchetto_note.tex`;
+- `1103.0412v2.pdf(.txt)`, gitignored.
+
+### Verdicts
+
+| Result (angle_B3) | Verdict | Reason |
+|---|---|---|
+| **Thm 11 / Thm 13:** every strictly convex n-set with n = 11 or 13 has ≥ 3 distances with multiplicity in [1, n] (SAT + drat-trim/LRAT) | **NEW** | No source states "≥ 3 rare distances" for any convex n ≥ 9. It does not follow from the literature either: r₂⁽ⁿ⁾ is known only for n ≤ 8 ([EF95b] §3), and the hard profiles (11,6,4) and (13,7,5) have D = m+1. Planar 6-distance 11-sets and 7-distance 13-sets are not classified (Wei 2011 covers 5 distances; Szöllősi–Östergård cover 13-point 6-distance sets). Caveat: the D = m sub-cases, (11,5,3) and (13,6,4), would also follow from Wei / Szöllősi–Östergård classifications plus Altman. Only the D = m+1 cases need our computation. |
+| **Conjecture Q-ORD / "the ordinal quadrilateral inequality alone suffices for 7 ≤ n ≤ 13"** | **PARTIALLY KNOWN (method), NEW (statement)** | Abstracting convex distance configurations by the quadrilateral inequality and searching the finite abstract version by computer is established technique. The inequality itself is used ordinally by Altman (1963) and by Füredi (1990) for unit distances. **Morić–Pritchard, arXiv:1103.0412** ("Counting large distances in convex polygons: a computational approach") run "an exhaustive search on a finite abstract version of the problem" using Fact 3.1, which is exactly our Lemma Q, plus three other facts. They also exhibit abstract patterns they cannot realise, the same tightness phenomenon as our (11,6,3). Aggarwal, arXiv:1009.2216, shows the limits of the Füredi-type ordinal method. New: the application to *rare* distances and #132; the observation that Q **alone** (no Fact 3.2-type angle facts, no rigidity) refutes every k ≤ 2 profile for 7 ≤ n ≤ 13 and fails at n = 5, 6; the "ordinal Altman" check for odd n ≤ 15; and the DRAT/LRAT-certified SAT pipeline. I found no SAT/CDCL treatment of distance-multiplicity problems anywhere. SAT geometry, e.g. Heule–Scheucher on empty hexagons (arXiv:2403.00737) and the SAT/ASP Erdős–Szekeres work in arXiv:2604.20120, works with order types or signotopes, not distance orders. |
+
+**Net for #132:** "k ≥ 3 for all convex 6 ≤ n ≤ 13" is not stated anywhere. Its parts have these statuses:
+- n = 6, 7, 8: literature corollary (Audit 3);
+- n = 10, 12: B2 Thm A, a minor corollary of CDL;
+- n = 9: B2 Thm B;
+- n = 11, 13: new, computer-certified.
+
+This is small-n evidence for the second question of #132 in convex position. It is not a resolution.
+
+### What was checked
+
+**erdosproblems.com (rule 4).**
+- The #132 thread (https://www.erdosproblems.com/forum/thread/132) is token-identical to the Audit 1 dump. It still has 5 comments, the latest ienjoymath on 25 Jul 2026.
+- Proof claims (…/132/proof-claims) are identical to Audit 2: one claim (Beller, n = 8, 23 Aug 2026), plus one comment (MalekZ, 24 Aug 2026).
+- Siblings re-fetched (`a4_siblings_20260923.txt`):
+
+  | # | Comments | Latest |
+  |---|---|---|
+  | 223 | 1 | 2025-10-13 |
+  | 756 | 1 | 2026-03-15 |
+  | 957 | 0 | — |
+  | 97 | 12 | 2026-09-17 |
+  | 98 | 5 | 2026-09-18 |
+  | 1082 | 22 | 2026-08-31 |
+  | 1084 | 5 | 2026-02-02 |
+
+- None mentions ≥ 3 rare distances or convex n = 11/13. The only keyword hit is #97, a comment about "every vertex has 4 equidistant vertices" for n ≤ 10, which is a different problem.
+
+**The three #132 small-n claims. None covers convex ≥ 3.**
+- **Zeraoulia Rafik** (28 Jan 2026): n = 7 for general sets, **≥ 2** rare distances, via 3-distance 7-set classification; plus the n = 8 reduction to profile {1,9,9,9}.
+- **Marchetto ("Marche")** (5 Jul 2026; https://github.com/JuanMarchetto/erdos-132-note, last pushed 2026-07-05; `a4_marchetto_note.tex`): 7 ≤ n ≤ 13 for **general** sets, **≥ 2** rare distances. Cases 11 and 12 are conditional on Wei 2011. The note mentions convexity only when citing CDL. It never states ≥ 3, and it never uses the quadrilateral inequality or SAT.
+- **Beller** (proof claim, 23 Aug 2026): n = 8, ≥ 2, general sets, with Lean conditional on literature inputs.
+
+Their statements have a different conclusion (≥ 2, not ≥ 3) on a larger class (all planar sets). Neither implies ours, and ours does not imply theirs.
+
+**GitHub** (`a4_github_20260923.txt`).
+- Repo searches for "erdos 132", "erdos132", "erdos-132" and "erdos problem 132" return the same set as Audit 2 plus two repos:
+  - `vibemathing/problem-erdosproblems-132` (2026-09-08): empty harness, with no attempts or results.
+  - **lyfar/rare-distance-fields** (2026-09-08; the Lean Pool project): proves **n ≤ 2^r** (r = number of rare distances) for point sets with coordinates in Q(√2) or in a purely transcendental field Q(T). That gives ≥ 3 rare distances for n ≥ 8 *in those coordinate fields*. The statement type overlaps ours (≥ 3 rare distances), but the class is disjoint in spirit. The result is arithmetic, not convex; generic real convex sets are not covered, and our result does not cover theirs. **Cite it as related work.**
+- Lean Pool (github.com/Vilin97/lean-pool, HEAD 2026-09-23) holds three #132 projects:
+  - `Erdos132ConvexK3`: the ELV top-three-distances degree-6 theorem. Not rare distances.
+  - `Erdos132ThreeChain`: non-diameter squared distances ≠ a geometric 3-chain for n ≥ 13.
+  - `Erdos132N14`: n = 14, ≥ 2, conditional.
+  
+  None of them overlaps.
+- Code search for "ordinal quadrilateral", "quadrilateral inequality SAT distances", "convex 11-gon distances" and "strictly convex rare distances": no relevant hits.
+
+**Literature and arXiv** (`a4_arxiv_queries_20260923.txt`).
+- arXiv API queries (convex polygon + distances + SAT; "distinct distances" + "SAT solver"; convex position + multiplicities; unit distances in a convex polygon; "quadrilateral inequality"; "k-distance sets" + computer; Erdős + Fishburn; "frequent distances"; "intervertex distances"; "distance multiplicities"; "repeated distances" + convex; Monge + convex polygon) returned only:
+  - CDL 2505.04283 (still v5, 2026-02-03);
+  - Aggarwal 1009.2216 and 1009.2218;
+  - Morić–Pritchard 1103.0412;
+  - off-topic papers.
+- Web searches (SAT + quadrilateral inequality + distances; convex "at least three" … "at most n times"; Fishburn ordinal/distance orderings; SAT for few-distance sets 2023–26; erdosproblems 132 convex three rare n = 11/13) turned up only:
+  - classical papers;
+  - Szöllősi–Östergård (EJC 27 (2020) P1.23), a computer classification of few-distance sets by graph/clique and Gröbner methods, not SAT;
+  - arXiv:2510.09800 (g(k) asymptotics);
+  - Tao's blog, 3 Sep 2024 (forbidden 4-point patterns).
+  
+  Nothing on rare-distance counts in convex position.
+
+**Fishburn's later papers** (OpenAlex author A5109079434, 1994–2012; `a4_fishburn_later_20260923.txt`).
+- The distance papers are EF94 *Postscript* (DCG), Fi95, EF95a/b, EF96 (read in Audit 3), EF96 *Maximum planar sets that determine k distances*, EF97 *Distinct distances in finite planar sets*, EF97 *Minimum planar sets with maximum equidistance counts*, Fishburn 1997 *Distances in convex polygons* (in The Mathematics of Paul Erdős II), and Fishburn 2002 *A remarkable eight-point configuration*.
+- By their titles and tldrs, the unread ones concern:
+  - g(n) = ⌊n/3⌋+1 (postscript);
+  - k-distance set sizes;
+  - equidistance counts.
+- The 1997 chapter is paywalled (Springer login). Its only citers are EF97, a 2006 vertex-distances paper and CDL 2025. **CDL cite it and still state only "≥ 2 rare distances" for convex sets**, which is indirect evidence that the chapter has no ≥ 3 statement for n ≥ 9.
+
+### Residual risks
+
+1. Fishburn's chapter "Distances in convex polygons" (1997) and the EF94 postscript are unread. At most they might tabulate r₂⁽ⁿ⁾ for n = 9, 10. That would make n = 9/10 corollaries; it would not reach n = 11, 13.
+2. Present the ordinal phenomenon with explicit credit: "in the spirit of Morić–Pritchard's abstract search (arXiv:1103.0412), using only their Fact 3.1". Do not call the method new.
+3. Before posting, re-check the #132 thread (anchor after post-8100) and Lean Pool / lyfar repos, which are very active.

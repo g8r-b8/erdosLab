@@ -1,0 +1,100 @@
+Erdős Problems
+Forum
+Inbox
+Favourites
+Tags
+More
+FAQ
+Prizes
+Problem Lists
+Definitions
+Links
+Forum
+Menu
+Inbox
+Favourites
+Tags
+FAQ
+Prizes
+Problem Lists
+Definitions
+Links
+Go
+Go
+Dual View
+Random Solved
+Random Open
+Revision history of
+436
+. All highlighted changes are compared to the current version.
+Current version
+If $p$ is a prime and $k,m\geq 2$ then let $r(k,m,p)$ be the minimal $r$ such that $r,r+1,\ldots,r+m-1$ are all $k$th power residues modulo $p$. Let\[\Lambda(k,m)=\limsup_{p\to \infty} r(k,m,p).\]Is it true that $\Lambda(k,2)$ is finite for all $k$? Is $\Lambda(k,3)$ finite for all odd $k$? How large are they?
+Asked by Lehmer and Lehmer
+[LeLe62]
+, who note that for example $\Lambda(2,2)=9$ - indeed, $9$ is always a quadratic residue, and if $10$ isn't then either $2$ or $5$ is, and hence at least one of $1,2$ or $4,5$ or $9,10$ is a consecutive pair of quadratic residues (and similarly there are infinitely many $p$ for which there are no consecutive quadratic residues below $9,10$).
+A similar argument of Dunton
+[Du65]
+proves $\Lambda(3,2)=77$, and Bierstedt and Mills
+[BiMi63]
+proved $\Lambda(4,2)=1224$. Lehmer and Lehmer proved that $\Lambda(k,3)=\infty$ for all even $k$ and $\Lambda(k,4)=\infty$ for all $k\leq 1048909$.
+Lehmer, Lehmer, and Mills
+[LLM63]
+proved $\Lambda(5,2)=7888$ and $\Lambda(6,2)=202124$. Brillhart, Lehmer, and Lehmer
+[BLL64]
+proved $\Lambda(7,2)=1649375$. Lehmer, Lehmer, Mills, and Selfridge
+[LLMS62]
+proved that $\Lambda(3,3)=23532$.
+Graham
+[Gr64g]
+proved that $\Lambda(k,l)=\infty$ for all $k\geq 2$ and $l\geq 4$.
+Hildebrand
+[Hi91]
+resolved the first question, proving that $\Lambda(k,2)$ is finite for all $k$: in other words, for any $k\geq 2$, if $p$ is sufficiently large then there exists a pair of consecutive $k$th power residues modulo $p$ in $[1,O_k(1)]$.
+The remaining questions are to examine whether $\Lambda(k,3)$ is finite for all odd $k\geq 5$, and the growth rate of $\Lambda(k,2)$ and $\Lambda(k,3)$ as functions of $k$.
+2025-10-20 00:00:00
+If $p$ is a prime and $k,m\geq 2$ then let $r(k,m,p)$ be the minimal $r$ such that $r,r+1,\ldots,r+m-1$ are all $k$th power residues modulo $p$. Let\[\Lambda(k,m)=\limsup_{p\to \infty} r(k,m,p).\]Is it true that $\Lambda(k,2)$ is finite for all $k$? Is $\Lambda(k,3)$ finite for all odd $k$? How large are they?
+Asked by Lehmer and Lehmer
+[LeLe62]
+. F
+, who note that f
+or example $\Lambda(2,2)=9$
+and
+- indeed, $9$ is always a quadratic residue, and if $10$ isn't then either $2$ or $5$ is, and hence at least one of $1,2$ or $4,5$ or $9,10$ is a consecutive pair of quadratic residues (and similarly there are infinitely many $p$ for which there are no consecutive quadratic residues below $9,10$).
+A similar argument of Dunton
+[Du65]
+proves
+$\Lambda(3,2)=77$
+, and Bierstedt and Mills
+[BiMi63]
+proved $\Lambda(4,2)=1224$
+.
+It is known
+Lehmer and Lehmer proved
+that $\Lambda(k,3)=\infty$ for all even $k$ and $\Lambda(k,4)=\infty$ for all $k
+\leq 1048909
+$.
+Lehmer, Lehmer, and Mills \cite
+{
+P
+LLM63
+}
+proved $\Lambda(5,2)=7888$ and $\Lambda(6,2)=202124$. Brillhart, Lehmer, and Lehmer
+[BLL64]
+proved $\Lambda(7,2)=1649375$. Lehmer, Lehmer, Mills, and Selfridge
+[LLMS62]
+proved that $\Lambda(3,3)=23532$.
+Graham
+[Gr64g]
+proved that $\Lambda(k,l)=\infty$ for all $k\geq 2$ and $l\geq 4$.
+Hildebrand
+[Hi91]
+resolved the first question, proving that $\Lambda(k,2)$ is finite for all $k$: in other words, for any $k\geq 2$, if $p$ is sufficiently large then there exists a pair of consecutive $k$th power residues modulo $p$ in $[1,O_k(1)]$.
+Th
+is has been partially resolved: Hildebrand
+[Hi91]
+has sho
+e remaining questions are to examine
+w
+n that $\Lambda(k,2)$ is finite for all
+hether $\Lambda(k,3)$ is finite for all odd $k\geq 5$, and the growth rate of $\Lambda(k,2)$ and $\Lambda(k,3)$ as functions of
+$k$.

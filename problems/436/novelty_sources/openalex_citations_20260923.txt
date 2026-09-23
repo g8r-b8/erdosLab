@@ -1,0 +1,83 @@
+## LLMS62 cubic machine proof 10.1090/S0025-5718-1962-0162379-2 https://openalex.org/W1965839947 cited_by 25 Machine proof of a theorem on cubic residues
+    2011 | The Twenties | https://doi.org/10.1007/978-0-85729-532-3_3
+    2011 | Looking for Busy Beavers. A socio-philosophical study of a computer-assisted proof | https://openalex.org/W2564935499
+    2009 | Doing Mathematics on the ENIAC. Von Neumann’s and Lehmer’s different visions | https://openalex.org/W601540798
+    2004 | None of the Above | https://doi.org/10.1007/978-0-387-26677-0_7
+    1994 | None of the Above | https://doi.org/10.1007/978-1-4899-3585-4_7
+    1986 | On consecutivek'th power residues | https://doi.org/10.1007/bf01490203
+    1983 | Monthly Unsolved Problems 1969–1983 | https://doi.org/10.1080/00029890.1983.11971313
+    1983 | Patterns of power residues | https://doi.org/10.1016/0022-314x(83)90004-5
+    1982 | On the distribution of quadratic residues modulo a prime | https://doi.org/10.1016/0022-314x(82)90029-4
+    1982 | The influence of computers in the development of number theory | https://doi.org/10.1016/0898-1221(82)90026-8
+    1980 | A recurrent pattern in the list of quadratic residues mod a prime and in the values of the liouville λ function | https://doi.org/10.1016/0022-314x(80)90072-4
+    1980 | Old and new problems and results in combinatorial number theory | https://openalex.org/W1489006728
+    1975 | On Applications of Van Der Waerden's Theorem | https://doi.org/10.1080/0025570x.1975.11976466
+    1974 | Bounds for consecutive kth power residues in the Eisenstein integers | https://doi.org/10.1016/0022-314x(74)90027-4
+    1973 | A note on Dirichlet characters | https://doi.org/10.1090/s0025-5718-1973-0337850-8
+    1971 | BIBLIOGRAPHY | https://doi.org/10.1016/b978-0-08-016091-7.50015-6
+    1971 | THE PAPERS | https://doi.org/10.1016/b978-0-12-587250-8.50012-6
+    1970 | Consecutive power residues or nonresidues | https://doi.org/10.1090/s0025-5718-1970-0277469-8
+    1969 | Consecutive residues or non-residues in the Gaussian integers | https://doi.org/10.1016/0022-314x(69)90008-0
+    1969 | Legal Information Retrieval | https://doi.org/10.1016/s0065-2458(08)60312-5
+    1964 | Aspects of Language Design for Combinatorial Computing | https://doi.org/10.1109/pgec.1964.263845
+    1964 | Bounds for Pairs of Consecutive Seventh and Higher Power Residues | https://doi.org/10.2307/2003762
+    1964 | A computer program for discovering and proving recognition rules for Backus Normal Form grammars | https://doi.org/10.1145/800257.808887
+    1964 | Bounds for pairs of consecutive seventh and higher power residues | https://doi.org/10.1090/s0025-5718-1964-0164923-x
+    1963 | Pairs of Consecutive Power Residues | https://doi.org/10.4153/cjm-1963-020-4
+## LL62 runs of residues 10.1090/S0002-9939-1962-0133295-6 ERR HTTP Error 404: Not Found
+## LLM63 pairs 10.4153/CJM-1963-019-8 ERR HTTP Error 404: Not Found
+## BLL64 10.1090/S0025-5718-1964-0164923-X https://openalex.org/W1999426642 cited_by 13 Bounds for pairs of consecutive seventh and higher power residues
+    2011 | The Twenties | https://doi.org/10.1007/978-0-85729-532-3_3
+    2000 | The Genesis of Quadratic Reciprocity | https://doi.org/10.1007/978-3-662-12893-0_1
+    1986 | On consecutivek'th power residues | https://doi.org/10.1007/bf01490203
+    1983 | Monthly Unsolved Problems 1969–1983 | https://doi.org/10.1080/00029890.1983.11971313
+    1983 | Patterns of power residues | https://doi.org/10.1016/0022-314x(83)90004-5
+    1982 | On the distribution of quadratic residues modulo a prime | https://doi.org/10.1016/0022-314x(82)90029-4
+    1980 | A recurrent pattern in the list of quadratic residues mod a prime and in the values of the liouville λ function | https://doi.org/10.1016/0022-314x(80)90072-4
+    1980 | Old and new problems and results in combinatorial number theory | https://openalex.org/W1489006728
+    1978 | On kth power residues | https://doi.org/10.1016/0022-314x(78)90030-6
+    1974 | Bounds for consecutive kth power residues in the Eisenstein integers | https://doi.org/10.1016/0022-314x(74)90027-4
+    1971 | BIBLIOGRAPHY | https://doi.org/10.1016/b978-0-08-016091-7.50015-6
+    1970 | Consecutive Power Residues or Nonresidues | https://doi.org/10.2307/2004850
+    1970 | Consecutive power residues or nonresidues | https://doi.org/10.1090/s0025-5718-1970-0277469-8
+## Hildebrand91 10.1307/mmj/1029004331 https://openalex.org/W2032446668 cited_by 6 On consecutive $k$th power residues. II.
+    2019 | On a theorem of Hildebrand | https://doi.org/10.2140/moscow.2019.8.189
+    2013 | A generalization of Schur's theorem and its application to consecutive power residues | https://doi.org/10.48550/arxiv.1309.7506
+    2007 | Quadratic residues and the combinatorics of sign multiplication | https://doi.org/10.1016/j.jnt.2007.07.001
+    2006 | On completely multiplicative functions whose values are roots of unity | https://doi.org/10.1007/s10474-006-0090-0
+    2004 | None of the Above | https://doi.org/10.1007/978-0-387-26677-0_7
+    1994 | None of the Above | https://doi.org/10.1007/978-1-4899-3585-4_7
+## Graham64 10.1090/S0002-9939-1964-0161822-2 ERR HTTP Error 404: Not Found
+## 10.1007/s10474-006-0090-0 2006 Bui Minh Phong | On completely multiplicative functions whose values are roots of unity | cited_by 0
+   ABSTRACT: 
+## 10.1007/bf01490203 1986 Adolf Hildebrand | On consecutivek'th power residues | cited_by 7
+   ABSTRACT: 
+    cite: 2022 | Consecutive quadratic residues in Beatty sequences
+    cite: 2021 | Consecutive Quadratic Residues and Primitive Roots in the Sequences Formed by Twice-differentiable Functions
+    cite: 2011 | The Twenties
+    cite: 2007 | Quadratic residues and the combinatorics of sign multiplication
+    cite: 2004 | None of the Above
+    cite: 1994 | None of the Above
+    cite: 1988 | Multiplicative functions into finite abelian groups
+## 10.1016/0022-314x(83)90004-5 1983 Emma T. Lehmer | Patterns of power residues | cited_by 4
+   ABSTRACT: 
+    cite: 2000 | The Genesis of Quadratic Reciprocity
+    cite: 1986 | The power of powerful numbers
+    cite: 1984 | On runs of consecutive quadratic residues and quadratic nonresidues
+    cite: 1983 | On the first occurrence of certain patterns of quadratic residues and non-residues
+## 10.1016/0022-314x(78)90030-6 1978 Paromita Chowla, Sarvadaman Chowla | On kth power residues | cited_by 2
+   ABSTRACT: 
+    cite: 1986 | On consecutivek'th power residues
+    cite: 1981 | A remark on the Dirichlet values of a completely reducible polynomial (mod q)
+## 10.1016/j.jnt.2007.07.001 2007 Steve J. Wright | Quadratic residues and the combinatorics of sign multiplication | cited_by 10
+   ABSTRACT: 
+    cite: 2023 | Non primitive roots with a prescribed residue pattern
+    cite: 2022 | Residue pattern for infinitely many primes
+    cite: 2016 | Quadratic Residues and Non-Residues in Arithmetic Progression
+    cite: 2013 | Quadratic residues and non-residues in arithmetic progression
+    cite: 2012 | Quadratic residues and non-residues for infinitely many Piatetski-Shapiro primes
+    cite: 2012 | Computational Complexity Theoretical Analyses on Cryptographic Algorithms for Computer Security Application
+    cite: 2011 | Quadratic residues and non-residues for infinitely many Piatetski-Shapiro primes
+    cite: 2011 | The Odd and Even Intersection Properties
+    cite: 2010 | Fast modular multiplication based on complement representation and canonical recoding
+    cite: 2008 | A note on the dth power residue symbol of Fq[t]

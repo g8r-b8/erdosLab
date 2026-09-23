@@ -1,0 +1,21 @@
+## all:"consecutive power residues"
+   2013-09-28 1309.7506v1 A generalization of Schur's theorem and its application to consecutive power residues
+   2003-11-29 0312010v3 Simple arguments on consecutive power residues
+## all:"consecutive residues" AND all:power
+## all:"power residues" AND all:consecutive AND all:triples
+## abs:"Erdos problem 436"
+## all:"k-th power residues" AND all:consecutive
+   2003-11-29 0312010v3 Simple arguments on consecutive power residues
+## all:Hildebrand AND all:"power residues"
+## all:"completely multiplicative" AND all:"roots of unity" AND all:consecutive
+   2017-02-05 1702.01470v2 On consecutive values of random completely multiplicative functions
+## all:"quintic residues"
+## all:"Lehmer" AND all:"power residues" AND all:runs
+http://arxiv.org/abs/1702.01470v2
+On consecutive values of random completely multiplicative functions
+In this article, we study the behavior of consecutive values of random completely multiplicative functions $(X_n)_{n \geq 1}$ whose values are i.i.d. at primes. We prove that for $X_2$ uniform on the unit circle, or uniform on the set of roots of unity of a given order, and for fixed $k \geq 1$, $X_{n+1}, \dots, X_{n+k}$ are independent if $n$ is large enough. Moreover, with the same assumption, we prove the almost sure convergence of the empirical measure $N^{-1} \sum_{n=1}^N δ_{(X_{n+1}, \dots, X_{n+k})}$ when $N$ goes to infinity, with an estimate of the rate of convergence. At the end of the paper, we also show that for any probability distribution on the unit circle followed by $X_2$, the empirical measure converges almost surely when $k=1$.
+
+http://arxiv.org/abs/math/0312010v3
+Simple arguments on consecutive power residues
+By some extremely simple arguments, we point out the following: (i) If n is the least positive k-th power non-residue modulo a positive integer m, then the greatest number of consecutive k-th power residues mod m is smaller than m/n. (ii) Let O_K be the ring of algebraic integers in a quadratic field $K=Q(\sqrt d)$ with d in {-1,-2,-3,-7,-11}. Then, for any irreducible $π\in O_K$ and positive integer k not relatively prime to $π\barπ-1$, there exists a k-th power non-residue $ω\in O_K$ modulo $π$ such that $|ω|&lt;\sqrt{|π|}+0.65$.
+

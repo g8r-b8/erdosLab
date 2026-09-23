@@ -1,0 +1,94 @@
+## repos: erdos 132
+mathematiclover1337/erdos-132-note 2026-07-25T18:06:38Z
+lyfar/erdos132-wei-certificates 2026-09-03T04:05:43Z
+EvanBeller/erdos-132 2026-08-30T22:53:24Z
+JuanMarchetto/erdos-132-note 2026-07-05T22:11:21Z
+vibemathing/problem-erdosproblems-132 2026-09-08T08:42:18Z
+DeckardShaw31/erdos-132-proof 2026-09-10T05:42:43Z
+lyfar/erdos-132-moment-obstruction-lean 2026-07-27T14:35:50Z
+lyfar/erdos-132-convex-k3-lean 2026-08-17T15:14:43Z
+## repos: erdos132
+lyfar/erdos132-wei-certificates 2026-09-03T04:05:43Z
+## repos: erdos-132
+mathematiclover1337/erdos-132-note 2026-07-25T18:06:38Z
+vibemathing/problem-um-ep-132-erd-s-problem-132-c8168ca4 2026-09-06T16:32:03Z
+lyfar/erdos132-wei-certificates 2026-09-03T04:05:43Z
+EvanBeller/erdos-132 2026-08-30T22:53:24Z
+JAgbanwa/Erdos-Problem-132 2026-08-05T11:28:11Z
+JuanMarchetto/erdos-132-note 2026-07-05T22:11:21Z
+vibemathing/problem-erdosproblems-132 2026-09-08T08:42:18Z
+DeckardShaw31/erdos-132-proof 2026-09-10T05:42:43Z
+lyfar/erdos-132-convex-k3-lean 2026-08-17T15:14:43Z
+lyfar/erdos-132-moment-obstruction-lean 2026-07-27T14:35:50Z
+## repos: erdos problem 132
+vibemathing/problem-um-ep-132-erd-s-problem-132-c8168ca4 2026-09-06T16:32:03Z
+lyfar/erdos-132-convex-k3-lean 2026-08-17T15:14:43Z
+lyfar/erdos-132-moment-obstruction-lean 2026-07-27T14:35:50Z
+JAgbanwa/Erdos-Problem-132 2026-08-05T11:28:11Z
+## repos: rare distances
+lyfar/rare-distance-fields 2026-09-08T05:17:36Z
+## repos: interpoint distances
+rezamodarres/Visual-IPD 2019-09-24T16:53:57Z
+sjkoelle/montlake 2024-05-23T23:00:46Z
+## code: ordinal quadrilateral
+## code: convex 11-gon distances
+## code: quadrilateral inequality SAT distances
+## code: Q-ORD
+consultingwerk/ADE-Sourcecode src/prores/q-order.p
+cpmech/gosl ode/erk.go
+Advantzware/Advantzware Source/oe/closelin.p
+sudo-gera/c stdin.py
+OpenTrading/OpenTrader wiki/TestsExamples.creole
+Advantzware/Advantzware Source/est/fgadd2.p
+Advantzware/Advantzware Source/oe/ordlup.p
+haskell-lisp/yale-haskell derived/derived.scm
+drreynolds/arklab driver_timedep_M.m
+stfbnc/fathon fathon/mfdfa.pyx
+drreynolds/arklab driver_timedep_M2.m
+cosmos72/schemesh io/wire/get.ss
+stfbnc/fathon fathon/mfdcca.pyx
+cosmos72/schemesh io/wire/constants.ss
+Advantzware/Advantzware Source/oe/fgadd2.p
+## code: strictly convex rare distances
+## Marchetto tree
+.gitignore
+LICENSE
+README.md
+paper
+paper/note.bbl
+paper/note.pdf
+paper/note.tex
+paper/refs.bib
+rust
+rust/Cargo.toml
+rust/covering
+rust/covering/Cargo.toml
+rust/covering/README.md
+rust/covering/examples
+rust/covering/examples/hunt4.rs
+rust/covering/examples/listtasks4.rs
+rust/covering/src
+rust/covering/src/hunt.rs
+rust/covering/src/instance.rs
+rust/covering/src/lib.rs
+rust/covering/src/provisional.rs
+rust/covering/src/solver.rs
+rust/covering/src/valuation.rs
+rust/covering/tests
+rust/covering/tests/hunt_tests.rs
+rust/covering/tests/provisional_tests.rs
+rust/covering/tests/solver_tests.rs
+rust/covering/tests/valuation_tests.rs
+rust/distgeom
+rust/distgeom/Cargo.toml
+rust/distgeom/README.md
+rust/distgeom/src
+rust/distgeom/src/bin
+rust/distgeom/src/bin/e10_brute.rs
+rust/distgeom/src/bin/e10_search.rs
+rust/distgeom/src/circle.rs
+rust/distgeom/src/lattice.rs
+rust/distgeom/src/lib.rs
+rust/distgeom/src/multiset.rs
+rust/distgeom/src/point.rs
+2026-07-05T22:11:21Z
