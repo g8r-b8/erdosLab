@@ -459,7 +459,27 @@ theorem card_le_of_oneSided {G : Finset Pt} (s : Pt → ℝ) {c ℓ : ℝ} (hc :
     (hsep : ∀ v ∈ G, ∀ w ∈ G, v ≠ w → c ≤ |s v - s w|)
     (hside : ∀ v ∈ G, ∀ w ∈ G, s v < s w → s w - s v ≤ ℓ) :
     (G.card : ℝ) ≤ ℓ / c + 1 := by
-  sorry
+  rcases G.eq_empty_or_nonempty with rfl | hne
+  · simp; positivity
+  obtain ⟨v₀, hv₀, hmin⟩ := G.exists_min_image s hne
+  have hinj : Set.InjOn s G := by
+    intro v hv w hw h
+    by_contra hvw
+    have := hsep v hv w hw hvw
+    rw [h, sub_self, abs_zero] at this; linarith
+  rw [← card_image_of_injOn hinj]
+  have := card_le_of_sep (a := s v₀) hc (G.image s) (s v₀ + ℓ) (by linarith) ?_ ?_
+  · rwa [show s v₀ + ℓ - s v₀ = ℓ by ring] at this
+  · intro x hx
+    obtain ⟨w, hw, rfl⟩ := mem_image.1 hx
+    refine ⟨hmin w hw, ?_⟩
+    rcases (hmin w hw).lt_or_eq with h | h
+    · linarith [hside v₀ hv₀ w hw h]
+    · rw [← h]; linarith
+  · intro x hx y hy hxy
+    obtain ⟨v, hv, rfl⟩ := mem_image.1 hx
+    obtain ⟨w, hw, rfl⟩ := mem_image.1 hy
+    exact hsep v hv w hw (fun h => hxy (h ▸ rfl))
 
 /-! ## Configurations of points with outward normals -/
 
@@ -475,20 +495,42 @@ variable {V : Finset Pt} {nrm : Pt → Pt}
 theorem NormalConfig.det2_ne (hV : NormalConfig V nrm) {v w g : Pt} {c : ℝ} (hc : 0 < c)
     (hv : v ∈ V) (hw : w ∈ V) (hvw : v ≠ w) (hvg : c ≤ inner ℝ (nrm v) g)
     (hwg : c ≤ inner ℝ (nrm w) g) : det2 (nrm v) (nrm w) ≠ 0 := by
-  sorry
+  intro h0
+  rcases eq_or_eq_neg_of_det2_eq_zero (hV.unit v hv) (hV.unit w hw) h0 with h | h
+  · have h1 := hV.chord v hv w hw hvw
+    have h2 := hV.chord w hw v hv (Ne.symm hvw)
+    rw [h] at h1
+    have : inner ℝ (v - w) (nrm w) = - inner ℝ (w - v) (nrm w) := by
+      rw [← inner_neg_left, neg_sub]
+    linarith
+  · rw [h, inner_neg_left] at hvg
+    linarith
 
 /-- Oriented separation along `g^⊥`. -/
 theorem NormalConfig.sep_det2 (hV : NormalConfig V nrm) {v w g : Pt} {c : ℝ} (hc : 0 ≤ c)
     (hv : v ∈ V) (hw : w ∈ V) (hvw : v ≠ w) (hvg : c ≤ inner ℝ (nrm v) g)
     (hwg : c ≤ inner ℝ (nrm w) g) (hdet : 0 < det2 (nrm v) (nrm w)) :
     c * dist w v ≤ det2 g (w - v) := by
-  sorry
+  have h1 := hV.chord v hv w hw hvw
+  have h2 := hV.chord w hw v hv (Ne.symm hvw)
+  have h2' : 0 ≤ inner ℝ (w - v) (nrm w) := by
+    have : inner ℝ (v - w) (nrm w) = - inner ℝ (w - v) (nrm w) := by
+      rw [← inner_neg_left, neg_sub]
+    linarith
+  have := wedge_sep (hV.unit v hv) (hV.unit w hw) hc hvg hwg hdet h1.le h2'
+  rwa [← dist_eq_norm] at this
 
 /-- Unoriented separation along `g^⊥`. -/
 theorem NormalConfig.sep_abs (hV : NormalConfig V nrm) {v w g : Pt} {c : ℝ} (hc : 0 < c)
     (hv : v ∈ V) (hw : w ∈ V) (hvw : v ≠ w) (hvg : c ≤ inner ℝ (nrm v) g)
     (hwg : c ≤ inner ℝ (nrm w) g) : c * dist w v ≤ |det2 g (w - v)| := by
-  sorry
+  rcases lt_or_gt_of_ne (hV.det2_ne hc hv hw hvw hvg hwg) with h | h
+  · have hd : 0 < det2 (nrm w) (nrm v) := by rw [det2_swap]; linarith
+    have := hV.sep_det2 hc.le hw hv (Ne.symm hvw) hwg hvg hd
+    have e : det2 g (v - w) = - det2 g (w - v) := by rw [det2_sub_right, det2_sub_right]; ring
+    rw [e, dist_comm] at this
+    exact this.trans (neg_le_abs _)
+  · exact (hV.sep_det2 hc.le hv hw hvw hvg hwg h).trans (le_abs_self _)
 
 /-- The points whose normals lie in the cap of a unit edge `pq` number at most `N`
 (`N > 2/|n_p + n_q|`). -/
@@ -496,7 +538,82 @@ theorem NormalConfig.card_cap_le (hV : NormalConfig V nrm) {p q : Pt} (hp : p �
     (hpq : dist p q = 1) (hdet : 0 < det2 (nrm p) (nrm q)) {κ : ℝ} (hκ : 0 < κ)
     (hκp : κ ≤ ‖nrm p + nrm q‖) {N : ℕ} (hN : 2 / κ < N) :
     (V.filter (fun v => nrm v ∈ cap (nrm p) (nrm q))).card ≤ N := by
-  sorry
+  set a := nrm p with ha_def
+  set b := nrm q with hb_def
+  have ha : ‖a‖ = 1 := hV.unit p hp
+  have hb : ‖b‖ = 1 := hV.unit q hq
+  set g := a + b with hg_def
+  set c := 1 + inner ℝ a b with hc_def
+  have hg2 : ‖g‖ ^ 2 = 2 * c := by rw [hg_def, norm_add_sq_real, ha, hb]; ring
+  have hgpos : 0 < ‖g‖ := lt_of_lt_of_le hκ hκp
+  have hc : 0 < c := by nlinarith
+  set C := V.filter (fun v => nrm v ∈ cap a b) with hC_def
+  have hCV : ∀ v ∈ C, v ∈ V := fun v hv => (mem_filter.1 hv).1
+  have hCg : ∀ v ∈ C, c ≤ inner ℝ (nrm v) g := fun v hv => (mem_filter.1 hv).2
+  have hpC : p ∈ C := by
+    refine mem_filter.2 ⟨hp, ?_⟩
+    show 1 + inner ℝ a b ≤ inner ℝ a (a + b)
+    rw [inner_add_right, real_inner_self_eq_norm_sq, ha]; norm_num
+  have hqC : q ∈ C := by
+    refine mem_filter.2 ⟨hq, ?_⟩
+    show 1 + inner ℝ a b ≤ inner ℝ b (a + b)
+    rw [inner_add_right, real_inner_self_eq_norm_sq, hb, real_inner_comm]; norm_num; linarith
+  have hlo : ∀ v ∈ C, det2 g p ≤ det2 g v := by
+    intro v hv
+    by_cases hvp : v = p
+    · rw [hvp]
+    have hvV := hCV v hv
+    have hd := (det2_nonneg_of_mem_cap ha hb (hV.unit v hvV) hdet (mem_filter.1 hv).2).1
+    have hne := hV.det2_ne hc hp hvV (Ne.symm hvp) (hCg p hpC) (hCg v hv)
+    have := hV.sep_det2 hc.le hp hvV (Ne.symm hvp) (hCg p hpC) (hCg v hv)
+      (lt_of_le_of_ne hd (Ne.symm hne))
+    rw [det2_sub_right] at this
+    have : 0 ≤ c * dist v p := by positivity
+    linarith
+  have hhi : ∀ v ∈ C, det2 g v ≤ det2 g q := by
+    intro v hv
+    by_cases hvq : v = q
+    · rw [hvq]
+    have hvV := hCV v hv
+    have hd := (det2_nonneg_of_mem_cap ha hb (hV.unit v hvV) hdet (mem_filter.1 hv).2).2
+    have hne := hV.det2_ne hc hvV hq hvq (hCg v hv) (hCg q hqC)
+    have := hV.sep_det2 hc.le hvV hq hvq (hCg v hv) (hCg q hqC) (lt_of_le_of_ne hd (Ne.symm hne))
+    rw [det2_sub_right] at this
+    have : 0 ≤ c * dist q v := by positivity
+    linarith
+  have hext : det2 g q - det2 g p ≤ ‖g‖ := by
+    rw [← det2_sub_right]
+    have := abs_det2_le g (q - p)
+    rw [← dist_eq_norm, dist_comm, hpq, one_mul] at this
+    exact (le_abs_self _).trans this
+  have hsep : ∀ v ∈ C, ∀ w ∈ C, v ≠ w → c ≤ |det2 g v - det2 g w| := by
+    intro v hv w hw hvw
+    have := hV.sep_abs hc (hCV v hv) (hCV w hw) hvw (hCg v hv) (hCg w hw)
+    rw [det2_sub_right, abs_sub_comm] at this
+    have h1 := hV.sep w (hCV w hw) v (hCV v hv) (Ne.symm hvw)
+    nlinarith
+  have hinj : Set.InjOn (fun v => det2 g v) C := by
+    intro v hv w hw h
+    by_contra hvw
+    have := hsep v hv w hw hvw
+    simp only at h
+    rw [h, sub_self, abs_zero] at this; linarith
+  have hcard := card_le_of_sep (a := det2 g p) hc (C.image (fun v => det2 g v)) (det2 g q)
+    (by linarith [hlo q hqC]) (by
+      intro x hx
+      obtain ⟨w, hw, rfl⟩ := mem_image.1 hx
+      exact ⟨hlo w hw, hhi w hw⟩) (by
+      intro x hx y hy hxy
+      obtain ⟨v, hv, rfl⟩ := mem_image.1 hx
+      obtain ⟨w, hw, rfl⟩ := mem_image.1 hy
+      exact hsep v hv w hw (fun h => hxy (h ▸ rfl)))
+  rw [card_image_of_injOn hinj] at hcard
+  have h1 : (det2 g q - det2 g p) / c ≤ 2 / κ := by
+    rw [div_le_div_iff₀ hc hκ]
+    have : ‖g‖ * κ ≤ 2 * c := by rw [← hg2]; nlinarith
+    nlinarith
+  have h2 : (C.card : ℝ) < N + 1 := by linarith
+  exact_mod_cast Nat.lt_succ_iff.1 (by exact_mod_cast h2)
 
 /-- **Edge count** (KK / DD): unit edges with normals at angle `> β₀` and `|n_p + n_q| ≥ κ`,
 degree `≤ D`, satisfy `#E · β₀ ≤ 2π·D·N` for any `N > 2/κ`. -/
