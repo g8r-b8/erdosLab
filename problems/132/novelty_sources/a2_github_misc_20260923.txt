@@ -1,0 +1,121 @@
+# GitHub repo search (erdos 132 / erdos132 / erdos-132 / erdos problem 132 / 'second largest distance' / 'Clemen Dumitrescu Liu'), 2026-09-23
+2026-09-10 DeckardShaw31/erdos-132-proof | 
+2026-09-08 vibemathing/problem-erdosproblems-132 | Superseded draft intake; canonical repository: vibemathing/problem-um-ep-132-erd-s-problem-132-c8168
+2026-09-06 vibemathing/problem-um-ep-132-erd-s-problem-132-c8168ca4 | Vibe Mathing single-problem candidate research: Erdős Problem #132
+2026-09-03 lyfar/erdos132-wei-certificates | Machine-checked certificates for the E11(5) classification chain (Wei 2011, Wei-Li-Cong-Gao 2014) — 
+2026-08-30 EvanBeller/erdos-132 | 
+2026-08-17 lyfar/erdos-132-convex-k3-lean | Standalone origin for LeanPool.Erdos132ConvexK3: conditional convex k=3 case of Erdős Problem 132 (L
+2026-08-05 JAgbanwa/Erdos-Problem-132 | 
+2026-07-27 lyfar/erdos-132-moment-obstruction-lean | Kernel-checked conditional fourteen-point theorem for Erdős Problem 132, with three explicit publish
+2026-07-25 mathematiclover1337/erdos-132-note | 
+2026-07-05 JuanMarchetto/erdos-132-note | 
+
+# mathematiclover1337/erdos-132-note commits
+2026-07-25T18:06:37Z Add files via upload
+2026-07-25T17:48:32Z Add files via upload
+RESULT3-upper-bound-program.md, NOTES.md: HTTP 404 (2026-09-23)
+
+# lyfar/erdos-132-convex-k3-lean README
+One rare disease is rare. Rare diseases together are not.
+
+I am building MISHA into an independent AI research lab for rare genetic
+diseases. This repository tests whether an AI-assisted mathematical result can
+be stated precisely, checked by Lean, and reviewed in public. It does not claim
+a direct application to biology.
+
+# A conditional convex three-distance theorem for Erdős Problem 132
+
+[![CI](https://github.com/lyfar/erdos-132-convex-k3-lean/actions/workflows/ci.yml/badge.svg)](https://github.com/lyfar/erdos-132-convex-k3-lean/actions/workflows/ci.yml)
+
+This repository is the standalone origin for the Lean Pool project
+`LeanPool.Erdos132ConvexK3`. It contains the same Lean modules with a minimal
+pinned Lake project around them.
+
+The result is conditional. It does not prove the convex `k = 3` case without
+an extra interface, and it does not solve the general Erdős problem.
+
+## Exact theorem
+
+The headline declaration is
+`LeanPool.Erdos132ConvexK3.convex_k3_degree_six_of_reduction`.
+
+Consider a finite, nonempty configuration of labelled points in strict convex
+position in the Euclidean plane. Join two labels when their squared distance is
+one of the three largest realized classes. Lean proves that this graph has a
+vertex of degree at most six, assuming
+`ConvexTopThreeDraftReductionComplete`.
+
+That single interface supplies the maximal-gap and thirteen-word reduction
+together with the route closures. Its remaining source-facing boundary is the
+coordinated-majorant selection step used in the proof sketch of Theorem 2.7 of
+Erdős, Lovász, and Vesztergombi. The paper does not state that selection step
+as a theorem.
+
+## Formalized content
+
+The Lean sources contain:
+
+- the top-three distance graph, strict convexity, and diameter-lens geometry;
+- penultimate-coordinate identities and the three-range metric dichotomy;
+- the cover process, majorant paths, terminal cages, anti-saturation, and the
+  thirteen-word assembly;
+- use-site rigidity for the exceptional `(1,2)`, `(2,1)`, and `(2,2)`
+  branches; and
+- exact rational witnesses, including a convex heptagon that refutes the
+  stronger universal longer-cover claim.
+
+The development also records nonnested-pair witnesses that rule out a general
+exchange statement. The theorem remains conditional on the one interface
+named above.
+
+## Source
+
+Paul Erdős, László Lovász, and Katalin Vesztergombi,
+[*On the Graph of Large Distances*](https://doi.org/10.1007/BF02187746),
+*Discrete & Computational Geometry* 4 (1989), 541–549.
+
+[Erdős Problem 132](https://www.erdosproblems.com/132) records the broader
+problem.
+
+## Reproducible verification
+
+The repository pins Lean, Mathlib, and the dependency graph. From the
+repository root:
+
+```bash
+lake exe cache get
+lake build --wfail LeanPool.Erdos132ConvexK3
+lake build --wfail
+lake env leanchecker
+./scripts/audit.sh
+```
+
+The audit strips Lean comments before checking forbidden executable tokens,
+enforces the Lean Pool source-size bound, rebuilds with warnings as errors,
+checks all 288 public declarations with `#print axioms`, and runs Lean's
+independent environment checker. The accepted axiom footprint is limited to
+`propext`, `Classical.choice`, and `Quot.sound`.
+
+CI repeats the build, source audit, axiom audit, and environment check on
+Ubuntu.
+
+## Provenance
+
+Proof provenance: **AI**. AI agents produced most of the Lean code under Egor
+Lyfar's direction. Egor selected the scope, required the source and soundness
+audits, and is the repository author. This provenance does not claim a solution
+of the unconditional convex case or the general Erdős problem.
+
+## License
+
+Apache-2.0. See [LICENSE](LICENSE).
+
+# google-deepmind/formal-conjectures PR #4389 (JuanMarchetto, open, last update 2026-07-05): formalises #132 parts i/ii + variants hopf_pannwitz, second_distance, four_points, erdos_fishburn, convex_position (CDL Thm 1.2), polynomial_count. No Problem 1.6 or k>=3 variant.
+
+# gh search code: '2505.04283' -> only Lyken17/arXiv-stats; 'Clemen Dumitrescu Problem 1.6', 'second largest distance multiplicity', 'rare distances convex' -> 0 hits; '54/37' -> unrelated JSON
+
+# Tao wiki: header
+**The wiki is no longer updated. The latest data is as of Jun 30, 2026.**
+grep for 132: 0 matches
+# teorth/erdosproblems problems.yaml #132: state open, last_update 2025-08-31
+# teorth/optimizationproblems (pushed 2026-09-05): no hit for Clemen|Vesztergombi|2505.04283|second largest distance|rare distance|132

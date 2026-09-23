@@ -1,0 +1,136 @@
+## abs:%22second+largest+distance%22
+  2026-02-11 2602.11331v1 Characterizing graphs with the second largest distance eigenvalue less than -1/2
+  2025-09-16 2509.12640v1 Tricyclic graphs for which the second largest distance eigenvalue less than $-\frac{1}{2}$
+  ( 2 hits since 2024 )
+## abs:%22minimum+distance%22+AND+abs:multiplicity+AND+abs:planar
+  ( 0 hits since 2024 )
+## abs:%22multiplicities+of+interpoint+distances%22
+  ( 0 hits since 2024 )
+## abs:%22interpoint+distances%22
+  2026-08-03 2608.02288v2 Identification of generic polygonal domains by integral-geometric invariants
+  2026-06-27 2606.29036v1 The limit law of the largest interpoint distance in a $d$-dimensional ellipsoid
+  2026-05-23 2605.24627v1 A 4/7-limit law for the largest interpoint distance in a rotational ellipsoid
+  2026-05-20 2605.20806v1 Evaluation of the number of clusters in a data set using $p$-values from Multiple Tests of Hypotheses
+  2026-05-06 2605.04739v1 Confirmation of Binary Clustering in Gamma-Ray Bursts through an Integrated $p$-value from Multiple Nonparamet
+  2026-04-28 2604.26030v1 Euclidean distance geometry and the orthogonal beltway problem
+  2025-11-06 2511.04870v2 Extending Characterizations of Multivariate Laws via Distance Distributions
+  2025-06-24 2506.19251v1 Statistical Geometry and Information Dynamics on Hyperspherical Surfaces
+  2024-11-01 2411.01065v1 Local Indicators of Mark Association for Spatial Marked Point Processes
+  2024-08-20 2408.10570v1 A two-sample test based on averaged Wilcoxon rank sums over interpoint distances
+  2024-05-22 2405.13351v2 Quantum (Inspired) $D^2$-sampling with Applications
+  ( 11 hits since 2024 )
+## abs:%22convex+position%22+AND+abs:%22distinct+distances%22
+  ( 0 hits since 2024 )
+## abs:%22convex+polygon%22+AND+abs:distances
+  2026-08-26 2608.27491v1 The Probability That the Incenter of a Triangle Lies in a Random Diameter Disk
+  2026-08-03 2608.02288v2 Identification of generic polygonal domains by integral-geometric invariants
+  2026-07-05 2607.04310v1 GPU-Accelerated Polygonal Signed Distance Functions for Real-Time Collision Avoidance
+  2026-05-08 2605.07882v2 Touring a Sequence of Orthogonal Polygons
+  2026-03-07 2603.07088v1 On the maximum product of distances of diameter $2$ point sets
+  2026-02-26 2602.22874v2 Flip Distance Between Triangulations of Convex Polygons is NP-Complete
+  2026-01-06 2601.03163v2 LSP-DETR: Efficient and Scalable Nuclei Segmentation in Whole-Slide Images
+  2026-01-05 2601.01756v3 A Wachspress-based transfinite formulation for exactly enforcing Dirichlet boundary conditions on convex polyg
+  2025-10-24 2510.21700v2 Cutting Planarians: Planar Emulators for String Graphs
+  2025-07-07 2507.04767v2 Billiards and Hofer's Geometry
+  2025-05-19 2505.13715v1 Dynamic Bipedal MPC with Foot-level Obstacle Avoidance and Adjustable Step Timing
+  2025-05-05 2505.03841v3 Contact-Aware Safety in Soft Robots Using High-Order Control Barrier and Lyapunov Functions
+  2025-04-09 2504.06960v1 Higher-Order Color Voronoi Diagrams and the Colorful Clarkson-Shor Framework
+  2025-01-07 2501.03834v2 The Geodesic Fréchet Distance Between Two Curves Bounding a Simple Polygon
+  2024-11-11 2411.07053v2 UAV survey coverage path planning of complex regions containing exclusion zones
+  2024-04-18 2404.12095v1 Convex Sequence and Convex Polygon
+  2024-03-15 2403.10033v1 Ipelets for the Convex Polygonal Geometry
+  ( 17 hits since 2024 )
+## abs:%22rare+distances%22
+  ( 0 hits since 2024 )
+## abs:Vesztergombi
+  2024-08-30 2409.00182v2 Status report on long-time decay measurements of 137Cs radioisotope
+  2024-02-12 2402.07761v1 Decay rate measurements $^{137}$Cs at Jánossy Underground Research Laboratory
+  ( 2 hits since 2024 )
+## abs:%22Pannwitz%22
+  ( 0 hits since 2024 )
+## abs:%22Erdos+problem%22+AND+abs:distances
+  ( 0 hits since 2024 )
+## abs:%22Erd%C5%91s+problem%22+AND+abs:distances
+  2026-07-29 2609.25011v1 A Kernel-Certified Verification of the Erdős-Mollin-Walsh Conjecture below $10^{14}$
+  ( 1 hits since 2024 )
+## au:Dumitrescu_Adrian
+  2026-09-21 2609.25288v1 Exponential improvements in Rado's covering problem
+  2026-09-01 2609.00538v1 Doubling Sunlight for a Human Mars Base With Orbiting Solar Reflectors
+  2026-04-19 2604.17509v2 Rado's covering problem for cubes and balls: a semi-survey
+  2025-11-01 2511.00692v1 A Couple of Simple Algorithms for $k$-Dispersion
+  2025-10-03 2510.03445v2 Note on the Number of Almost Ordinary Triangles
+  2025-09-01 2509.01580v1 Arcs with increasing chords in $\mathbf{R}^d$
+  2025-07-26 2507.19841v4 The number of regular simplices in higher dimensions
+  2025-07-14 2507.10840v2 Covering Complete Geometric Graphs by Monotone Paths
+  2025-06-20 2506.16675v2 Closed curve covering and multiagent TSP ratios
+  2025-05-07 2505.04283v5 On multiplicities of interpoint distances
+  2025-04-18 2504.13819v3 Ordered Yao graphs: maximum degree, edge density, and clique numbers
+  2025-03-10 2503.06857v2 General Position Subset Selection in Line Arrangements
+  2025-02-22 2502.16305v4 A Purely Geometric Variant of the Gale-Berlekamp Switching Game
+  2024-12-22 2412.16994v1 Geometric Variants of the Gale--Berlekamp Switching Game
+  2024-12-18 2412.14287v2 Subset selection problems in planar point sets
+  2024-11-20 2411.13206v1 A Stopping Game on Zero-Sum Sequences
+  2024-06-13 2406.08913v3 Maximizing the Maximum Degree in Ordered Nearest Neighbor Graphs
+  2024-05-27 2405.17172v2 Partitioning Complete Geometric Graphs on Dense Point Sets into Plane Subgraphs
+  2024-03-02 2403.01085v2 A Strongly Subcubic Combinatorial Algorithm for Triangle Detection with Applications
+  ( 19 hits since 2024 )
+## au:Clemen_Felix
+  2026-08-06 2608.14687v1 Triangle-Saturated Graphs in the Semi-Random Graph Process
+  2026-07-31 2607.29628v2 A minimum-degree threshold for colour-biased Hamilton cycles in hypergraphs
+  2026-06-04 2606.05841v1 Geometric Sidon Problems
+  2026-05-13 2605.14138v2 On Tournament Anti-Sidorenko Orientations of Trees
+  2025-07-26 2507.19841v4 The number of regular simplices in higher dimensions
+  2025-05-07 2505.04283v5 On multiplicities of interpoint distances
+  2025-05-06 2505.03903v1 Maximizing Alternating Paths via Entropy
+  2024-12-18 2412.14287v2 Subset selection problems in planar point sets
+  2024-06-03 2406.01499v1 Applications of Sparse Hypergraph Colorings
+  2024-06-03 2406.01119v2 Crossing Numbers of Billiard Curves in the Multidimensional Box via Translation Surfaces
+  ( 10 hits since 2024 )
+## au:Liu_Dingyuan
+  2026-08-23 2608.22414v1 Extremal problems for suspensions of even cycles
+  2026-05-27 2605.28472v1 On the Ramsey classes of random hypergraphs
+  2026-02-21 2602.18895v2 Could Large Language Models work as Post-hoc Explainability Tools in Credit Risk Models?
+  2026-01-30 2602.03865v2 Remarks on a theorem of Erdős and Szemerédi
+  2025-12-17 2512.15516v2 Ramsey problems for graphs in Euclidean spaces and Cartesian powers
+  2025-08-18 2508.12763v2 Turán problems for simplicial complexes
+  2025-07-26 2507.19841v4 The number of regular simplices in higher dimensions
+  2025-05-07 2505.04283v5 On multiplicities of interpoint distances
+  2024-12-18 2412.14287v2 Subset selection problems in planar point sets
+  2024-11-18 2411.12124v3 A note on the mutual-visibility coloring of hypercubes
+  2024-09-11 2409.07535v2 Chromatic Ramsey numbers and two-color Turán densities
+  2024-07-05 2407.04492v2 On the number of sets with small sumset
+  2024-02-13 2402.08651v5 Induced saturation for complete bipartite posets
+  2024-02-07 2402.04791v4 Visibility in hypercubes
+  ( 14 hits since 2024 )
+## abs:%22few+distances%22+AND+abs:convex
+  ( 0 hits since 2024 )
+## abs:%22largest+distances%22
+  2026-08-20 2608.20101v1 Largest bulk gap of the complex Ginibre ensemble
+  2026-05-02 2605.01578v1 A fine-grained dichotomy for the center problem on Gromov hyperbolic graphs
+  2026-02-11 2602.11331v1 Characterizing graphs with the second largest distance eigenvalue less than -1/2
+  2025-12-04 2512.05248v1 Extremes of Brownian Decision Trees
+  2025-10-28 2510.24846v1 A Precise $α_s$ Determination from the R-improved QCD Static Energy
+  2025-09-16 2509.12640v1 Tricyclic graphs for which the second largest distance eigenvalue less than $-\frac{1}{2}$
+  2025-08-07 2508.05760v2 On the Maximum Spread of Non-Negative Matrices
+  2025-07-07 2507.04672v3 Bounds for the number of basic feasible solutions generated by the simplex method with the largest distance ru
+  2025-03-28 2503.22521v1 Distributed Freeze Tag: a Sustainable Solution to Discover and Wake-up a Robot Swarm
+  2024-10-31 2410.24104v1 Clustering to Minimize Cluster-Aware Norm Objectives
+  2024-10-21 2410.16482v1 Giant branch systems: surveys and populations
+  2024-09-11 2409.07198v1 Connected graphs with large multiplicity of $-1$ in the spectrum of the eccentricity matrix
+  2024-05-12 2405.07371v1 Extreme Distance Distributions of Poisson Voronoi Cells
+  2024-05-07 2405.04421v1 The bishop and knight checkmate on a large chessboard
+  2024-01-24 2401.13380v4 The golf model on $\mathbb{Z}/n\mathbb{Z}$ and on $\mathbb{Z}$
+  ( 15 hits since 2024 )
+## abs:%22distance+multiplicities%22
+  2026-08-08 2608.08239v1 The Replay Gap: Static Evaluation of Model Switching in LLM Agents Scores the Wrong World
+  2026-01-15 2601.10376v2 A Hybrid Reliability--Weight Framework for Construction of Polar Codes
+  2025-05-07 2505.04283v5 On multiplicities of interpoint distances
+  ( 3 hits since 2024 )
+## abs:%22repeated+distances%22
+  2026-09-15 2609.16731v1 The Price of Random Access: Measuring Block Granularity Across Four Compressed Formats
+  2026-07-06 2607.05374v1 The Minkowski grid has robustly many repeated distances
+  2026-06-16 2606.17487v2 A combinatorial large sieve for Sidon sets, distances, and norm forms
+  2026-01-20 2601.13779v1 Maximum spanning trees in normed planes
+  2026-01-12 2601.07183v1 RAIRS: Optimizing Redundant Assignment and List Layout for IVF-Based ANN Search
+  2025-03-28 2503.22630v3 Large subsets avoiding algebraic patterns
+  ( 6 hits since 2024 )

@@ -337,3 +337,52 @@ repeat it. New raw material is in `novelty_sources/`:
 
    Any of them might remark that convex n-gons have ≥ 3 distances with r ≤ n for small n, or might list the Fishburn hexagon profiles. That would affect B2 Theorem A only at n = 6 or as "folklore". It would not affect A2.
 3. **B2 Theorem A is a 5-line consequence of CDL's proof plus parity.** Present it as a remark or corollary ("CDL's argument, with parity-sharp counting, gives k ≥ 3 for even n"), not as a headline result.
+
+## Audit 2 (A2 54/37, B2 Theorems A/B)
+
+Independent second pass, run on 2026-09-23 (all sources accessed that day). A parallel agent committed the
+section above (b8bb2ec) while this pass was running. This section does not repeat it. It records a separate
+re-check and the points the section above does not cover. New raw material in `novelty_sources/`:
+- `a2_proofclaims132_20260923.txt`: the proof-claims page plus the comment fragment for claim 218;
+- `a2_tag_distances_scan_20260923.txt`: every thread on the distances tag, with comment counts, latest comment date and a keyword scan;
+- `a2_arxiv_queries_20260923.txt`;
+- `a2_cdl_v5_html_20260923.txt`: the CDL v5 HTML as text;
+- `a2_github_misc_20260923.txt`: repo search, the ienjoymath repo state, lyfar's k3 README, the formal-conjectures PR, Tao's wiki and optimizationproblems;
+- `a2_history132_20260923.txt`.
+
+### Verdicts (agree with the section above)
+
+| Result | Verdict | Reason |
+|---|---|---|
+| **A2:** min{μ(Δ₂), μ(δ)} ≤ (54/37)n + C₀ | **NEW** | No upper bound below 3/2 exists anywhere. CDL v5 §1.1 and §2.2 still give only Ve87's 3n/2. The #132 thread and every thread on the distances tag are silent on it. So are GitHub, arXiv 2024–26, Tao's wiki, teorth/optimizationproblems, and formal-conjectures PR #4389. CDL still has 0 citers (Semantic Scholar and OpenAlex). The one open risk is still ienjoymath's unpublished LP note: the repo is unchanged since 2026-07-25 and `RESULT3-upper-bound-program.md` and `NOTES.md` return 404. |
+| **B2 Theorem A:** convex, n ≥ 6 even ⇒ k ≥ 3 | **NEW as a statement, but minor.** Close to PARTIALLY KNOWN. | Nobody states it. **But every input is already printed in CDL v5 §2.1:** Altman; the Fishburn D = m list with the explicit profiles (6,6,3), (5,5,5), (n,…,n,n/2) and (n−1,…,n−1); and the pair count ⌊n/2⌋(n+1)+1 > C(n,2). Reading those profiles gives k ≥ 3 when D = m. The only step of ours is the parity-sharp count for D ≥ m+1. This also settles the n = 6 worry above: the hexagon profiles are in CDL, not only in ErFi95. Present it as "CDL's proof, counted with parity, gives …". |
+| **B2 Theorem B:** convex 9-sets, k ≥ 3 | **NEW, minor** | Not found anywhere. It is immediate from Erdős–Fishburn 1996 (convex nonagons with 5 distances) plus counting. It depends on how accurately we quote that paper (paywalled, not re-read here). |
+
+### Points not in the section above
+
+1. **There is a comment after 25 Jul 2026, but it is irrelevant.**
+   - It is on the proof-claims page, under Beller's claim 218, and is loaded by XHR from `/forum/proof-claims/218/comments`.
+   - Post-8564, MalekZ, 24 Aug 2026: an invitation to verify Beller's n = 8 claim via a "Significance record".
+   - It says nothing about Problem 1.6 or convex sets.
+   - The #132 thread itself still has 5 comments (latest post-8100, 25 Jul 2026). The page history still shows only the 2025-10-20 revision.
+2. **Full sweep of the distances tag: 65 problem links, all threads fetched.**
+   - Comments newer than the first audit's reading exist only on #90 (20 Sep 2026, unit distances), #97 and #98 (already covered), #100, #213, #217, #654 and #670.
+   - A keyword scan for Clemen, 2505.04283, "second largest", Vesztergombi, "Problem 1.6", "rare distance" and 54/37 finds only problem-statement boilerplate (#223, #756, #957, #958, #959) and Clemen–Führer–Roche-Newton "Geometric Sidon Problems" on #1208. That paper is unrelated.
+3. **lyfar/erdos-132-convex-k3-lean.** Its "convex k = 3 case" means the graph of the **three largest distances** (Erdős–Lovász–Vesztergombi 1989, degree ≤ 6). It is not "three rare distances". No overlap with B2 Theorem A.
+4. **google-deepmind/formal-conjectures PR #4389** (Marchetto, open, last activity 2026-07-05).
+   - Variants included: hopf_pannwitz, second_distance, four_points, erdos_fishburn, convex_position (CDL Thm 1.2), polynomial_count.
+   - Nothing on k ≥ 3 for convex sets and nothing on Problem 1.6.
+5. **Citation correction to REFEREE_A2.** The referee's "citation mismatch" is itself wrong.
+   - CDL v5 cites **[23] = Vesztergombi 1987, Discrete Math. 67** for the general 3n/2 bound (§2.2).
+   - It cites **[22] = Ve85, Discrete Math. 57** for the convex-position bound.
+   - So angle_A2's "[23]" is correct. Do not "fix" it.
+6. **Another paywalled classical source to add to the residual risks:** Erdős–Fishburn, "A postscript on distances in convex n-gons", DCG (1994), DOI 10.1007/BF02573998. No abstract is available on Crossref, OpenAlex or Semantic Scholar, and Springer requires login. Together with ErFi95 and Fishburn's survey chapter, it is the most likely place for a small-n "convex ⇒ ≥ 3 rare distances" remark. It could affect only B2, never A2.
+7. **Semantic Scholar** (it worked on this pass):
+   - CDL (DOI 10.1007/s10474-025-01562-y): 0 citations.
+   - ErFi95: 14 citations, of which the only one since 2024 is CDL.
+8. **Further web and GitHub searches, all without an on-topic hit:**
+   - "54/37" with distances;
+   - "Problem 1.6" with "multiplicities of interpoint distances";
+   - ienjoymath/9/7 LP note;
+   - convex "at least three" … "at most n times";
+   - gh code search for "Clemen Dumitrescu Problem 1.6", "second largest distance multiplicity" and "rare distances convex".

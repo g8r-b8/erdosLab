@@ -1,0 +1,82 @@
+# distances-tag threads, fetched 2026-09-23: number, comment count, latest comment date
+89 Comments (0) 
+90 Comments (47) 2026-09-20
+91 Comments (7) 2026-05-14
+92 Comments (5) 2026-05-21
+93 Comments (3) 2026-02-18
+94 Comments (6) 2026-01-15
+95 Comments (1) 2026-02-17
+96 Comments (6) 2026-06-17
+97 Comments (12) 2026-09-17
+98 Comments (5) 2026-09-18
+99 Comments (0) 
+100 Comments (2) 2026-09-08
+103 Comments (0) 
+130 Comments (1) 2026-07-31
+132 Comments (5) 2026-07-25
+135 Comments (0) 
+136 Comments (1) 2026-07-23
+140 Comments (0) 
+201 Comments (0) 
+212 Comments (0) 
+213 Comments (1) 2026-09-08
+214 Comments (2) 2026-03-02
+217 Comments (3) 2026-09-04
+223 Comments (1) 2025-10-13
+232 Comments (0) 
+465 Comments (0) 
+466 Comments (1) 2026-05-11
+502 Comments (2) 2026-08-21
+503 Comments (16) 2026-05-29
+530 Comments (1) 2026-05-28
+604 Comments (1) 2026-02-08
+605 Comments (0) 
+652 Comments (6) 2026-01-30
+653 Comments (0) 
+654 Comments (2) 2026-09-11
+655 Comments (5) 2026-04-22
+657 Comments (7) 2026-08-06
+658 Comments (2) 2026-04-21
+659 Comments (21) 2026-01-19
+660 Comments (3) 2025-10-24
+661 Comments (1) 2026-01-07
+662 Comments (4) 2026-04-23
+668 Comments (3) 2025-08-31
+670 Comments (6) 2026-09-17
+754 Comments (0) 
+755 Comments (0) 
+756 Comments (1) 2026-03-15
+757 Comments (7) 2026-02-27
+953 Comments (17) 2026-05-09
+956 Comments (7) 2026-04-28
+957 Comments (0) 
+958 Comments (2) 2025-12-27
+959 Comments (0) 
+982 Comments (1) 2025-10-02
+1082 Comments (22) 2026-08-31
+1083 Comments (2) 2026-08-17
+1084 Comments (5) 2026-02-02
+1085 Comments (1) 2026-05-21
+1086 Comments (0) 
+1087 Comments (1) 2026-02-14
+1088 Comments (0) 
+1089 Comments (0) 
+1127 Comments (0) 
+1207 Comments (1) 2026-07-08
+1208 Comments (6) 2026-06-15
+
+# keyword scan (Clemen|2505.04283|second largest|Vesztergombi|Problem 1.6|rare distance|54/37|#132)
+threads/223.txt:39: See also [132] , and [1084] for the analogous problem with minimal distance $1$.
+threads/756.txt:34:Asked by Erdős and Pach in the stronger form of whether all distances (aside from the largest) can occur with multiplicity $>n$. Hopf and Pannowitz [HoPa34] proved that the largest distance between points of $A$ can occur at most $n$ times, but it is unknown whether a second such
+threads/756.txt:36:Further investigations were undertaken by Clemen, Dumitrescu, and Liu [CDL25] , who proved, amongst other results, that if we take $A$ to be the square grid of $n$ points, then there are at least $n^{c/\log\log n}$ many distances which occur with multiplicity at least $n^{1+c/\log
+threads/756.txt:37:See also [132] and [957] .
+threads/958.txt:36:This was proved by Clemen, Dumitrescu, and Liu [CDL25] , who observed that equidistant points on a short circular arc on a circle of radius $1$, together with the centre, are also an example.
+threads/1208.txt:81:The Clemen--Fuehrer--Roche-Newton/Li--Postle argument seems to give the following quantitative form. If\[
+threads/1208.txt:149: The planar lower bound for $F_2(n)$ has recently been improved. Clemen, Führer and Roche-Newton prove that every finite $P\subset\mathbb{R}^2$ contains a subset $S\subset P$ with $|S|\gg|P|^{1/3}$ all of whose pairwise distances are distinct (a "distance Sidon set"), thereby r
+threads/1208.txt:150:Reference: F. C. Clemen, J. Führer, O. Roche-Newton, "Geometric Sidon Problems", arXiv:2606.05841 (June 2026).
+threads/652.txt:109: For what it's worth, Gemini Deepthink confirms the solution , while ChatGPT DeepResearch did not turn up any significant references beyond the reference [ El1995 ] already cited as well as the literature for the sister problems #653 and #654, as well as this 2013 paper of Sharir
+threads/662.txt:36:A problem of Erdős, Lovász, and Vesztergombi.
+threads/755.txt:35:This problem was solved in a strong form by Clemen, Dumitrescu, and Liu [CDL25b] , who in fact prove that if $T_6(n)$ is the maximal number of equilateral triangles of any size formed by $n$ points in $\mathbb{R}^6$ then\[T_6(n)=(\tfrac{1}{27}+o(1))n^3.\]Indeed, they give an exact
+threads/90.txt:262: I believe one can prove a lower bound on the second-largest eigenvalue which is a constant multiple of the average degree by the most naive method: Write down a function $v$ with average 0 with $v^T A v$ large. To construct such a function, choose a function of the form $x\mapsto
+threads/957.txt:37:The original problem was solved by Dumitrescu [Du19] , who proved that\[f(d_1)f(d_k)\leq \frac{9}{8}n^2+O(n).\]See also [132] and [756] .
+threads/959.txt:34:More generally, one can ask about\[\max (f(d_r)-f(d_{r+1})).\]Clemen, Dumitrescu, and Liu [CDL25] , have shown that\[\max (f(d_1)-f(d_2))\gg n\log n.\]More generally, for any $1\leq k\leq \log n$, there exists a set $A$ of $n$ points such that\[f(d_r)-f(d_{r+1})\gg \frac{n\log n}{

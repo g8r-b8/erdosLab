@@ -1,0 +1,697 @@
+ 
+ On multiplicities of interpoint distances 
+ Report GitHub Issue 
+ × 
+ Title: 
+ Content selection saved. Describe the issue below:
+ Description: 
+ Submit without GitHub 
+ Submit in GitHub 
+ arXiv is now an independent nonprofit! 
+ Learn more 
+ × 
+ Back to arXiv 
+ Why HTML? 
+ Report Issue 
+ Back to Abstract 
+ Download PDF 
+ Abstract. 
+ 1 Introduction 
+ 1.1 Another distance with multiplicity at most n n besides the diameter 
+ 1.2 Point sets with many large distance multiplicities 
+ 1.3 On the differences a k ​ ( X ) − a k + 1 ​ ( X ) a_{k}(X)-a_{k+1}(X) 
+ 1.4 Related work 
+ 2 A second multiplicity at most n n in planar point sets 
+ 2.1 The convex case 
+ 2.2 The “not too convex” case 
+ 2.3 The case where the multiplicities of Δ 2 \Delta_{2} and δ \delta are both large 
+ 3 Many large distance multiplicities among planar points 
+ 3.1 Proof of Theorem  
+ 3.2 Proof of Proposition  
+ 4 On the differences a k ​ ( X ) − a k + 1 ​ ( X ) a_{k}(X)-a_{k+1}(X) 
+ 5 Point sets with distinct distance multiplicities 
+ References 
+ License: arXiv.org perpetual non-exclusive license
+arXiv:2505.04283v5 [math.CO] 03 Feb 2026
+ On multiplicities of interpoint distances Thanks:  The first author is partially supported by a PIMS Postdoctoral Fellowship. 
+ Felix Christian Clemen
+ Address:  Felix Christian Clemen 
+ University of Victoria, Canada
+ Email address: fclemen@uvic.ca 
+ , 
+ Adrian Dumitrescu
+ Address:  Adrian Dumitrescu 
+ Algoresearch L.L.C., Milwaukee, WI, USA
+ Email address: ad.dumitrescu@algoresearch.org 
+ and 
+ Dingyuan Liu
+ Address:  Dingyuan Liu 
+ Karlsruhe Institute of Technology, Germany
+ Email address: liu@mathe.berlin 
+ Abstract. 
+ Given a set X ⊆ ℝ 2 X\subseteq\mathbb{R}^{2} of n n points and a distance d > 0 d>0 , the multiplicity of d d is the
+number of times the distance d d appears between points in X X . Let a 1 ​ ( X ) ≥ a 2 ​ ( X ) ≥ ⋯ ≥ a m ​ ( X ) a_{1}(X)\geq a_{2}(X)\geq\cdots\geq a_{m}(X) 
+denote the multiplicities of the m m distances determined by X X and let
+ a ⁡ ( X ) = ( a 1 ​ ( X ) , … , a m ​ ( X ) ) a(X)=\left(a_{1}(X),\dots,a_{m}(X)\right) . In this paper, we study several
+questions from Erdős’s time regarding distance multiplicities. Among other results,
+we show that:
+ (1) 
+ If X X is convex or “not too convex”, then there exists a distance other than the diameter
+that has multiplicity at most n n .
+ (2) 
+ There exists a set X ⊆ ℝ 2 X\subseteq\mathbb{R}^{2} of n n points, such that many distances occur with high
+multiplicity. In particular, at least n Ω ⁡ ( 1 / log ⁡ log ​ n ) n^{\Omega(1/\log\log{n})} distances
+have superlinear multiplicity in n n .
+ (3) 
+ For any (not necessarily fixed) integer 1 ≤ k ≤ log ⁡ n 1\leq k\leq\log{n} ,
+there exists X ⊆ ℝ 2 X\subseteq\mathbb{R}^{2} of n n points, such that the difference between
+the k th k^{\text{th}} and ( k + 1 ) th (k+1)^{\text{th}} largest multiplicities is at least
+ Ω ⁡ ( n ​ log ⁡ n k ) \Omega(\frac{n\log{n}}{k}) .
+Moreover, the distances in X X with the largest k k multiplicities can be prescribed.
+ (4) 
+ For every n ∈ ℕ n\in\mathbb{N} , there exists X ⊆ ℝ 2 X\subseteq\mathbb{R}^{2} of n n points, not all
+collinear or cocircular, such that a ⁡ ( X ) = ( n − 1 , n − 2 , … , 1 ) a(X)=(n-1,n-2,\ldots,1) . There also
+exists Y ⊆ ℝ 2 Y\subseteq\mathbb{R}^{2} of n n points with pairwise distinct distance
+multiplicities and a ⁡ ( Y ) ≠ ( n − 1 , n − 2 , … , 1 ) a(Y)\neq(n-1,n-2,\ldots,1) .
+ Keywords : distance multiplicity, convex layer decomposition, integer grid.
+ 1. Introduction 
+ Let dist ⁡ ( x , y ) {\rm dist}(x,y) denote the Euclidean distance between points x x and y y in the plane.
+Given a finite planar point set X = { x 1 , … , x n } X=\{x_{1},\ldots,x_{n}\} , let d 1 , … , d m d_{1},\ldots,d_{m} denote
+the distinct distances between points in X X , where m = m ⁡ ( X ) ≤ ( n 2 ) m=m(X)\leq{n\choose 2} .
+The multiplicity of d k d_{k} in X X is defined as
+ a k ( X ) = | { ( i , j ) : 1 ≤ i < j ≤ n , dist ( x i , x j ) = d k } | . a_{k}(X)=\lvert\{(i,j)\colon 1\leq i<j\leq n,\,{\rm dist}(x_{i},x_{j})=d_{k}\}\rvert. 
+ We arrange the m m multiplicities as a 1 ​ ( X ) ≥ a 2 ​ ( X ) ≥ ⋯ ≥ a m ​ ( X ) a_{1}(X)\geq a_{2}(X)\geq\cdots\geq a_{m}(X) ,
+irrespective to relative values of the d k d_{k} ,
+and let a ⁡ ( X ) = ( a 1 ​ ( X ) , … , a m ​ ( X ) ) a(X)=\left(a_{1}(X),\dots,a_{m}(X)\right) . In this paper, we revisit
+several questions from the time of Erdős regarding distance multiplicities:
+ (1) 
+ Is it possible that all distances except the diameter have multiplicity
+larger than n n ? See  [ 6 ] and  [ 9 , Conjecture 4] .
+ (2) 
+ Can it happen that there are many distances of multiplicity at least c ​ n cn ,
+where c > 1 c>1 is a constant, or even superlinear in n n ? See  [ 10 ] and  [ 8 , Problem 11] .
+ (3) 
+ Estimate max X ⊆ ℝ 2 , | X | = n ⁡ ( a 1 ​ ( X ) − a 2 ​ ( X ) ) \max_{X\subseteq\mathbb{R}^{2},\,|X|=n}(a_{1}(X)-a_{2}(X)) , and more generally,
+ max X ⊆ ℝ 2 , | X | = n ⁡ ( a k ​ ( X ) − a k + 1 ​ ( X ) ) \max_{X\subseteq\mathbb{R}^{2},\,|X|=n}(a_{k}(X)-a_{k+1}(X)) 
+ as well as possible.
+See  [ 5 , Section 3] .
+ (4) 
+ For sufficiently large n ∈ ℕ n\in\mathbb{N} , is it true that
+ a ⁡ ( X ) = ( n − 1 , n − 2 , … , 1 ) a(X)=(n-1,n-2,\dots,1) if and only if X X consists of equidistant points on
+a line or on a circle? See  [ 6 , p. 135] .
+ We answer Questions ( 2 ) and ( 4 ), and give partial answers to the other two.
+ 1.1. Another distance with multiplicity at most n n besides the diameter 
+ The diameter of X X , denoted Δ = Δ ⁡ ( X ) \Delta=\Delta(X) , is the maximum distance
+between points in X X . Further, denote by Δ 2 = Δ 2 ​ ( X ) \Delta_{2}=\Delta_{2}(X) and δ = δ ⁡ ( X ) \delta=\delta(X) 
+the second largest and the smallest distances in X X , respectively,
+and by μ ⁡ ( X , d ) \mu(X,d) the multiplicity of the distance d d in X X .
+ Hopf and Pannwitz  [ 16 ] proved that the
+multiplicity of the diameter among any n n points in the plane is at
+most n n . Erdős  [ 6 ] further conjectured that for any
+ n n -element point set X ⊆ ℝ 2 X\subseteq\mathbb{R}^{2} , there must be a second
+distance besides the diameter that has multiplicity at most n n .
+ Conjecture 1.1 (Erdős  [ 6 ] , see also  [ 9 , Conjecture 4] ) . 
+ Let n ≥ 5 n\geq 5 . For any X ⊆ ℝ 2 X\subseteq\mathbb{R}^{2} with | X | = n |X|=n , it is not
+possible that every distance except the diameter occurs more than n n times. 
+ The condition n ≥ 5 n\geq 5 is necessary, since for n = 4 n=4 we can glue two equilateral triangles
+of the same side length together as a rhombus and this gives a counterexample. Erdős and
+Fishburn  [ 9 ] proved the Conjecture for n = 5 , 6 n=5,6 and the case of n ≥ 7 n\geq 7 is still open.
+Here we confirm Conjecture  1.1 in two special cases.
+A point set X ⊆ ℝ 2 X\subseteq\mathbb{R}^{2} is said to be convex , or
+in convex position if no point lies inside the convex hull of other points.
+ Theorem 1.2 . 
+ Let n ≥ 5 n\geq 5 . For any convex point set X ⊆ ℝ 2 X\subseteq\mathbb{R}^{2} with
+ | X | = n |X|=n , it cannot happen that all distances except the diameter occur
+more than n n times. 
+ Given a point set X ⊆ ℝ 2 X\subseteq\mathbb{R}^{2} , let L 1 = L 1 ​ ( X ) L_{1}=L_{1}(X) be the set of vertices of
+the convex hull of X X , called the first (outer) convex layer of
+ X X . Similarly, the second convex layer L 2 = L 2 ​ ( X ) L_{2}=L_{2}(X) of X X is the set of
+vertices of the convex hull of X ∖ L 1 X\setminus L_{1} . Note that X X is convex if and only if L 2 L_{2} is
+empty. It follows from definition that X X is convex if and only if
+ | L 1 | = | X | |L_{1}|=|X| . Next we confirm Conjecture  1.1 for “not too convex”
+point sets, namely for point sets whose first and second convex layers are not
+too large.
+ Theorem 1.3 . 
+ Let X ⊆ ℝ 2 X\subseteq\mathbb{R}^{2} be a set of n ≥ 2 n\geq 2 points. If 
+ min ⁡ { 3 2 ​ ( | L 1 | + | L 2 | ) , 4 3 ​ | L 1 | + 2 ​ | L 2 | ,  2 ​ | L 1 | + | L 2 | } ≤ n , \min\left\{\frac{3}{2}(|L_{1}|+|L_{2}|),\,\frac{4}{3}|L_{1}|+2|L_{2}|,\,2|L_{1}|+|L_{2}|\right\}\leq n, 
+ then the second largest distance in X X can occur at most n n times. 
+ Theorem  1.3 
+directly implies that, if the ratio Δ ⁡ ( X ) / δ ⁡ ( X ) \Delta(X)/\delta(X) of a set X ⊆ ℝ 2 X\subseteq\mathbb{R}^{2} 
+is small enough, then the second largest distance in X X occurs at most n n times.
+ Corollary 1.4 . 
+ If X ⊆ ℝ 2 X\subseteq\mathbb{R}^{2} is a set of n ∈ ℕ n\in\mathbb{N} points with Δ ⁡ ( X ) ≤ n 3 ​ π ​ δ ​ ( X ) \Delta(X)\leq\frac{n}{3\pi}\delta(X) ,
+then μ ⁡ ( X , Δ 2 ) ≤ n \mu(X,\Delta_{2})\leq n . 
+ Proof. 
+ Assume without loss of generality that δ ⁡ ( X ) = 1 \delta(X)=1 , namely,
+ Δ ⁡ ( X ) ≤ n 3 ​ π \Delta(X)\leq\frac{n}{3\pi} . Then, | L 1 | |L_{1}| and | L 2 | |L_{2}| are upper bounded by
+the perimeter of the convex polygons formed by L 1 L_{1} and L 2 L_{2} ,
+respectively. Since the perimeter of a convex polygon is at most π \pi times its
+diameter, see  [ 25 , p. 76] , we have | L 1 | + | L 2 | ≤ 2 ​ n / 3 |L_{1}|+|L_{2}|\leq 2n/3 and thus
+ μ ⁡ ( X , Δ 2 ) ≤ n \mu(X,\Delta_{2})\leq n by Theorem  1.3 .
+∎ 
+ Note that the multiplicity of the second largest distance can be larger than n n 
+in some planar point sets, see  [ 23 , 24 ] . Thus, to fully resolve
+Conjecture  1.1 , one could perhaps consider multiplicities of different distances
+simultaneously and show that one of them must be at most n n . For instance, one could consider
+the smallest and the second largest distance; however, as we demonstrate below,
+their multiplicities can both be large.
+ Proposition 1.5 . 
+ Let m , n ∈ ℕ m,n\in\mathbb{N} with m ≤ ⌊ n / 2 ⌋ m\leq\lfloor n/2\rfloor . There exists a planar point set
+ X X with | X | = n |X|=n , such that μ ⁡ ( X , Δ 2 ) ≥ 3 ​ m \mu(X,\Delta_{2})\geq 3m and μ ⁡ ( X , δ ) ≥ 3 ​ n − 5 ​ m + o ⁡ ( m ) \mu(X,\delta)\geq 3n-5m+o(m) . 
+ By letting m = ⌊ 3 ​ n / 8 ⌋ m=\lfloor 3n/8\rfloor , we obtain that min ⁡ { μ ⁡ ( X , Δ 2 ) , μ ⁡ ( X , δ ) } ≥ 9 ​ n / 8 + o ⁡ ( n ) \min\{\mu(X,\Delta_{2}),\mu(X,\delta)\}\geq 9n/8+o(n) .
+This also motivates the following problem.
+ Problem 1.6 . 
+ Determine 
+ lim sup n → ∞ sup X ⊆ ℝ 2 , | X | = n min ⁡ { μ ⁡ ( X , Δ 2 ) , μ ⁡ ( X , δ ) } n . \limsup_{n\rightarrow\infty}\sup_{X\subseteq\mathbb{R}^{2},\,|X|=n}\frac{\min\{\mu(X,\Delta_{2}),\mu(X,\delta)\}}{n}. 
+ 1.2. Point sets with many large distance multiplicities 
+ Erdős and Pach  [ 10 ] , see also  [ 8 , Problem 11] , asked the following question:
+Given a set X ⊆ ℝ 2 X\subseteq\mathbb{R}^{2} of n n points, can it happen that
+there are c 1 ​ n c_{1}n distances with multiplicities at least c 2 ​ n c_{2}n , for
+some constant c 1 , c 2 > 0 c_{1},c_{2}>0 ? Bhowmick  [ 2 ] recently answered
+their question in the positive: There exist arbitrary large planar
+point sets X X , | X | = n |X|=n , such that there are ⌊ n / 4 ⌋ \lfloor n/4\rfloor 
+distances which occur at least n + 1 n+1 times. Bhowmick  [ 2 ] also
+considered higher multiplicities, distances that occur at least n + m n+m 
+times, m ≥ 1 m\geq 1 . He showed that there are sets with at least
+ ⌊ n 2 ​ ( m + 1 ) ⌋ \lfloor\frac{n}{2(m+1)}\rfloor 
+distances that occur at least n + m n+m times. Observe that for m m linear in n n , this
+lower bound is only Ω ⁡ ( 1 ) \Omega(1) . Here we give a substantial
+improvement by showing that there exist X ⊆ ℝ 2 X\subseteq\mathbb{R}^{2} of
+ n n points, such that at least n c / log ⁡ log ​ n n^{c/\log\log{n}} distances have
+superlinear multiplicity in n n . For comparison purposes, note that
+ n c / log ⁡ log ​ n = Ω ⁡ ( ( log ⁡ n ) α ) n^{c/\log\log{n}}=\Omega((\log{n})^{\alpha}) , for any fixed α > 0 \alpha>0 .
+ Theorem 1.7 . 
+ There exists some constant c > 0 c>0 such that for sufficiently large n ∈ ℕ n\in\mathbb{N} ,
+at least n c / log ⁡ log ​ n n^{c/\log\log{n}} distances occur at least n 1 + c / log ⁡ log ​ n n^{1+c/\log\log{n}} times
+in the n × n \sqrt{n}\times\sqrt{n} grid. 
+ As mentioned earlier, Bhowmick  [ 2 ] answered the question of Erdős and Pach  [ 10 ] 
+with constants c 1 = 1 / 4 c_{1}=1/4 and c 2 = 1 c_{2}=1 . One may ask whether the constant c 1 = 1 / 4 c_{1}=1/4 resulting
+from his construction is the best possible. We extend the above investigation for the range c 2 > 1 c_{2}>1 .
+More precisely, we show that there exist n n -element planar point sets with m m distances
+so that c 1 ​ m c_{1}m distances occur at least c 2 ​ n c_{2}n times, for suitable constants c 1 > 0 c_{1}>0 , c 2 > 1 c_{2}>1 .
+Proposition  1.8 below gives three sample combinations; these combinations are not exhaustive.
+ Proposition 1.8 . 
+ For every ε > 0 \varepsilon>0 , there exists n 0 ​ ( ε ) ∈ ℕ n_{0}(\varepsilon)\in\mathbb{N} such that if n ≥ n 0 ​ ( ε ) n\geq n_{0}(\varepsilon) ,
+then out of the m = Θ ⁡ ( n / log ⁡ n ) m=\Theta(n/\sqrt{\log{n}}) distances presented in the n × n \sqrt{n}\times\sqrt{n} grid: 
+ (i) 
+ at least ( 1 − ε ) ​ m / 9 (1-\varepsilon)\,m/9 distances occur at least 16 ​ n / 9 16n/9 times; 
+ (ii) 
+ at least ( 1 − ε ) ​ m / 16 (1-\varepsilon)\,m/16 distances occur at least 9 ​ n / 4 9n/4 times; 
+ (iii) 
+ at least ( 1 − ε ) ​ m / 25 (1-\varepsilon)\,m/25 distances occur at least 64 ​ n / 25 64n/25 times. 
+ 1.3. On the differences a k ​ ( X ) − a k + 1 ​ ( X ) a_{k}(X)-a_{k+1}(X) 
+ Let f ⁡ ( n ) f(n) denote the maximum value of a 1 ​ ( X ) a_{1}(X) over all X ⊆ ℝ 2 X\subseteq\mathbb{R}^{2} with | X | = n |X|=n .
+Erdős  [ 5 , Section 3] asked whether f ​ ( n ) − a 2 ​ ( X ) f(n)-a_{2}(X) tends to infinity as n → ∞ n\to\infty .
+However, this question is somewhat ambiguous since it leaves the ground set X X 
+unspecified. Here we reformulate the question and ask for
+ max X ⊆ ℝ 2 , | X | = n ⁡ ( a 1 ​ ( X ) − a 2 ​ ( X ) ) . \max_{X\subseteq\mathbb{R}^{2},\,|X|=n}(a_{1}(X)-a_{2}(X)). 
+ We show that the maximum difference a 1 ​ ( X ) − a 2 ​ ( X ) a_{1}(X)-a_{2}(X) is at least Ω ⁡ ( n ​ log ⁡ n ) \Omega(n\log{n}) .
+This is implied by the following more general result.
+ Theorem 1.9 . 
+ Let n ∈ ℕ n\in\mathbb{N} be sufficiently large and 1 ≤ k ≤ log ⁡ n 1\leq k\leq\log{n} . There
+exists a point set X ⊆ ℝ 2 X\subseteq\mathbb{R}^{2} with | X | = n |X|=n , such that
+ a k ​ ( X ) − a k + 1 ​ ( X ) = Ω ⁡ ( n k ​ log ⁡ n ) a_{k}(X)-a_{k+1}(X)=\Omega\left(\frac{n}{k}\log{n}\right) . Moreover, the
+distances with the largest k k multiplicities can be prescribed. 
+ In particular, a k ​ ( X ) − a k + 1 ​ ( X ) a_{k}(X)-a_{k+1}(X) can be superlinear in n n for k → ∞ k\to\infty .
+ Corollary 1.10 . 
+ max X ⊆ ℝ 2 , | X | = n ⁡ ( a 1 ​ ( X ) − a 2 ​ ( X ) ) = Ω ⁡ ( n ​ log ⁡ n ) \max_{X\subseteq\mathbb{R}^{2},\,|X|=n}(a_{1}(X)-a_{2}(X))=\Omega(n\log{n}) . 
+ Theorem  1.7 suggests that the following stronger lower bound might be true:
+ Problem 1.11 . 
+ Does there exist a constant c > 0 c>0 such that for sufficiently large n ∈ ℕ n\in\mathbb{N} , we have 
+ max X ⊆ ℝ 2 , | X | = n ⁡ ( a 1 ​ ( X ) − a 2 ​ ( X ) ) ≥ n 1 + c / log ⁡ log ​ n ​ ? \max_{X\subseteq\mathbb{R}^{2},\,|X|=n}(a_{1}(X)-a_{2}(X))\geq n^{1+c/\log\log{n}}? 
+ 1.4. Related work 
+ Recall that f ⁡ ( n ) f(n) denotes the largest possible value of a 1 ​ ( X ) a_{1}(X) among
+all subsets X ⊆ ℝ 2 X\subseteq\mathbb{R}^{2} of n n points. Determining f ⁡ ( n ) f(n) , also known as
+the unit distance problem, is notoriously difficult. The current best upper
+bound is O ⁡ ( n 4 / 3 ) O(n^{4/3}) established by Spencer, Szemerédi, and Trotter  [ 19 ] .
+A simple and elegant argument based on crossing numbers is due to Székely  [ 20 ] . From the other direction,
+it is conjectured by Erdős that a n × n \sqrt{n}\times\sqrt{n} section of the integer lattice
+gives the correct order magnitude, n 1 + c / log ⁡ log ​ n n^{1+c/\log\log{n}} , and so the current best
+upper bound seems far off. See also a recent survey by Szemerédi  [ 21 ] for more on this topic.
+ Let A ⁡ ( n ) A(n) be the maximum value of ∑ a k ​ ( X ) 2 \sum a_{k}(X)^{2} over all X ⊆ ℝ 2 X\subseteq\mathbb{R}^{2} 
+with | X | = n |X|=n . Erdős  [ 7 ] asked whether A ⁡ ( n ) = O ⁡ ( n 3 ​ ( log ⁡ n ) α ) A(n)=O(n^{3}(\log{n})^{\alpha}) 
+holds for some positive constant α > 0 \alpha>0 . This question received a complete
+answer via the work of Guth and Katz  [ 15 ] on the problem of distinct
+distances. Specifically, the authors proved that the inequality holds with
+ α = 1 \alpha=1 , i.e., A ⁡ ( n ) = O ⁡ ( n 3 ​ log ⁡ n ) A(n)=O(n^{3}\log{n}) , and is tight in the n × n \sqrt{n}\times\sqrt{n} integer grid.
+Lefmann and Thiele  [ 17 ] proved that the sharper inequality A ⁡ ( n ) = O ⁡ ( n 3 ) A(n)=O(n^{3}) holds for convex point sets;
+this bound is tight, e.g., for a regular n n -gon.
+ The rest of the paper is organized as follows. We will prove
+Theorems  1.2 ,  1.3 and Proposition  1.5 in Section  2 .
+In Section  3 we will prove Theorem  1.7 and Proposition  1.8 .
+Section  4 is devoted to proving Theorem  1.9 .
+Finally, in Section  5 we give a simple answer to Question ( 4 ).
+ 2. A second multiplicity at most n n in planar point sets 
+ Given a finite point set X ⊆ ℝ 2 X\subseteq\mathbb{R}^{2} , recall that δ ⁡ ( X ) < Δ 2 ​ ( X ) < Δ ⁡ ( X ) \delta(X)<\Delta_{2}(X)<\Delta(X) 
+denote the smallest, the second largest, and the largest distances in X X , respectively
+(assuming they exist and are different).
+ 2.1. The convex case 
+ Proof of Theorem  1.2 . 
+ Let X ⊆ ℝ 2 X\subseteq\mathbb{R}^{2} be an arbitrary convex set of n n points. Let
+ R n R_{n} denote a regular n n -gon and R n − R_{n}^{-} denote a regular n n -gon
+minus one vertex.
+A classical result of Altman  [ 1 ] states that
+ X X determines at least ⌊ n / 2 ⌋ \lfloor n/2\rfloor distinct distances; and this bound is attained by R n R_{n} .
+Moreover, Altman proved that if n n is odd and X X determines exactly ⌊ n / 2 ⌋ \lfloor n/2\rfloor distances,
+then X = R n X=R_{n} ; in particular, a ⁡ ( X ) = ( n , n , … , n ) a(X)=(n,n,\ldots,n) . See also  [ 9 , 13 ] . 
+ The complementary result for even n n is due to Fishburn  [ 12 ] .
+Suppose that n ≥ 6 n\geq 6 is even and X X  determines exactly ⌊ n / 2 ⌋ \lfloor n/2\rfloor distances. Then 
+ (i) 
+ for n = 6 n=6 , there exist exactly two possibilities, a ⁡ ( X ) = ( 6 , 6 , 3 ) a(X)=(6,6,3) , or a ⁡ ( X ) = ( 5 , 5 , 5 ) a(X)=(5,5,5) ;
+ (ii) 
+ for n ≥ 8 n\geq 8 , either X = R n X=R_{n} or X = R n + 1 − X=R_{n+1}^{-} .
+ In particular, for the second case we have a ⁡ ( X ) = ( n , n , … , n , n / 2 ) a(X)=(n,n,\ldots,n,n/2) or a ⁡ ( X ) = ( n − 1 , n − 1 , … , n − 1 ) a(X)=(n-1,n-1,\ldots,n-1) . 
+ We can now finalize the proof. If X X determines strictly more than ⌊ n / 2 ⌋ \lfloor n/2\rfloor 
+distinct distances and all distances smaller than Δ \Delta occur more than n n times,
+then the number of point pairs is at least 
+ ⌊ n 2 ⌋ ​ ( n + 1 ) + 1 > ( n 2 ) , \left\lfloor\frac{n}{2}\right\rfloor(n+1)+1>{n\choose 2}, 
+ a contradiction. Otherwise, X X determines exactly ⌊ n / 2 ⌋ \lfloor n/2\rfloor distinct distances,
+and it is easy to check that all possible cases listed previously satisfy the requirements.
+∎ 
+ 2.2. The “not too convex” case 
+ Proof of Theorem  1.3 . 
+ Let L 1 = L 1 ​ ( X ) L_{1}=L_{1}(X) and L 2 = L 2 ​ ( X ) L_{2}=L_{2}(X) be the first and second convex layers of X X . It suffices to show that 
+ μ ⁡ ( X , Δ 2 ) ≤ min ⁡ { 3 2 ​ ( | L 1 | + | L 2 | ) , 4 3 ​ | L 1 | + 2 ​ | L 2 | ,  2 ​ | L 1 | + | L 2 | } . \mu(X,\Delta_{2})\leq\min\left\{\frac{3}{2}(|L_{1}|+|L_{2}|),\,\frac{4}{3}|L_{1}|+2|L_{2}|,\,2|L_{1}|+|L_{2}|\right\}. 
+ We have the following observations: 
+ (1) 
+ [ 24 , Proposition 1] Let p , q ∈ X p,q\in X . If dist ⁡ ( p , q ) = Δ {\rm dist}(p,q)=\Delta then { p , q } ⊆ L 1 \{p,q\}\subseteq L_{1} .
+If dist ⁡ ( p , q ) = Δ 2 {\rm dist}(p,q)=\Delta_{2} then { p , q } ∩ L 1 ≠ ∅ \{p,q\}\cap L_{1}\neq\emptyset .
+ (2) 
+ If dist ⁡ ( p , q ) = Δ 2 {\rm dist}(p,q)=\Delta_{2} and p ∈ L 1 p\in L_{1} , then q ∈ L 1 ∪ L 2 q\in L_{1}\cup L_{2} . Indeed,
+the points of X X in the exterior of the circle of radius Δ 2 \Delta_{2} centered at p p , if any, have distance Δ \Delta 
+from p p and by observation (1) are in L 1 L_{1} . Hence, q q is at least in the second convex layer of X X .
+ Combining observations (1) and (2) we have that μ ⁡ ( X , Δ 2 ) = μ ⁡ ( L 1 ∪ L 2 , Δ 2 ) \mu(X,\Delta_{2})=\mu(L_{1}\cup L_{2},\Delta_{2}) ,
+moreover, Δ 2 \Delta_{2} is still the second largest distance in L 1 ∪ L 2 L_{1}\cup L_{2} . Vesztergombi  [ 23 ] showed that the multiplicity of the second
+largest distance among any n n points in the plane is at most 3 ​ n / 2 3n/2 . Namely, we have 
+ μ ⁡ ( X , Δ 2 ) ≤ 3 2 ​ ( | L 1 | + | L 2 | ) . \mu(X,\Delta_{2})\leq\frac{3}{2}(|L_{1}|+|L_{2}|). 
+ We proceed to prove μ ⁡ ( X , Δ 2 ) ≤ min ⁡ { 4 3 ​ | L 1 | + 2 ​ | L 2 | ,  2 ​ | L 1 | + | L 2 | } \mu(X,\Delta_{2})\leq\min\left\{\frac{4}{3}|L_{1}|+2|L_{2}|,\,2|L_{1}|+|L_{2}|\right\} .
+Let G G be a graph on L 1 ​ ∪ ˙ ​ L 2 L_{1}\dot{\cup}L_{2} , where p ​ q pq is an edge if and only if
+ dist ⁡ ( p , q ) = Δ 2 {\rm dist}(p,q)=\Delta_{2} . Then it holds that μ ⁡ ( X , Δ 2 ) = e ⁡ ( G ) \mu(X,\Delta_{2})=e(G) . Iteratively
+remove vertices of degree less than 2 2 from G G , and let G ′ G^{\prime} be the remaining
+graph whose vertex set is L 1 ′ ​ ∪ ˙ ​ L 2 ′ L_{1}^{\prime}\dot{\cup}L_{2}^{\prime} with L 1 ′ ⊆ L 1 L_{1}^{\prime}\subseteq L_{1} and
+ L 2 ′ ⊆ L 2 L_{2}^{\prime}\subseteq L_{2} . Then we have 
+ e ⁡ ( G ) ≤ | L 1 ∖ L 1 ′ | + | L 2 ∖ L 2 ′ | + e ⁡ ( G ′ ) . e(G)\leq|L_{1}\setminus L_{1}^{\prime}|+|L_{2}\setminus L_{2}^{\prime}|+e(G^{\prime}). 
+ To bound e ⁡ ( G ′ ) e(G^{\prime}) , we record several observations about the graph G ′ G^{\prime} by Vesztergombi  [ 24 ] : 
+ (3) 
+ L 2 ′ L_{2}^{\prime} is an independent set (follows from (1) and (2)).
+ (4) 
+ [ 24 , Proposition 3] Every q ∈ L 2 ′ q\in L_{2}^{\prime} has degree exactly 2 2 .
+ (5) 
+ [ 24 , Proposition 5] Every p ∈ L 1 ′ p\in L_{1}^{\prime} has at most 2 2 neighbors in L 2 ′ L_{2}^{\prime} .
+ (6) 
+ [ 24 , Proposition 6] If p ∈ L 1 ′ p\in L_{1}^{\prime} has 3 3 neighbors in L 1 ′ L_{1}^{\prime} , then it has at most 1 1 neighbor in L 2 ′ L_{2}^{\prime} .
+ (7) 
+ [ 24 , Proposition 7] If p ∈ L 1 ′ p\in L_{1}^{\prime} has 4 4 neighbors in L 1 ′ L_{1}^{\prime} , then it has no neighbor in L 2 ′ L_{2}^{\prime} .
+ (8) 
+ [ 24 , Proposition 8] Every p ∈ L 1 ′ p\in L_{1}^{\prime} has at most 4 4 neighbors in L 1 ′ L_{1}^{\prime} .
+ Let e ⁡ ( L 1 ′ ) e(L_{1}^{\prime}) denote the number of edges in L 1 ′ L_{1}^{\prime} , and let e ⁡ ( L 1 ′ , L 2 ′ ) e(L_{1}^{\prime},L_{2}^{\prime}) 
+denote the number of edges between L 1 ′ L_{1}^{\prime} and L 2 ′ L_{2}^{\prime} . Due to observations (3)–(5), 
+ e ⁡ ( G ′ ) = e ⁡ ( L 1 ′ ) + e ⁡ ( L 1 ′ , L 2 ′ ) = e ⁡ ( L 1 ′ ) +  2 ​ | L 2 ′ | . e(G^{\prime})=e(L_{1}^{\prime})+e(L_{1}^{\prime},L_{2}^{\prime})=e(L_{1}^{\prime})+\,2|L_{2}^{\prime}|. 
+ Vesztergombi  [ 22 ] showed that the multiplicity of the second largest
+distance among any n n points in convex position in the plane is at most
+ 4 ​ n / 3 4n/3 . Since L 1 ′ L_{1}^{\prime} is convex and Δ 2 \Delta_{2} is either the largest or second
+largest distance in L 1 ′ L_{1}^{\prime} , 
+ e ⁡ ( L 1 ′ ) = μ ⁡ ( L 1 ′ , Δ 2 ) ≤ 4 3 ​ | L 1 ′ | . e(L_{1}^{\prime})=\mu(L_{1}^{\prime},\Delta_{2})\leq\frac{4}{3}|L_{1}^{\prime}|. 
+ On the other hand, let deg ⁡ ( p ) \deg(p) , deg 1 ⁡ ( p ) \deg_{1}(p) , and deg 2 ⁡ ( p ) \deg_{2}(p) denote the number
+of neighbors of p p in G ′ G^{\prime} , L 1 ′ L_{1}^{\prime} , and L 2 ′ L_{2}^{\prime} , respectively. For each p ∈ L 1 ′ p\in L_{1}^{\prime} ,
+by observations (4)–(8) we have deg ⁡ ( p ) = deg 1 ⁡ ( p ) + deg 2 ⁡ ( p ) ≤ 4 \deg(p)=\deg_{1}(p)+\deg_{2}(p)\leq 4 . Therefore, 
+ e ⁡ ( L 1 ′ ) = 1 2 ​ ∑ p ∈ L 1 ′ deg 1 ⁡ ( p ) ≤ 1 2 ​ ∑ p ∈ L 1 ′ ( 4 − deg 2 ⁡ ( p ) ) \displaystyle e(L_{1}^{\prime})=\frac{1}{2}\sum_{p\in L_{1}^{\prime}}\deg_{1}(p)\leq\frac{1}{2}\sum_{p\in L_{1}^{\prime}}\left(4-\deg_{2}(p)\right) 
+ = 2 ​ | L 1 ′ | − 1 2 ​ e ​ ( L 1 ′ , L 2 ′ ) \displaystyle=2|L_{1}^{\prime}|-\frac{1}{2}e(L_{1}^{\prime},L_{2}^{\prime}) 
+ = 2 ​ | L 1 ′ | − 2 ​ | L 2 ′ | . \displaystyle=2|L_{1}^{\prime}|-2|L_{2}^{\prime}|. 
+ We conclude 
+ e ⁡ ( G ) \displaystyle e(G) 
+ ≤ | L 1 ∖ L 1 ′ | + | L 2 ∖ L 2 ′ | + e ⁡ ( G ′ ) = | L 1 ∖ L 1 ′ | + | L 2 ∖ L 2 ′ | + e ⁡ ( L 1 ′ ) + e ⁡ ( L 1 ′ , L 2 ′ ) \displaystyle\leq|L_{1}\setminus L_{1}^{\prime}|+|L_{2}\setminus L_{2}^{\prime}|+e(G^{\prime})=|L_{1}\setminus L_{1}^{\prime}|+|L_{2}\setminus L_{2}^{\prime}|+e(L_{1}^{\prime})+e(L_{1}^{\prime},L_{2}^{\prime}) 
+ ≤ | L 1 ∖ L 1 ′ | + | L 2 ∖ L 2 ′ | + min ⁡ { 4 3 ​ | L 1 ′ | ,  2 ​ | L 1 ′ | − | L 2 ′ | } + 2 ​ | L 2 ′ | \displaystyle\leq|L_{1}\setminus L_{1}^{\prime}|+|L_{2}\setminus L_{2}^{\prime}|+\min\left\{\frac{4}{3}|L_{1}^{\prime}|,\,2|L_{1}^{\prime}|-|L_{2}^{\prime}|\right\}+2|L_{2}^{\prime}| 
+ = | L 1 ∖ L 1 ′ | + | L 2 ∖ L 2 ′ | + min ⁡ { 4 3 ​ | L 1 ′ | + 2 ​ | L 2 ′ | ,  2 ​ | L 1 ′ | + | L 2 ′ | } \displaystyle=|L_{1}\setminus L_{1}^{\prime}|+|L_{2}\setminus L_{2}^{\prime}|+\min\left\{\frac{4}{3}|L_{1}^{\prime}|+2|L_{2}^{\prime}|,\,2|L_{1}^{\prime}|+|L_{2}^{\prime}|\right\} 
+ ≤ min ⁡ { 4 3 ​ | L 1 | + 2 ​ | L 2 | ,  2 ​ | L 1 | + | L 2 | } . ∎ \displaystyle\leq\min\left\{\frac{4}{3}|L_{1}|+2|L_{2}|,\,2|L_{1}|+|L_{2}|\right\}.\qed 
+ 2.3. The case where the multiplicities of Δ 2 \Delta_{2} and δ \delta are both large 
+ Proof of Proposition  1.5 . 
+ Our construction is inspired by that of Vesztergombi  [ 23 , 24 ] , see also  [ 3 , Chap. 5.8] .
+Let m 1 = m 2 = m m_{1}=m_{2}=m and m 3 = n − 2 ​ m m_{3}=n-2m . The construction comprises three groups,
+each containing m 1 , m 2 m_{1},m_{2} and m 3 m_{3} points, respectively. Note that n = m 1 + m 2 + m 3 n=m_{1}+m_{2}+m_{3} . 
+ Group I: Place the first m 1 m_{1} points v 1 , … , v m 1 v_{1},\ldots,v_{m_{1}} as the vertices of a regular m 1 m_{1} -gon inscribed
+in a circle C C of radius n n . Let Δ \Delta and Δ 2 \Delta_{2} be the largest and second largest distances in this m 1 m_{1} -gon.
+Note that Δ = O ⁡ ( n ) \Delta=O(n) and the number of occurrences of Δ 2 \Delta_{2} in Group I is exactly m 1 m_{1} . 
+ Group II: The next m 2 m_{2} points u 1 , … , u m 2 u_{1},\ldots,u_{m_{2}} are positioned inside the circle C C such that
+ dist ⁡ ( v i , u i ) = dist ⁡ ( u i , v i + 1 ) = Δ 2 {\rm dist}(v_{i},u_{i})={\rm dist}(u_{i},v_{i+1})=\Delta_{2} , where the indices are modulo m 2 m_{2} . Notably,
+the u i u_{i} ’s lie on a circle. Let δ = Θ ⁡ ( 1 ) \delta=\Theta(1) be the smallest distance in the construction so far,
+representing the distance between consecutive u i u_{i} ’s. This distance appears m 2 m_{2} times in Group II. 
+ Group III: The final m 3 m_{3} points form an equilateral triangular lattice with mesh width δ \delta contained
+in a disk of radius Θ ⁡ ( n ) \Theta(\sqrt{n}) . The lattice is centered at the origin, coinciding with the center
+of the circle C C . Note that the distance δ \delta appears 3 ​ m 3 + o ⁡ ( n ) 3m_{3}+o(n) times inside Group III. 
+ Let X X denote the final construction, see Figure  1 for an illustration.
+Since L 1 ​ ( X ) L_{1}(X) and L 2 ​ ( X ) L_{2}(X) correspond to the points in Group I and Group II, respectively,
+we have | L 1 | = | L 2 | = m |L_{1}|=|L_{2}|=m . Overall, the distance δ \delta appears 3 ​ m 3 + m 2 + o ⁡ ( n ) = 3 ​ n − 5 ​ m + o ⁡ ( n ) 3m_{3}+m_{2}+o(n)=3n-5m+o(n) times,
+and the distance Δ 2 \Delta_{2} appears m 1 + 2 ​ m 2 = 3 ​ m m_{1}+2m_{2}=3m times.
+We complete the proof by noting that δ ⁡ ( X ) = δ \delta(X)=\delta and Δ 2 ​ ( X ) = Δ 2 \Delta_{2}(X)=\Delta_{2} .
+∎ 
+ v 1 v_{1} v 2 v_{2} v 3 v_{3} v 4 v_{4} v 5 v_{5} v 6 v_{6} v 7 v_{7} u 4 u_{4} u 5 u_{5} u 6 u_{6} u 7 u_{7} u 1 u_{1} u 2 u_{2} u 3 u_{3} 
+ Figure 1 . The construction in Proposition  1.5 , when m = 7 m=7 .
+Dotted edges represent the second largest distance Δ 2 \Delta_{2} . 
+ 3. Many large distance multiplicities among planar points 
+ 3.1. Proof of Theorem  1.7 
+ For n ∈ ℕ n\in\mathbb{N} , let [ n ] [n] denote the set { 1 , 2 ​ … , n } \{1,2\ldots,n\} . We first prove the following lemma by adapting
+a well-known argument for counting representations of a natural number as the sum of two squares;
+see, e.g., [ 18 , Chap. 3] and  [ 14 , Chap. 2] .
+ Lemma 3.1 . 
+ Let r ⁡ ( n ) r(n) denote the number of distinct ways in which n ∈ ℕ n\in\mathbb{N} can be represented as
+the sum of two squares. Then there exists a constant c > 0 c>0 such that for infinitely many n ∈ ℕ n\in\mathbb{N} ,
+at least n c / log ⁡ log ​ n n^{c/\log\log{n}} distinct elements n ′ ∈ [ n ] n^{\prime}\in[n] have 
+ r ⁡ ( n ′ ) ≥ n c / log ⁡ log ​ n . r(n^{\prime})\geq n^{c/\log\log{n}}. 
+ Proof. 
+ Let n = p 1 p 2 ⋯ p k n=p_{1}p_{2}\cdots p_{k} , where p j p_{j} is the j th j^{\mathrm{th}} smallest prime of the form 4 ​ m + 1 4m+1 .
+Since p k p_{k} satisfies 
+ c 1 ​ k ​ log ⁡ k ≤ p k ≤ c 2 ​ k ​ log ⁡ k , c_{1}k\log{k}\leq p_{k}\leq c_{2}k\log{k}, 
+ for suitable constants c 1 , c 2 > 0 c_{1},c_{2}>0 , this implies k ≥ 2 ​ c ​ log ⁡ n / log ⁡ log ⁡ n k\geq 2c\log{n}/\log\log{n} for
+a suitable constant c > 0 c>0 .
+It is well-known that any such prime can be represented (uniquely) as the sum of two squares,
+i.e., 
+ p j = a j 2 + b j 2 = ( a j + b j ​ i ) ​ ( a j − b j ​ i ) , p_{j}=a_{j}^{2}+b_{j}^{2}=(a_{j}+b_{j}\mathrm{i})(a_{j}-b_{j}\mathrm{i}), 
+ where i = − 1 \mathrm{i}=\sqrt{-1} .
+There are 2 k 2^{k} subsets of K = { 1 , 2 , … , k } K=\{1,2,\ldots,k\} , and out of these, exactly 2 k − 1 2^{k-1} 
+subsets have cardinality at least k / 2 k/2 . 
+ Fix any subset K ′ ⊆ K K^{\prime}\subseteq K of cardinality | K ′ | ≥ k / 2 |K^{\prime}|\geq k/2 .
+Let n ′ = ∏ j ∈ K ′ p j n^{\prime}=\prod_{j\in K^{\prime}}p_{j} . For each subset J ⊆ K ′ J\subseteq K^{\prime} , 
+ ∏ j ∈ J ( a j + b j ​ i ) ​ ∏ j ∈ K ′ ∖ J ( a j − b j ​ i ) \displaystyle\prod_{j\in J}(a_{j}+b_{j}\mathrm{i})\prod_{j\in K^{\prime}\setminus J}(a_{j}-b_{j}\mathrm{i}) 
+ = A J + B J ​ i , \displaystyle=A_{J}+B_{J}\mathrm{i}, 
+ ∏ j ∈ J ( a j − b j ​ i ) ​ ∏ j ∈ K ′ ∖ J ( a j + b j ​ i ) \displaystyle\prod_{j\in J}(a_{j}-b_{j}\mathrm{i})\prod_{j\in K^{\prime}\setminus J}(a_{j}+b_{j}\mathrm{i}) 
+ = A J − B J ​ i , \displaystyle=A_{J}-B_{J}\mathrm{i}, 
+ where A J A_{J} and B J B_{J} satisfy 
+ A J 2 + B J 2 = ( A J + B J ​ i ) ​ ( A J − B J ​ i ) = ∏ j ∈ K ′ p j = n ′ ≤ n . A_{J}^{2}+B_{J}^{2}=(A_{J}+B_{J}\mathrm{i})(A_{J}-B_{J}\mathrm{i})=\prod_{j\in K^{\prime}}p_{j}=n^{\prime}\leq n. 
+ By the unique factorization theorem for complex integers, A J + B J ​ i A_{J}+B_{J}\mathrm{i} is different for
+different choices of J J , so we obtain 
+ r ⁡ ( n ′ ) ≥ 2 k / 2 ≥ n c / log ⁡ log ​ n . r(n^{\prime})\geq 2^{k/2}\geq n^{c/\log\log{n}}. 
+ Since there are 2 k − 1 ≥ n c / log ⁡ log ​ n 2^{k-1}\geq n^{c/\log\log{n}} distinct values n ′ ∈ [ n ] n^{\prime}\in[n] 
+that have been considered, the lemma is implied.
+∎ 
+ Proof of Theorem  1.7 . 
+ The proof follows a (now standard) argument of Erdős  [ 4 ] using
+the estimate in Lemma  3.1 . Let n 0 ≤ n n_{0}\leq n be the largest integer
+such that n 0 = p 1 ​ p 2 ​ … ​ p k n_{0}=p_{1}p_{2}\dots p_{k} , where p j p_{j} is the j th j^{\text{th}} 
+smallest prime of the form 4 ​ m + 1 4m+1 . Since
+ k = Θ ⁡ ( log ⁡ n / log ⁡ log ⁡ n ) k=\Theta(\log{n}/\log\log{n}) , we
+have 
+ p k + 1 = Θ ⁡ ( ( k + 1 ) ​ log ⁡ ( k + 1 ) ) = Θ ⁡ ( log ⁡ n ) , p_{k+1}=\Theta((k+1)\log(k+1))=\Theta(\log{n}), 
+ namely, n 0 = Ω ⁡ ( n / log ⁡ n ) n_{0}=\Omega(n/\log{n}) . By Lemma  3.1 there
+exist n 0 Ω ⁡ ( 1 / log ⁡ log ⁡ n 0 ) = n Ω ⁡ ( 1 / log ⁡ log ​ n ) n_{0}^{\Omega(1/\log\log{n_{0}})}=n^{\Omega(1/\log\log{n})} 
+different values of n ′ ∈ [ n 0 ] n^{\prime}\in[n_{0}] that can be represented as the sum
+of two squares in n Ω ⁡ ( 1 / log ⁡ log ​ n ) n^{\Omega(1/\log\log{n})} ways. For every such
+value of n ′ n^{\prime} there are Ω ⁡ ( n ) \Omega(n) points in the
+ n × n \sqrt{n}\times\sqrt{n} grid, each of which has
+ n Ω ⁡ ( 1 / log ⁡ log ​ n ) n^{\Omega(1/\log\log{n})} neighbors at distance n ′ \sqrt{n^{\prime}} . This
+completes the proof.
+∎ 
+ 3.2. Proof of Proposition  1.8 
+ Proof. 
+ We prove the second estimate; the proofs of the other two estimates are analogous.
+Let X X be a n × n \sqrt{n}\times\sqrt{n} section of the integer grid, where n = 16 ​ k 2 n=16k^{2} .
+Then X X determines 
+ m = ( 1 ± o ⁡ ( 1 ) ) ​ c ​ n log ⁡ n m=(1\pm o(1))\frac{cn}{\sqrt{\log{n}}} 
+ distinct distances, for some c > 0 c>0 ; see  [ 4 ] or  [ 18 , Chap. 12] .
+ X X consists of 16 16 smaller k × k k\times k sections Y Y , each determining 
+ ( 1 ± o ⁡ ( 1 ) ) ​ c ​ n 16 ​ log ⁡ ( n / 16 ) = ( 1 ± o ⁡ ( 1 ) ) ​ m 16 (1\pm o(1))\frac{cn}{16\sqrt{\log{(n/16)}}}=(1\pm o(1))\frac{m}{16} 
+ distinct distances. See Figure  2 . 
+ Figure 2 . Multiplicities of distances in the grid. 
+ Take any distance determined by a non-vertical and non-horizontal
+segment s = a ​ b s=ab in Y Y , where a a and b b are its left and
+right endpoint, respectively. Observe that s s occurs at least 
+ 2 ​ k ⋅ 3 ​ k ⋅ 4 + 2 ​ k ⋅ 3 ​ k ⋅ 2 = 36 ​ k 2 = 9 4 ​ n 2k\cdot 3k\cdot 4+2k\cdot 3k\cdot 2=36k^{2}=\frac{9}{4}n 
+ times in X X . Indeed, the left degree of every point in the 6 6 central left smaller sections
+is at least 4 4 whereas the left degree of every point in the remaining 6 6 left smaller sections
+is at least 2 2 . Note that the number of distances determined by a
+vertical or horizontal segment in Y Y is at most k = o ⁡ ( m ) k=o(m) . This
+justifies the second estimate. 
+ The first and the third estimate are obtained analogously by subdividing X X into 9 9 
+and 25 25 smaller sections, respectively.
+∎ 
+ 4. On the differences a k ​ ( X ) − a k + 1 ​ ( X ) a_{k}(X)-a_{k+1}(X) 
+ Using an inductive construction, Erdős and Purdy  [ 11 ] 
+showed that the maximum number of times the unit distance occurs among n n points
+in the plane, no three of which are collinear, is at least
+ Ω ⁡ ( n ​ log ⁡ n ) \Omega(n\log{n}) . Our proof of Theorem  1.9 can be viewed
+as a refinement of their argument.
+ Proof of Theorem  1.9 . 
+ Let d 1 , … , d k > 0 d_{1},\ldots,d_{k}>0 be arbitrary pairwise distinct distances. Let
+ X 0 ​ ( m ) X_{0}(m) denote a configuration of m m points and let X i ​ ( 2 ​ m ) X_{i}(2m) 
+denote the union of X i − 1 ​ ( m ) X_{i-1}(m) and a translate
+of X i − 1 ​ ( m ) X_{i-1}(m) by distance d i d_{i} in some generic direction, so that
+none of the segments connecting the two copies duplicates a distance
+other than d i d_{i} . This is feasible since it amounts to excluding a
+set of directions of measure zero.
+We start from a single point and apply translates by
+ d 1 , … , d k d_{1},\ldots,d_{k} in a cyclic fashion. The resulting set after k k 
+steps has 2 k ≤ n 2^{k}\leq n points. 
+ For any 1 ≤ i ≤ k 1\leq i\leq k , the multiplicity T i ​ ( n ) T_{i}(n) of d i d_{i} in a set of n n points constructed in the above way
+satisfies the recurrence 
+ T i ​ ( n ) = 2 k ​ T i ​ ( n / 2 k ) + n / 2 , T i ​ ( 1 ) = 0 . T_{i}(n)=2^{k}T_{i}\left(n/2^{k}\right)+n/2,\ \ T_{i}(1)=0. 
+ Its solution satisfies 
+ T i ​ ( n ) ≥ n 2 ​ log 2 k ​ n = n 2 ​ k ​ log ⁡ n . T_{i}(n)\geq\frac{n}{2}\log_{2^{k}}{n}=\frac{n}{2k}\log{n}. 
+ In the inductive step corresponding to d i d_{i} , we ensure that none of the segments connecting the two copies
+duplicate a distance other than d i d_{i} . Consequently, any distance other than d 1 , … , d k d_{1},\ldots,d_{k} occurs at most
+ n n times. In conclusion, we have 
+ a 1 ​ ( X ) , … , a k ​ ( X ) = Ω ⁡ ( n k ​ log ⁡ n ) ,  and  ​ a k + 1 ​ ( X ) , a k + 2 ​ ( X ) , … ≤ n , a_{1}(X),\ldots,a_{k}(X)=\Omega\left(\frac{n}{k}\log{n}\right),\text{ and }a_{k+1}(X),a_{k+2}(X),\ldots\leq n, 
+ as required.
+∎ 
+ 5. Point sets with distinct distance multiplicities 
+ Given a set X ⊆ ℝ 2 X\subseteq\mathbb{R}^{2} of n ≥ 2 n\geq 2 points, which contains
+ m = m ⁡ ( X ) ≤ ( n 2 ) m=m(X)\leq\binom{n}{2} distinct distances, recall that
+ a ⁡ ( X ) = ( a 1 ​ ( X ) , … , a m ​ ( X ) ) a(X)=(a_{1}(X),\dots,a_{m}(X)) consists of the multiplicities of all distances
+ordered by a 1 ​ ( X ) ≥ a 2 ​ ( X ) ≥ ⋯ ≥ a m ​ ( X ) a_{1}(X)\geq a_{2}(X)\geq\dots\geq a_{m}(X) .
+How many distinct values can a ⁡ ( X ) a(X) contain? At most n − 1 n-1 , this
+follows easily from ∑ k = 1 m a k ​ ( X ) = ( n 2 ) \sum_{k=1}^{m}a_{k}(X)=\binom{n}{2} . Moreover, when
+ a ⁡ ( X ) a(X) contains n − 1 n-1 distinct values, then
+ a ⁡ ( X ) = ( n − 1 , n − 2 , … , 1 ) a(X)=(n-1,n-2,\dots,1) . One can observe that if X X consists of
+equidistant points on
+a line or on a circle, see Figure  3  (a) and (b) for an
+illustration, then a ⁡ ( X ) = ( n − 1 , n − 2 , … , 1 ) a(X)=(n-1,n-2,\dots,1) . Are there other
+constructions of X X that achieve a ⁡ ( X ) = ( n − 1 , n − 2 , … , 1 ) a(X)=(n-1,n-2,\dots,1) ?
+Erdős  [ 6 , p. 135] conjectured the answer to be negative, when n n is large. Here we give
+a simple counterexample to this conjecture.
+ Observation 5.1 . 
+ Let γ \gamma be a circular arc subtending a center angle < π / 3 <\pi/3 on the circle C C of unit radius
+centered at c c . Let X X consist of c c together with a set of n − 1 n-1 equidistant points on γ \gamma .
+Then a ⁡ ( X ) = ( n − 1 , n − 2 , … , 1 ) a(X)=(n-1,n-2,\ldots,1) . See Figure  3   (c) for an illustration. 
+ (a) Equidistant points on a line. 
+ (b) Equidistant points on a circular segment. 
+ c c 
+ (c) Equidistant points on a circle together with its center. 
+ Figure 3 . Three configurations X X satisfying a ⁡ ( X ) = ( n − 1 , n − 2 , … , 1 ) a(X)=(n-1,n-2,\ldots,1) for n = 7 n=7 . 
+ Proof. 
+ The multiplicities of the n − 1 n-1 points on γ \gamma are 1 , 2 , … , n − 2 1,2,\ldots,n-2 .
+Since the multiplicity of the unit distance is n − 1 n-1 , we have a ⁡ ( X ) = ( n − 1 , n − 2 , … , 1 ) a(X)=(n-1,n-2,\ldots,1) .
+Finally, X X is not contained in any line or circle.
+∎ 
+ One may further ask:
+ Problem 5.2 . 
+ For sufficiently large n ∈ ℕ n\in\mathbb{N} , are the examples in
+Figure  3 the only
+point sets with a ⁡ ( X ) = ( n − 1 , n − 2 , … , 1 ) a(X)=(n-1,n-2,\ldots,1) ? Are these the only ones
+with pairwise distinct distance multiplicities? 
+ We answer the latter question in the negative. We also show that an integer grid is not a valid candidate.
+ Proposition 5.3 . 
+ For every n ∈ ℕ n\in\mathbb{N} , there is a set X ⊆ ℝ 2 X\subseteq\mathbb{R}^{2} of n n points with
+pairwise distinct distance multiplicities and a ⁡ ( X ) ≠ ( n − 1 , n − 2 , … , 1 ) a(X)\neq(n-1,n-2,\ldots,1) . 
+ Proof. 
+ We present the proof for odd n n ; the case of even n n is analogous and left to the reader.
+Let X X be a piece of the hexagonal lattice of side length 1 1 with n = 2 ​ k + 1 n=2k+1 
+points placed on two adjacent horizontal lines ℓ 1 , ℓ 2 \ell_{1},\ell_{2} , so that
+ | X ∩ ℓ 1 | = k + 1 |X\cap\ell_{1}|=k+1 and | X ∩ ℓ 2 | = k |X\cap\ell_{2}|=k . See Figure  4  (left) for an illustration. 
+ Figure 4 . Point sets ( n = 9 n=9 and n = 10 n=10 ) with pairwise distinct distance multiplicities
+and a ⁡ ( X ) ≠ ( n − 1 , n − 2 , … , 1 ) a(X)\neq(n-1,n-2,\ldots,1) . 
+ There are two types of distances in X X , integer and irrational. The integer
+distances are { 1 , … , k } \{1,\ldots,k\} , determined by points on the same horizontal
+line, or by points with consecutive x x -coordinates on different horizontal
+lines. The irrational distances occur between nonconsecutive points on different
+horizontal lines.
+Let these be d 1 < d 2 < ⋯ < d k − 1 d_{1}<d_{2}<\cdots<d_{k-1} , where d j = j 2 + j + 1 d_{j}=\sqrt{j^{2}+j+1} for j = 1 , … , k − 1 j=1,\ldots,k-1 .
+It is not difficult to verify that 
+ (i) 
+ μ ⁡ ( X , 1 ) = 4 ​ k − 1 \mu(X,1)=4k-1 .
+ (ii) 
+ μ ( X , j ) = 2 ( k − j ) + 1 ,  for  j = 2 , … , k \mu(X,j)=2(k-j)+1,\text{ for }j=2,\ldots,k .
+ (iii) 
+ μ ( X , d j ) = 2 ( k − j ) ,  for  j = 1 , … , k − 1 \mu(X,d_{j})=2(k-j),\text{ for }j=1,\ldots,k-1 .
+ The multiplicities are clearly distinct and this completes the proof.
+∎ 
+ Observation 5.4 . 
+ Let k ≥ 4 k\geq 4 . In the k × k k\times k grid there are two distances which appear exactly 8 8 times each. 
+ Proof. 
+ The distance d 1 = ( k − 1 ) 2 + ( k − 2 ) 2 d_{1}=\sqrt{(k-1)^{2}+(k-2)^{2}} appears among the pairs: 
+ { ( 0 , 0 ) , ( k − 1 , k − 2 ) } , { ( 0 , 0 ) , ( k − 2 , k − 1 ) } , { ( 1 , 0 ) , ( k − 1 , k − 1 ) } , { ( 0 , 1 ) , ( k − 1 , k − 1 ) } , \displaystyle\{(0,0),(k-1,k-2)\},\{(0,0),(k-2,k-1)\},\{(1,0),(k-1,k-1)\},\{(0,1),(k-1,k-1)\}, 
+ { ( k − 1 , 0 ) , ( 0 , k − 2 ) } , { ( k − 1 , 0 ) , ( 1 , k − 1 ) } , { ( k − 2 , 0 ) , ( 0 , k − 1 ) } , { ( k − 1 , 1 ) , ( 0 , k − 1 ) } . \displaystyle\{(k-1,0),(0,k-2)\},\{(k-1,0),(1,k-1)\},\{(k-2,0),(0,k-1)\},\{(k-1,1),(0,k-1)\}. 
+ The distance d 1 d_{1} can only appear between point pairs ( x 1 , y 1 ) (x_{1},y_{1}) and ( x 2 , y 2 ) (x_{2},y_{2}) where
+ ( | x 1 − x 2 | , | y 1 − y 2 | ) ∈ { ( k − 1 , k − 2 ) , ( k − 2 , k − 1 ) } (|x_{1}-x_{2}|,|y_{1}-y_{2}|)\in\{(k-1,k-2),(k-2,k-1)\} , and thus cannot appear more
+than eight times, as shown above. The distance d 2 = 2 ​ ( k − 2 ) 2 d_{2}=\sqrt{2(k-2)^{2}} appears among the pairs: 
+ { ( 0 , 0 ) , ( k − 2 , k − 2 ) } , { ( 1 , 0 ) , ( k − 1 , k − 2 ) } , { ( 0 , 1 ) , ( k − 2 , k − 1 ) } , { ( 1 , 1 ) , ( k − 2 , k − 2 ) } , \displaystyle\{(0,0),(k-2,k-2)\},\{(1,0),(k-1,k-2)\},\{(0,1),(k-2,k-1)\},\{(1,1),(k-2,k-2)\}, 
+ { ( k − 1 , 0 ) , ( 1 , k − 2 ) } , { ( k − 1 , 1 ) , ( 1 , k − 1 ) } , { ( k − 2 , 0 ) , ( 0 , k − 2 ) } , { ( k − 2 , 1 ) , ( 0 , k − 1 ) } . \displaystyle\{(k-1,0),(1,k-2)\},\{(k-1,1),(1,k-1)\},\{(k-2,0),(0,k-2)\},\{(k-2,1),(0,k-1)\}. 
+ Note that this is an exhaustive list of all point pairs ( | x 1 − x 2 | , | y 1 − y 2 | ) = ( k − 2 , k − 2 ) . (|x_{1}-x_{2}|,|y_{1}-y_{2}|)=(k-2,k-2). 
+It is not possible that | x 1 − x 2 | = k − 1 |x_{1}-x_{2}|=k-1 (respectively | y 1 − y 2 | = k − 1 |y_{1}-y_{2}|=k-1 ), since the equation 
+ ( k − 1 ) 2 + ( x ) 2 = 2 ​ ( k − 2 ) 2 (k-1)^{2}+(x)^{2}=2(k-2)^{2} 
+ does not have a solution. Indeed, if 
+ x 2 = 2 ​ ( k − 2 ) 2 − ( k − 1 ) 2 = k 2 − 6 ​ k + 7 , x^{2}=2(k-2)^{2}-(k-1)^{2}=k^{2}-6k+7, 
+ then 
+ k = 3 ± 3 2 − ( 7 − x 2 ) = 3 ± 2 + x 2 , k=3\pm\sqrt{3^{2}-(7-x^{2})}=3\pm\sqrt{2+x^{2}}, 
+ but x 2 + 2 x^{2}+2 is not square for x ∈ ℕ x\in\mathbb{N} .
+∎ 
+ References 
+ [1] 
+E. Altman,
+On a problem of P. Erdős,
+ The American Mathematical Monthly ,
+ 70(2) (1963), 148–157.
+ [2] 
+K. Bhowmick,
+A note on a problem of Erdős about rich distances,
+ Studia Scientiarum Mathematicarum Hungarica ,
+ 62(1) (2025), 89–94.
+ [3] 
+P. Braß, W. Moser, and J. Pach,
+ Research Problems in Discrete Geometry ,
+Springer, New York, 2005.
+ [4] 
+P. Erdős,
+On sets of distances of n n points,
+ The American Mathematical Monthly ,
+ 53 (1946), 248–250.
+ [5] 
+P. Erdős,
+Extremal problems in number theory, combinatorics and geometry,
+in Proceedings of the International Congress of Mathematicians , Warsaw, 1983.
+ [6] 
+P. Erdős,
+Some old and new problems in combinatorial geometry,
+ Annals of Discrete Mathematics ,
+ 20 (1984), 129–136.
+ [7] 
+P. Erdős,
+Some of my favourite unsolved problems,
+in A Tribute to Paul Erdős edited by A. Baker, B. Bollobás, and A. Hajnal,
+Cambridge University Press, 1990.
+ [8] 
+P. Erdős,
+Some old and new problems in various branches of combinatorics,
+ Discrete Mathematics ,
+ 165/166 (1997), 227–231.
+ [9] 
+P. Erdős and P. Fishburn,
+Multiplicities of interpoint distances in finite planar sets,
+ Discrete Applied Mathematics ,
+ 60 (1995), 141–147.
+ [10] 
+P. Erdős and J. Pach,
+Variations on the theme of repeated distances,
+ Combinatorica ,
+ 10(3) (1990), 261–269.
+ [11] 
+P. Erdős and G. Purdy,
+Some extremal problems in geometry IV,
+ Congressus Numerantium ,
+ 17 (1976), 307–322.
+ [12] 
+P. Fishburn,
+Convex polygons with few intervertex distances,
+ Computational Geometry ,
+ 5(2) (1995), 65–93.
+ [13] 
+P. Fishburn,
+Distances in convex polygons,
+in The Mathematics of Paul Erdős edited by R. L. Graham, J. Nešetřil, and S. Butler,
+Springer Verlag, New York, 2013.
+ [14] 
+E. Großwald,
+ Representations of Integers as Sums of Squares ,
+Springer Verlag, New York, 1985.
+ [15] 
+L. Guth and N. H. Katz,
+On the Erdős distinct distances problem in the plane,
+ Annals of Mathematics ,
+ 181 (2015), 155–190.
+ [16] 
+H. Hopf and E. Pannwitz,
+Aufgabe Nr. 167,
+ Jahresbericht der Deutschen Mathematiker-Vereinigung ,
+ 43 (1934), 114.
+ [17] 
+H. Lefmann and T. Thiele,
+Point sets with distinct distances,
+ Combinatorica ,
+ 15(3) (1995), 379–408.
+ [18] 
+J. Pach and P. K. Agarwal,
+ Combinatorial Geometry ,
+John Wiley, New York, 1995.
+ [19] 
+J. Spencer, E. Szemerédi, and W. T. Trotter,
+Unit distances in the Euclidean plane,
+in Graph Theory and Combinatorics ,
+Academic Press, London, 1984.
+ [20] 
+L. Székely,
+Crossing numbers and hard Erdős problems in discrete geometry,
+ Combinatorics, Probability and Computing ,
+ 6 (1997), 353–358.
+ [21] 
+E. Szemerédi,
+Erdős’s unit distance problem,
+in Open Problems in Mathematics edited by J. F. Nash Jr. and M. Th. Rassias, 2016.
+ [22] 
+K. Vesztergombi,
+On the distribution of distances in finite sets in the plane,
+ Discrete Mathematics ,
+ 57(1-2) (1985), 129–145.
+ [23] 
+K. Vesztergombi,
+On large distances in planar sets,
+ Discrete Mathematics ,
+ 67(2) (1987), 191–198.
+ [24] 
+K. Vesztergombi,
+The two largest distances in finite planar sets,
+ Discrete Mathematics ,
+ 150(1-3) (1996), 379–386.
+ [25] 
+I. M. Yaglom and V. G. Boltyanskii,
+ Convex Figures ,
+Holt, Rinehart and Winston, New York, 1961.
+ Experimental support, please
+ view the build logs 
+ for errors. Generated by
+ L
+ A 
+ T
+ E 
+ xml 
+ .
+ Instructions for reporting errors 
+ We are continuing to improve HTML versions of papers, and your feedback helps enhance accessibility and mobile
+ support. To report errors in the HTML that will help us improve conversion and rendering, choose any of the
+ methods listed below:
+ Click the "Report Issue" ( 
+ ) button, located in the page header.
+ Tip: You can select the relevant text first, to include it in your report.
+ Our team has already identified the following issues . We appreciate your time reviewing and reporting rendering errors we
+ may not have found yet. Your efforts will help us improve the HTML versions for all readers, because disability
+ should not be a barrier to accessing research. Thank you for your continued support in championing open access for
+ all.
+ Have a free development cycle? Help support accessibility at arXiv! Our collaborators at LaTeXML maintain a list of packages that need conversion , and welcome developer contributions .
+ We gratefully acknowledge support from
+ our major funders ,
+ member institutions , ,
+ and all contributors.
+ About 
+ · 
+ Help 
+ · 
+ Contact 
+ · 
+ Subscribe 
+ · 
+ Copyright 
+ · 
+ Privacy 
+ · 
+ Accessibility 
+ · 
+ Operational Status (opens in new tab) 
+ Major funding support from
+
