@@ -979,30 +979,158 @@ theorem lemmaF_real {x₁ y₁ x₂ y₂ xb yb xr yr D : ℝ} (_hD : 1 < D)
 
 /-! ## Prop 3: core vertices of `L₂` have core degree `2` -/
 
-/-- TODO: prove.
-What's missing: frame at `q` with axis `m`; `t` from `exists_of_not_isExt` with coefficients
-`q − m`; transport all squared distances through `frame_sqd`; apply `case3_real'`.
-Acceptance: Case 3 when the middle neighbour `m` separates `a` and `c`.
-Depends on: `frame_sqd`, `frame_base`, `frame_axis`, `frame_cross`, `exists_of_not_isExt`,
-`dist_le_snd_of_not_isExt`, `TwoLargest.sqd_gap`, `case3_real'`. -/
+/-- `frame_sqd` with the scale `sqd q v` named. -/
+theorem frame_nsq {q v : Pt} {s : ℝ} (h : q ≠ v) (hs : sqd q v = s) (P Q : Pt) :
+    (fx q v P - fx q v Q) ^ 2 + (fy q v P - fy q v Q) ^ 2 = sqd P Q / s := by
+  rw [frame_sqd h, hs]
+
+/-- Squared frame norm of `P` is `sqd q P / sqd q v`. -/
+theorem frame_norm' {q v : Pt} {s : ℝ} (h : q ≠ v) (hs : sqd q v = s) (P : Pt) :
+    fx q v P ^ 2 + fy q v P ^ 2 = sqd q P / s := by
+  have := frame_nsq h hs P q
+  rw [(frame_base q v).1, (frame_base q v).2, sub_zero, sub_zero, sqd_comm] at this
+  exact this
+
+/-- Normalised gap: `sqd P Q / Δ₂² ≤ 1` or `= Δ² / Δ₂²`. -/
+theorem TwoLargest.ngap {X : Finset Pt} {Δ Δ₂ : ℝ} (hT : TwoLargest X Δ Δ₂) {P Q : Pt}
+    (hP : P ∈ X) (hQ : Q ∈ X) : sqd P Q / Δ₂ ^ 2 ≤ 1 ∨ sqd P Q / Δ₂ ^ 2 = Δ ^ 2 / Δ₂ ^ 2 := by
+  have hs : 0 < Δ₂ ^ 2 := by have := hT.pos; positivity
+  rcases hT.sqd_gap hP hQ with h | h
+  · exact Or.inl (div_le_one_of_le₀ h hs.le)
+  · exact Or.inr (by rw [h])
+
+/-- Normalised maximality: `sqd P Q / Δ₂² ≤ Δ² / Δ₂²`. -/
+theorem TwoLargest.nle {X : Finset Pt} {Δ Δ₂ : ℝ} (hT : TwoLargest X Δ Δ₂) {P Q : Pt}
+    (hP : P ∈ X) (hQ : Q ∈ X) : sqd P Q / Δ₂ ^ 2 ≤ Δ ^ 2 / Δ₂ ^ 2 := by
+  have hs : 0 < Δ₂ ^ 2 := by have := hT.pos; positivity
+  exact div_le_div_of_nonneg_right (hT.sqd_le hP hQ) hs.le
+
+/-- `1 < Δ² / Δ₂²`. -/
+theorem TwoLargest.one_lt {X : Finset Pt} {Δ Δ₂ : ℝ} (hT : TwoLargest X Δ Δ₂) :
+    1 < Δ ^ 2 / Δ₂ ^ 2 := by
+  have hs : 0 < Δ₂ ^ 2 := by have := hT.pos; positivity
+  exact (one_lt_div hs).2 (pow_lt_pow_left₀ hT.snd_lt hT.pos.le two_ne_zero)
+
+/-- Points at distance `Δ₂ > 0` are distinct. -/
+theorem ne_of_dist_snd {Δ₂ : ℝ} (hpos : 0 < Δ₂) {q v : Pt} (h : dist q v = Δ₂) : q ≠ v := by
+  rintro rfl; rw [dist_self] at h; linarith
+
+/-- Case 3 when the middle neighbour `m` separates `a` and `c` (frame at `q` with axis `m`; the witness `t` comes from `q` not being extreme). -/
 theorem prop3_case3_core {X : Finset Pt} {Δ Δ₂ : ℝ} (hT : TwoLargest X Δ Δ₂) {q m a c : Pt}
     (hq : q ∈ X) (hqe : ¬ IsExt X q) (hm : m ∈ X) (ha : a ∈ X) (hc : c ∈ X)
     (hqm : dist q m = Δ₂) (hqa : dist q a = Δ₂) (hqc : dist q c = Δ₂)
     (hma : sqd m a ≤ Δ₂ ^ 2) (hmc : sqd m c ≤ Δ₂ ^ 2)
     (hopp : orient q m a * orient q m c < 0) : False := by
-  sorry
+  have hpos := hT.pos
+  have hs0 : 0 < Δ₂ ^ 2 := by positivity
+  have hne := ne_of_dist_snd hpos hqm
+  have hs : sqd q m = Δ₂ ^ 2 := (dist_eq_iff_sqd hpos.le).1 hqm
+  obtain ⟨m0, m1⟩ := frame_axis hne
+  have N := frame_nsq hne hs
+  have Nn := frame_norm' hne hs
+  obtain ⟨t, htX, htq, ht⟩ := exists_of_not_isExt hq hqe (q 0 - m 0) (q 1 - m 1)
+  have hxt : fx q m t ≤ 0 := by
+    unfold fx
+    refine div_nonpos_of_nonpos_of_nonneg ?_ (sqd_pos_of_ne hne).le
+    have e : dotp q m t = -((q 0 - m 0) * (t 0 - q 0) + (q 1 - m 1) * (t 1 - q 1)) := by
+      simp only [dotp]; ring
+    linarith
+  have ht0 : 0 < fx q m t ^ 2 + fy q m t ^ 2 := by
+    rw [Nn]; exact div_pos (sqd_pos_of_ne (Ne.symm htq)) hs0
+  have unit : ∀ P, dist q P = Δ₂ → fx q m P ^ 2 + fy q m P ^ 2 = 1 := fun P hP => by
+    rw [Nn, (dist_eq_iff_sqd hpos.le).1 hP, div_self hs0.ne']
+  have close : ∀ P, sqd m P ≤ Δ₂ ^ 2 → (fx q m P - 1) ^ 2 + fy q m P ^ 2 ≤ 1 := fun P hP => by
+    have := N P m
+    rw [m0, m1, sub_zero, sqd_comm] at this
+    rw [this]; exact div_le_one_of_le₀ hP hs0.le
+  have gap : ∀ P ∈ X, ∀ Q ∈ X, (fx q m P - fx q m Q) ^ 2 + (fy q m P - fy q m Q) ^ 2 ≤ 1 ∨
+      (fx q m P - fx q m Q) ^ 2 + (fy q m P - fy q m Q) ^ 2 = Δ ^ 2 / Δ₂ ^ 2 :=
+    fun P hP Q hQ => by rw [N]; exact hT.ngap hP hQ
+  have gb := gap t htX m hm
+  rw [m0, m1, sub_zero] at gb
+  have hopp' : fy q m a * fy q m c < 0 := by
+    unfold fy; rw [div_mul_div_comm]
+    exact div_neg_of_neg_of_pos hopp (by have := sqd_pos_of_ne hne; positivity)
+  exact case3_real' hT.one_lt (unit a hqa) (unit c hqc) (close a hma) (close c hmc) hopp' hxt ht0
+    (gap t htX a ha) gb (gap t htX c hc)
 
-/-- TODO: prove.
-What's missing: frame at `q` with axis `v₂`; if `v₁, v₃` are on opposite sides use
-`prop3_case3_core` with middle `v₂`, otherwise `case3_select_real` picks middle `v₁` or `v₃`.
-Acceptance: Case 3 (at most one `Δ`-pair; labelled so that `v₂` is close to both others).
-Depends on: `prop3_case3_core`, `case3_select_real`, frame lemmas. -/
+/-- **Case 3** (at most one `Δ`-pair, labelled so that `v₂` is within `Δ₂` of both others): in the frame at `q` with axis `v₂`, either `v₂` separates `v₁, v₃`, or `case3_select_real` makes `v₁` or `v₃` the separating middle neighbour. -/
 theorem prop3_case3 {X : Finset Pt} {Δ Δ₂ : ℝ} (hT : TwoLargest X Δ Δ₂) {q v₁ v₂ v₃ : Pt}
     (hq : q ∈ X) (hqe : ¬ IsExt X q) (h₁ : v₁ ∈ X) (h₂ : v₂ ∈ X) (h₃ : v₃ ∈ X)
     (h12 : v₁ ≠ v₂) (h13 : v₁ ≠ v₃) (h23 : v₂ ≠ v₃)
     (d₁ : dist q v₁ = Δ₂) (d₂ : dist q v₂ = Δ₂) (d₃ : dist q v₃ = Δ₂)
     (s12 : sqd v₁ v₂ ≤ Δ₂ ^ 2) (s23 : sqd v₂ v₃ ≤ Δ₂ ^ 2) : False := by
-  sorry
+  have hpos := hT.pos
+  have hs0 : 0 < Δ₂ ^ 2 := by positivity
+  have hne := ne_of_dist_snd hpos d₂
+  have hs : sqd q v₂ = Δ₂ ^ 2 := (dist_eq_iff_sqd hpos.le).1 d₂
+  obtain ⟨m0, m1⟩ := frame_axis hne
+  have N := frame_nsq hne hs
+  have Nn := frame_norm' hne hs
+  have unit : ∀ P, dist q P = Δ₂ → fx q v₂ P ^ 2 + fy q v₂ P ^ 2 = 1 := fun P hP => by
+    rw [Nn, (dist_eq_iff_sqd hpos.le).1 hP, div_self hs0.ne']
+  have close : ∀ P, sqd P v₂ ≤ Δ₂ ^ 2 → (fx q v₂ P - 1) ^ 2 + fy q v₂ P ^ 2 ≤ 1 := fun P hP => by
+    have := N P v₂
+    rw [m0, m1, sub_zero] at this
+    rw [this]; exact div_le_one_of_le₀ hP hs0.le
+  have ha := unit v₁ d₁
+  have hc := unit v₃ d₃
+  have hab := close v₁ s12
+  have hcb := close v₃ (by rw [sqd_comm]; exact s23)
+  -- neither `v₁` nor `v₃` lies on the axis
+  have ynz : ∀ P, P ≠ v₂ → fx q v₂ P ^ 2 + fy q v₂ P ^ 2 = 1 →
+      (fx q v₂ P - 1) ^ 2 + fy q v₂ P ^ 2 ≤ 1 → fy q v₂ P ≠ 0 := by
+    intro P hP hu hcl hy
+    rw [hy] at hu
+    have hx : fx q v₂ P = 1 := by nlinarith
+    have := N P v₂
+    rw [m0, m1, hx, hy, sub_self, sub_self] at this
+    have h0 : sqd P v₂ = 0 := by
+      have := (div_eq_zero_iff.1 (by rw [← this]; norm_num)).resolve_right hs0.ne'
+      exact this
+    exact (sqd_pos_of_ne hP).ne' h0
+  have ya := ynz v₁ h12 ha hab
+  have yc := ynz v₃ (Ne.symm h23) hc hcb
+  -- orientation in the frame
+  have O : ∀ P Q, orient q P Q = (fx q v₂ P * fy q v₂ Q - fy q v₂ P * fx q v₂ Q) * Δ₂ ^ 2 :=
+    fun P Q => by rw [frame_cross hne, hs, div_mul_cancel₀ _ hs0.ne']
+  rcases lt_trichotomy (fy q v₂ v₁ * fy q v₂ v₃) 0 with hopp | h0 | hsame
+  · refine prop3_case3_core hT hq hqe h₂ h₁ h₃ d₂ d₁ d₃ (by rw [sqd_comm]; exact s12) s23 ?_
+    rw [O, O, m0, m1]
+    have := mul_pos hs0 hs0
+    have e : (1 * fy q v₂ v₁ - 0 * fx q v₂ v₁) * Δ₂ ^ 2 * ((1 * fy q v₂ v₃ - 0 * fx q v₂ v₃) *
+        Δ₂ ^ 2) = (fy q v₂ v₁ * fy q v₂ v₃) * (Δ₂ ^ 2 * Δ₂ ^ 2) := by ring
+    rw [e]; exact mul_neg_of_neg_of_pos hopp this
+  · exact (mul_ne_zero ya yc) h0
+  · have hne13 : ¬ (fx q v₂ v₁ = fx q v₂ v₃ ∧ fy q v₂ v₁ = fy q v₂ v₃) := by
+      rintro ⟨hx, hy⟩
+      have := N v₁ v₃
+      rw [hx, hy, sub_self, sub_self] at this
+      have h0 : sqd v₁ v₃ = 0 :=
+        (div_eq_zero_iff.1 (by rw [← this]; norm_num)).resolve_right hs0.ne'
+      exact (sqd_pos_of_ne h13).ne' h0
+    obtain ⟨hac, hmid⟩ := case3_select_real ha hc hab hcb hsame hne13
+    have s13 : sqd v₁ v₃ ≤ Δ₂ ^ 2 := by
+      rw [N] at hac
+      exact (div_le_one hs0).1 hac
+    have := mul_pos hs0 hs0
+    rcases hmid with hmid | hmid
+    · -- `v₁` is the middle neighbour
+      refine prop3_case3_core hT hq hqe h₁ h₂ h₃ d₁ d₂ d₃ s12 s13 ?_
+      rw [O, O, m0, m1]
+      have e : (fx q v₂ v₁ * 0 - fy q v₂ v₁ * 1) * Δ₂ ^ 2 * ((fx q v₂ v₁ * fy q v₂ v₃ -
+          fy q v₂ v₁ * fx q v₂ v₃) * Δ₂ ^ 2) = ((-fy q v₂ v₁) * (fx q v₂ v₁ * fy q v₂ v₃ -
+          fy q v₂ v₁ * fx q v₂ v₃)) * (Δ₂ ^ 2 * Δ₂ ^ 2) := by ring
+      rw [e]; exact mul_neg_of_neg_of_pos hmid this
+    · -- `v₃` is the middle neighbour
+      refine prop3_case3_core hT hq hqe h₃ h₂ h₁ d₃ d₂ d₁ ?_ ?_ ?_
+      · rw [sqd_comm]; exact s23
+      · rw [sqd_comm]; exact s13
+      · rw [O, O, m0, m1]
+        have e : (fx q v₂ v₃ * 0 - fy q v₂ v₃ * 1) * Δ₂ ^ 2 * ((fx q v₂ v₃ * fy q v₂ v₁ -
+            fy q v₂ v₃ * fx q v₂ v₁) * Δ₂ ^ 2) = ((-fy q v₂ v₃) * (fx q v₂ v₃ * fy q v₂ v₁ -
+            fy q v₂ v₃ * fx q v₂ v₁)) * (Δ₂ ^ 2 * Δ₂ ^ 2) := by ring
+        rw [e]; exact mul_neg_of_neg_of_pos hmid this
 
 /-- TODO: prove.
 What's missing: frame at `q` with axis `v₁`; transport; apply `case2_real`.
