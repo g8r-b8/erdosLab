@@ -4,10 +4,10 @@ import Erdos.E132MainDegen
 /-!
 # Erdős Problem 132 — `min{μ(Δ₂), μ(δ)} ≤ (54/37)n + C₀` (assembly, §9)
 
-The main theorem `erdos132_main` is **proved** from the lemma statements of
-`E132MainDefs / Local / Regions / Degen`; all remaining `sorry`s are in those lemmas
-(see `problems/132/lean/MAIN_PLAN.md`).  `#print axioms erdos132_main` currently includes
-`sorryAx`.  One lemma is a cited black box: `vesztergombi87` ([Ve87]).
+The main theorem `erdos132_main` is **fully proved**: there are no `sorry`s in
+`E132MainDefs / Local / Regions / Degen / ConvexCurve / Ve87`, and
+`#print axioms erdos132_main` = `[propext, Classical.choice, Quot.sound]`.
+`vesztergombi87` ([Ve87]) is proved (`E132Ve87.lean`), not assumed.
 
 | regime (δ = 1, β = 1/100) | `e(S)` bound | `min{μ(Δ₂), μ(δ)} ≤` |
 |---|---|---|
@@ -102,8 +102,7 @@ theorem main_normalized (Y : Finset Pt) (h1 : minDist Y = 1) :
 `min{μ(Δ₂), μ(δ)} ≤ (54/37)n + C₀` for every `n`-point planar set, `n ≥ 2`.  Hence
 `L ≤ 54/37 < 3/2`.
 
-Proved from the lemma statements (assembly of §9).  Remaining `sorry`s live in the lemmas;
-`vesztergombi87` is a cited result. -/
+Assembly of §9 from the (fully proved) lemmas. -/
 theorem erdos132_main :
     ∃ C₀ : ℝ, ∀ X : Finset Pt, 2 ≤ X.card →
       ((min (mult X (dist2 X)) (mult X (minDist X)) : ℕ) : ℝ) ≤ 54 / 37 * X.card + C₀ := by
