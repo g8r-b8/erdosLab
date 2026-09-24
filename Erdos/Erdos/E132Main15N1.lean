@@ -528,13 +528,105 @@ theorem norm_le_of_inner_bounds {ν₁ ν₂ v : Pt} (hn₁ : ‖ν₁‖ = 1) (
   have hVb : ‖v‖ ^ 2 ≤ 150 ^ 2 := by norm_num at h5 ⊢; linarith
   exact (pow_le_pow_iff_left₀ (norm_nonneg v) (by norm_num) two_ne_zero).1 hVb
 
+/-- Helper: a direction on the short arc `[c, c + α]` (`0 < α < π`) is a nonnegative combination
+of the two end directions. -/
+theorem n1_dirVec_arc {c α t : ℝ} (hα : 0 < α) (hα' : α < π) (ht0 : 0 ≤ t) (ht1 : t ≤ α) :
+    ∃ a b : ℝ, 0 ≤ a ∧ 0 ≤ b ∧ dirVec (c + t) = a • dirVec c + b • dirVec (c + α) := by
+  have hsin : 0 < Real.sin α := Real.sin_pos_of_pos_of_lt_pi hα hα'
+  have hdir : dirVec (c + t) =
+      (Real.sin α)⁻¹ • (Real.sin (α - t) • dirVec c + Real.sin t • dirVec (c + α)) := by
+    rw [eq_inv_smul_iff₀ hsin.ne']
+    ext i; fin_cases i <;> simp [dirVec, Real.sin_sub, Real.cos_add, Real.sin_add] <;> ring
+  refine ⟨(Real.sin α)⁻¹ * Real.sin (α - t), (Real.sin α)⁻¹ * Real.sin t, ?_, ?_, ?_⟩
+  · exact mul_nonneg (inv_nonneg.2 hsin.le)
+      (Real.sin_nonneg_of_nonneg_of_le_pi (by linarith) (by linarith))
+  · exact mul_nonneg (inv_nonneg.2 hsin.le)
+      (Real.sin_nonneg_of_nonneg_of_le_pi ht0 (by linarith))
+  · rw [hdir, smul_add, smul_smul, smul_smul]
+
+/-- Helper (Lemma BT, support points): a unit direction `d = a ν₁ + b ν₂` (`a, b ≥ 0`) between
+two unit normals at boundary points `b₁, b₂` within distance `1` of `y ∈ K`, with
+`|ν₁·ν₂| ≤ 1 − 10⁻⁴`, is an outer normal at a boundary point within distance `150` of `y`. -/
+theorem n1_support_near (hX : Normal X) {y b₁ b₂ ν₁ ν₂ d : Pt} (hyK : y ∈ KBall X)
+    (hb₁ : b₁ ∈ frontier (KBall X)) (hb₂ : b₂ ∈ frontier (KBall X))
+    (h₁ : dist y b₁ ≤ 1) (h₂ : dist y b₂ ≤ 1)
+    (hν₁ : ν₁ ∈ normalCone (KBall X) b₁) (hν₂ : ν₂ ∈ normalCone (KBall X) b₂)
+    (hn₁ : ‖ν₁‖ = 1) (hn₂ : ‖ν₂‖ = 1) (hc : |inner ℝ ν₁ ν₂| ≤ 1 - 1 / 10 ^ 4)
+    (hd : ‖d‖ = 1) {a b : ℝ} (ha : 0 ≤ a) (hb : 0 ≤ b) (hdab : d = a • ν₁ + b • ν₂) :
+    ∃ x ∈ bdryNear X y, d ∈ normalCone (KBall X) x := by
+  have hne : X.Nonempty := card_pos.1 (by have := hX.four_le; omega)
+  have hb₁K : b₁ ∈ KBall X := (KBall_isClosed X).closure_eq ▸ hb₁.1
+  have hb₂K : b₂ ∈ KBall X := (KBall_isClosed X).closure_eq ▸ hb₂.1
+  -- `|(b_i − y)·ν_j| ≤ 1`
+  have hbd : ∀ b' ν : Pt, dist y b' ≤ 1 → ‖ν‖ = 1 → |inner ℝ (b' - y) ν| ≤ 1 := by
+    intro b' ν hb' hν
+    refine (abs_real_inner_le_norm _ _).trans ?_
+    rw [hν, mul_one, ← dist_eq_norm, dist_comm]; exact hb'
+  rcases ha.eq_or_lt with ha0 | ha0
+  · -- `d = ν₂`
+    subst ha0
+    have hb1 : b = 1 := by
+      rw [hdab, zero_smul, zero_add, norm_smul, hn₂, mul_one, Real.norm_eq_abs,
+        abs_of_nonneg hb] at hd
+      exact hd
+    refine ⟨b₂, ⟨hb₂, ?_⟩, ?_⟩
+    · rw [Metric.mem_closedBall, dist_comm]; linarith
+    · rw [hdab, hb1, zero_smul, zero_add, one_smul]; exact hν₂
+  rcases hb.eq_or_lt with hb0 | hb0
+  · subst hb0
+    have ha1 : a = 1 := by
+      rw [hdab, zero_smul, add_zero, norm_smul, hn₁, mul_one, Real.norm_eq_abs,
+        abs_of_nonneg ha] at hd
+      exact hd
+    refine ⟨b₁, ⟨hb₁, ?_⟩, ?_⟩
+    · rw [Metric.mem_closedBall, dist_comm]; linarith
+    · rw [hdab, ha1, zero_smul, add_zero, one_smul]; exact hν₁
+  -- a support point in direction `d`
+  obtain ⟨x, hxK, hxmax⟩ := (KBall_isCompact hne).exists_isMaxOn ⟨y, hyK⟩
+    (continuous_id.inner continuous_const : Continuous fun z : Pt => inner ℝ z d).continuousOn
+  have hmax : ∀ z ∈ KBall X, inner ℝ z d ≤ inner ℝ x d := fun z hz => hxmax hz
+  have hxF : x ∈ frontier (KBall X) := mem_frontier_of_max hxK hd hmax
+  have hxN : d ∈ normalCone (KBall X) x := fun z hz => by
+    rw [inner_sub_left]; linarith [hmax z hz]
+  refine ⟨x, ⟨hxF, ?_⟩, hxN⟩
+  -- bounds on `(x − y)·ν_i`
+  have u₁ : inner ℝ (x - b₁) ν₁ ≤ 0 := hν₁ x hxK
+  have u₂ : inner ℝ (x - b₂) ν₂ ≤ 0 := hν₂ x hxK
+  have m₁ : 0 ≤ inner ℝ (x - b₁) d := by rw [inner_sub_left]; linarith [hmax b₁ hb₁K]
+  have m₂ : 0 ≤ inner ℝ (x - b₂) d := by rw [inner_sub_left]; linarith [hmax b₂ hb₂K]
+  rw [hdab, inner_add_right, inner_smul_right, inner_smul_right] at m₁ m₂
+  have l₂ : 0 ≤ inner ℝ (x - b₁) ν₂ := by
+    by_contra hneg; push Not at hneg
+    have := mul_neg_of_pos_of_neg hb0 hneg
+    nlinarith
+  have l₁ : 0 ≤ inner ℝ (x - b₂) ν₁ := by
+    by_contra hneg; push Not at hneg
+    have := mul_neg_of_pos_of_neg ha0 hneg
+    nlinarith
+  have e : ∀ (b' ν : Pt), inner ℝ (x - y) ν = inner ℝ (x - b') ν + inner ℝ (b' - y) ν := by
+    intro b' ν; rw [← inner_add_left]; congr 1; abel
+  have s₁ : |inner ℝ (x - y) ν₁| ≤ 1 := by
+    rw [abs_le]
+    have := abs_le.1 (hbd b₁ ν₁ h₁ hn₁); have := abs_le.1 (hbd b₂ ν₁ h₂ hn₁)
+    constructor
+    · rw [e b₂ ν₁]; linarith
+    · rw [e b₁ ν₁]; linarith
+  have s₂ : |inner ℝ (x - y) ν₂| ≤ 1 := by
+    rw [abs_le]
+    have := abs_le.1 (hbd b₁ ν₂ h₁ hn₂); have := abs_le.1 (hbd b₂ ν₂ h₂ hn₂)
+    constructor
+    · rw [e b₁ ν₂]; linarith
+    · rw [e b₂ ν₂]; linarith
+  rw [Metric.mem_closedBall, dist_eq_norm]
+  exact norm_le_of_inner_bounds hn₁ hn₂ hc s₁ s₂
+
 /-- **Non-flat, non-thin ⇒ big turning** (Lemma BT, local part): every direction `d` strictly
 between `ν₁` and `ν₂` (short arc, length `∠(ν₁,ν₂) ≥ ‖ν₁ − ν₂‖ > 1/4`) is an outer normal at a
 support point `x_d ∈ ∂K`; `x_d` beats `b₁, b₂` in direction `d` and lies in both supporting
 half-planes, so `v = x_d − y` has `|v·ν_i| ≤ 1` and `‖v‖ ≤ 150`.  Hence
 `turning(K, ∂K ∩ B̄(y,150)) ≥ 1/4`.
 
-TODO: prove.
+TODO: none — proved.
 What's missing: parametrise the short arc `ν₁ = dirVec c`, `ν₂ = dirVec (c ± α)`
 (`exists_dirVec_pair`); for `θ` inside, `d = a ν₁ + b ν₂` with `a, b ≥ 0`; support point by
 compactness (`IsCompact.exists_isMaxOn`), `mem_frontier_of_max`; bounds
@@ -551,7 +643,43 @@ theorem turning_ge_of_nonflat (hX : Normal X) {y b₁ b₂ ν₁ ν₂ : Pt} (hy
     (hn₁ : ‖ν₁‖ = 1) (hn₂ : ‖ν₂‖ = 1) (hfar : 1 / 4 < ‖ν₁ - ν₂‖)
     (hnt : -(1 - 1 / 10 ^ 4) < inner ℝ ν₁ ν₂) :
     1 / 4 ≤ turning (KBall X) (bdryNear X y) := by
-  sorry
+  have hyK := interior_subset hy
+  have hc_hi : inner ℝ ν₁ ν₂ < 31 / 32 := by
+    have := norm_sub_sq_real ν₁ ν₂
+    rw [hn₁, hn₂] at this
+    nlinarith [norm_nonneg (ν₁ - ν₂)]
+  have hc : |inner ℝ ν₁ ν₂| ≤ 1 - 1 / 10 ^ 4 := abs_le.2 ⟨by linarith, by linarith⟩
+  set α := ang ν₁ ν₂ with hαdef
+  have hα1 : 1 / 4 < α := lt_of_lt_of_le hfar (norm_sub_le_ang hn₁ hn₂)
+  have hαπ : α < π := by
+    have hle : α ≤ π := InnerProductGeometry.angle_le_pi _ _
+    refine lt_of_le_of_ne hle fun h => ?_
+    have := cos_ang_unit hn₁ hn₂
+    rw [← hαdef, h, Real.cos_pi] at this
+    linarith
+  have hα0 : 0 < α := by linarith
+  have hsupp := fun (d : Pt) (hd : ‖d‖ = 1) (a b : ℝ) (ha : 0 ≤ a) (hb : 0 ≤ b)
+      (hdab : d = a • ν₁ + b • ν₂) =>
+    n1_support_near hX hyK hb₁ hb₂ h₁ h₂ hν₁ hν₂ hn₁ hn₂ hc hd ha hb hdab
+  have key : ∀ c : ℝ, (dirVec c = ν₁ ∧ dirVec (c + α) = ν₂) ∨
+      (dirVec c = ν₂ ∧ dirVec (c + α) = ν₁) → α ≤ turning (KBall X) (bdryNear X y) := by
+    intro c hc'
+    refine le_turning_of_Icc (c := c) hα0.le (by linarith) fun θ hθ => ?_
+    obtain ⟨a, b, ha, hb, hab⟩ := n1_dirVec_arc (c := c) hα0 hαπ (t := θ - c)
+      (by linarith [hθ.1]) (by linarith [hθ.2])
+    rw [add_sub_cancel] at hab
+    rcases hc' with ⟨e1, e2⟩ | ⟨e1, e2⟩
+    · rw [e1, e2] at hab
+      exact hsupp _ (norm_dirVec θ) a b ha hb hab
+    · rw [e1, e2, add_comm] at hab
+      exact hsupp _ (norm_dirVec θ) b a hb ha hab
+  obtain ⟨θ₁, σ, hσ, hd₁, hd₂⟩ := exists_dirVec_pair hn₁ hn₂
+  rw [← hαdef] at hd₂
+  rcases hσ with rfl | rfl
+  · exact hα1.le.trans (key θ₁ (Or.inl ⟨hd₁, by simpa using hd₂⟩))
+  · refine hα1.le.trans (key (θ₁ - α) (Or.inr ⟨?_, ?_⟩))
+    · rw [← hd₂]; congr 1; ring
+    · rw [← hd₁]; congr 1; ring
 
 /-- **Ball packing**: points pairwise `≥ 1` apart within distance `ρ` of `x` number at most
 `(4ρ + 1)²`.
