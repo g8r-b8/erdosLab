@@ -404,11 +404,129 @@ theorem rowR_cap_K (hX : Normal X) (F : DirField X) {p q n : Pt} (h : RowR F p q
 
 /-! ## (B′), (W) -/
 
+/-- Real core of the (B′) step: two unit vectors `(aᵢ, cᵢ)` with elevations in `(0, 1/100)` on
+opposite sides, a unit `(x, y)` making a nonnegative product with the second: the product with
+the first is `≤ 1/40`. -/
+private theorem eta_real {a₁ c₁ a₂ c₂ x y : ℝ} (n1 : a₁ ^ 2 + c₁ ^ 2 = 1) (n2 : a₂ ^ 2 + c₂ ^ 2 = 1)
+    (nw : x ^ 2 + y ^ 2 = 1) (h1 : 0 < a₁) (h1' : a₁ < 1 / 100) (h2 : 0 < a₂)
+    (h2' : a₂ < 1 / 100) (hs : c₁ * c₂ < 0) (hζ : 0 ≤ a₂ * x + c₂ * y) :
+    a₁ * x + c₁ * y ≤ 1 / 40 := by
+  have hx : |x| ≤ 1 := by rw [abs_le]; constructor <;> nlinarith [sq_nonneg y]
+  have hc₁ : |c₁| ≤ 1 := by rw [abs_le]; constructor <;> nlinarith [sq_nonneg a₁]
+  have hc₂' : |c₂| ≤ 1 := by rw [abs_le]; constructor <;> nlinarith [sq_nonneg a₂]
+  have hc₂ : c₂ ≠ 0 := by rintro rfl; simp at hs
+  have ha2 : a₂ ^ 2 < 1 / 10000 := by nlinarith
+  have hsq : 0.9999 ≤ c₂ ^ 2 := by linarith
+  rw [abs_le] at hx hc₁ hc₂'
+  -- `κ c₂ ≥ 0.99` and `κ c₁ > 0` for the sign `κ` of `c₂`
+  obtain ⟨κ, hκ, hκc₂, hκc₁⟩ : ∃ κ : ℝ, (κ = 1 ∨ κ = -1) ∧ 0.99 ≤ κ * c₂ ∧ κ * c₁ < 0 := by
+    rcases lt_or_gt_of_ne hc₂ with hc | hc
+    · refine ⟨-1, Or.inr rfl, by nlinarith, ?_⟩
+      by_contra h; push Not at h
+      have : c₁ ≤ 0 := by linarith
+      nlinarith [mul_nonneg_of_nonpos_of_nonpos this hc.le]
+    · refine ⟨1, Or.inl rfl, by nlinarith, ?_⟩
+      by_contra h; push Not at h
+      have : 0 ≤ c₁ := by linarith
+      nlinarith [mul_nonneg this hc.le]
+  have k1 : (κ * c₁) * (c₂ * y) ≤ (κ * c₁) * (-(a₂ * x)) :=
+    mul_le_mul_of_nonpos_left (by linarith) hκc₁.le
+  have hS1 : |κ * c₂ * a₁ - κ * c₁ * a₂| ≤ 2 / 100 := by
+    have e1 : |κ * c₂| ≤ 1 := by
+      rcases hκ with rfl | rfl <;> rw [abs_le] <;> constructor <;> linarith
+    have e2 : |κ * c₁| ≤ 1 := by
+      rcases hκ with rfl | rfl <;> rw [abs_le] <;> constructor <;> linarith
+    have := abs_sub (κ * c₂ * a₁) (κ * c₁ * a₂)
+    rw [abs_mul (κ * c₂), abs_mul (κ * c₁), abs_of_pos h1, abs_of_pos h2] at this
+    have := mul_le_mul_of_nonneg_right e1 h1.le
+    have := mul_le_mul_of_nonneg_right e2 h2.le
+    linarith
+  have k2 : x * (κ * c₂ * a₁ - κ * c₁ * a₂) ≤ 2 / 100 := by
+    have := abs_mul x (κ * c₂ * a₁ - κ * c₁ * a₂)
+    have hx' : |x| ≤ 1 := abs_le.2 hx
+    have := mul_le_mul hx' hS1 (abs_nonneg _) zero_le_one
+    have := le_abs_self (x * (κ * c₂ * a₁ - κ * c₁ * a₂))
+    linarith
+  have k3 : (κ * c₂) * (a₁ * x + c₁ * y) ≤ 2 / 100 := by
+    have e : (κ * c₂) * (a₁ * x + c₁ * y) = x * (κ * c₂ * a₁) + (κ * c₁) * (c₂ * y) := by ring
+    have e' : (κ * c₁) * (-(a₂ * x)) = -(x * (κ * c₁ * a₂)) := by ring
+    have e'' : x * (κ * c₂ * a₁ - κ * c₁ * a₂) = x * (κ * c₂ * a₁) - x * (κ * c₁ * a₂) := by ring
+    linarith
+  by_contra hη; push Not at hη
+  have : 0.99 * (1 / 40) ≤ (κ * c₂) * (a₁ * x + c₁ * y) :=
+    mul_le_mul hκc₂ hη.le (by norm_num) (by linarith)
+  linarith
+
+/-- Vector form of `eta_real` in the frame of `u`. -/
+private theorem eta_small {u ŵ e₁ e₂ : Pt} (hu : ‖u‖ = 1) (hŵ : ‖ŵ‖ = 1) (he₁ : ‖e₁‖ = 1)
+    (he₂ : ‖e₂‖ = 1) (a₁ : 0 < inner ℝ e₁ u) (a₁' : inner ℝ e₁ u < beta)
+    (a₂ : 0 < inner ℝ e₂ u) (a₂' : inner ℝ e₂ u < beta) (hs : det2 u e₁ * det2 u e₂ < 0)
+    (hζ : 0 ≤ inner ℝ e₂ ŵ) : inner ℝ e₁ ŵ ≤ 1 / 40 := by
+  have f1 := inner_mul_add_det_mul u e₁ ŵ
+  have f2 := inner_mul_add_det_mul u e₂ ŵ
+  have n1 := inner_sq_add_det_sq (e := e₁) hu
+  have n2 := inner_sq_add_det_sq (e := e₂) hu
+  have nw := inner_sq_add_det_sq (e := ŵ) hu
+  rw [hu, one_pow, one_mul] at f1 f2
+  rw [he₁] at n1; rw [he₂] at n2; rw [hŵ] at nw
+  rw [real_inner_comm e₁ u, real_inner_comm ŵ u] at f1
+  rw [real_inner_comm e₂ u, real_inner_comm ŵ u] at f2
+  have hb : beta = 1 / 100 := rfl
+  rw [hb] at a₁' a₂'
+  rw [← f1]; rw [← f2] at hζ
+  exact eta_real (by linarith) (by linarith) (by linarith) a₁ a₁' a₂ a₂' hs hζ
+
+/-- **(B′) step**: `z` on `C(w, Δ)` with T-neighbours `q` (the one we step to) and `p` on the
+two sides; then `q` is on `C(w, Δ)` too (at `τ = √3/2`, `t > 0.866`). -/
+private theorem step_on_circle (hX : Normal X) (F : DirField X) (hτ : tau X = √3 / 2)
+    {w z q p : Pt} (hw : w ∈ X) (hz : z ∈ Sset X) (hq : q ∈ Sset X) (hp : p ∈ Sset X)
+    (hzq : dist z q = 1) (hzp : dist z p = 1) (a₁ : 0 < inner ℝ (q - z) (F.u z))
+    (a₁' : inner ℝ (q - z) (F.u z) < beta) (a₂ : 0 < inner ℝ (p - z) (F.u z))
+    (a₂' : inner ℝ (p - z) (F.u z) < beta)
+    (hs : det2 (F.u z) (q - z) * det2 (F.u z) (p - z) < 0) (hd : dist z w = diam X) :
+    dist q w = diam X := by
+  have hpos := hX.dist2_pos
+  have hT := two_of_pos hpos
+  have hΔ : 0 < diam X := hpos.trans hT.lt
+  have hzX := Sset_sub hz
+  have hqX := Sset_sub hq
+  have hpX := Sset_sub hp
+  set ŵ := (diam X)⁻¹ • (w - z)
+  have hŵ : ‖ŵ‖ = 1 := by
+    rw [norm_smul, ← dist_eq_norm, dist_comm, hd, Real.norm_eq_abs, abs_of_pos (inv_pos.2 hΔ),
+      inv_mul_cancel₀ hΔ.ne']
+  have he₁ : ‖q - z‖ = 1 := by rw [← dist_eq_norm, dist_comm, hzq]
+  have he₂ : ‖p - z‖ = 1 := by rw [← dist_eq_norm, dist_comm, hzp]
+  have hζ : 0 ≤ inner ℝ (p - z) ŵ := by
+    rw [real_inner_smul_right]
+    have := two_inner_sub p z w
+    have hpw := hT.le_diam p hpX w hw
+    rw [dist_comm p z, hzp, dist_comm w z, hd] at this
+    have : 0 ≤ inner ℝ (p - z) (w - z) := by nlinarith [dist_nonneg (x := p) (y := w)]
+    positivity
+  have hη := eta_small (F.norm_u hz) hŵ he₁ he₂ a₁ a₁' a₂ a₂' hs hζ
+  rw [real_inner_smul_right] at hη
+  have hcos := two_inner_sub q z w
+  rw [dist_comm q z, hzq, dist_comm w z, hd] at hcos
+  have hη' : inner ℝ (q - z) (w - z) ≤ diam X / 40 := by
+    rw [inv_mul_le_iff₀ hΔ] at hη; linarith
+  obtain ⟨ht1, -⟩ := tgap_bounds_exact hX hτ
+  have h3 : (1.732 : ℝ) < √3 := by rw [Real.lt_sqrt (by norm_num)]; norm_num
+  have hgap : diam X - dist2 X = tgap X := rfl
+  have hfar : dist2 X < dist q w := by
+    by_contra hle; push Not at hle
+    have : dist q w ^ 2 ≤ dist2 X ^ 2 := pow_le_pow_left₀ dist_nonneg hle 2
+    nlinarith
+  rcases hT.gap q hqX w hw with h | h
+  · exact absurd h (not_le.2 hfar)
+  · exact h
+
 /-- **(B′)** the pure right D-walk from the right base end `b` of a triangle stays on
 `C(w_v, Δ)`.
 
-TODO: prove.
-What's missing: induction on `k`; interior walk vertices have normal cones of `conv X` in the
+TODO: none — proved (`step_on_circle`: with `ŵ = (w − z)/Δ`, the left neighbour gives
+`(p − z)·ŵ ≥ 0`, hence `η = (q − z)·ŵ ≤ 1/40` (`eta_real`) and `|qw|² ≥ 1 + Δ² − Δ/20 > Δ₂²`).
+What's missing: (was) induction on `k`; interior walk vertices have normal cones of `conv X` in the
 cap of radius `arcsin β` around `u` (inwardness against both neighbours); the diametral
 direction `ŵ_k = (w − z_k)/Δ` is such a normal, so `η = (z_{k+1} − z_k)·ŵ_k < sin(2 arcsin β)`
 `< t`; `lemmaB`-type identity `|z_{k+1}w|² = 1 + Δ² − 2Δη > Δ₂²` forces `|z_{k+1}w| = Δ`.
@@ -418,19 +536,54 @@ theorem Bprime_walk_right (hX : Normal X) (F : DirField X) (hτ : tau X = √3 /
     (ht : IsTri F v a b) (z : ℕ → Pt) (N : ℕ) (hz0 : z 0 = b)
     (hstep : ∀ k < N, RowR F (z k) (z (k + 1))) :
     ∀ k ≤ N, dist (z k) (F.partner v) = diam X := by
-  sorry
+  obtain ⟨hva, hvb, -, -, hab, -⟩ := ht
+  have hwX : F.partner v ∈ X := F.partner_mem v hva.1
+  have hleft : ∀ k < N, ∃ p, RowR F p (z k) := by
+    intro k hk
+    cases k with
+    | zero => exact ⟨a, hz0 ▸ hab⟩
+    | succ k => exact ⟨z k, hstep k (by omega)⟩
+  intro k hk
+  induction k with
+  | zero => rw [hz0]; exact hvb.2.2.2.2.2
+  | succ k ih =>
+    have hk' : k < N := by omega
+    obtain ⟨p, hp⟩ := hleft k hk'
+    have hq := hstep k hk'
+    obtain ⟨-, -, hd1, -, ⟨a₁, a₁', -, -⟩, s₁⟩ := hq.1
+    have hp' := T2 hX F hp.1
+    obtain ⟨-, -, hd2, -, ⟨a₂, a₂', -, -⟩, s₂⟩ := hp'
+    exact step_on_circle hX F hτ hwX hq.1.1 hq.1.2.1 hp.1.1 hd1 hd2 a₁ a₁' a₂ a₂'
+      (by nlinarith) (ih (by omega))
 
 /-- **(B′)** the pure left D-walk from the left base end `a` stays on `C(w_v, Δ)`.
 
-TODO: prove.
-What's missing: mirror image of `Bprime_walk_right`.
+TODO: none — proved (mirror image, via `step_on_circle`).
+What's missing: (was) mirror image of `Bprime_walk_right`.
 Acceptance: no `sorry`.
 Depends on: as `Bprime_walk_right`. Difficulty L. -/
 theorem Bprime_walk_left (hX : Normal X) (F : DirField X) (hτ : tau X = √3 / 2) {v a b : Pt}
     (ht : IsTri F v a b) (z : ℕ → Pt) (N : ℕ) (hz0 : z 0 = a)
     (hstep : ∀ k < N, RowR F (z (k + 1)) (z k)) :
     ∀ k ≤ N, dist (z k) (F.partner v) = diam X := by
-  sorry
+  obtain ⟨hva, hvb, -, -, hab, -⟩ := ht
+  have hwX : F.partner v ∈ X := F.partner_mem v hva.1
+  have hright : ∀ k < N, ∃ p, RowR F (z k) p := by
+    intro k hk
+    cases k with
+    | zero => exact ⟨b, hz0 ▸ hab⟩
+    | succ k => exact ⟨z k, hstep k (by omega)⟩
+  intro k hk
+  induction k with
+  | zero => rw [hz0]; exact hva.2.2.2.2.2
+  | succ k ih =>
+    have hk' : k < N := by omega
+    obtain ⟨p, hp⟩ := hright k hk'
+    have hq := T2 hX F (hstep k hk').1
+    obtain ⟨-, -, hd1, -, ⟨a₁, a₁', -, -⟩, s₁⟩ := hq
+    obtain ⟨-, -, hd2, -, ⟨a₂, a₂', -, -⟩, s₂⟩ := hp.1
+    exact step_on_circle hX F hτ hwX hp.1.1 (hstep k hk').1.1 hp.1.2.1 hd1 hd2 a₁ a₁' a₂ a₂'
+      (by nlinarith) (ih (by omega))
 
 /-- **(B′)** consecutive walk vertices differ by the rotation `rot α₁` about `w = w_v`
 (counterclockwise = right), starting with the base itself.
