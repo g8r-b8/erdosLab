@@ -34,6 +34,15 @@ needing heavy analytic number theory not in Mathlib. Keep a ranked shortlist in 
 - Never claim a result that has `sorry`, `admit`, `native_decide` without noting it, or new
   `axiom`s. Check with `#print axioms`.
 
+## Blog: post anything of note
+Public blog: https://g8r-b8.github.io/erdos-lab/ (source ~/Projects/erdosBlog, repo g8r-b8/erdos-lab; see its README).
+When a result survives the novelty check (rule above), post it: `scripts/new-post.sh <problem> "<title>"`,
+fill in the draft, move it to `_posts/YYYY-MM-DD-<slug>.md`, commit, push. Posts need not be final or
+refereed. Say plainly what was checked and what wasn't, and label partial results as partial. Fix mistakes
+with a dated "Correction" note in the post, and don't silently rewrite claims. Author is Wingate Jones. The
+footer already has the one AI-disclosure line, so don't repeat it, and don't add Co-Authored-By trailers
+in that repo. Don't post results already known (e.g. #468 = Tao's theorem).
+
 ## Done
 Only when there is a sorry-free, axiom-clean Lean proof of an open-verified Erdős problem
 (or a disproof by verified counterexample), with the verification evidence in NOTES.md,
