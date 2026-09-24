@@ -133,6 +133,20 @@ then ¬(almost-all o(N)) as in PR #4076's Erdos468MinimalPreimageLittleOAlmostAl
   Brillhart–Lehmer–Lehmer 1964). Unread: Lehmer "Mechanized mathematics" (BAMS 1966), Lehmer–Lehmer
   "On runs of residues" (Proc AMS 1962), Mills' 1965 survey.
 
+## Research round R1–R5 (2026-09-23/24): beyond Clemen–Dumitrescu–Liu
+- R1 (angle_R1.md, a0a2fdf): convex ⇒ ≥3 rare distances for every 6 ≤ n ≤ 18 (n = 15, 17 SAT-certified by
+  drat-trim). Odd n ≥ 19 is open: B1b closed; A1/B2 are conditional on Fishburn L6 / Thm 2 / the E–F conjecture;
+  A2, B1a and B2 (3 ≤ a ≤ m) remain open.
+- R2 (angle_R2.md, 2f1f194): Conjecture C1 is FALSE. There are convex no-4-concyclic sets with μ(Δ₂) = 5n/4 (proof needs a
+  referee). Local lemmas P0–P6 are proved. New question: μ(Δ₂) ≤ 5n/4 + O(1)? The paper is corrected (70fe7e8).
+- R3 (angle_R3.md, ce1b53b): Hit Lemma (≤ 21–23 chord hits, via Beukers–Smyth). Theorem AC: an almost-cocircular
+  convex set has k ≥ (n−3w+1)/4. The general case reduces to Erdős–Fishburn's f(n), plus stability off a circle.
+- R4 (angle_R4.md, c2f61e8): **L ≤ 15/11** for CDL Problem 1.6, down from 54/37 (18/13 refereed twice, the N1 lemma refereed
+  once). Region II alone gives 4/3. Theorem G would give 9/7 conditionally (it needs a gap lemma).
+- R5 (angle_R5.md, fecabb2): the #132(a) case map. "Δ₂ or Δ₃ is rare" is false (exact n = 8; odd rings → 6/5). Conjecture
+  R5.4: min(μ₂, μ₃, μ₄) ≤ n. Charge Lemma conjectured (0 violations in ~205k sets).
+- The paper and Lean proof still state 54/37. The upgrade to 15/11 awaits the user's decision.
+
 ## ★ Lean milestone 2 (2026-09-23): #132 54/37 bound fully formalised
 - Erdos132Main.erdos132_main (CDL Problem 1.6: min{μ(Δ₂),μ(δ)} ≤ 54/37·n + C₀) sorry-free, axioms = propext,
   Classical.choice, Quot.sound. Also Vesztergombi 1987, Hopf–Pannwitz, Cor A1 (E132Layer). Full lake build OK.

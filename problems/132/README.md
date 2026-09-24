@@ -119,6 +119,20 @@ n pairs? Must the number of such distances → ∞ (perhaps ≥ n^{1−o(1)})?
   for a Lean-verified certificate (LRAT via Lean's bv_decide/LRAT checker), plus a small Lean lemma deriving the ordinal
   constraints from geometry (diagonals of a convex quadrilateral beat the opposite sides).
 
+## Research round R1–R5 (2026-09-23/24): beyond Clemen–Dumitrescu–Liu
+- R1 (angle_R1.md, a0a2fdf): convex ⇒ ≥3 rare distances for every 6 ≤ n ≤ 18 (n = 15, 17 SAT-certified by
+  drat-trim). Odd n ≥ 19 is open: B1b closed; A1/B2 are conditional on Fishburn L6 / Thm 2 / the E–F conjecture;
+  A2, B1a and B2 (3 ≤ a ≤ m) remain open.
+- R2 (angle_R2.md, 2f1f194): Conjecture C1 is FALSE. There are convex no-4-concyclic sets with μ(Δ₂) = 5n/4 (proof needs a
+  referee). Local lemmas P0–P6 are proved. New question: μ(Δ₂) ≤ 5n/4 + O(1)? The paper is corrected (70fe7e8).
+- R3 (angle_R3.md, ce1b53b): Hit Lemma (≤ 21–23 chord hits, via Beukers–Smyth). Theorem AC: an almost-cocircular
+  convex set has k ≥ (n−3w+1)/4. The general case reduces to Erdős–Fishburn's f(n), plus stability off a circle.
+- R4 (angle_R4.md, c2f61e8): **L ≤ 15/11** for CDL Problem 1.6, down from 54/37 (18/13 refereed twice, the N1 lemma refereed
+  once). Region II alone gives 4/3. Theorem G would give 9/7 conditionally (it needs a gap lemma).
+- R5 (angle_R5.md, fecabb2): the #132(a) case map. "Δ₂ or Δ₃ is rare" is false (exact n = 8; odd rings → 6/5). Conjecture
+  R5.4: min(μ₂, μ₃, μ₄) ≤ n. Charge Lemma conjectured (0 violations in ~205k sets).
+- The paper and Lean proof still state 54/37. The upgrade to 15/11 awaits the user's decision.
+
 ## Next steps
 0. B3: n=7,11,13 certified by drat-trim + lrat-check (DONE). Lean: convex n=7 and n=11 sorry-free in
    Erdos/Erdos/E132Convex.lean (Lemma Q, ordinal reduction and BitVec encoding proved in Lean; the core is closed by bv_decide.
