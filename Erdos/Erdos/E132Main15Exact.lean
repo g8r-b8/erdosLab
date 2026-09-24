@@ -848,17 +848,91 @@ theorem Bprime_rot (hX : Normal X) (F : DirField X) (hτ : tau X = √3 / 2) {v 
     refine hrot _ _ hzk hzk1 hd1 ?_
     rw [hdetE]; nlinarith
 
+private theorem rot_rot (θ φ : ℝ) (x : Pt) : rot θ (rot φ x) = rot (θ + φ) x := by
+  rw [pt_ext_iff]
+  simp only [rot_apply0, rot_apply1, Real.cos_add, Real.sin_add]
+  constructor <;> ring
+
+private theorem norm_rot_sub_sq (ψ : ℝ) (r : Pt) :
+    ‖rot ψ r - r‖ ^ 2 = 2 * (1 - Real.cos ψ) * ‖r‖ ^ 2 := by
+  rw [norm_sq_pt, norm_sq_pt]
+  simp only [PiLp.sub_apply, rot_apply0, rot_apply1]
+  have := Real.sin_sq_add_cos_sq ψ
+  linear_combination (r 0 ^ 2 + r 1 ^ 2) * this
+
 /-- **(B′)** span: a walk of `N` right steps from the base satisfies `(N + 1)·α₁ ≤ π/3`
 (points of `X` are `≤ Δ` apart; chord `2Δ sin(θ/2) ≤ Δ`), so D-walks are paths.
 
-TODO: prove.
-What's missing: `Bprime_rot` iterated: `z_N − w = rot((N+1)α₁)(a − w)`; `|z_N − a| ≤ Δ`.
+TODO: none — proved (induction on `N`, using `(N+1)α₁ ≤ π/3 + α₁ < π`).
+What's missing: (was) `Bprime_rot` iterated: `z_N − w = rot((N+1)α₁)(a − w)`; `|z_N − a| ≤ Δ`.
 Acceptance: no `sorry`.
 Depends on: `Bprime_rot`, `dist_le_diam`. Difficulty M. -/
 theorem Bprime_span (hX : Normal X) (F : DirField X) (hτ : tau X = √3 / 2) {v a b : Pt}
     (ht : IsTri F v a b) (z : ℕ → Pt) (N : ℕ) (hz0 : z 0 = b)
     (hstep : ∀ k < N, RowR F (z k) (z (k + 1))) : ((N : ℝ) + 1) * alpha1 X ≤ π / 3 := by
-  sorry
+  obtain ⟨hbase, hsteps⟩ := Bprime_rot hX F hτ ht z N hz0 hstep
+  obtain ⟨hva, hvb, -, -, -, -⟩ := ht
+  set w := F.partner v
+  set α := alpha1 X
+  have hpos := hX.dist2_pos
+  have hT := two_of_pos hpos
+  have hΔ : 0 < diam X := hpos.trans hT.lt
+  have hL := hX.large
+  have hπ := Real.pi_gt_three
+  -- `0 ≤ α ≤ 0.001`
+  have hα0 : 0 ≤ α := by
+    have : 0 ≤ Real.arcsin (1 / (2 * diam X)) := Real.arcsin_nonneg.2 (by positivity)
+    simp only [α, alpha1]; linarith
+  have hα1 : α ≤ 1 / 1000 := by
+    have hx0 : 0 < 1 / (2 * diam X) := by positivity
+    have hx1 : 1 / (2 * diam X) ≤ 1 / 20000 := by
+      rw [div_le_div_iff₀ (by positivity) (by norm_num)]; linarith [hT.lt]
+    obtain ⟨-, h⟩ := arcsin_bounds hx0 (by linarith)
+    have : (1 / (2 * diam X)) ^ 3 ≤ 1 / 20000 := by
+      calc (1 / (2 * diam X)) ^ 3 ≤ (1 / 20000) ^ 3 := by gcongr
+        _ ≤ 1 / 20000 := by norm_num
+    simp only [α, alpha1]; linarith
+  -- positions on the circle
+  have hzk : ∀ k ≤ N, z k - w = rot (((k : ℝ) + 1) * α) (a - w) := by
+    intro k hk
+    induction k with
+    | zero => rw [hz0, hbase]; simp
+    | succ k ih =>
+      rw [hsteps k (by omega), ih (by omega), rot_rot]
+      congr 1; push_cast; ring
+  have hzX : ∀ k ≤ N, z k ∈ X := by
+    intro k hk
+    cases k with
+    | zero => rw [hz0]; exact Sset_sub hvb.2.2.1
+    | succ k => exact Sset_sub (hstep k (by omega)).1.2.1
+  have haw : ‖a - w‖ = diam X := by rw [← dist_eq_norm]; exact hva.2.2.2.2.2
+  have hcos : ∀ k ≤ N, 1 / 2 ≤ Real.cos (((k : ℝ) + 1) * α) := by
+    intro k hk
+    have hd := hT.le_diam (z k) (hzX k hk) a (Sset_sub hva.2.2.1)
+    rw [dist_eq_norm, show z k - a = (z k - w) - (a - w) by abel, hzk k hk] at hd
+    have h2 := norm_rot_sub_sq (((k : ℝ) + 1) * α) (a - w)
+    rw [haw] at h2
+    have : ‖rot (((k : ℝ) + 1) * α) (a - w) - (a - w)‖ ^ 2 ≤ diam X ^ 2 :=
+      pow_le_pow_left₀ (norm_nonneg _) hd 2
+    have hΔ2 : 0 < diam X ^ 2 := by positivity
+    by_contra hlt; push Not at hlt
+    have : 0 < (2 * (1 - Real.cos (((k : ℝ) + 1) * α)) - 1) * diam X ^ 2 :=
+      mul_pos (by linarith) hΔ2
+    nlinarith
+  have key : ∀ k ≤ N, ((k : ℝ) + 1) * α ≤ π / 3 := by
+    intro k
+    induction k with
+    | zero => intro _; simp; linarith
+    | succ k ih =>
+      intro hk
+      have h1 := ih (by omega)
+      have hc := hcos (k + 1) hk
+      by_contra h; push Not at h
+      have hle : ((((k + 1 : ℕ) : ℝ)) + 1) * α ≤ π := by push_cast at h1 ⊢; nlinarith
+      have := Real.cos_lt_cos_of_nonneg_of_le_pi (by linarith) hle h
+      rw [Real.cos_pi_div_three] at this
+      linarith
+  exact key N le_rfl
 
 /-- **(W)** one centre per D-walk: if the base of a second triangle `A′` lies on the right walk
 from the base of `A`, the two apexes have the same `Δ₂`-partner.
