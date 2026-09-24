@@ -49,14 +49,33 @@ def IsTri (F : DirField X) (v a b : Pt) : Prop :=
 
 /-- At `τ = √3/2`: `√3/2 < t < √3/2 + 1/(2Δ₂)` (`t < 1`, since `t ≥ 1` forces `τ ≥ t ≥ 1`).
 
-TODO: prove.
-What's missing: `tau_sub_tgap` (`τ − t = (t² − 1)/(2Δ₂)`); if `t ≥ 1` then `τ ≥ 1`; so
+TODO: none — proved.
+What's missing: (was) `tau_sub_tgap` (`τ − t = (t² − 1)/(2Δ₂)`); if `t ≥ 1` then `τ ≥ 1`; so
 `t < 1` and `0 < (1 − t²)/(2Δ₂) < 1/(2Δ₂)`.
 Acceptance: no `sorry`.
 Depends on: `tau_sub_tgap`, `Normal.dist2_pos`, `tgap > 0`. Difficulty S. -/
 theorem tgap_bounds_exact (hX : Normal X) (hτ : tau X = √3 / 2) :
     √3 / 2 < tgap X ∧ tgap X < √3 / 2 + 1 / (2 * dist2 X) := by
-  sorry
+  have hpos := hX.dist2_pos
+  have ht0 : 0 < tgap X := by have := (two_of_pos hpos).lt; unfold tgap; linarith
+  have e := tau_sub_tgap X
+  rw [hτ] at e
+  have h3 : √3 < 1.7321 := by rw [Real.sqrt_lt' (by norm_num)]; norm_num
+  have ht1 : tgap X < 1 := by
+    by_contra h; push Not at h
+    have : 0 ≤ (tgap X ^ 2 - 1) / (2 * dist2 X) := div_nonneg (by nlinarith) (by positivity)
+    linarith
+  have hd : 0 < 2 * dist2 X := by positivity
+  have e' : tgap X - √3 / 2 = (1 - tgap X ^ 2) / (2 * dist2 X) := by
+    have : (tgap X ^ 2 - 1) / (2 * dist2 X) = -((1 - tgap X ^ 2) / (2 * dist2 X)) := by
+      rw [← neg_div, neg_sub]
+    linarith
+  constructor
+  · have : 0 < (1 - tgap X ^ 2) / (2 * dist2 X) := div_pos (by nlinarith) hd
+    linarith
+  · have : (1 - tgap X ^ 2) / (2 * dist2 X) < 1 / (2 * dist2 X) :=
+      div_lt_div_of_pos_right (by nlinarith) hd
+    linarith
 
 /-- **(Arith)** For `R ≥ 10⁴`, `Δ = R + t` with `√3/2 < t < √3/2 + 1/(2R)`, `α₁ = 2 arcsin(1/(2Δ))`,
 `α₂ = 2 arcsin(1/(2R))`: no `j ≥ 1`, `k` with `kα₁ < π/3` have `jα₂ = kα₁`.
