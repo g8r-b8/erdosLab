@@ -30,14 +30,59 @@ variable {X : Finset Pt}
 /-- `#rungs ≤ #rungVerts + #twoRungVerts` (each K-end carries `≤ 2` good rungs, and `2` only on
 `twoRungVerts`).
 
-TODO: prove.
-What's missing: as `card_rungs_le`: map a rung to its K-end; fibres have size `≤ 2`, and size
+TODO: none — proved.
+What's missing: (was) as `card_rungs_le`: map a rung to its K-end; fibres have size `≤ 2`, and size
 `2` only over `twoRungVerts`; `card_le_card_biUnion`-style sum over fibres.
 Acceptance: no `sorry`.
 Depends on: `rung_offset`, proof of `card_rungs_le`. Difficulty M. -/
 theorem card_rungs_le_add (hX : Normal X) (F : DirField X) :
     (rungs X F).card ≤ (rungVerts X F).card + (twoRungVerts X F).card := by
-  sorry
+  classical
+  let f : Sym2 Pt → Pt := fun e =>
+    if h : ∃ v w, e = s(v, w) ∧ IsRung F v w then h.choose else 0
+  have hf : ∀ e, (h : ∃ v w, e = s(v, w) ∧ IsRung F v w) →
+      ∃ w, e = s(f e, w) ∧ IsRung F (f e) w := by
+    intro e h
+    have : f e = h.choose := dif_pos h
+    rw [this]; exact h.choose_spec
+  have hmap : ∀ e ∈ rungs X F, f e ∈ rungVerts X F := by
+    intro e he
+    obtain ⟨w, -, hr⟩ := hf e (mem_filter.1 he).2
+    exact mem_filter.2 ⟨mem_sdiff.2 ⟨hr.1, hr.2.1⟩, w, hr⟩
+  rw [card_eq_sum_card_fiberwise hmap]
+  have hfib : ∀ v ∈ rungVerts X F, ((rungs X F).filter (fun e => f e = v)).card ≤
+      1 + if v ∈ twoRungVerts X F then 1 else 0 := by
+    intro v hv
+    split_ifs with h2
+    · let o : ℝ → Pt := fun σ => v + ((-tau X) • F.u v + (σ * sOff X) • perp (F.u v))
+      have hsub : (rungs X F).filter (fun e => f e = v) ⊆ {s(v, o 1), s(v, o (-1))} := by
+        intro e he
+        obtain ⟨he, hfe⟩ := mem_filter.1 he
+        obtain ⟨w, hew, hr⟩ := hf e (mem_filter.1 he).2
+        rw [hfe] at hew hr
+        obtain ⟨σ, hσ, ho⟩ := rung_offset F hr
+        have hw : w = o σ := by simp only [o]; rw [← ho]; abel
+        rw [hew, hw]
+        rcases hσ with rfl | rfl <;> simp
+      exact (card_le_card hsub).trans card_le_two
+    · refine (card_le_one.2 fun e he e' he' => ?_).trans (by omega)
+      by_contra hne
+      apply h2
+      obtain ⟨he, hfe⟩ := mem_filter.1 he
+      obtain ⟨he', hfe'⟩ := mem_filter.1 he'
+      obtain ⟨w, hew, hr⟩ := hf e (mem_filter.1 he).2
+      obtain ⟨w', hew', hr'⟩ := hf e' (mem_filter.1 he').2
+      rw [hfe] at hew hr
+      rw [hfe'] at hew' hr'
+      refine mem_filter.2 ⟨hv, w, w', ?_, hr, hr', hew ▸ he, hew' ▸ he'⟩
+      rintro rfl
+      exact hne (hew.trans hew'.symm)
+  refine (sum_le_sum hfib).trans ?_
+  rw [sum_add_distrib, sum_const, smul_eq_mul, mul_one, sum_boole]
+  have : ((rungVerts X F).filter (fun v => v ∈ twoRungVerts X F)).card ≤
+      (twoRungVerts X F).card := card_le_card fun v hv => (mem_filter.1 hv).2
+  simp only [Nat.cast_id] at this ⊢
+  omega
 
 /-- For `τ > √3/2` no vertex carries two rungs: the positions `v + o_±` are `2s < 1` apart.
 
