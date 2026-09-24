@@ -115,8 +115,8 @@ theorem twoRung_eq_empty (hX : Normal X) (F : DirField X) (hτ₁ : √3 / 2 < t
 /-- **Slot counting**: each T-edge uses two slots (one at each end, by the sign of `det2`), each
 slot is used at most once (T1); so `2#T + #(free slots) ≤ 2|S|`.
 
-TODO: prove.
-What's missing: injection `tEdges × {end} → S × {±1}` (via `tstep_flip`: the two ends see each
+TODO: none — proved.
+What's missing: (was) injection `tEdges × {end} → S × {±1}` (via `tstep_flip`: the two ends see each
 other on opposite sides, and `tnbr_unique`), disjoint from `Kill`; slots live in
 `S ×ˢ {1, -1}` of size `2|S|`.
 Acceptance: no `sorry`.
@@ -124,7 +124,100 @@ Depends on: `tnbr_unique`, `tstep_flip`, definitions. Difficulty M. -/
 theorem card_tEdges_slots (hX : Normal X) (F : DirField X) (Kill : Finset (Pt × ℝ))
     (hK : ∀ x ∈ Kill, x.1 ∈ Sset X ∧ (x.2 = 1 ∨ x.2 = -1) ∧ SlotFree F x.1 x.2) :
     2 * (tEdges X F).card + Kill.card ≤ 2 * (Sset X).card := by
-  sorry
+  classical
+  set S := Sset X
+  set T := tEdges X F
+  have hE : ∀ z ∈ T, ¬ z.IsDiag ∧ ∀ p ∈ z, p ∈ S := fun z hz =>
+    mem_edges (mem_filter.1 (mem_filter.1 hz).1).1
+  have tdata : ∀ {p q : Pt}, s(p, q) ∈ T → dist p q = 1 ∧ IsTEdge F p q := by
+    intro p q h
+    obtain ⟨hg, hTall⟩ := mem_filter.1 h
+    obtain ⟨hee, -⟩ := mem_filter.1 hg
+    have hd : pairDist s(p, q) = minDist X := (mem_filter.1 hee).2
+    exact ⟨by rw [← hX.minDist_eq, ← hd]; rfl, hTall p q rfl⟩
+  have h2 : ∀ z ∈ T, (S.filter (fun p => p ∈ z)).card = 2 := by
+    intro z hz
+    induction z using Sym2.ind with
+    | h a b =>
+      obtain ⟨hd, hV⟩ := hE _ hz
+      have hab : a ≠ b := by simpa using hd
+      have : S.filter (fun p => p ∈ s(a, b)) = {a, b} := by
+        ext x
+        simp only [mem_filter, Sym2.mem_iff, mem_insert, mem_singleton]
+        constructor
+        · exact fun h => h.2
+        · rintro (rfl | rfl)
+          · exact ⟨hV _ (Sym2.mem_mk_left _ _), Or.inl rfl⟩
+          · exact ⟨hV _ (Sym2.mem_mk_right _ _), Or.inr rfl⟩
+      rw [this, card_pair hab]
+  have hdc : ∑ z ∈ T, (S.filter (fun p => p ∈ z)).card =
+      ∑ p ∈ S, (T.filter (fun z => p ∈ z)).card := by
+    simp only [card_filter]; exact sum_comm
+  have hT2 : 2 * T.card = ∑ p ∈ S, (T.filter (fun z => p ∈ z)).card := by
+    rw [← hdc, sum_congr rfl h2, sum_const, smul_eq_mul, mul_comm]
+  have hK2 : Kill.card = ∑ p ∈ S, (Kill.filter (fun x => x.1 = p)).card :=
+    card_eq_sum_card_fiberwise (fun x hx => (hK x hx).1)
+  have hloc : ∀ p ∈ S, (T.filter (fun z => p ∈ z)).card +
+      (Kill.filter (fun x => x.1 = p)).card ≤ 2 := by
+    intro p hp
+    let B : ℝ → Finset Pt := fun σ =>
+      S.filter (fun q => s(p, q) ∈ T ∧ 0 < σ * det2 (F.u p) (q - p))
+    let k : ℝ → ℕ := fun σ => if (p, σ) ∈ Kill then 1 else 0
+    have hB : ∀ σ, (B σ).card + k σ ≤ 1 := by
+      intro σ
+      by_cases hk : (p, σ) ∈ Kill
+      · have hfree := (hK _ hk).2.2
+        have : B σ = ∅ := by
+          refine eq_empty_of_forall_notMem fun q hq => ?_
+          obtain ⟨-, hqT, hs⟩ := mem_filter.1 hq
+          exact hfree q hqT hs
+        simp [k, hk, this]
+      · simp only [k, hk, if_false, add_zero]
+        refine card_le_one.2 fun a ha b hb => ?_
+        obtain ⟨haS, haT, has⟩ := mem_filter.1 ha
+        obtain ⟨hbS, hbT, hbs⟩ := mem_filter.1 hb
+        obtain ⟨da, ta⟩ := tdata haT
+        obtain ⟨db, tb⟩ := tdata hbT
+        exact tnbr_unique hX hp haS hbS da db ta tb has hbs
+    have hsub : T.filter (fun z => p ∈ z) ⊆ (B 1 ∪ B (-1)).image (fun q => s(p, q)) := by
+      intro z hz
+      obtain ⟨hzT, hpz⟩ := mem_filter.1 hz
+      obtain ⟨q, rfl⟩ := Sym2.mem_iff_exists.1 hpz
+      obtain ⟨hd, hTe⟩ := tdata hzT
+      have hq : q ∈ S := (hE _ hzT).2 q (Sym2.mem_mk_right _ _)
+      rw [mem_image]
+      refine ⟨q, ?_, rfl⟩
+      have hl := lagrange (q - p) (F.u p)
+      rw [F.norm_u' hp, ← dist_eq_norm, dist_comm q p, hd] at hl
+      have ha := hTe.2.1
+      have hβ : beta = 1 / 100 := rfl
+      rw [hβ] at ha
+      rcases lt_or_gt_of_ne (show det2 (F.u p) (q - p) ≠ 0 by
+        intro h0; rw [h0] at hl; nlinarith [hTe.1]) with hb | hb
+      · exact mem_union_right _ (mem_filter.2 ⟨hq, hzT, by linarith⟩)
+      · exact mem_union_left _ (mem_filter.2 ⟨hq, hzT, by linarith⟩)
+    have hKp : (Kill.filter (fun x => x.1 = p)).card ≤ k 1 + k (-1) := by
+      have : Kill.filter (fun x => x.1 = p) ⊆
+          (if (p, (1 : ℝ)) ∈ Kill then {(p, 1)} else ∅) ∪
+            (if (p, (-1 : ℝ)) ∈ Kill then {(p, -1)} else ∅) := by
+        intro x hx
+        obtain ⟨hxK, hx1⟩ := mem_filter.1 hx
+        obtain ⟨-, hσ, -⟩ := hK x hxK
+        obtain ⟨a, σ⟩ := x
+        simp only at hx1 hσ
+        subst hx1
+        rcases hσ with rfl | rfl
+        · apply mem_union_left; rw [if_pos hxK]; exact mem_singleton_self _
+        · apply mem_union_right; rw [if_pos hxK]; exact mem_singleton_self _
+      refine (card_le_card this).trans ((card_union_le _ _).trans ?_)
+      simp only [k]; split_ifs <;> simp
+    have c1 := hB 1
+    have c2 := hB (-1)
+    have := (card_le_card hsub).trans (card_image_le.trans (card_union_le _ _))
+    omega
+  have := sum_le_sum hloc
+  rw [sum_add_distrib, sum_const, smul_eq_mul, ← hT2, ← hK2] at this
+  omega
 
 /-- **Lemma III.1** (`τ < √3/2`, `2s > 1`): if `v` has rungs `z ≠ z′` (the one to `z′` good),
 then `z′` has no T-neighbour on the side of `z`.
