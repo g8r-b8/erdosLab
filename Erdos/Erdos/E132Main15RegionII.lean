@@ -154,7 +154,7 @@ theorem lemmaA_ii (F : DirField X) {v z w' : Pt} (hr : IsRung F v z) (hw' : w' �
 /-- **At most 5 type-(i) vertices** (their normal cones of `K` are wider than `π/3` and
 interior-disjoint; `6·π/3 = 2π`).
 
-TODO: prove.
+TODO: none — proved.
 What's missing: copy of `card_cornerVerts_le` with `lemmaA_i` in place of `corner_lemma` and
 `6` in place of `7`.
 Acceptance: no `sorry`.
@@ -162,7 +162,63 @@ Depends on: `lemmaA_i`, `turning_sum_le`, `turning_ge_angle`, `ball_polygon_b`,
 `neg_mem_normalCone`. Difficulty M. -/
 theorem card_typeOne_le_five (hX : Normal X) (F : DirField X) (hτ₁ : √3 / 2 + 3 * beta ≤ tau X)
     (hτ₂ : tau X ≤ 1) : (typeOneVerts X F).card ≤ 5 := by
-  sorry
+  by_contra hlt
+  push Not at hlt
+  set C := typeOneVerts X F
+  have hmem : ∀ v ∈ C, v ∈ Sset X ∧ v ∉ Dset X ∧ ∃ z w', IsRung F v z ∧ w' ∈ X ∧
+      dist v w' = dist2 X ∧ w' ≠ F.partner v ∧ dist z w' ≠ diam X := by
+    intro v hv
+    obtain ⟨hv, hd⟩ := mem_filter.1 hv
+    obtain ⟨hv, -⟩ := mem_filter.1 hv
+    exact ⟨(mem_sdiff.1 hv).1, (mem_sdiff.1 hv).2, hd⟩
+  have hK : ∀ v ∈ C, v ∈ KBall X := fun v hv =>
+    ball_polygon_a (Sset_sub (hmem v hv).1) (hmem v hv).2.1
+  obtain ⟨a, ha, b, hb, hab⟩ := one_lt_card.1 (by omega : 1 < C.card)
+  have hint := KBall_interior_nonempty (hK a ha) (hK b hb) hab
+  have hXne : X.Nonempty := ⟨a, Sset_sub (hmem a ha).1⟩
+  have hconv := KBall_convex X
+  have hcomp := KBall_isCompact hXne
+  set γ : Pt → Set Pt := fun v => (fun _ : ℝ => v) '' Set.Icc 0 0
+  have hγ : ∀ v, γ v = {v} := fun v => (Set.nonempty_Icc.2 le_rfl).image_const v
+  have hsum := turning_sum_le hconv hcomp C γ
+    (fun v hv => by rw [hγ]; exact Set.singleton_subset_iff.2 (ball_polygon_b (hmem v hv).1
+      (hmem v hv).2.1)) (fun v _ => by rw [hγ]; exact isClosed_singleton) 1
+    (fun x => by
+      refine card_le_one.2 fun v hv v' hv' => ?_
+      have h1 := (mem_filter.1 hv).2
+      have h2 := (mem_filter.1 hv').2
+      rw [hγ, Set.mem_singleton_iff] at h1 h2
+      rw [← h1, ← h2])
+  have hlow : ∀ v ∈ C, π / 3 < turning (KBall X) (γ v) := by
+    intro v hv
+    obtain ⟨hvS, hvD, z, w', hr, hw'X, hw'v, hne, hzw⟩ := hmem v hv
+    have hcor := lemmaA_i hX F hτ₁ hτ₂ hr hw'X hw'v hne hzw
+    have hpos := hX.dist2_pos
+    have hn₁ : -F.u v ∈ normalCone (KBall X) v := by
+      unfold DirField.u
+      exact neg_mem_normalCone (hK v hv) (F.partner_mem v hvS) (F.partner_K v hvS hvD) _
+        (inv_nonneg.2 dist_nonneg)
+    have hn₂ : -((dist2 X)⁻¹ • (w' - v)) ∈ normalCone (KBall X) v :=
+      neg_mem_normalCone (hK v hv) hw'X hw'v _ (inv_nonneg.2 hpos.le)
+    have hu := F.norm_u hvS
+    have hu' : ‖(dist2 X)⁻¹ • (w' - v)‖ = 1 := by
+      rw [norm_smul, ← dist_eq_norm, dist_comm, hw'v, Real.norm_eq_abs,
+        abs_of_pos (inv_pos.2 hpos), inv_mul_cancel₀ hpos.ne']
+    have hfr : γ v ⊆ frontier (KBall X) := by
+      rw [hγ]; exact Set.singleton_subset_iff.2 (ball_polygon_b hvS hvD)
+    have hta := turning_ge_angle hconv hcomp hint (γ := fun _ : ℝ => v) (le_refl (0 : ℝ))
+      continuousOn_const hfr hn₁ hn₂
+      (neg_ne_zero.2 (norm_ne_zero_iff.1 (by rw [hu]; norm_num)))
+      (neg_ne_zero.2 (norm_ne_zero_iff.1 (by rw [hu']; norm_num)))
+    unfold ang at hta hcor
+    rw [InnerProductGeometry.angle_neg_neg] at hta
+    exact hcor.trans_le hta
+  have := sum_lt_sum_of_nonempty ⟨a, ha⟩ hlow
+  rw [sum_const, nsmul_eq_mul] at this
+  have h6 : (6 : ℝ) ≤ C.card := by exact_mod_cast hlt
+  have hπ := Real.pi_pos
+  push_cast at hsum
+  nlinarith
 
 /-! ## Lemma C -/
 
@@ -216,10 +272,51 @@ theorem lemmaC (hX : Normal X) (F : DirField X) (hτ₁ : √3 / 2 + 3 * beta �
 
 /-! ## Counting -/
 
+/-- T-degree `≤ 2` (the degree bound inside `card_tEdges_le`, by (T1)).
+
+TODO: none — proved.
+Acceptance: no `sorry`.
+Depends on: `T1`. Difficulty M. -/
+theorem tEdges_deg_le_two (hX : Normal X) (F : DirField X) (p : Pt) :
+    ((tEdges X F).filter (fun z => p ∈ z)).card ≤ 2 := by
+  have hsub : (tEdges X F).filter (fun z => p ∈ z) ⊆
+      ((Sset X).filter (IsSideT F 1 p) ∪ (Sset X).filter (IsSideT F (-1) p)).image
+        (fun q => s(p, q)) := by
+    intro z hz
+    obtain ⟨hzT, hpz⟩ := mem_filter.1 hz
+    obtain ⟨q, rfl⟩ := Sym2.mem_iff_exists.1 hpz
+    obtain ⟨hzg, hT⟩ := mem_filter.1 hzT
+    obtain ⟨hze, hg⟩ := mem_filter.1 hzg
+    obtain ⟨hzP, hzd⟩ := mem_filter.1 hze
+    simp only [pairsS, mem_filter, Finset.mk_mem_sym2_iff, Sym2.mk_isDiag_iff] at hzP
+    obtain ⟨⟨hp, hq⟩, -⟩ := hzP
+    have hd : dist p q = 1 := by rw [← hX.minDist_eq]; exact hzd
+    have hT' := hT p q rfl
+    have hg' := hg p q rfl
+    rw [mem_image]
+    refine ⟨q, ?_, rfl⟩
+    have hl := lagrange (q - p) (F.u p)
+    rw [F.norm_u' hp, ← dist_eq_norm, dist_comm q p, hd] at hl
+    have hβ : beta = 1 / 100 := rfl
+    have ha := hT'.2.1
+    have ha0 := hT'.1
+    rw [hβ] at ha
+    rcases lt_or_gt_of_ne (show det2 (F.u p) (q - p) ≠ 0 by
+      intro h0; rw [h0] at hl; nlinarith) with hb | hb
+    · exact mem_union_right _ (mem_filter.2 ⟨hq, hp, hq, hd, hg', hT', by linarith⟩)
+    · exact mem_union_left _ (mem_filter.2 ⟨hq, hp, hq, hd, hg', hT', by linarith⟩)
+  have c1 : ((Sset X).filter (IsSideT F 1 p)).card ≤ 1 :=
+    card_le_one.2 fun a ha b hb =>
+      T1 hX F (Or.inl rfl) (mem_filter.1 ha).2 (mem_filter.1 hb).2
+  have c2 : ((Sset X).filter (IsSideT F (-1) p)).card ≤ 1 :=
+    card_le_one.2 fun a ha b hb =>
+      T1 hX F (Or.inr rfl) (mem_filter.1 ha).2 (mem_filter.1 hb).2
+  exact (card_le_card hsub).trans (card_image_le.trans ((card_union_le _ _).trans (by omega)))
+
 /-- **T-edges with isolated vertices**: if no vertex of `Z ⊆ S` has a T-edge then
 `#T + |Z| ≤ |S|` (each vertex has T-degree `≤ 2`, and `0` on `Z`).
 
-TODO: prove.
+TODO: none — proved.
 What's missing: `two_mul_card_le_of_deg_le` on `V = S ∖ Z` (all T-edges avoid `Z`), with the
 degree bound of `card_tEdges_le`.
 Acceptance: no `sorry`.
@@ -227,7 +324,17 @@ Depends on: `two_mul_card_le_of_deg_le`, `T1`, proof of `card_tEdges_le`. Diffic
 theorem card_tEdges_add_le_of_isolated (hX : Normal X) (F : DirField X) (Z : Finset Pt)
     (hZ : Z ⊆ Sset X) (h0 : ∀ z ∈ Z, ∀ q, s(z, q) ∉ tEdges X F) :
     (tEdges X F).card + Z.card ≤ (Sset X).card := by
-  sorry
+  have h := two_mul_card_le_of_deg_le (V := Sset X \ Z) (E := tEdges X F) (k := 2) ?_
+    (fun p _ => tEdges_deg_le_two hX F p)
+  · have := card_sdiff_of_subset hZ
+    have := card_le_card hZ
+    omega
+  · intro z hz
+    have hz' : z ∈ edges X := (mem_filter.1 (mem_filter.1 hz).1).1
+    obtain ⟨hnd, hS⟩ := mem_edges hz'
+    refine ⟨hnd, fun p hp => mem_sdiff.2 ⟨hS p hp, fun hpZ => ?_⟩⟩
+    obtain ⟨q, rfl⟩ := Sym2.mem_iff_exists.1 hp
+    exact h0 p hpZ q hz
 
 /-- `#T + #doubleEnds ≤ |S|` (Lemma C isolates the double ends).
 
@@ -241,11 +348,24 @@ theorem card_tEdges_add_doubleEnds_le (hX : Normal X) (F : DirField X)
   obtain ⟨v, hd, hr⟩ := (mem_filter.1 hz).2
   exact lemmaC hX F hτ₁ hτ₂ hd (mem_filter.1 hr).1 hq
 
+/-- Double counting with a relation that is injective on the right (local copy of
+`Finset.card_le_card_of_forall_subsingleton`, not imported here).
+
+TODO: none — proved.
+Acceptance: no `sorry`. -/
+theorem card_le_of_rel {α β : Type*} [Nonempty β] (r : α → β → Prop) {s : Finset α} {t : Finset β}
+    (hs : ∀ a ∈ s, ∃ b, b ∈ t ∧ r a b)
+    (ht : ∀ b ∈ t, ∀ a₁ ∈ s, ∀ a₂ ∈ s, r a₁ b → r a₂ b → a₁ = a₂) : s.card ≤ t.card := by
+  choose! f hf hr using hs
+  refine card_le_card_of_injOn f (fun a ha => hf a ha) ?_
+  intro a₁ h₁ a₂ h₂ he
+  exact ht _ (hf a₁ h₁) a₁ h₁ a₂ h₂ (hr a₁ h₁) (he ▸ hr a₂ h₂)
+
 /-- **Rung count in Region II**: `#rungs ≤ #doubleEnds + |P₁| + 5`.
 Rungs form a matching (R1); a rung is double, or its K-end has `Δ₂`-degree 1 (`∈ P₁`), or its
 K-end is of type (i) (`≤ 5`).
 
-TODO: prove.
+TODO: none — proved.
 What's missing: split `rungs` by `IsDouble` of its (unique) orientation `(v, z)`; the double ones
 inject into `doubleEnds` via the D-end (`R1_z`), the others into `P1set ∪ typeOneVerts` via the
 K-end (`R1_v`); a non-double rung whose K-end has `deg2 ≥ 2` has a partner `w′ ≠ w_v` with
@@ -255,7 +375,47 @@ Depends on: `R1_v`, `R1_z`, `card_typeOne_le_five`, definitions. Difficulty M. -
 theorem card_rungs_le_II (hX : Normal X) (F : DirField X) (hτ₁ : √3 / 2 + 3 * beta ≤ tau X)
     (hτ₂ : tau X ≤ 1) :
     (rungs X F).card ≤ (doubleEnds X F).card + (P1set X F).card + 5 := by
-  sorry
+  have hgood : ∀ v z, s(v, z) ∈ rungs X F → ang (F.u v) (F.u z) ≤ beta := fun v z he =>
+    (mem_filter.1 (mem_filter.1 he).1).2 v z rfl
+  have huniq : ∀ v z v' z', s(v, z) = s(v', z') → IsRung F v z → IsRung F v' z' →
+      v = v' ∧ z = z' := by
+    intro v z v' z' h hr hr'
+    rcases Sym2.eq_iff.1 h with ⟨h1, h2⟩ | ⟨h1, h2⟩
+    · exact ⟨h1, h2⟩
+    · exact absurd (by rw [h1]; exact hr'.2.2.2.1) hr.2.1
+  set A := (rungs X F).filter (fun e => ∃ v z, e = s(v, z) ∧ IsDouble F v z)
+  set B := (rungs X F).filter (fun e => ¬ ∃ v z, e = s(v, z) ∧ IsDouble F v z)
+  have hAB : A.card + B.card = (rungs X F).card := card_filter_add_card_filter_not _
+  have hA : A.card ≤ (doubleEnds X F).card := by
+    refine card_le_of_rel
+      (fun e z => ∃ v, e = s(v, z) ∧ IsRung F v z) (fun e he => ?_) (fun z _ => ?_)
+    · obtain ⟨he, v, z, rfl, hd⟩ := mem_filter.1 he
+      exact ⟨z, mem_filter.2 ⟨hd.1.2.2.1, v, hd, he⟩, v, rfl, hd.1⟩
+    · rintro e₁ he₁ e₂ he₂ ⟨v₁, rfl, hr₁⟩ ⟨v₂, rfl, hr₂⟩
+      have := R1_z hX F hτ₁ hτ₂ hr₁ hr₂ (hgood _ _ (mem_filter.1 he₁).1)
+        (hgood _ _ (mem_filter.1 he₂).1)
+      rw [this]
+  have hB : B.card ≤ (P1set X F ∪ typeOneVerts X F).card := by
+    refine card_le_of_rel
+      (fun e v => ∃ z, e = s(v, z) ∧ IsRung F v z) (fun e he => ?_) (fun v _ => ?_)
+    · obtain ⟨he, hnd⟩ := mem_filter.1 he
+      obtain ⟨-, v, z, rfl, hr⟩ := mem_filter.1 he
+      refine ⟨v, ?_, z, rfl, hr⟩
+      have hvR : v ∈ rungVerts X F := mem_filter.2 ⟨mem_sdiff.2 ⟨hr.1, hr.2.1⟩, z, hr⟩
+      by_cases h1 : deg2 X v = 1
+      · exact mem_union_left _ (mem_filter.2 ⟨hvR, h1⟩)
+      · refine mem_union_right _ (mem_filter.2 ⟨hvR, ?_⟩)
+        have hpne : (partners X (dist2 X) v).Nonempty := (mem_filter.1 hr.1).2
+        have h2 : 1 < (partners X (dist2 X) v).card := by
+          have := hpne.card_pos; unfold deg2 at h1; omega
+        obtain ⟨w', hw', hne⟩ := exists_mem_ne h2 (F.partner v)
+        obtain ⟨hw'X, -, hw'v⟩ := mem_filter.1 hw'
+        refine ⟨z, w', hr, hw'X, hw'v, hne, fun hzw => hnd ⟨v, z, rfl, hr, w', hw'X, hw'v, hne, hzw⟩⟩
+    · rintro e₁ - e₂ - ⟨z₁, rfl, hr₁⟩ ⟨z₂, rfl, hr₂⟩
+      rw [R1_v hX F hτ₁ hτ₂ hr₁ hr₂]
+  have hU := card_union_le (P1set X F) (typeOneVerts X F)
+  have h5 := card_typeOne_le_five hX F hτ₁ hτ₂
+  omega
 
 /-- **Region II** (`√3/2 + 3β ≤ τ ≤ 1`): `e(S) ≤ |S| + |P₁| + cReg`.
 
