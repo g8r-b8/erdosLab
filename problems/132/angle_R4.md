@@ -294,7 +294,60 @@ The LP uses μ(Δ₂) ≤ p + (3/2)(s − p) + C_V and μ(δ) ≤ s + p + 6r + C
 
 ## 5. Beyond 18/13: the 6r term
 
-TODO: results of the local R-neighbour route and the global Euler route (sub-agents running).
+Both routes attack Loss 2 (§1).
+
+### 5.1 Local route: the R-neighbour lemma (CLAIMED, referee pass in progress)
+
+The full proofs are in `scratchpad/R4/rnb/N1N2_proof.md`. The scripts are `scripts/r4_nb_exact.py` (60-digit sharpness example), `r4_nb_search.py` (adversarial search) and `r4_nb_ring16_check.py` (the construction).
+
+**Claimed results.**
+- **Lemma T (thin K).** If some point of ∂K within distance 1 of y is not on the 232-arc around y's nearest boundary point, then diam K < 409, so |X∖D| = O(1).
+  - The proof uses: every point of ∂K lies on some C(w,Δ₂) with w ∈ X and outer normal (p−w)/Δ₂, together with Δ ≤ 1.94Δ₂.
+  - Consequence: the three-row strip obstruction cannot occur.
+- **Lemma BT.** Points y whose 464-arc turns by more than 1/50 number fewer than 6.9·10⁷, by Lemma 3.4 of WRITEUP_A2.
+- **Lemma F (flat case).** Near y, K is the subgraph of a concave function with |f′| ≤ tan(1/50). Hence:
+  - S-neighbours of y satisfy cos ψ > −ε;
+  - D-neighbours satisfy cos ψ ≥ h + t − ε.
+- **Theorem N1 (every τ).** All but O(1) points y ∈ R have m_y ≤ 4, so deg + m ≤ 10.
+  - Combined with §§2–4, this would give **L ≤ 15/11 ≈ 1.3636**.
+- **Theorem N2.** In Region II, deg + m ≤ 8, which would give **4/3 in Region II**.
+- **Sharpness.** 10 cannot be improved locally for τ ≤ √3/2. An exact chord-midpoint configuration has deg = 6 and m = 4, using the identity c_D(0) = τ.
+  - In that example the D-neighbours have no Δ₂-partner.
+  - Whether Θ(n) such y can exist with S-neighbours is open.
+
+**Status.** Unverified. It will only be promoted to "proved" after the independent referee (`scratchpad/R4/ref4/`) reports.
+
+### 5.2 Global route: Euler/peel (PARTIAL; one sub-agent's proof, not refereed)
+
+Report: `scratchpad/R4/global/GLOBAL_report.md`. Scripts: `scripts/r4_global_*.py`. Write Def := 3n − μ(δ) = 3 + 3c + Σ_f(|f|−3) for the plane δ-graph with c components.
+
+**Peel identity (exact).** For a vertex set A,
+
+  Def(H) = Def(H − A) + 3|A| − e(A) − e(A, V∖A).
+
+**Theorem G (proved by the sub-agent).** Let a penny-graph component have a convex outer cycle C of k vertices, with turning ≤ 2 arcsin β at each vertex and at most one inward edge per vertex. Then
+
+  Def ≥ 2k − #chords − (2π − 3).
+
+- The proof uses Euler's formula on each inner component, the non-crossing of rungs, and a telescoping projection of the inner boundary walk onto the chord directions.
+- It is tight on ienjoymath's even-m core (Def = 2|S| exactly).
+
+**Conditional corollaries.** These assume hypothesis H: the K-row and the D-row are each a single unbroken T-cycle.
+- τ > 1: 9/7.
+- Region II: 4/3.
+
+**Obstructions.**
+1. Gaps in the rows. A "gap lemma" charging each row break O(1) would remove H.
+2. Region I "zigzag stack". Here K-vertices have two outward exceptions and the rows are stacked. It defeats any one-layer count: S–R edges exceed the first-layer R-deficit. The multi-layer peel pays for it, so a proof must be multi-layer.
+3. Thin, path-like deep peel components.
+
+### 5.3 Conjecture (equivalent to L = 9/7 given (VS))
+
+Def(δ-graph) ≥ 2|S| − o(n), i.e. μ(δ) + (4/3)μ(Δ₂) ≤ 3n + o(n).
+
+- Evidence: the even-m core has equality (m = 8…80). The odd-m core has Def − 2|S| = m. The full construction has Def − 2|S| ≈ √(12P).
+- All adversarial searches (angle D, R4) found nothing below.
+- In Regions II and III the Δ₂ side would also need sharpening, because of the |Q| term (see the table in §1).
 
 ## 6. Consistency with ienjoymath's construction
 
