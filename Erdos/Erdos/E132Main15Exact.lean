@@ -568,11 +568,59 @@ theorem arc_sub_K (hX : Normal X) {w : Pt} (hw : w ∈ X) {θ₁ θ₂ : ℝ} (h
       rw [sub_add_cancel_left, smul_neg, neg_neg, smul_smul, inv_mul_cancel₀ hR.ne', one_smul]
     rwa [e] at this
 
+/-- If `a(cos h − 1) + b sin h ≤ 0` for all `|h| ≤ δ`, then `a ≥ 0` and `b = 0`. -/
+private theorem normal_core {a b δ : ℝ} (hδ : 0 < δ)
+    (h : ∀ x ∈ Set.Icc (-δ) δ, a * (Real.cos x - 1) + b * Real.sin x ≤ 0) : 0 ≤ a ∧ b = 0 := by
+  have hπ := Real.pi_gt_three
+  -- two-sided bound `|b| sin x ≤ a (1 − cos x)` for `0 < x ≤ min δ 1`
+  have two : ∀ x, 0 < x → x ≤ δ → x ≤ 1 → |b| * Real.sin x ≤ a * (1 - Real.cos x) := by
+    intro x hx hxδ _
+    have h1 := h x ⟨by linarith, hxδ⟩
+    have h2 := h (-x) ⟨by linarith, by linarith⟩
+    rw [Real.cos_neg, Real.sin_neg] at h2
+    rcases abs_cases b with ⟨hb, -⟩ | ⟨hb, -⟩ <;> rw [hb] <;> nlinarith
+  set x₀ := min δ 1
+  have hx₀ : 0 < x₀ := lt_min hδ one_pos
+  have hx₀δ : x₀ ≤ δ := min_le_left _ _
+  have hx₀1 : x₀ ≤ 1 := min_le_right _ _
+  have hcos : Real.cos x₀ < 1 := by
+    rw [← Real.cos_zero]
+    exact Real.cos_lt_cos_of_nonneg_of_le_pi_div_two le_rfl (by linarith) hx₀
+  have hsin0 : 0 ≤ Real.sin x₀ := Real.sin_nonneg_of_nonneg_of_le_pi hx₀.le (by linarith)
+  have ha : 0 ≤ a := by
+    have := two x₀ hx₀ hx₀δ hx₀1
+    have : 0 ≤ a * (1 - Real.cos x₀) := le_trans (by positivity) this
+    by_contra ha; push Not at ha
+    have : a * (1 - Real.cos x₀) < 0 := mul_neg_of_neg_of_pos ha (by linarith)
+    linarith
+  refine ⟨ha, ?_⟩
+  by_contra hb
+  have hbpos : 0 < |b| := abs_pos.2 hb
+  set x := min x₀ (|b| / (2 * (a + 1)))
+  have hx : 0 < x := lt_min hx₀ (by positivity)
+  have hxx₀ : x ≤ x₀ := min_le_left _ _
+  have hxb : x ≤ |b| / (2 * (a + 1)) := min_le_right _ _
+  have h2 := two x hx (hxx₀.trans hx₀δ) (hxx₀.trans hx₀1)
+  have hc := Real.one_sub_sq_div_two_le_cos (x := x)
+  have hs := Real.sin_gt_sub_cube (x := x) hx
+  have hx1 : x ≤ 1 := hxx₀.trans hx₀1
+  have hx3 : x ^ 3 ≤ x := by nlinarith
+  -- `|b| x/2 ≤ |b| sin x ≤ a x²/2`, so `|b| ≤ a x`
+  have e1 : |b| * (x / 2) ≤ a * (x ^ 2 / 2) := by
+    have : x / 2 ≤ Real.sin x := by linarith
+    nlinarith [mul_le_mul_of_nonneg_left this hbpos.le, mul_le_mul_of_nonneg_left
+      (show 1 - Real.cos x ≤ x ^ 2 / 2 by linarith) ha]
+  have e2 : |b| ≤ a * x := by nlinarith
+  have e3 : a * x ≤ a * (|b| / (2 * (a + 1))) := mul_le_mul_of_nonneg_left hxb ha
+  have e4 : a * (|b| / (2 * (a + 1))) < |b| := by
+    rw [mul_div_assoc', div_lt_iff₀ (by positivity)]; nlinarith
+  linarith
+
 /-- **(Rigid), normal fact**: at a relative-interior point of an arc of `C(w, Δ₂)` contained in
 `K`, the outer normal cone is the single ray through `dirVec θ`.
 
-TODO: prove.
-What's missing: `ν` normal ⇒ `(y − p)·ν ≤ 0` for `y` on the arc on both sides of `p`; divide by
+TODO: none — proved (`normal_core`: `a(cos h − 1) + b sin h ≤ 0` for `|h| ≤ δ` forces `b = 0`).
+What's missing: (was) `ν` normal ⇒ `(y − p)·ν ≤ 0` for `y` on the arc on both sides of `p`; divide by
 the arc parameter and let it tend to `0` (or use the two chords): `ν ⊥ tangent`, and
 `(w − p)·ν ≤ 0` fixes the sign.
 Acceptance: no `sorry`.
@@ -581,7 +629,35 @@ theorem normal_fact (hX : Normal X) {w : Pt} {θ₁ θ θ₂ : ℝ} (h₁ : θ�
     (harc : ∀ φ ∈ Set.Icc θ₁ θ₂, w + dist2 X • dirVec φ ∈ KBall X) {ν : Pt}
     (hν : ν ∈ normalCone (KBall X) (w + dist2 X • dirVec θ)) :
     ∃ c : ℝ, 0 ≤ c ∧ ν = c • dirVec θ := by
-  sorry
+  have hR := hX.dist2_pos
+  set R := dist2 X
+  set d := dirVec θ
+  have hd : ‖d‖ = 1 := norm_dirVec θ
+  set a := inner ℝ ν d
+  set b := det2 d ν
+  have hdec : ν = a • d + b • perp d := decompR hd ν
+  set δ := min (θ - θ₁) (θ₂ - θ)
+  have hδ : 0 < δ := lt_min (by linarith) (by linarith)
+  have key : ∀ x ∈ Set.Icc (-δ) δ, a * (Real.cos x - 1) + b * Real.sin x ≤ 0 := by
+    intro x hx
+    have hφ : θ + x ∈ Set.Icc θ₁ θ₂ :=
+      ⟨by linarith [min_le_left (θ - θ₁) (θ₂ - θ), hx.1],
+        by linarith [min_le_right (θ - θ₁) (θ₂ - θ), hx.2]⟩
+    have h := hν _ (harc _ hφ)
+    have e0 : w + R • dirVec (θ + x) - (w + R • d) = R • (dirVec (θ + x) - d) := by
+      rw [smul_sub]; abel
+    rw [e0, real_inner_smul_left, dirVec_addR] at h
+    have e : inner ℝ (Real.cos x • d + Real.sin x • perp d - d) ν =
+        a * (Real.cos x - 1) + b * Real.sin x := by
+      rw [inner_sub_left, inner_add_left, real_inner_smul_left, real_inner_smul_left,
+        real_inner_comm ν d, ← det2_eq_inner_perpR]
+      ring
+    rw [e] at h
+    by_contra hc; push Not at hc
+    have := mul_pos hR hc
+    linarith
+  obtain ⟨ha, hb⟩ := normal_core hδ key
+  exact ⟨a, ha, by rw [hdec, hb, zero_smul, add_zero]⟩
 
 /-- **(Rigid), step**: on an arc `[θ, θ₂]` of `C(w, Δ₂)` inside `K`, with `u = −dirVec θ` at the
 current K-row point and room for one step (`θ + α₂ ≤ θ₂`), the pure right K T-neighbour is the
