@@ -31,7 +31,32 @@ Import chain: `E132MainRegions → Main15Defs → {Main15N1, Main15RegionII, Mai
 Check one file: `cd Erdos && lake env lean -o .lake/build/lib/lean/Erdos/<F>.olean -i .lake/build/lib/lean/Erdos/<F>.ilean Erdos/<F>.lean`
 (the `-o` is needed so that downstream `E132Main15*` files can import it without `lake build`).
 
-## Status at skeleton time
+## ✅ COMPLETE (2026-09-24)
+
+`erdos132_main15` is proved with **no `sorry`**. `#print axioms Erdos132Main.erdos132_main15` =
+`[propext, Classical.choice, Quot.sound]`; no `native_decide`/`bv_decide`, no new axioms.
+All six `E132Main15*` modules are imported from `Erdos.lean`; full `lake build` succeeds
+(`lake build Erdos.E132Main15` ≈ 1 min from the 54/37 oleans).
+
+| file | theorems (incl. helpers) | lines | sorry |
+|---|---|---|---|
+| Defs | 5 | 192 | 0 |
+| N1 | 29 | 1169 | 0 |
+| RegionII | 17 | 620 | 0 |
+| Exact | 70 | 2277 | 0 |
+| RegionIII | 17 | 870 | 0 |
+| Main15 | 3 | 123 | 0 |
+| **total** | **141** | **5251** | **0** |
+
+No skeleton statement was changed. Notes from Phase 2:
+- `lemmaC` is proved by an exact reflection decomposition (`reflect_eq`, `lemmaB_threshold`,
+  `two_circles`), not the angle bounds of angle_R4 §2.
+- `thin_box` uses an `(e, ν₁)` frame; the constants have a large margin (referee: `L ≤ 19.7`, `W ≤ 2.28`).
+- `exact_breaks` is proved through private walk/charge helpers in `E132Main15Exact.lean`.
+- An independent math referee (`scratchpad/L15/ref_report.md`) checked the two new arguments
+  (Euclidean-local N1; slots/breaks for Region III) and found every statement true as written.
+
+## Status at skeleton time (historical)
 
 `#print axioms erdos132_main15 = [propext, sorryAx, Classical.choice, Quot.sound]`; the `sorryAx`
 comes only from lemma sorries.  **Proved already:** the assembly (`erdos132_main15`,

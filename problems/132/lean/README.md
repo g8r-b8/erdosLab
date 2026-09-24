@@ -1,3 +1,11 @@
+# ✅ 15/11 theorem fully formalised (2026-09-24)
+
+`Erdos132Main.erdos132_main15 : ∃ C₀ : ℝ, ∀ X : Finset Pt, 2 ≤ X.card → (min (mult X (dist2 X)) (mult X (minDist X)) : ℝ) ≤ 15/11 * X.card + C₀`
+
+- No `sorry`; `#print axioms` = `[propext, Classical.choice, Quot.sound]`.
+- Files: E132Main15Defs, E132Main15N1, E132Main15RegionII, E132Main15Exact, E132Main15RegionIII, E132Main15.
+  They build on the 54/37 files, which are unchanged. See MAIN15_PLAN.md for the formulation, including the deviations from angle_R4: N1 is proved without arc length, and Region III uses slots and breaks.
+
 # ✅ 54/37 theorem fully formalised (2026-09-23)
 
 `Erdos132Main.erdos132_main : ∃ C₀ : ℝ, ∀ X : Finset Pt, 2 ≤ X.card → (min (mult X (dist2 X)) (mult X (minDist X)) : ℝ) ≤ 54/37 * X.card + C₀`
