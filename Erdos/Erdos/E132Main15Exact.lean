@@ -474,11 +474,35 @@ theorem W_center (hX : Normal X) (F : DirField X) (hτ : tau X = √3 / 2) {v a 
     F.partner v = F.partner v' := by
   sorry
 
+/-- A point equidistant from `a, b` (`|ab| = 1`) lies on the bisector:
+`x − m = c·(b − a)^⊥` with `c² = |xa|² − 1/4`. -/
+private theorem bisector {x a b : Pt} (hab : dist a b = 1) (h : dist x a = dist x b) :
+    x - midpoint ℝ a b = det2 (b - a) (x - midpoint ℝ a b) • perp (b - a) ∧
+      det2 (b - a) (x - midpoint ℝ a b) ^ 2 = dist x a ^ 2 - 1 / 4 := by
+  have hm : midpoint ℝ a b = (1 / 2 : ℝ) • (a + b) := by rw [midpoint_eq_smul_add]; norm_num
+  have hu := dist_sq_pt a b
+  rw [hab] at hu
+  have hsq : dist x a ^ 2 = dist x b ^ 2 := by rw [h]
+  rw [dist_sq_pt, dist_sq_pt] at hsq
+  have hxa := dist_sq_pt x a
+  rw [hm]
+  constructor
+  · rw [pt_ext_iff]
+    simp only [PiLp.sub_apply, PiLp.smul_apply, PiLp.add_apply, smul_eq_mul, det2_pt,
+      perp_apply0, perp_apply1]
+    constructor
+    · linear_combination ((b 0 - a 0) / 2) * hsq + (x 0 - (a 0 + b 0) / 2) * hu
+    · linear_combination ((b 1 - a 1) / 2) * hsq + (x 1 - (a 1 + b 1) / 2) * hu
+  · simp only [PiLp.sub_apply, PiLp.smul_apply, PiLp.add_apply, smul_eq_mul, det2_pt]
+    rw [hxa]
+    linear_combination (-((x 0 - (a 0 + b 0) / 2) ^ 2 + (x 1 - (a 1 + b 1) / 2) ^ 2 - 1 / 4)) * hu
+      - (((b 0 - a 0) * (x 0 - (a 0 + b 0) / 2) + (b 1 - a 1) * (x 1 - (a 1 + b 1) / 2) + 1) / 2) * hsq
+
 /-- The apex of a triangle sits on `C(w, Δ₂)` on the bisector of its base:
 `v = w + (Δ₂/|m − w|)(m − w)` with `m` the base midpoint.
 
-TODO: prove.
-What's missing: `|va| = |vb| = 1`, `|aw| = |bw| = Δ`: `v, w` both on the perpendicular
+TODO: none — proved (bisector coefficients `α, β` with `2αβ = Δ² − Δ₂² + 1/2 > 0`, `|β| > |α|`).
+What's missing: (was) `|va| = |vb| = 1`, `|aw| = |bw| = Δ`: `v, w` both on the perpendicular
 bisector of `ab`; `|vw| = Δ₂ < |mw|` and `v` on the segment side (`exact_identity_c`).
 Acceptance: no `sorry`.
 Depends on: `rung_offset`, `IsRung`. Difficulty M. -/
@@ -486,7 +510,48 @@ theorem apex_eq (hX : Normal X) (F : DirField X) (hτ : tau X = √3 / 2) {v a b
     (ht : IsTri F v a b) :
     v = F.partner v + (dist2 X / ‖midpoint ℝ a b - F.partner v‖) •
       (midpoint ℝ a b - F.partner v) := by
-  sorry
+  obtain ⟨hva, hvb, -, -, hR, -⟩ := ht
+  set w := F.partner v
+  have hvw : dist v w = dist2 X := F.partner_K v hva.1 hva.2.1
+  have haw : dist a w = diam X := hva.2.2.2.2.2
+  have hbw : dist b w = diam X := hvb.2.2.2.2.2
+  have hab : dist a b = 1 := hR.1.2.2.1
+  obtain ⟨ev, cv⟩ := bisector hab (x := v)
+    (by rw [hva.2.2.2.2.1, hvb.2.2.2.2.1])
+  obtain ⟨ew, cw⟩ := bisector hab (x := w) (by rw [dist_comm w a, dist_comm w b, haw, hbw])
+  set m := midpoint ℝ a b
+  set n := perp (b - a)
+  set α := det2 (b - a) (v - m)
+  set β := det2 (b - a) (w - m)
+  have hn : ‖n‖ = 1 := by rw [norm_perp, ← dist_eq_norm, dist_comm, hab]
+  rw [hva.2.2.2.2.1] at cv
+  rw [dist_comm w a, haw] at cw
+  have hvw' : v - w = (α - β) • n := by
+    rw [sub_smul, ← ev, ← ew]; abel
+  have hαβ : (α - β) ^ 2 = dist2 X ^ 2 := by
+    rw [← hvw, dist_eq_norm, hvw', norm_smul, hn, mul_one, Real.norm_eq_abs, sq_abs]
+  have hΔ := dist2_le_diam X
+  have hΔ₂ := hX.large
+  have hR0 := hX.dist2_pos
+  have hmw : m - w = (-β) • n := by rw [neg_smul, ← ew]; abel
+  rw [hmw, norm_smul, hn, mul_one, Real.norm_eq_abs, abs_neg]
+  have e : v = w + (α - β) • n := by rw [← hvw']; abel
+  have h2 : 2 * α * β = diam X ^ 2 - dist2 X ^ 2 + 1 / 2 := by nlinarith
+  have hβα : α ^ 2 < β ^ 2 := by nlinarith
+  have hβ0 : β ≠ 0 := by intro h0; rw [h0] at hβα; nlinarith
+  rcases lt_or_gt_of_ne hβ0 with hβ | hβ
+  · have hα : α < 0 := by nlinarith
+    have hlt : β < α := by nlinarith
+    have : α - β = dist2 X :=
+      (pow_left_inj₀ (by linarith) hR0.le two_ne_zero).1 hαβ
+    rw [abs_of_neg hβ, e, this, smul_smul, div_mul_cancel₀ _ (by linarith)]
+  · have hα : 0 < α := by nlinarith
+    have hlt : α < β := by nlinarith
+    have : β - α = dist2 X :=
+      (pow_left_inj₀ (by linarith) hR0.le two_ne_zero).1 (by rw [← hαβ]; ring)
+    rw [abs_of_pos hβ, e, smul_smul, show α - β = -dist2 X by linarith]
+    congr 2
+    field_simp
 
 /-! ## (Arc), (Rigid) -/
 
