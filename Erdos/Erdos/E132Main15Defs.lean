@@ -86,7 +86,7 @@ theorem degδ_le_six (X : Finset Pt) (y : Pt) : degδ X y ≤ 6 :=
 /-- **Exact identity (0.1)**: `2μ(δ) = 2e(S) + Σ_{y ∈ R} (deg y + m_y)`.
 (S–S pairs: `e(S)`; S–R pairs: `Σ m_y`; R–R pairs: `Σ (deg y − m_y)/2`.)
 
-TODO: prove.
+TODO: none — proved.
 What's missing: double counting.  Write `2μ(δ) = Σ_{x∈X} deg x` (handshake, as in
 `mult_le_add_sum`/`two_mul_card_le_of_deg_le`), split `X = S ⊔ R`, and
 `Σ_{x∈S} deg x = 2e(S) + Σ_{y∈R} m_y` (a `δ`-neighbour of `x ∈ S` is in `S` or in `R`; the
@@ -96,7 +96,71 @@ Acceptance: no `sorry`.
 Depends on: definitions, `Defs.mult_eq_card`, `Defs.mem_pairsAt`. Difficulty M. -/
 theorem mu_delta_identity (X : Finset Pt) :
     2 * mult X (minDist X) = 2 * eS X + ∑ y ∈ Rset X, (degδ X y + mS X y) := by
-  sorry
+  rcases (Defs.minDist_nonneg X).eq_or_lt with h0 | hpos
+  · have hd : ∀ y, degδ X y = 0 := by
+      intro y; unfold degδ partners; rw [card_eq_zero, filter_eq_empty_iff]
+      rintro q - ⟨hq, hd⟩
+      rw [← h0, dist_eq_zero] at hd; exact hq hd.symm
+    have hm : ∀ y, mS X y = 0 := fun y => Nat.le_zero.1 ((mS_le_degδ X y).trans (hd y).le)
+    unfold eS
+    rw [← h0, Defs.mult_zero, Defs.mult_zero]
+    simp [hd, hm]
+  · have hX2 := Erdos132Layer.two_mul_multS hpos X
+    have hS2 := Erdos132Layer.two_mul_multS hpos (Sset X)
+    unfold Erdos132Layer.esum at hX2 hS2
+    have hSX : Sset X ⊆ X := filter_subset _ _
+    have hnX : ∀ v, (Erdos132Layer.nbr X (minDist X) v).card = degδ X v := by
+      intro v; unfold degδ; congr 1; ext x
+      rw [Erdos132Layer.mem_nbr, Defs.mem_partners]
+      constructor
+      · rintro ⟨hx, hd⟩
+        exact ⟨hx, fun h => by rw [h, dist_self] at hd; linarith, hd⟩
+      · rintro ⟨hx, -, hd⟩; exact ⟨hx, hd⟩
+    have hnS : ∀ v, (Erdos132Layer.nbr (Sset X) (minDist X) v).card = mS X v := by
+      intro v; unfold mS; congr 1; ext x
+      rw [Erdos132Layer.mem_nbr, mem_filter, Defs.mem_partners]
+      constructor
+      · rintro ⟨hx, hd⟩
+        exact ⟨⟨hSX hx, fun h => by rw [h, dist_self] at hd; linarith, hd⟩, hx⟩
+      · rintro ⟨⟨-, -, hd⟩, hx⟩; exact ⟨hx, hd⟩
+    have hsplit : ∀ v ∈ Sset X, degδ X v =
+        mS X v + ((Rset X).filter (fun y => dist v y = minDist X)).card := by
+      intro v hv
+      unfold degδ mS
+      rw [← card_filter_add_card_filter_not (p := (· ∈ Sset X))]
+      congr 2
+      ext y
+      rw [mem_filter, Defs.mem_partners, mem_filter, Rset, mem_sdiff]
+      constructor
+      · rintro ⟨⟨hy, -, hd⟩, hyS⟩; exact ⟨⟨hy, hyS⟩, hd⟩
+      · rintro ⟨⟨hy, hyS⟩, hd⟩
+        exact ⟨⟨hy, fun h => hyS (h ▸ hv), hd⟩, hyS⟩
+    have hR : ∀ y ∈ Rset X, mS X y =
+        ((Sset X).filter (fun v => dist v y = minDist X)).card := by
+      intro y hy
+      have hyS := (mem_sdiff.1 hy).2
+      unfold mS
+      congr 1; ext v
+      rw [mem_filter, Defs.mem_partners, mem_filter, dist_comm]
+      constructor
+      · rintro ⟨⟨-, -, hd⟩, hv⟩; exact ⟨hv, hd⟩
+      · rintro ⟨hv, hd⟩
+        exact ⟨⟨hSX hv, fun h => hyS (h ▸ hv), hd⟩, hv⟩
+    have hcross : ∑ v ∈ Sset X, ((Rset X).filter (fun y => dist v y = minDist X)).card =
+        ∑ y ∈ Rset X, mS X y := by
+      rw [sum_congr rfl hR]
+      simp only [card_filter]
+      exact sum_comm
+    have hXsum : ∑ v ∈ X, degδ X v = ∑ v ∈ Sset X, degδ X v + ∑ y ∈ Rset X, degδ X y := by
+      rw [add_comm, Rset]; exact (sum_sdiff hSX).symm
+    have hSsum : ∑ v ∈ Sset X, degδ X v = ∑ v ∈ Sset X, mS X v + ∑ y ∈ Rset X, mS X y := by
+      rw [sum_congr rfl hsplit, sum_add_distrib, hcross]
+    simp only [hnX] at hX2
+    simp only [hnS] at hS2
+    have e1 : mult X (minDist X) = multS X (minDist X) := rfl
+    have e2 : eS X = multS (Sset X) (minDist X) := rfl
+    rw [e1, e2, hX2, hS2, sum_add_distrib, hXsum, hSsum]
+    ring
 
 /-! ## The linear programme (Appendix A (0.2), `2c = 10`) -/
 
