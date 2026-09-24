@@ -41,14 +41,31 @@ theorem card_rungs_le_add (hX : Normal X) (F : DirField X) :
 
 /-- For `τ > √3/2` no vertex carries two rungs: the positions `v + o_±` are `2s < 1` apart.
 
-TODO: prove.
-What's missing: `rung_offset` for both rungs; `σ ≠ σ'` (else equal); `|z − z′| = 2 sOff < 1`
+TODO: none — proved.
+What's missing: (was) `rung_offset` for both rungs; `σ ≠ σ'` (else equal); `|z − z′| = 2 sOff < 1`
 (`sOff² = 1 − τ² < 1/4`); `eq_of_dist_lt_one`.
 Acceptance: no `sorry`.
 Depends on: `rung_offset`, `eq_of_dist_lt_one`, `norm_perp`. Difficulty S–M. -/
 theorem twoRung_eq_empty (hX : Normal X) (F : DirField X) (hτ₁ : √3 / 2 < tau X)
     (hτ₂ : tau X < √3 / 2 + 3 * beta) : twoRungVerts X F = ∅ := by
-  sorry
+  refine eq_empty_of_forall_notMem fun v hv => ?_
+  obtain ⟨z, z', hne, h₁, h₂, -, -⟩ := (mem_filter.1 hv).2
+  obtain ⟨σ₁, hσ₁, e₁⟩ := rung_offset F h₁
+  obtain ⟨σ₂, hσ₂, e₂⟩ := rung_offset F h₂
+  have hu := F.norm_u h₁.1
+  have hs0 : 0 ≤ sOff X := Real.sqrt_nonneg _
+  have hs : 2 * sOff X < 1 := by
+    have h3 : (1.732 : ℝ) < √3 := by rw [Real.lt_sqrt (by norm_num)]; norm_num
+    have : sOff X < 1 / 2 := by
+      have e3 : (√3 / 2) ^ 2 = 3 / 4 := by rw [div_pow, Real.sq_sqrt (by norm_num)]; norm_num
+      have : (√3 / 2) ^ 2 < tau X ^ 2 := pow_lt_pow_left₀ hτ₁ (by positivity) (by norm_num)
+      unfold sOff; rw [Real.sqrt_lt' (by norm_num)]; nlinarith
+    linarith
+  refine hne (eq_of_dist_lt_one hX.minDist_eq h₁.memX.2 h₂.memX.2 ?_)
+  have e : z - z' = (z - v) - (z' - v) := by abel
+  rw [dist_eq_norm, e, e₁, e₂]
+  refine (norm_offset_sub hu hu hs0 hσ₁ hσ₂).trans_lt ?_
+  simpa using hs
 
 /-- **Slot counting**: each T-edge uses two slots (one at each end, by the sign of `det2`), each
 slot is used at most once (T1); so `2#T + #(free slots) ≤ 2|S|`.
