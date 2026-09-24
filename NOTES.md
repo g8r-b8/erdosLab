@@ -336,6 +336,10 @@ PROMPT.md rule 4: check all cross-referenced/sibling problems and their threads.
   rational-x construction must fight rationality ⇒ gaps ≤ log₂a+O(1) (260 claim) vs gadget runs ≈ log₂a.
   Lean fit would be excellent (FC statement exists; certificate = infinite family), but no proof idea.
   Verdict: genuinely open + elementary, NOT quick. Record reformulation; revisit only with a new idea.
+  Re-check 2026-09-24: exact DP over all partial reps of x=1 to a=1600 → live-branch count doubles at
+  exactly a=2,4,80,236,432,1504 (matches orbit); orbit returns to 2e10 reproduced (identical list).
+  Reduction itself still only a sketch (no rigorous proof that live branches never die).
+  Blog draft (partial result) written; publishing awaits user go-ahead (blog-repo write was blocked).
 - Drops (one line): 3/5/9/10/11/14/15/17/18/20/25/28/30/32/33/36/39–41/44/50–52/60–62/65/66/68/
   70/75/77/78/80–82/84–87/89/91/96–104/107/108/111/114/120/122/124/128–131/137/138/141–143/145/148/
   149/151/153/155/158/159/161/162/165/167–170/172–174/176/177/181/184/187/188/195–197/200/201/203/
