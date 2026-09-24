@@ -46,18 +46,20 @@ def doubleEnds (X : Finset Pt) (F : DirField X) : Finset Pt :=
 
 /-- **Lemma B, identity**: `|yw|² = |zw|² + |yz|² − 2 (y − z)·(w − z)`.
 
-TODO: prove.
+TODO: none — proved.
 What's missing: expand norms (`dist_eq_norm`, `norm_sub_sq_real`).
 Acceptance: no `sorry`.
 Depends on: nothing. Difficulty S. -/
 theorem lemmaB_sq (z w y : Pt) :
     dist y w ^ 2 = dist z w ^ 2 + dist y z ^ 2 - 2 * inner ℝ (y - z) (w - z) := by
-  sorry
+  rw [dist_eq_norm y w, dist_eq_norm z w, dist_eq_norm y z,
+    show y - w = (y - z) - (w - z) by abel, norm_sub_rev z w, @norm_sub_sq_real]
+  ring
 
 /-- **Lemma B**: if `|zw| = Δ`, `|yz| = 1` and `η' := (y − z)·(w − z) < (Δ² − Δ₂² + 1)/2`
 (i.e. `η < (Δ² − Δ₂² + 1)/(2Δ)` for the unit direction), then `|yw| = Δ`.
 
-TODO: prove.
+TODO: none — proved.
 What's missing: `lemmaB_sq` gives `|yw|² > Δ₂²`, so `|yw| > Δ₂`; there are no distances in
 `(Δ₂, Δ)` (`dist_le_dist2`), so `|yw| = Δ`.
 Acceptance: no `sorry`.
@@ -65,14 +67,19 @@ Depends on: `lemmaB_sq`, `dist_le_dist2`. Difficulty S–M. -/
 theorem lemmaB (hX : Normal X) {z w y : Pt} (hw : w ∈ X) (hy : y ∈ X) (hzw : dist z w = diam X)
     (hzy : dist y z = 1) (hη : inner ℝ (y - z) (w - z) < (diam X ^ 2 - dist2 X ^ 2 + 1) / 2) :
     dist y w = diam X := by
-  sorry
+  have hsq := lemmaB_sq z w y
+  rw [hzw, hzy] at hsq
+  by_contra hne
+  have hle := dist_le_dist2 hy hw hne
+  have h2 : dist y w ^ 2 ≤ dist2 X ^ 2 := pow_le_pow_left₀ dist_nonneg hle 2
+  linarith
 
 /-! ## Lemma A -/
 
 /-- **Lemma A (i)** in Region II: a type-(i) partner direction makes an angle `> π/3` with `u_v`
 (`u_v·u′ < √(1 − τ²) < 1/2`).
 
-TODO: prove.
+TODO: none — proved.
 What's missing: as the second branch of `corner_lemma`: redirect `F` to `w′`
 (`DirField.redirect`), `exact_identity_b` gives `c·u′ > 0`, `inner_lt_sOff` gives
 `u_v·u′ < √(1 − τ²)`, and `√(1 − τ²) < 1/2 = cos(π/3)` as `τ > √3/2`; `lt_ang_of_inner_lt`.
@@ -83,12 +90,39 @@ theorem lemmaA_i (hX : Normal X) (F : DirField X) (hτ₁ : √3 / 2 + 3 * beta 
     (hτ₂ : tau X ≤ 1) {v z w' : Pt} (hr : IsRung F v z) (hw' : w' ∈ X)
     (hw'v : dist v w' = dist2 X) (hne : w' ≠ F.partner v) (hzw : dist z w' ≠ diam X) :
     π / 3 < ang (F.u v) ((dist2 X)⁻¹ • (w' - v)) := by
-  sorry
+  have hv := hr.1
+  have hvD := hr.2.1
+  have hpos := hr.two.1.pos
+  set F' := F.redirect hw' hw'v hvD
+  have hp' : F'.partner v = w' := F.redirect_partner hw' hw'v hvD
+  have hu'eq : F'.u v = (dist2 X)⁻¹ • (w' - v) := by
+    unfold DirField.u; rw [hp', hw'v]
+  rw [← hu'eq]
+  have hc := hr.norm_c
+  have hu := F.norm_u hv
+  have hu' := F'.norm_u hv
+  have i₀ := hr.inner_eq
+  have hπ := Real.pi_gt_three
+  have h3 : (1.7 : ℝ) < √3 := by rw [Real.lt_sqrt (by norm_num)]; norm_num
+  have h3sq : √3 ^ 2 = 3 := Real.sq_sqrt (by norm_num)
+  have hτ0 : 0 < tau X := by unfold beta at hτ₁; linarith
+  have hb := exact_identity_b F' hv hvD hr.memX.2
+  rw [hp'] at hb
+  have ha : 0 < inner ℝ (z - v) (F'.u v) := by
+    rcases hb with hb | hb
+    · refine lt_of_lt_of_le ?_ hb
+      rw [dist_comm, hr.2.2.2.2.1]; positivity
+    · exact absurd hb hzw
+  have hlt := inner_lt_sOff hc hu hu' i₀ hτ0 ha
+  refine lt_ang_of_inner_lt hu hu' (by positivity) (by linarith) (hlt.trans_le ?_)
+  rw [Real.cos_pi_div_three, Real.sqrt_le_left (by norm_num)]
+  have : √3 / 2 ≤ tau X := by unfold beta at hτ₁; linarith
+  nlinarith
 
 /-- **Lemma A (ii)**: a type-(ii) partner direction is the reflection of `u_v` in `ℝc`:
 `u_v·u′ = 2τ² − 1` (so `∠(u_v, u′) = 2θ₀`).
 
-TODO: prove.
+TODO: none — proved.
 What's missing: first branch of `corner_lemma`: `exact_identity_c` for the redirected field,
 `inner_two_sol`.
 Acceptance: no `sorry`.
@@ -97,7 +131,25 @@ Difficulty S–M. -/
 theorem lemmaA_ii (F : DirField X) {v z w' : Pt} (hr : IsRung F v z) (hw' : w' ∈ X)
     (hw'v : dist v w' = dist2 X) (hne : w' ≠ F.partner v) (hzw : dist z w' = diam X) :
     inner ℝ (F.u v) ((dist2 X)⁻¹ • (w' - v)) = 2 * tau X ^ 2 - 1 := by
-  sorry
+  have hv := hr.1
+  have hvD := hr.2.1
+  have hpos := hr.two.1.pos
+  set F' := F.redirect hw' hw'v hvD
+  have hp' : F'.partner v = w' := F.redirect_partner hw' hw'v hvD
+  have hu'eq : F'.u v = (dist2 X)⁻¹ • (w' - v) := by
+    unfold DirField.u; rw [hp', hw'v]
+  rw [← hu'eq]
+  have i₁ : inner ℝ (z - v) (F'.u v) = - tau X :=
+    exact_identity_c F' hv hvD (by rw [hp']; exact hzw) (by rw [dist_comm]; exact hr.2.2.2.2.1)
+  have hne' : F.u v ≠ F'.u v := by
+    intro e
+    apply hne
+    have hpK := F.partner_K v hv hvD
+    unfold DirField.u at e
+    rw [hp', hpK, hw'v] at e
+    have := smul_right_injective Pt (inv_ne_zero hpos.ne') e
+    simpa using this.symm
+  exact inner_two_sol hr.norm_c (F.norm_u hv) (F'.norm_u hv) hr.inner_eq i₁ hne'
 
 /-- **At most 5 type-(i) vertices** (their normal cones of `K` are wider than `π/3` and
 interior-disjoint; `6·π/3 = 2π`).
@@ -118,14 +170,29 @@ theorem card_typeOne_le_five (hX : Normal X) (F : DirField X) (hτ₁ : √3 / 2
 Part E): on all of Region II,
 `2τ√(1 − τ²) + (β + arcsin β + 2/Δ₂) < τ(1 − 1/(2Δ₂))`.
 
-TODO: prove.
+TODO: none — proved.
 What's missing: `√(1 − τ²) ≤ √(1 − τ_min²) < 0.4441` with `τ_min = √3/2 + 3β`;
 `arcsin β ≤ β + β³` (or `≤ 0.0101`); `1/Δ₂ ≤ 10⁻⁴`; then `nlinarith` (margin `≈ 0.08`).
 Acceptance: no `sorry`.
 Depends on: nothing (real analysis). Difficulty S–M. -/
 theorem lemmaC_numeric {τ R : ℝ} (h1 : √3 / 2 + 3 * beta ≤ τ) (h2 : τ ≤ 1) (hR : 10 ^ 4 ≤ R) :
     2 * τ * √(1 - τ ^ 2) + (beta + Real.arcsin beta + 2 / R) < τ * (1 - 1 / (2 * R)) := by
-  sorry
+  have hb : beta = 1 / 100 := rfl
+  have h3 : (1.732 : ℝ) < √3 := by rw [Real.lt_sqrt (by norm_num)]; norm_num
+  have hτ : (0.896 : ℝ) ≤ τ := by rw [hb] at h1; linarith
+  have hs : √(1 - τ ^ 2) ≤ 0.445 := by
+    rw [Real.sqrt_le_left (by norm_num)]; nlinarith
+  have hA : Real.arcsin beta < 0.05 := by
+    rw [Real.arcsin_lt_iff_lt_sin ⟨by rw [hb]; norm_num, by rw [hb]; norm_num⟩
+      ⟨by linarith [Real.pi_pos], by linarith [Real.pi_gt_three]⟩]
+    have := Real.sin_gt_sub_cube (x := 0.05) (by norm_num)
+    rw [hb]; linarith
+  have hR0 : 0 < R := by linarith
+  have hR1 : 2 / R ≤ 2 / 10 ^ 4 := div_le_div_of_nonneg_left (by norm_num) (by norm_num) hR
+  have hR2 : τ * (1 / (2 * R)) ≤ 1 / 10 ^ 4 := by
+    rw [mul_one_div, div_le_div_iff₀ (by positivity) (by norm_num)]; nlinarith
+  have hs0 := Real.sqrt_nonneg (1 - τ ^ 2)
+  nlinarith
 
 /-- **Lemma C** (all of Region II): the rung partner `z` of a double vertex `v` (good rung) has
 no T-neighbour, pure or mixed.
