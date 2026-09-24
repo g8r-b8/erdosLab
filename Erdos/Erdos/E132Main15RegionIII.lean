@@ -440,8 +440,8 @@ theorem slot_kill_inj (hX : Normal X) (F : DirField X) (hτ₁ : √3 / 2 - 2 * 
 
 /-- **Slot bound for `τ < √3/2`**: `#T + q₂ ≤ |S|`.
 
-TODO: prove (wiring).
-What's missing: `Kill := ⋃_{v ∈ twoRungVerts} {(z′, σ_v), (z, σ′_v)}` (the two killed slots of
+TODO: none — proved.
+What's missing: (was) `Kill := ⋃_{v ∈ twoRungVerts} {(z′, σ_v), (z, σ′_v)}` (the two killed slots of
 `v`, chosen via `Classical.choose`); `slot_kill_one` gives `SlotFree`; `slot_kill_inj` and
 `z ≠ z′` give `#Kill = 2q₂`; conclude with `card_tEdges_slots`.
 Acceptance: no `sorry` (inherits).
@@ -449,7 +449,78 @@ Depends on: `card_tEdges_slots`, `slot_kill_one`, `slot_kill_inj`. Difficulty M.
 theorem card_tEdges_add_twoRung_lt (hX : Normal X) (F : DirField X)
     (hτ₁ : √3 / 2 - 2 * beta < tau X) (hτ₂ : tau X < √3 / 2) :
     (tEdges X F).card + (twoRungVerts X F).card ≤ (Sset X).card := by
-  sorry
+  classical
+  set V := twoRungVerts X F
+  have hpick : ∀ v ∈ V, ∃ zz : Pt × Pt, zz.1 ≠ zz.2 ∧ IsRung F v zz.1 ∧ IsRung F v zz.2 ∧
+      s(v, zz.1) ∈ rungs X F ∧ s(v, zz.2) ∈ rungs X F := by
+    intro v hv
+    obtain ⟨z, z', hne, h1, h2, g1, g2⟩ := (mem_filter.1 hv).2
+    exact ⟨(z, z'), hne, h1, h2, g1, g2⟩
+  let P : Pt → Pt × Pt := fun v => if h : v ∈ V then (hpick v h).choose else (0, 0)
+  have hP : ∀ v ∈ V, (P v).1 ≠ (P v).2 ∧ IsRung F v (P v).1 ∧ IsRung F v (P v).2 ∧
+      s(v, (P v).1) ∈ rungs X F ∧ s(v, (P v).2) ∈ rungs X F := by
+    intro v hv
+    have : P v = (hpick v hv).choose := dif_pos hv
+    rw [this]; exact (hpick v hv).choose_spec
+  let sg : ℝ → ℝ := fun x => if 0 < x then 1 else -1
+  -- the slot of `b` on the side of `a`
+  have hsg : ∀ {v a b : Pt}, IsRung F v a → IsRung F v b → s(v, b) ∈ rungs X F → a ≠ b →
+      0 < sg (det2 (F.u b) (a - b)) * det2 (F.u b) (a - b) ∧
+        (sg (det2 (F.u b) (a - b)) = 1 ∨ sg (det2 (F.u b) (a - b)) = -1) := by
+    intro v a b ha hb gb hab
+    obtain ⟨hs1, -, -⟩ := two_rung_diff F hτ₁ hτ₂ ha hb hab
+    obtain ⟨κ, hκ, hd, -⟩ := rung_pair_kappa F ha hb hab
+    have hgood : ang (F.u v) (F.u b) ≤ beta := (mem_filter.1 (mem_filter.1 gb).1).2 v b rfl
+    have hu := F.norm_u ha.1
+    have hub := F.norm_u hb.2.2.1
+    have huu : ‖F.u v - F.u b‖ ≤ beta := (norm_sub_le_angR hu hub).trans hgood
+    have hb' : beta = 1 / 100 := rfl
+    rw [hb'] at huu
+    have hin : 0 < inner ℝ (F.u b) (F.u v) := by
+      have e := @norm_sub_sq_real _ _ _ (F.u v) (F.u b)
+      rw [hu, hub, real_inner_comm] at e
+      nlinarith [norm_nonneg (F.u v - F.u b)]
+    have hne0 : det2 (F.u b) (a - b) ≠ 0 := by
+      rw [hd, det2_smul_right', det2_perp_right']
+      have : 0 < sOff X := by linarith
+      rcases hκ with rfl | rfl
+      · have := mul_pos (mul_pos (by norm_num : (0:ℝ) < 2) this) hin; nlinarith
+      · have := mul_pos (mul_pos (by norm_num : (0:ℝ) < 2) this) hin; nlinarith
+    simp only [sg]
+    split_ifs with h
+    · exact ⟨by linarith, Or.inl rfl⟩
+    · exact ⟨by have := lt_of_le_of_ne (not_lt.1 h) hne0; linarith, Or.inr rfl⟩
+  let Sl : Pt → Finset (Pt × ℝ) := fun v =>
+    {((P v).2, sg (det2 (F.u (P v).2) ((P v).1 - (P v).2))),
+      ((P v).1, sg (det2 (F.u (P v).1) ((P v).2 - (P v).1)))}
+  have hmem : ∀ v ∈ V, ∀ x ∈ Sl v, ∃ a, IsRung F v a ∧ IsRung F v x.1 ∧ s(v, a) ∈ rungs X F ∧
+      s(v, x.1) ∈ rungs X F ∧ a ≠ x.1 ∧ 0 < x.2 * det2 (F.u x.1) (a - x.1) ∧
+      (x.2 = 1 ∨ x.2 = -1) := by
+    intro v hv x hx
+    obtain ⟨hne, h1, h2, g1, g2⟩ := hP v hv
+    rcases mem_insert.1 hx with rfl | hx
+    · exact ⟨_, h1, h2, g1, g2, hne, hsg h1 h2 g2 hne⟩
+    · rw [mem_singleton] at hx; subst hx
+      exact ⟨_, h2, h1, g2, g1, hne.symm, hsg h2 h1 g1 hne.symm⟩
+  set Kill := V.biUnion Sl
+  have hK : ∀ x ∈ Kill, x.1 ∈ Sset X ∧ (x.2 = 1 ∨ x.2 = -1) ∧ SlotFree F x.1 x.2 := by
+    intro x hx
+    obtain ⟨v, hv, hx⟩ := mem_biUnion.1 hx
+    obtain ⟨a, ha, hb, ga, gb, hab, hσ, hσ1⟩ := hmem v hv x hx
+    exact ⟨hb.2.2.1, hσ1, slot_kill_one hX F hτ₁ hτ₂ ha hb gb hab hσ⟩
+  have hcard : Kill.card = 2 * V.card := by
+    rw [card_biUnion]
+    · rw [sum_congr rfl (g := fun _ => 2), sum_const, smul_eq_mul, mul_comm]
+      intro v hv
+      refine card_pair fun e => (hP v hv).1 ?_
+      exact (congrArg Prod.fst e).symm
+    · intro v hv v' hv' hvv'
+      refine Finset.disjoint_left.2 fun x hx hx' => hvv' ?_
+      obtain ⟨a, ha, hb, ga, gb, hab, hσ, -⟩ := hmem v hv x hx
+      obtain ⟨a', ha', hb', ga', gb', hab', hσ', -⟩ := hmem v' hv' x hx'
+      exact slot_kill_inj hX F hτ₁ hτ₂ ha hb hb' ha' ga gb gb' ga' hab hab' hσ hσ'
+  have := card_tEdges_slots hX F Kill hK
+  omega
 
 /-- **Breaks**: `#T + #breaks ≤ |S| + #mixed` (a pure T-edge is charged to its left end, which
 has a pure right T-neighbour; each vertex has `≤ 1` right T-neighbour).
