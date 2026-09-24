@@ -59,7 +59,7 @@ def cThin : ℝ := 10 ^ 4
 /-- **Arc packing**: points at distance `1` from `y`, pairwise `≥ 1` apart, all in the open cone
 `(q − y)·n > −1/4` (an open arc of length `2 arccos(−1/4) < 4π/3`), number at most 4.
 
-TODO: prove.
+TODO: none — proved.
 What's missing: write `q − y = dirVec (θ_n + ψ_q)` with `ψ_q ∈ (−arccos(−1/4), arccos(−1/4))`
 (`exists_angle`, `Real.arccos`); distance `≥ 1` between unit vectors ⇔ `|ψ_q − ψ_q'| ≥ π/3`
 (on this arc of length `< 2π`); sort the `ψ`'s (or use `card_le_of_sep_real` /
@@ -69,7 +69,91 @@ Depends on: `card_le_of_sep_real`, `exists_angle`, `dirVec`. Difficulty M. -/
 theorem card_sep_arc_le_four {y n : Pt} (hn : ‖n‖ = 1) (P : Finset Pt)
     (h1 : ∀ q ∈ P, dist q y = 1) (hsep : ∀ q ∈ P, ∀ q' ∈ P, q ≠ q' → 1 ≤ dist q q')
     (hcone : ∀ q ∈ P, -(1 / 4) < inner ℝ (q - y) n) : P.card ≤ 4 := by
-  sorry
+  have hπ := Real.pi_pos
+  obtain ⟨θn, hθn⟩ := exists_dirVec hn
+  have hu : ∀ q ∈ P, ‖q - y‖ = 1 := fun q hq => by rw [← dist_eq_norm, h1 q hq]
+  have hp : (0 : ℝ) < 2 * π := by linarith
+  have hang : ∀ q ∈ P, ∃ ψ : ℝ, ψ ∈ Set.Ioc (-π) π ∧ dirVec (θn + ψ) = q - y := by
+    intro q hq
+    obtain ⟨φ, -, hφ⟩ := exists_angle (hu q hq)
+    refine ⟨toIocMod hp (-π) (φ - θn), ?_, ?_⟩
+    · have := toIocMod_mem_Ioc hp (-π) (φ - θn)
+      refine ⟨this.1, ?_⟩
+      linarith [this.2]
+    · have e := toIocMod_add_toIocDiv_zsmul hp (-π) (φ - θn)
+      rw [← hφ]
+      have : θn + toIocMod hp (-π) (φ - θn) =
+          φ + ((-(toIocDiv hp (-π) (φ - θn)) : ℤ) : ℝ) * (2 * π) := by
+        rw [zsmul_eq_mul] at e; push_cast; linarith
+      rw [this, dirVec_add_int]
+  choose! ψ hψ hψd using hang
+  set A := Real.arccos (-(1 / 4)) with hAdef
+  have hA0 : 0 ≤ A := Real.arccos_nonneg _
+  have hA : A < 2 * π / 3 := by
+    by_contra h
+    push Not at h
+    have h1 := Real.cos_le_cos_of_nonneg_of_le_pi (by positivity) (Real.arccos_le_pi _) h
+    rw [Real.cos_arccos (by norm_num) (by norm_num)] at h1
+    have : Real.cos (2 * π / 3) = -(1 / 2) := by
+      rw [show 2 * π / 3 = π - π / 3 by ring, Real.cos_pi_sub, Real.cos_pi_div_three]
+    linarith
+  have hbound : ∀ q ∈ P, |ψ q| < A := by
+    intro q hq
+    have hc : Real.cos (ψ q) = inner ℝ (q - y) n := by
+      rw [← hψd q hq, ← hθn, Curve.inner_dirVec]; congr 1; ring
+    have hcos : -(1 / 4) < Real.cos |ψ q| := by rw [Real.cos_abs, hc]; exact hcone q hq
+    have hm0 : 0 ≤ |ψ q| := abs_nonneg _
+    have hm1 : |ψ q| ≤ π := abs_le.2 ⟨by linarith [(hψ q hq).1], (hψ q hq).2⟩
+    rw [← Real.arccos_cos hm0 hm1]
+    exact Real.arccos_lt_arccos (by norm_num) hcos (Real.cos_le_one _)
+  have hsep' : ∀ q ∈ P, ∀ q' ∈ P, q ≠ q' → π / 3 ≤ |ψ q - ψ q'| := by
+    intro q hq q' hq' hne
+    by_contra hlt
+    push Not at hlt
+    have hlt' := Defs.sqd_lt_of_arg one_pos (a := θn + ψ q) (b := θn + ψ q')
+      (by rwa [add_sub_add_left_eq_sub])
+    have hd := hsep q hq q' hq' hne
+    have e : dist q q' ^ 2 = (1 * Real.cos (θn + ψ q) - 1 * Real.cos (θn + ψ q')) ^ 2 +
+        (1 * Real.sin (θn + ψ q) - 1 * Real.sin (θn + ψ q')) ^ 2 := by
+      have e0 : dist q q' = dist (q - y) (q' - y) := by
+        rw [dist_eq_norm, dist_eq_norm, sub_sub_sub_cancel_right]
+      rw [e0, dist_sq_pt, ← hψd q hq, ← hψd q' hq']
+      simp only [dirVec_apply0, dirVec_apply1, one_mul]
+    nlinarith [dist_nonneg (x := q) (y := q')]
+  have hc3 : 0 < π / 3 := by positivity
+  have hinj : Set.InjOn (fun q => ψ q / (π / 3)) P := by
+    intro q hq q' hq' h
+    by_contra hne
+    have h3 := hsep' q hq q' hq' hne
+    simp only at h
+    have : ψ q = ψ q' := by
+      have := congrArg (· * (π / 3)) h
+      simpa [div_mul_cancel₀ _ hc3.ne'] using this
+    rw [this, sub_self, abs_zero] at h3
+    linarith
+  have hcard := card_le_of_sep_real (a := -(A / (π / 3))) (P.image fun q => ψ q / (π / 3))
+    (A / (π / 3)) (by have : 0 ≤ A / (π / 3) := by positivity
+                      linarith)
+    (by
+      intro x hx
+      obtain ⟨q, hq, rfl⟩ := mem_image.1 hx
+      have hb := abs_lt.1 (hbound q hq)
+      constructor
+      · rw [← neg_div]; exact div_le_div_of_nonneg_right hb.1.le hc3.le
+      · exact div_le_div_of_nonneg_right hb.2.le hc3.le)
+    (by
+      intro x hx x' hx' hne
+      obtain ⟨q, hq, rfl⟩ := mem_image.1 hx
+      obtain ⟨q', hq', rfl⟩ := mem_image.1 hx'
+      have hqq : q ≠ q' := by rintro rfl; exact hne rfl
+      have h3 := hsep' q hq q' hq' hqq
+      rw [← sub_div, abs_div, abs_of_pos hc3, le_div_iff₀ hc3, one_mul]
+      exact h3)
+  rw [card_image_of_injOn hinj] at hcard
+  have : A / (π / 3) < 2 := by rw [div_lt_iff₀ hc3]; linarith
+  have h5 : (P.card : ℝ) < 5 := by linarith
+  have : P.card < 5 := by exact_mod_cast h5
+  omega
 
 /-- Helper: a point strictly inside every disc `D(w, Δ₂)` is interior to `K`. -/
 theorem n1_mem_interior_of_lt {z : Pt} (h : ∀ w ∈ X, dist z w < dist2 X) :
