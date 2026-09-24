@@ -219,13 +219,52 @@ theorem card_tEdges_slots (hX : Normal X) (F : DirField X) (Kill : Finset (Pt ×
   rw [sum_add_distrib, sum_const, smul_eq_mul, ← hT2, ← hK2] at this
   omega
 
+/-- `det(a, c b) = c det(a, b)`. -/
+private theorem det2_smul_right' (a b : Pt) (c : ℝ) : det2 a (c • b) = c * det2 a b := by
+  simp only [det2_pt, PiLp.smul_apply, smul_eq_mul]; ring
+
+/-- `det(a, b^⊥) = a·b`. -/
+private theorem det2_perp_right' (a b : Pt) : det2 a (perp b) = inner ℝ a b := by
+  rw [det2_pt, inner_pt]; simp
+
+/-- Common data of the two rungs of a two-rung vertex at `τ < √3/2`: `z − z′ = 2sκ u_v^⊥`,
+`κ = ±1`, and `1/2 < s < 0.6`. -/
+private theorem two_rung_diff (F : DirField X) (hτ₁ : √3 / 2 - 2 * beta < tau X)
+    (hτ₂ : tau X < √3 / 2) {v z z' : Pt} (hr : IsRung F v z) (hr' : IsRung F v z')
+    (hne : z ≠ z') :
+    1 / 2 < sOff X ∧ sOff X < 0.6 ∧ ∃ κ : ℝ, (κ = 1 ∨ κ = -1) ∧
+      z - z' = (2 * sOff X * κ) • perp (F.u v) := by
+  obtain ⟨σ₁, hσ₁, e₁⟩ := rung_offset F hr
+  obtain ⟨σ₂, hσ₂, e₂⟩ := rung_offset F hr'
+  have hb : beta = 1 / 100 := rfl
+  have h3 : (1.732 : ℝ) < √3 := by rw [Real.lt_sqrt (by norm_num)]; norm_num
+  have hτpos : 0.84 < tau X := by rw [hb] at hτ₁; linarith
+  have hτ2 : tau X ^ 2 < 3 / 4 := by
+    have e3 : (√3 / 2) ^ 2 = 3 / 4 := by rw [div_pow, Real.sq_sqrt (by norm_num)]; norm_num
+    have := pow_lt_pow_left₀ hτ₂ (by linarith) (two_ne_zero)
+    linarith
+  have hs2 : sOff X ^ 2 = 1 - tau X ^ 2 := Real.sq_sqrt (by nlinarith)
+  have hs0 : 0 ≤ sOff X := Real.sqrt_nonneg _
+  refine ⟨by nlinarith, by nlinarith, ?_⟩
+  have hne12 : σ₁ ≠ σ₂ := by
+    rintro rfl; apply hne
+    have : z - v = z' - v := by rw [e₁, e₂]
+    exact sub_left_injective this
+  refine ⟨(σ₁ - σ₂) / 2, ?_, ?_⟩
+  · rcases hσ₁ with rfl | rfl <;> rcases hσ₂ with rfl | rfl <;> (try norm_num at hne12) <;> norm_num
+  · have : z - z' = (z - v) - (z' - v) := by abel
+    rw [this, e₁, e₂, show 2 * sOff X * ((σ₁ - σ₂) / 2) = σ₁ * sOff X - σ₂ * sOff X by ring,
+      sub_smul]
+    abel
+
 /-- **Lemma III.1** (`τ < √3/2`, `2s > 1`): if `v` has rungs `z ≠ z′` (the one to `z′` good),
 then `z′` has no T-neighbour on the side of `z`.
 (`o₊ − o₋ = 2s·u^⊥`; a T-neighbour `y` of `z′` on that side has `∠(y − z′, z − z′) ≤ β + arcsin β`,
 so `|y − z|² ≤ (2s − 1)² + 4s(1 − cos γ) < 1`, and `y ≠ z` since `|zz′| = 2s ≠ 1`.)
 
-TODO: prove.
-What's missing: the vector computation above with `rung_offset`, `RungM.ang`/good rung,
+TODO: none — proved (in the frame of `u_{z′}`: `κ det(u_v, q − z′) > 0.98`, so
+`|q − z|² = 1 − 4sκ det + 4s² < 1`).
+What's missing: (was) the vector computation above with `rung_offset`, `RungM.ang`/good rung,
 `IsTEdge` bounds, `eq_of_dist_lt_one`; float worst case `|y − z| ≤ 0.069`.
 Acceptance: no `sorry`.
 Depends on: `rung_offset`, `norm_offset_sub`, `same_side_close`, `eq_of_dist_lt_one`.
@@ -234,7 +273,76 @@ theorem slot_kill_one (hX : Normal X) (F : DirField X) (hτ₁ : √3 / 2 - 2 * 
     (hτ₂ : tau X < √3 / 2) {v z z' : Pt} (hr : IsRung F v z) (hr' : IsRung F v z')
     (hg' : s(v, z') ∈ rungs X F) (hne : z ≠ z') {σ : ℝ}
     (hσ : 0 < σ * det2 (F.u z') (z - z')) : SlotFree F z' σ := by
-  sorry
+  intro q hq hqs
+  obtain ⟨hgq, hTall⟩ := mem_filter.1 hq
+  obtain ⟨hee, -⟩ := mem_filter.1 hgq
+  have hd1 : dist z' q = 1 := by
+    have hd : pairDist s(z', q) = minDist X := (mem_filter.1 hee).2
+    rw [← hX.minDist_eq, ← hd]; rfl
+  have hT := hTall z' q rfl
+  have hqS : q ∈ Sset X := (mem_edges hee).2 q (Sym2.mem_mk_right _ _)
+  have hgood : ang (F.u v) (F.u z') ≤ beta := (mem_filter.1 (mem_filter.1 hg').1).2 v z' rfl
+  obtain ⟨hs1, hs2, κ, hκ, hd⟩ := two_rung_diff F hτ₁ hτ₂ hr hr' hne
+  set u := F.u v
+  set u' := F.u z'
+  set s := sOff X
+  have hu : ‖u‖ = 1 := F.norm_u hr.1
+  have hu' : ‖u'‖ = 1 := F.norm_u hr'.2.2.1
+  have huu : ‖u - u'‖ ≤ beta := (norm_sub_le_angR hu hu').trans hgood
+  have hb : beta = 1 / 100 := rfl
+  rw [hb] at huu
+  have hκ2 : κ * κ = 1 := by rcases hκ with rfl | rfl <;> norm_num
+  set y := q - z'
+  have hy : ‖y‖ = 1 := by rw [← dist_eq_norm, dist_comm, hd1]
+  have ha0 : 0 < inner ℝ y u' := hT.1
+  have ha1 : inner ℝ y u' < 1 / 100 := hT.2.1
+  -- `u·u' > 0`
+  have huu' : 0 < inner ℝ u' u := by
+    have e := @norm_sub_sq_real _ _ _ u u'
+    rw [hu, hu', real_inner_comm] at e
+    nlinarith [norm_nonneg (u - u')]
+  -- the sign of the side: `σκ > 0`
+  have hσκ : 0 < σ * κ := by
+    rw [hd, det2_smul_right', det2_perp_right'] at hσ
+    by_contra h; push Not at h
+    have : σ * (2 * s * κ * inner ℝ u' u) = (σ * κ) * (2 * s * inner ℝ u' u) := by ring
+    have h2 : 0 ≤ 2 * s * inner ℝ u' u := by positivity
+    nlinarith [mul_nonpos_of_nonpos_of_nonneg h h2]
+  have hκD : 0 < κ * det2 u' y := by
+    by_contra h; push Not at h
+    have : σ * κ * (σ * det2 u' y) = σ ^ 2 * (κ * det2 u' y) := by ring
+    nlinarith [mul_pos hσκ hqs, mul_nonpos_of_nonneg_of_nonpos (sq_nonneg σ) h]
+  have hD2 := inner_sq_add_det_sq (e := y) hu'
+  rw [hy] at hD2
+  have hκD' : 0.999 < κ * det2 u' y := by
+    have : (κ * det2 u' y) ^ 2 = det2 u' y ^ 2 := by
+      rw [mul_pow, show κ ^ 2 = κ * κ by ring, hκ2, one_mul]
+    nlinarith
+  have hW := abs_det2_leR (u - u') y
+  rw [hy, mul_one, det2_sub_left] at hW
+  have hκE : 0.98 < κ * det2 u y := by
+    rw [abs_le] at hW
+    rcases hκ with rfl | rfl <;> nlinarith
+  -- `|q − z| < 1`
+  have hqz : q - z = y - (z - z') := by simp only [y]; abel
+  have hlt : dist q z < 1 := by
+    rw [dist_eq_norm, hqz]
+    have e := @norm_sub_sq_real _ _ _ y (z - z')
+    have hin : inner ℝ y (z - z') = 2 * s * (κ * det2 u y) := by
+      rw [hd, inner_smul_right, det2_eq_inner_perpR, real_inner_comm]; ring
+    have hn : ‖z - z'‖ ^ 2 = 4 * s ^ 2 := by
+      rw [hd, norm_smul, norm_perp, hu, mul_one, Real.norm_eq_abs, sq_abs]
+      linear_combination (4 * s ^ 2) * hκ2
+    rw [hin, hn, hy] at e
+    have : ‖y - (z - z')‖ ^ 2 < 1 := by nlinarith
+    nlinarith [norm_nonneg (y - (z - z'))]
+  have hqz' := eq_of_dist_lt_one hX.minDist_eq (Sset_sub hqS) hr.memX.2 hlt
+  rw [hqz', dist_eq_norm'] at hd1
+  have : ‖z - z'‖ = 2 * s := by
+    rw [hd, norm_smul, norm_perp, hu, mul_one, Real.norm_eq_abs, abs_mul, abs_of_pos
+      (by linarith : (0 : ℝ) < 2 * s)]
+    rcases hκ with rfl | rfl <;> norm_num
+  linarith
 
 /-- **Injectivity of killed slots** (`τ < √3/2`): two two-rung vertices `v, v̄` sharing a rung end
 `z′` and killing the same slot of `z′` coincide.  (`|z̄ − z| ≤ 2s·2β < 1` gives `z̄ = z`; then `v̄`
