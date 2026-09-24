@@ -468,7 +468,11 @@ distance 1 of `y ∈ K` have nearly antipodal unit outer normals (`K` lies in a 
 `< 1°` or a strip, `y` at distance `≤ 1` from both lines), then `K` lies in a box of length
 `400` and width `9`.
 
-TODO: none — proved.
+TODO: none — proved.  Formalised route: frame `(e, ν₁)` with `perp e = ν₁` (not the bisector);
+`‖ν₁ + ν₂‖ ≤ 3/200` gives heights in `[h(y) − 1 − (L+1)/64, h(y) + 1]`; the midpoint of the two
+extreme-level points is interior (`n1_mid_interior`), so the middle slice has positive length;
+slice extremes (`n1_slice_extreme`) carry circle normals (`n1_circle_normal`), which are
+`0.999`-vertical when `L > 400` (`n1_tilt`); then `|w_bot − w_top| ≥ 1.998Δ₂ − W > 1.94Δ₂`.
 What's missing: the fatness step verbatim: bisector frame `(e, e⊥)`; levels `[E₋, E₊]`,
 `L = E₊ − E₋`, `W ≤ w_y + 2 tan(θ/2) L`, `w_y ≤ 2/cos(θ/2)`; top/bottom points `p_top, p_bot`
 at the middle level with outer normals from `frontier_on_circle`, `cos φ > 0`,
