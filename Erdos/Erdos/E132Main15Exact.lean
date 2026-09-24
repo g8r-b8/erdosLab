@@ -1125,12 +1125,63 @@ theorem normal_fact (hX : Normal X) {w : Pt} {θ₁ θ θ₂ : ℝ} (h₁ : θ�
   obtain ⟨ha, hb⟩ := normal_core hδ key
   exact ⟨a, ha, by rw [hdec, hb, zero_smul, add_zero]⟩
 
+/-- Inner product in the frame `(d, d^⊥)` of a unit `d`. -/
+private theorem frame_inner {d : Pt} (hd : ‖d‖ = 1) (x y x' y' : ℝ) :
+    inner ℝ (x • d + y • perp d) (x' • d + y' • perp d) = x * x' + y * y' := by
+  have h := unit_sq hd
+  rw [inner_pt]
+  simp only [PiLp.add_apply, PiLp.smul_apply, smul_eq_mul, perp_apply0, perp_apply1]
+  linear_combination (x * x' + y * y') * h
+
+private theorem frame_norm_sq {d : Pt} (hd : ‖d‖ = 1) (x y : ℝ) :
+    ‖x • d + y • perp d‖ ^ 2 = x ^ 2 + y ^ 2 := by
+  rw [← real_inner_self_eq_norm_sq, frame_inner hd]; ring
+
+/-- The arithmetic core of `rigid_step`. -/
+private theorem rigid_arith {A B N1 N2 X1 Y1 R : ℝ} (hR : 0 < R) (hAB : A ^ 2 + B ^ 2 = 1)
+    (hB : 0 < B) (h1 : 1 + 2 * A * R ≤ 0) (hN1 : N1 < 0) (hX1 : 2 * R * X1 = -1) (hY : 0 ≤ Y1)
+    (hXY : X1 ^ 2 + Y1 ^ 2 = 1) (hP : 0 ≤ -A * N1 + -B * N2)
+    (hV : 0 ≤ (X1 - A) * N1 + (Y1 - B) * N2) : A = X1 ∧ B = Y1 := by
+  have hR2 : 0 < 2 * R := by linarith
+  have hAle : A ≤ X1 := by
+    by_contra h; push Not at h
+    have := mul_lt_mul_of_pos_left h hR2
+    linarith
+  have hX1n : X1 < 0 := by
+    by_contra h; push Not at h
+    have := mul_nonneg hR2.le h
+    linarith
+  have hAeq : A = X1 := by
+    by_contra hne
+    have hlt : A < X1 := lt_of_le_of_ne hAle hne
+    have hA : A < 0 := by linarith
+    have hAN : 0 < A * N1 := mul_pos_of_neg_of_neg hA hN1
+    have hN2 : N2 < 0 := by
+      by_contra h; push Not at h
+      have := mul_nonneg hB.le h
+      linarith
+    have hpos : 0 < (A - X1) * N1 := mul_pos_of_neg_of_neg (by linarith) hN1
+    have hYB : Y1 < B := by
+      by_contra h; push Not at h
+      have := mul_nonpos_of_nonneg_of_nonpos (show 0 ≤ Y1 - B by linarith) hN2.le
+      linarith
+    have e1 : Y1 ^ 2 < B ^ 2 := pow_lt_pow_left₀ hYB hY two_ne_zero
+    have e2 : X1 ^ 2 < A ^ 2 := by nlinarith
+    linarith
+  refine ⟨hAeq, ?_⟩
+  subst hAeq
+  have h : (B - Y1) * (B + Y1) = 0 := by linear_combination hAB - hXY
+  rcases mul_eq_zero.1 h with h | h
+  · linarith
+  · linarith
+
 /-- **(Rigid), step**: on an arc `[θ, θ₂]` of `C(w, Δ₂)` inside `K`, with `u = −dirVec θ` at the
 current K-row point and room for one step (`θ + α₂ ≤ θ₂`), the pure right K T-neighbour is the
 next arc point `w + Δ₂ dirVec(θ + α₂)`.
 
-TODO: prove.
-What's missing: coordinates `(r, u)`; `v_{i+1} − v_i = (cos ψ, sin ψ)` with `ψ < arcsin β`;
+TODO: none — proved (child agent r3c1: frame `(d, d^⊥)`, `d = dirVec θ`; testing the inward
+normal `u_q` at `y = p` and `y = v*` pins `q − p = v* − p`, `rigid_arith`).
+What's missing: (was) coordinates `(r, u)`; `v_{i+1} − v_i = (cos ψ, sin ψ)` with `ψ < arcsin β`;
 `v_{i+1} ∈ D(w,Δ₂)` forces `ψ ≥ ψ* = arcsin(1/(2Δ₂))`; if `ψ > ψ*`, the normal `n = u_{v_{i+1}}`
 (`|φ| ≤ β`) violates `v_i ∈ K` or `v* ∈ K` (both terms negative).  Float check B2.
 Acceptance: no `sorry`.
@@ -1141,14 +1192,112 @@ theorem rigid_step (hX : Normal X) (F : DirField X) (hτ : tau X = √3 / 2) {w 
     (hvD : w + dist2 X • dirVec θ ∉ Dset X) (hu : F.u (w + dist2 X • dirVec θ) = -dirVec θ)
     {q : Pt} (hq : RowR F (w + dist2 X • dirVec θ) q) :
     q = w + dist2 X • dirVec (θ + alpha2 X) := by
-  sorry
+  have hR := hX.dist2_pos
+  have hRbig := hX.large
+  set R := dist2 X with hRdef
+  set α := alpha2 X with hαdef
+  set d := dirVec θ with hddef
+  set p := w + R • d with hpdef
+  have hd : ‖d‖ = 1 := norm_dirVec θ
+  obtain ⟨hpS, hqS, -, hang, -, -⟩ := hq.1
+  have hqD : q ∉ Dset X := fun h => hvD (hq.2.2 h)
+  obtain ⟨hn, -, -, hdet⟩ := hq.1.step
+  rw [hu] at hdet
+  set e := q - p with hedef
+  set A := inner ℝ e d
+  set B := det2 d e
+  have hdec : e = A • d + B • perp d := decompR hd e
+  have hAB : A ^ 2 + B ^ 2 = 1 := by rw [inner_sq_add_det_sq hd, hn, one_pow]
+  have hB : 0 < B := by
+    have : det2 (-d) e = -B := by simp only [B, det2_pt, PiLp.neg_apply]; ring
+    linarith
+  -- `q ∈ K ⊆ D(w, Δ₂)`
+  have hqK : q ∈ KBall X := ball_polygon_a (Sset_sub hqS) hqD
+  have hqw : dist q w ≤ R := mem_KBall.1 hqK w hw
+  have hqw' : q - w = (A + R) • d + B • perp d := by
+    rw [show q - w = e + R • d by simp only [e, p]; abel, hdec, add_smul]; abel
+  have h1 : 1 + 2 * A * R ≤ 0 := by
+    have h := frame_norm_sq hd (A + R) B
+    rw [← hqw', ← dist_eq_norm] at h
+    have h2 : dist q w ^ 2 ≤ R ^ 2 := pow_le_pow_left₀ dist_nonneg hqw 2
+    nlinarith
+  -- inward normal at `q`
+  have hnq : ‖F.u q‖ = 1 := F.norm_u hqS
+  have hnc : ∀ y ∈ KBall X, 0 ≤ inner ℝ (y - q) (F.u q) := by
+    intro y hy
+    have := neg_mem_normalCone hqK (F.partner_mem q hqS) (F.partner_K q hqS hqD)
+      (dist q (F.partner q))⁻¹ (inv_nonneg.2 dist_nonneg) y hy
+    rw [inner_neg_right] at this
+    unfold DirField.u
+    linarith
+  set N1 := inner ℝ (F.u q) d
+  set N2 := det2 d (F.u q)
+  have hndec : F.u q = N1 • d + N2 • perp d := decompR hd _
+  have hN1 : N1 < 0 := by
+    have hc := cos_le_inner_of_ang_le (F.norm_u hpS) hnq
+      (by unfold beta; linarith [Real.pi_gt_three]) hang
+    rw [hu, inner_neg_left, real_inner_comm] at hc
+    have : 0 < Real.cos beta :=
+      Real.cos_pos_of_mem_Ioo ⟨by unfold beta; linarith [Real.pi_gt_three],
+        by unfold beta; linarith [Real.pi_gt_three]⟩
+    linarith
+  -- `α₂` facts
+  set s := 1 / (2 * R) with hsdef
+  have hs0 : 0 < s := by positivity
+  have hs1 : s ≤ 1 := by
+    rw [hsdef, div_le_one (by positivity)]; linarith
+  have hsin : Real.sin (Real.arcsin s) = s := Real.sin_arcsin (by linarith) hs1
+  set C := Real.cos (Real.arcsin s)
+  have hC0 : 0 ≤ C := Real.cos_arcsin_nonneg _
+  have hC2 : s ^ 2 + C ^ 2 = 1 := by rw [← hsin]; exact Real.sin_sq_add_cos_sq _
+  have hα0 : 0 ≤ α := by
+    rw [hαdef, alpha2]; have := Real.arcsin_nonneg.2 hs0.le; linarith
+  have hRs : 2 * R * s = 1 := by rw [hsdef]; field_simp
+  set X1 := R * (Real.cos α - 1)
+  set Y1 := R * Real.sin α
+  have hX1 : 2 * R * X1 = -1 := by
+    have : Real.cos α = 2 * C ^ 2 - 1 := by rw [hαdef, alpha2, Real.cos_two_mul]
+    simp only [X1]; rw [this]; linear_combination 4 * R ^ 2 * hC2 - (2 * R * s + 1) * hRs
+  have hY1 : Y1 = C := by
+    have : Real.sin α = 2 * s * C := by rw [hαdef, alpha2, Real.sin_two_mul, hsin]
+    simp only [Y1]; rw [this]; linear_combination C * hRs
+  have hXY : X1 ^ 2 + Y1 ^ 2 = 1 := by
+    have : X1 = -s := by
+      have h' : (2 * R) * (X1 + s) = 0 := by linarith
+      rcases mul_eq_zero.1 h' with h | h
+      · linarith
+      · linarith
+    rw [this, hY1]; nlinarith
+  -- the candidate point
+  set vs := w + R • dirVec (θ + α) with hvsdef
+  have hvsp : vs - p = X1 • d + Y1 • perp d := by
+    simp only [vs, p, X1, Y1]
+    rw [dirVec_addR, pt_ext_iff]
+    simp only [PiLp.add_apply, PiLp.sub_apply, PiLp.smul_apply, smul_eq_mul]
+    constructor <;> ring
+  -- test `y = p`
+  have hP := hnc p (harc θ ⟨le_rfl, by linarith⟩)
+  rw [show p - q = (-A) • d + (-B) • perp d by rw [← neg_sub, hedef.symm, hdec]; simp; abel,
+    hndec, frame_inner hd] at hP
+  -- test `y = v*`
+  have hV := hnc vs (harc (θ + α) ⟨by linarith, hroom⟩)
+  rw [show vs - q = (X1 - A) • d + (Y1 - B) • perp d by
+      rw [show vs - q = (vs - p) - e by simp only [e]; abel, hvsp, hdec, sub_smul, sub_smul]; abel,
+    hndec, frame_inner hd] at hV
+  -- conclude `A = X1`, `B = Y1`
+  obtain ⟨hAeq, hBeq⟩ := rigid_arith hR hAB hB h1 hN1 hX1 (hY1 ▸ hC0) hXY
+    (by linarith [hP]) (by linarith [hV])
+  have : q = p + (vs - p) := by
+    rw [hvsp, ← hAeq, ← hBeq, ← hdec, hedef]; abel
+  rw [this, add_sub_cancel]
 
 /-- **(Count), different centres**: a point in the relative interior of an arc of `C(w, Δ₂)`
 inside `K` cannot be an endpoint of a nondegenerate arc of `C(w′, Δ₂)` inside `K` unless
 `w = w′` (near such a point `∂K` is the arc of `C(w,Δ₂)`, and two circles share `≤ 2` points).
 
-TODO: prove.
-What's missing: points of the `w′`-arc near `p` are in `∂K` (`w′ ∈ X`); near `p` every boundary
+TODO: none — proved (child agent r3c1: `p − w′` is an outward normal at `p`, so by
+`normal_fact` it is `c·dirVec θ`, and `c = Δ₂` by norms; `hw`, `hφ`, `harc'` are unused).
+What's missing: (was) points of the `w′`-arc near `p` are in `∂K` (`w′ ∈ X`); near `p` every boundary
 point of `K` lies on `C(w, Δ₂)` (inside `D(w,Δ₂)` near `p` is interior to the circular segment
 `conv(arc) ⊆ K`); infinitely many common points of two circles force `w = w′`.
 Acceptance: no `sorry`.
@@ -1159,7 +1308,24 @@ theorem arc_centre_unique (hX : Normal X) {w w' : Pt} (hw : w ∈ X) (hw' : w' �
     (harc' : ∀ ψ ∈ Set.Icc φ₁ φ₂, w' + dist2 X • dirVec ψ ∈ KBall X)
     (hp : w + dist2 X • dirVec θ = w' + dist2 X • dirVec φ₁ ∨
       w + dist2 X • dirVec θ = w' + dist2 X • dirVec φ₂) : w = w' := by
-  sorry
+  have hR := hX.dist2_pos
+  set R := dist2 X
+  set d := dirVec θ
+  set p := w + R • d with hpdef
+  have hK : p ∈ KBall X := harc θ ⟨h₁.le, h₂.le⟩
+  have hd : dist p w' = R := by
+    rcases hp with h | h <;>
+    · rw [h, dist_eq_norm, add_sub_cancel_left, norm_smul, norm_dirVec, mul_one, Real.norm_eq_abs,
+        abs_of_pos hR]
+  have hn := neg_mem_normalCone hK hw' hd 1 zero_le_one
+  obtain ⟨c, hc, e⟩ := normal_fact hX h₁ h₂ harc hn
+  have hc' : c = R := by
+    have := congrArg norm e
+    rw [norm_neg, one_smul, norm_smul, norm_dirVec, mul_one, Real.norm_eq_abs, abs_of_nonneg hc,
+      ← dist_eq_norm, dist_comm, hd] at this
+    exact this.symm
+  have e2 : w' = p - c • d := by rw [← e]; simp
+  rw [e2, hc', hpdef, add_sub_cancel_right]
 
 /-! ## (Count) -/
 
