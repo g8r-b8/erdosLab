@@ -538,8 +538,9 @@ private theorem arc_mem_iff {w x : Pt} {R φ : ℝ} (hR : 0 < R) :
 /-- **(Arc)** spindle convexity: if two points of `C(w, Δ₂)` (`w ∈ X`) at angles `θ₁ ≤ θ₂`,
 `θ₂ − θ₁ < π`, lie in `K`, the whole short arc between them lies in `K`, hence in `∂K`.
 
-TODO: prove.
-What's missing: for `x ∈ X`, `D(x,Δ₂) ∩ C(w,Δ₂) = {θ : cos(θ − θ_x) ≥ |wx|/(2Δ₂)}` is an arc
+TODO: none — proved (sinusoid interpolation `sinusoid_interp`; frontier via the outward normal
+`dirVec θ`).
+What's missing: (was) for `x ∈ X`, `D(x,Δ₂) ∩ C(w,Δ₂) = {θ : cos(θ − θ_x) ≥ |wx|/(2Δ₂)}` is an arc
 of width `≤ π` (or everything if `x = w`) containing `θ₁, θ₂`, so containing `[θ₁, θ₂]`; frontier
 since `w ∈ X` and the point is on `C(w,Δ₂)`.
 Acceptance: no `sorry`.
