@@ -937,8 +937,9 @@ theorem Bprime_span (hX : Normal X) (F : DirField X) (hτ : tau X = √3 / 2) {v
 /-- **(W)** one centre per D-walk: if the base of a second triangle `A′` lies on the right walk
 from the base of `A`, the two apexes have the same `Δ₂`-partner.
 
-TODO: prove.
-What's missing: both centres are at distance `Δ` from `a′, b′`; distinct centres are mirror
+TODO: none — proved (walk extended by `b′`; frame `e = a′ − b′` at `b′`: the centres are
+`b′ + ½e ± β e^⊥`, and the mirror case gives `(w − b′)·(w′ − b′) = ½ − Δ² < Δ²/2`).
+What's missing: (was) both centres are at distance `Δ` from `a′, b′`; distinct centres are mirror
 images in the line `a′b′`, and `a·e = ±1/(2Δ)` (second referee) gives `a·a* < 0`, contradicting
 `exact_identity_a` at `b′`.
 Acceptance: no `sorry`.
@@ -947,7 +948,73 @@ theorem W_center (hX : Normal X) (F : DirField X) (hτ : tau X = √3 / 2) {v a 
     (ht : IsTri F v a b) (ht' : IsTri F v' a' b') (z : ℕ → Pt) (N : ℕ) (hz0 : z 0 = b)
     (hstep : ∀ k < N, RowR F (z k) (z (k + 1))) (hk : ∃ k ≤ N, z k = a') :
     F.partner v = F.partner v' := by
-  sorry
+  obtain ⟨k, hkN, hka⟩ := hk
+  have hR' : RowR F a' b' := ht'.2.2.2.2.1
+  set w := F.partner v
+  set w' := F.partner v'
+  -- the walk extended by `b′`
+  let z' : ℕ → Pt := fun j => if j ≤ k then z j else b'
+  have hz'0 : z' 0 = b := by simp [z', hz0]
+  have hstep' : ∀ j < k + 1, RowR F (z' j) (z' (j + 1)) := by
+    intro j hj
+    rcases Nat.lt_or_ge j k with h | h
+    · simp only [z', if_pos h.le, if_pos (show j + 1 ≤ k by omega)]
+      exact hstep j (by omega)
+    · have : j = k := by omega
+      subst this
+      simp only [z', if_pos le_rfl, if_neg (show ¬ j + 1 ≤ j by omega)]
+      rw [hka]; exact hR'
+  have hw1 := Bprime_walk_right hX F hτ ht z' (k + 1) hz'0 hstep'
+  have haw : dist a' w = diam X := by
+    have := hw1 k (by omega); simp only [z', if_pos le_rfl] at this; rwa [hka] at this
+  have hbw : dist b' w = diam X := by
+    have := hw1 (k + 1) le_rfl
+    simp only [z', if_neg (show ¬ k + 1 ≤ k by omega)] at this; exact this
+  have haw' : dist a' w' = diam X := ht'.1.2.2.2.2.2
+  have hbw' : dist b' w' = diam X := ht'.2.1.2.2.2.2.2
+  have hab' : dist a' b' = 1 := hR'.1.2.2.1
+  have hwX : w ∈ X := F.partner_mem v ht.1.1
+  have hw'X : w' ∈ X := F.partner_mem v' ht'.1.1
+  have hT := two_of_pos hX.dist2_pos
+  have hL := hX.large
+  have hΔ : dist2 X ≤ diam X := dist2_le_diam X
+  -- frame at `b′` with `e = a′ − b′`
+  set e := a' - b'
+  have he : ‖e‖ = 1 := by rw [← dist_eq_norm, hab']
+  have hin : ∀ x, dist x a' = diam X → dist x b' = diam X → inner ℝ (x - b') e = 1 / 2 := by
+    intro x hxa hxb
+    have := two_inner_sub x b' a'
+    rw [hxa, hxb, dist_comm a' b'] at this
+    rw [dist_comm b' a', hab'] at this
+    linarith
+  have h1 := hin w (by rw [dist_comm, haw]) (by rw [dist_comm, hbw])
+  have h2 := hin w' (by rw [dist_comm, haw']) (by rw [dist_comm, hbw'])
+  have n1 := inner_sq_add_det_sq (e := w - b') he
+  have n2 := inner_sq_add_det_sq (e := w' - b') he
+  rw [h1, ← dist_eq_norm, dist_comm, hbw] at n1
+  rw [h2, ← dist_eq_norm, dist_comm, hbw'] at n2
+  have d1 := decompR he (w - b')
+  have d2 := decompR he (w' - b')
+  rw [h1] at d1; rw [h2] at d2
+  have hL2 := inner_mul_add_det_mul e (w - b') (w' - b')
+  rw [real_inner_comm (w - b') e, real_inner_comm (w' - b') e, h1, h2, he] at hL2
+  set β₁ := det2 e (w - b')
+  set β₂ := det2 e (w' - b')
+  by_cases hβ : β₁ = β₂
+  · have : w - b' = w' - b' := by rw [d1, d2, hβ]
+    exact sub_left_injective this
+  · exfalso
+    have hβ' : β₂ = -β₁ := by
+      have : (β₂ - β₁) * (β₂ + β₁) = 0 := by linear_combination n2 - n1
+      rcases mul_eq_zero.1 this with h | h
+      · exact absurd (sub_eq_zero.1 h).symm hβ
+      · linarith
+    rw [hβ'] at hL2
+    have hlow := two_inner_sub w b' w'
+    rw [dist_comm w b', hbw, dist_comm w' b', hbw'] at hlow
+    have hww := hT.le_diam w hwX w' hw'X
+    have : dist w w' ^ 2 ≤ diam X ^ 2 := pow_le_pow_left₀ dist_nonneg hww 2
+    nlinarith
 
 /-- A point equidistant from `a, b` (`|ab| = 1`) lies on the bisector:
 `x − m = c·(b − a)^⊥` with `c² = |xa|² − 1/4`. -/
