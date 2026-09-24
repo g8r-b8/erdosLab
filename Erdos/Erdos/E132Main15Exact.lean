@@ -1634,6 +1634,145 @@ theorem card_badBase_le (hX : Normal X) (F : DirField X) (hτ : tau X = √3 / 2
   have : (V.card : ℝ) ≤ (bad X F).card := by exact_mod_cast h1
   linarith
 
+/-! ### Walks, angles and the charging of triangles (skeleton for `exact_breaks`) -/
+
+/-- The pure right successor of `p` (or `p` itself if there is none). -/
+private noncomputable def nxt (F : DirField X) (p : Pt) : Pt :=
+  if h : ∃ q, RowR F p q then h.choose else p
+
+/-- The pure right walk from `p`. -/
+private noncomputable def walk (F : DirField X) (p : Pt) (k : ℕ) : Pt := (nxt F)^[k] p
+
+/-- The walk from `p` makes (at least) `N` genuine right steps. -/
+private def Runs (F : DirField X) (p : Pt) (N : ℕ) : Prop :=
+  ∀ k < N, RowR F (walk F p k) (walk F p (k + 1))
+
+/-- `p` is the left base end of some triangle. -/
+private def TriAt (F : DirField X) (p : Pt) : Prop := ∃ v' a' b', IsTri F v' a' b' ∧ a' = p
+
+/-- TODO: prove.
+What's missing: `rowR_fun` and `Classical.choose_spec`.
+Acceptance: no `sorry`. Depends on: `rowR_fun`. Difficulty S. -/
+private theorem nxt_eq (hX : Normal X) {F : DirField X} {p q : Pt} (h : RowR F p q) :
+    nxt F p = q := by
+  sorry
+
+private theorem walk_zero (F : DirField X) (p : Pt) : walk F p 0 = p := rfl
+
+private theorem walk_succ (F : DirField X) (p : Pt) (k : ℕ) :
+    walk F p (k + 1) = nxt F (walk F p k) := Function.iterate_succ_apply' _ _ _
+
+/-- TODO: prove. What's missing: restriction. Acceptance: no `sorry`. Difficulty S. -/
+private theorem runs_mono {F : DirField X} {p : Pt} {N M : ℕ} (h : Runs F p N) (hM : M ≤ N) :
+    Runs F p M := by
+  sorry
+
+/-- TODO: prove. What's missing: `nxt_eq`, `walk_succ`. Acceptance: no `sorry`. Difficulty S. -/
+private theorem runs_succ (hX : Normal X) {F : DirField X} {p q : Pt} {N : ℕ} (h : Runs F p N)
+    (hq : RowR F (walk F p N) q) : Runs F p (N + 1) := by
+  sorry
+
+/-- TODO: prove. What's missing: induction; `RowR` targets lie in `S`. Difficulty S. -/
+private theorem walk_mem_S {F : DirField X} {p : Pt} {N : ℕ} (h : Runs F p N) (hp : p ∈ Sset X) :
+    ∀ k ≤ N, walk F p k ∈ Sset X := by
+  sorry
+
+/-- TODO: prove. What's missing: induction; `RowR` preserves `D`-membership. Difficulty S. -/
+private theorem walk_D_iff {F : DirField X} {p : Pt} {N : ℕ} (h : Runs F p N) :
+    ∀ k ≤ N, (walk F p k ∈ Dset X ↔ p ∈ Dset X) := by
+  sorry
+
+/-- Suffix property of walks (predecessors are unique, `rowR_inj`).
+TODO: prove. What's missing: induction on `i'` generalising `i`. Difficulty S–M. -/
+private theorem walk_suffix (hX : Normal X) {F : DirField X} {p p' : Pt} {i i' : ℕ}
+    (h : Runs F p i) (h' : Runs F p' i') (he : walk F p i = walk F p' i') (hle : i' ≤ i) :
+    walk F p (i - i') = p' := by
+  sorry
+
+/-- TODO: prove. What's missing: `pt_ext_iff`, `rot`, `cos_add`/`sin_add`. Difficulty S. -/
+private theorem rot_dirVec (ψ φ c : ℝ) : rot ψ (c • dirVec φ) = c • dirVec (φ + ψ) := by
+  sorry
+
+/-- TODO: prove. What's missing: sum-to-product in coordinates. Difficulty S. -/
+private theorem dirVec_add_half (φ α : ℝ) :
+    dirVec φ + dirVec (φ + α) = (2 * Real.cos (α / 2)) • dirVec (φ + α / 2) := by
+  sorry
+
+/-- Two points of `C(w, R) ∩ X` at angular distance in `(0, 2 arcsin(1/(2R)))` would be `< 1`
+apart and distinct.
+TODO: prove. What's missing: chord `|dirVec x − dirVec y| = 2|sin((x−y)/2)|`. Difficulty M. -/
+private theorem arc_sep (hX : Normal X) {w : Pt} {R x y : ℝ} (hR : 1 ≤ R)
+    (hx : w + R • dirVec x ∈ X) (hy : w + R • dirVec y ∈ X) (h0 : 0 < x - y)
+    (h1 : x - y < 2 * Real.arcsin (1 / (2 * R))) : False := by
+  sorry
+
+/-- TODO: prove. What's missing: `arcsin` positivity. Difficulty S. -/
+private theorem alpha_pos (hX : Normal X) : 0 < alpha1 X ∧ 0 < alpha2 X := by
+  sorry
+
+/-- The apex angle: if `a − w = Δ dirVec φ` then `v = w + Δ₂ dirVec(φ + α₁/2)`.
+TODO: prove. What's missing: `Bprime_rot` (with `N = 0`), `rot_dirVec`, `dirVec_add_half`,
+`apex_eq`. Difficulty M. -/
+private theorem apex_angle (hX : Normal X) (F : DirField X) (hτ : tau X = √3 / 2) {v a b : Pt}
+    (ht : IsTri F v a b) {φ : ℝ} (hφ : a - F.partner v = diam X • dirVec φ) :
+    v = F.partner v + dist2 X • dirVec (φ + alpha1 X / 2) := by
+  sorry
+
+/-- D-walk positions: `walk b k − w = Δ dirVec(φ + (k+1)α₁)`.
+TODO: prove. What's missing: `Bprime_rot` with `z = walk F b`, `rot_dirVec`. Difficulty S–M. -/
+private theorem dwalk_angle (hX : Normal X) (F : DirField X) (hτ : tau X = √3 / 2) {v a b : Pt}
+    (ht : IsTri F v a b) {φ : ℝ} (hφ : a - F.partner v = diam X • dirVec φ) {N : ℕ}
+    (hN : Runs F b N) :
+    ∀ k ≤ N, walk F b k - F.partner v = diam X • dirVec (φ + ((k : ℝ) + 1) * alpha1 X) := by
+  sorry
+
+/-- D-walks terminate.
+TODO: prove. What's missing: otherwise `Runs F b N` for all `N` (`runs_succ`), contradicting
+`Bprime_span` and `α₁ > 0`. Difficulty M. -/
+private theorem dwalk_stops (hX : Normal X) (F : DirField X) (hτ : tau X = √3 / 2) {v a b : Pt}
+    (ht : IsTri F v a b) : ∃ N, Runs F b N ∧ ¬ ∃ q, RowR F (walk F b N) q := by
+  sorry
+
+/-- A point in the relative interior of an arc of `C(w, Δ₂)` inside `K`, at distance `Δ₂` from
+`w′ ∈ X`: `w = w′` (the proof of `arc_centre_unique`, without the unused hypotheses).
+TODO: prove. What's missing: copy of the `arc_centre_unique` proof. Difficulty S. -/
+private theorem centre_eq (hX : Normal X) {w w' : Pt} (hw' : w' ∈ X) {θ₁ θ θ₂ : ℝ}
+    (h₁ : θ₁ < θ) (h₂ : θ < θ₂)
+    (harc : ∀ ψ ∈ Set.Icc θ₁ θ₂, w + dist2 X • dirVec ψ ∈ KBall X)
+    (hd : dist (w + dist2 X • dirVec θ) w' = dist2 X) : w = w' := by
+  sorry
+
+/-- **K-walk on the arc**: with `A = (v, a, b)`, `a − w = Δ dirVec φ`, and a triangle `B` whose
+left base end is `walk b j` (`j < N`), the pure right walk from `v` stays on `C(w, Δ₂)` in steps
+`α₂`, strictly before the apex of `B` (at angle `φ + α₁/2 + (j+1)α₁`).
+TODO: prove. What's missing: induction on `i`: room (`arc_sep`), `arc_sub_K`, `normal_fact`
+(`u = −dirVec θ_i`), `rigid_step`, `arith_no_land` + `Bprime_span`; `W_center`, `apex_angle`,
+`dwalk_angle` for the apex of `B`. Difficulty L. -/
+private theorem kwalk_arc (hX : Normal X) (F : DirField X) (hτ : tau X = √3 / 2) {v a b : Pt}
+    (ht : IsTri F v a b) {φ : ℝ} (hφ : a - F.partner v = diam X • dirVec φ) {N : ℕ}
+    (hN : Runs F b N) {j : ℕ} (hj : j < N) {v' b' : Pt} (ht' : IsTri F v' (walk F b j) b') :
+    ∀ i, Runs F v i → walk F v i = F.partner v +
+        dist2 X • dirVec (φ + alpha1 X / 2 + (i : ℝ) * alpha2 X) ∧
+      (i : ℝ) * alpha2 X < ((j : ℝ) + 1) * alpha1 X := by
+  sorry
+
+/-- K-walks from an apex with a successor terminate.
+TODO: prove. What's missing: `kwalk_arc`, `alpha_pos`, Archimedes. Difficulty S–M. -/
+private theorem kwalk_stops (hX : Normal X) (F : DirField X) (hτ : tau X = √3 / 2) {v a b : Pt}
+    (ht : IsTri F v a b) {N : ℕ} (hN : Runs F b N) {j : ℕ} (hj : j < N) {v' b' : Pt}
+    (ht' : IsTri F v' (walk F b j) b') : ∃ i, Runs F v i ∧ ¬ ∃ q, RowR F (walk F v i) q := by
+  sorry
+
+/-- **No apex strictly inside** the arc `(θ_A, θ_B)` when `B` is the first successor of `A`.
+TODO: prove. What's missing: `centre_eq` (the apex's centre is `w`), `apex_angle` for it,
+`dwalk_angle`, `arc_sep` on `C(w, Δ)` with `⌊(ψ − φ)/α₁⌋`. Difficulty L. -/
+private theorem no_apex_inside (hX : Normal X) (F : DirField X) (hτ : tau X = √3 / 2)
+    {v a b : Pt} (ht : IsTri F v a b) {N : ℕ} (hN : Runs F b N) {j : ℕ} (hj : j < N)
+    {v' b' : Pt} (ht' : IsTri F v' (walk F b j) b')
+    (hmin : ∀ j' < j, ¬ TriAt F (walk F b j')) {i : ℕ} (hi : 1 ≤ i) (hr : Runs F v i)
+    {v'' a'' b'' : Pt} (ht'' : IsTri F v'' a'' b'') (hv'' : v'' = walk F v i) : False := by
+  sorry
+
 /-- **(Count)** at `τ = √3/2`: `q₂ ≤ #breaks + cBad`.
 Each good-base triangle `A` is charged to a break: the K-break `b_{AB} ∈ [v_A, v_B)` if `A` has a
 successor `B` on its D-walk ((W), (Arc), (Rigid), (Arith)), else the right end of its D-walk (a
@@ -1641,8 +1780,9 @@ D-break, (B′)).  K-breaks of different triangles lie on disjoint half-open arc
 (`arc_centre_unique`, one triangle per apex); D-breaks of different walks are distinct
 (`rowR_inj`); K- and D-breaks differ (`∉ D` vs `∈ D`).
 
-TODO: prove.
-What's missing: the injection and its well-definedness (walk iteration via `rowR_fun`, a
+TODO: proved from the private skeleton lemmas above (`dwalk_stops`, `kwalk_stops`,
+`no_apex_inside`, `walk_suffix`, …), some of which are still `sorry` — see their docstrings.
+What's missing: (was) the injection and its well-definedness (walk iteration via `rowR_fun`, a
 `Nat.find` for the first break), assembling the chain lemmas above.
 Acceptance: no `sorry`.
 Depends on: `card_badBase_le`, `tri_of_twoRung`, `Bprime_walk_right`, `Bprime_rot`,
@@ -1651,7 +1791,123 @@ Depends on: `card_badBase_le`, `tri_of_twoRung`, `Bprime_walk_right`, `Bprime_ro
 Difficulty XL. -/
 theorem exact_breaks (hX : Normal X) (F : DirField X) (hτ : tau X = √3 / 2) :
     ((twoRungVerts X F).card : ℝ) ≤ (breaks X F).card + cBad := by
-  sorry
+  classical
+  set V := twoRungVerts X F
+  set Vb := V.filter (fun v => ¬ ∃ a b, IsTri F v a b)
+  set Vg := V.filter (fun v => ∃ a b, IsTri F v a b)
+  have hsplit : Vg.card + Vb.card = V.card := card_filter_add_card_filter_not _
+  have hbad := card_badBase_le hX F hτ
+  -- the charging relation
+  let DC : Pt → Pt → Prop := fun b p => ∃ N, Runs F b N ∧ (¬ ∃ q, RowR F (walk F b N) q) ∧
+    p = walk F b N ∧ ∀ j < N, ¬ TriAt F (walk F b j)
+  let KC : Pt → Pt → Pt → Prop := fun v b p => ∃ N j, Runs F b N ∧ j < N ∧
+    TriAt F (walk F b j) ∧ (∀ j' < j, ¬ TriAt F (walk F b j')) ∧
+    ∃ i, Runs F v i ∧ (¬ ∃ q, RowR F (walk F v i) q) ∧ p = walk F v i
+  let Ch : Pt → Pt → Prop := fun v p => ∃ a b, IsTri F v a b ∧ (DC b p ∨ KC v b p)
+  have hex : ∀ v ∈ Vg, ∃ p ∈ breaks X F, Ch v p := by
+    intro v hv
+    obtain ⟨a, b, ht⟩ := (mem_filter.1 hv).2
+    obtain ⟨N, hN, hs⟩ := dwalk_stops hX F hτ ht
+    have hbS : b ∈ Sset X := ht.2.1.2.2.1
+    have hvS : v ∈ Sset X := ht.1.1
+    by_cases hsucc : ∃ j, j < N ∧ TriAt F (walk F b j)
+    · let j := Nat.find hsucc
+      have hj : j < N ∧ TriAt F (walk F b j) := Nat.find_spec hsucc
+      have hmin : ∀ j' < j, ¬ TriAt F (walk F b j') := fun j' hj' h =>
+        Nat.find_min hsucc hj' ⟨hj'.trans hj.1, h⟩
+      obtain ⟨v', a', b', ht', ha'⟩ := hj.2
+      rw [ha'] at ht'
+      obtain ⟨i, hi, his⟩ := kwalk_stops hX F hτ ht hN hj.1 ht'
+      refine ⟨walk F v i, mem_filter.2 ⟨walk_mem_S hi hvS i le_rfl, his⟩, a, b, ht,
+        Or.inr ⟨N, j, hN, hj.1, hj.2, hmin, i, hi, his, rfl⟩⟩
+    · push Not at hsucc
+      refine ⟨walk F b N, mem_filter.2 ⟨walk_mem_S hN hbS N le_rfl, hs⟩, a, b, ht,
+        Or.inl ⟨N, hN, hs, rfl, fun j hj => hsucc j hj⟩⟩
+  -- the charging relation is injective
+  have hDD : ∀ {v a b v' a' b' p}, IsTri F v a b → IsTri F v' a' b' → DC b p → DC b' p →
+      v = v' := by
+    intro v a b v' a' b' p ht ht' hd hd'
+    -- wlog `N' ≤ N`
+    have key : ∀ {v a b v' a' b' : Pt} {N N' : ℕ}, IsTri F v a b → IsTri F v' a' b' →
+        Runs F b N → Runs F b' N' → walk F b N = walk F b' N' → N' ≤ N →
+        (∀ j < N, ¬ TriAt F (walk F b j)) → v = v' := by
+      intro v a b v' a' b' N N' ht ht' hN hN' he hle hfree
+      have hsuf := walk_suffix hX hN hN' he hle
+      rcases Nat.lt_or_ge N' N with hlt | hge
+      · exfalso
+        set d := N - N'
+        have hd1 : 1 ≤ d := by omega
+        have hR := hN (d - 1) (by omega)
+        rw [show d - 1 + 1 = d by omega, hsuf] at hR
+        have := rowR_inj hX hR ht'.2.2.2.2.1
+        exact hfree (d - 1) (by omega) ⟨v', a', b', ht', this.symm⟩
+      · have hNN : N = N' := le_antisymm hge hle
+        rw [hNN, Nat.sub_self, walk_zero] at hsuf
+        subst hsuf
+        have haa := rowR_inj hX ht.2.2.2.2.1 ht'.2.2.2.2.1
+        subst haa
+        have hab : a ≠ b := by
+          intro e; have := ht.2.2.2.2.1.1.2.2.1; rw [e, dist_self] at this; norm_num at this
+        exact base_apex_unique hX F hτ hab ht.1 ht.2.1 ht'.1 ht'.2.1 ht.2.2.1 ht.2.2.2.1
+          ht'.2.2.1 ht'.2.2.2.1
+    obtain ⟨N, hN, -, hp, hfree⟩ := hd
+    obtain ⟨N', hN', -, hp', hfree'⟩ := hd'
+    rcases le_total N' N with hle | hle
+    · exact key ht ht' hN hN' (hp.symm.trans hp') hle hfree
+    · exact (key ht' ht hN' hN (hp'.symm.trans hp) hle hfree').symm
+  have hKK : ∀ {v a b v' a' b' p}, IsTri F v a b → IsTri F v' a' b' → KC v b p → KC v' b' p →
+      v = v' := by
+    intro v a b v' a' b' p ht ht' hk hk'
+    have key : ∀ {v a b v' a' b' : Pt} {i i' : ℕ}, IsTri F v a b → IsTri F v' a' b' →
+        KC v b (walk F v i) → Runs F v i → Runs F v' i' → walk F v i = walk F v' i' →
+        i' ≤ i → v = v' := by
+      intro v a b v' a' b' i i' ht ht' hk hi hi' he hle
+      have hsuf := walk_suffix hX hi hi' he hle
+      rcases Nat.lt_or_ge i' i with hlt | hge
+      · exfalso
+        obtain ⟨N, j, hN, hj, ⟨v₁, a₁, b₁, ht₁, ha₁⟩, hmin, -⟩ := hk
+        rw [ha₁] at ht₁
+        exact no_apex_inside hX F hτ ht hN hj ht₁ hmin (i := i - i') (by omega)
+          (runs_mono hi (by omega)) ht' hsuf.symm
+      · have : i = i' := le_antisymm hge hle
+        rw [this, Nat.sub_self, walk_zero] at hsuf
+        exact hsuf
+    obtain ⟨N, j, hN, hj, htj, hmin, i, hi, his, hp⟩ := hk
+    obtain ⟨N', j', hN', hj', htj', hmin', i', hi', his', hp'⟩ := hk'
+    subst hp
+    rcases le_total i' i with hle | hle
+    · exact key ht ht' ⟨N, j, hN, hj, htj, hmin, i, hi, his, rfl⟩ hi hi' hp' hle
+    · exact (key ht' ht ⟨N', j', hN', hj', htj', hmin', i', hi', his', rfl⟩ hi' hi
+        hp'.symm hle).symm
+  have hDK : ∀ {v a b v' a' b' p}, IsTri F v a b → IsTri F v' a' b' → DC b p → KC v' b' p →
+      False := by
+    intro v a b v' a' b' p ht ht' hd hk
+    obtain ⟨N, hN, -, hp, -⟩ := hd
+    obtain ⟨-, -, -, -, -, -, i, hi, -, hp'⟩ := hk
+    have h1 := (walk_D_iff hN N le_rfl).2 ht.2.1.2.2.2.1
+    have h2 := (walk_D_iff hi i le_rfl).1
+    rw [← hp, hp'] at h1
+    exact ht'.1.2.1 (h2 h1)
+  have huniq : ∀ {v v' p}, Ch v p → Ch v' p → v = v' := by
+    intro v v' p ⟨a, b, ht, h⟩ ⟨a', b', ht', h'⟩
+    rcases h with hd | hk <;> rcases h' with hd' | hk'
+    · exact hDD ht ht' hd hd'
+    · exact (hDK ht ht' hd hk').elim
+    · exact (hDK ht' ht hd' hk).elim
+    · exact hKK ht ht' hk hk'
+  -- the injection
+  let g : Pt → Pt := fun v => if h : v ∈ Vg then (hex v h).choose else 0
+  have hg : ∀ v ∈ Vg, g v ∈ breaks X F ∧ Ch v (g v) := by
+    intro v hv
+    have : g v = (hex v hv).choose := dif_pos hv
+    rw [this]; exact (hex v hv).choose_spec
+  have hinj : Set.InjOn g ↑Vg := fun v hv v' hv' e =>
+    huniq (hg v hv).2 (e ▸ (hg v' hv').2)
+  have hcard := card_le_card_of_injOn g (fun v hv => (hg v hv).1) hinj
+  have : (Vg.card : ℝ) ≤ (breaks X F).card := by exact_mod_cast hcard
+  have hs : (V.card : ℝ) = Vg.card + Vb.card := by exact_mod_cast hsplit.symm
+  rw [hs]
+  linarith
 
 end
 
