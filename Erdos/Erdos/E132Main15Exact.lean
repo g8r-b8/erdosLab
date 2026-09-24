@@ -1793,7 +1793,34 @@ TODO: prove. What's missing: `Bprime_rot` (with `N = 0`), `rot_dirVec`, `dirVec_
 private theorem apex_angle (hX : Normal X) (F : DirField X) (hτ : tau X = √3 / 2) {v a b : Pt}
     (ht : IsTri F v a b) {φ : ℝ} (hφ : a - F.partner v = diam X • dirVec φ) :
     v = F.partner v + dist2 X • dirVec (φ + alpha1 X / 2) := by
-  sorry
+  obtain ⟨hbase, -⟩ := Bprime_rot hX F hτ ht (fun _ => b) 0 rfl
+    (fun k hk => absurd hk (Nat.not_lt_zero k))
+  set w := F.partner v
+  set α := alpha1 X
+  have hb : b - w = diam X • dirVec (φ + α) := by rw [hbase, hφ, rot_dirVec]
+  have ha' : a = w + diam X • dirVec φ := by rw [← hφ]; abel
+  have hb' : b = w + diam X • dirVec (φ + α) := by rw [← hb]; abel
+  have hm : midpoint ℝ a b - w = (diam X / 2) • (dirVec φ + dirVec (φ + α)) := by
+    rw [midpoint_eq_smul_add, invOf_eq_inv, ha', hb']; module
+  rw [dirVec_add_half, smul_smul] at hm
+  have hpos := hX.dist2_pos
+  have hΔ : 0 < diam X := hpos.trans_le (dist2_le_diam X)
+  have hc : 0 < Real.cos (α / 2) := by
+    have e : α / 2 = Real.arcsin (1 / (2 * diam X)) := by simp only [α, alpha1]; ring
+    rw [e, Real.cos_arcsin]
+    have : 1 / (2 * diam X) < 1 := by
+      rw [div_lt_one (by positivity)]; have := hX.large; linarith [dist2_le_diam X]
+    apply Real.sqrt_pos.2
+    have : (1 / (2 * diam X)) ^ 2 < 1 := by
+      have h0 : 0 < 1 / (2 * diam X) := by positivity
+      nlinarith
+    linarith
+  have hn : ‖midpoint ℝ a b - w‖ = diam X * Real.cos (α / 2) := by
+    rw [hm, norm_smul, norm_dirVec, mul_one, Real.norm_eq_abs, abs_of_pos (by positivity)]
+    ring
+  rw [apex_eq hX F hτ ht, hn, hm, smul_smul]
+  congr 2
+  field_simp
 
 /-- D-walk positions: `walk b k − w = Δ dirVec(φ + (k+1)α₁)`.
 TODO: prove. What's missing: `Bprime_rot` with `z = walk F b`, `rot_dirVec`. Difficulty S–M. -/
@@ -1801,14 +1828,33 @@ private theorem dwalk_angle (hX : Normal X) (F : DirField X) (hτ : tau X = √3
     (ht : IsTri F v a b) {φ : ℝ} (hφ : a - F.partner v = diam X • dirVec φ) {N : ℕ}
     (hN : Runs F b N) :
     ∀ k ≤ N, walk F b k - F.partner v = diam X • dirVec (φ + ((k : ℝ) + 1) * alpha1 X) := by
-  sorry
+  obtain ⟨hbase, hsteps⟩ := Bprime_rot hX F hτ ht (walk F b) N rfl hN
+  intro k hk
+  induction k with
+  | zero =>
+    rw [walk_zero, hbase, hφ, rot_dirVec]; congr 2; push_cast; ring
+  | succ k ih =>
+    rw [hsteps k (by omega), ih (by omega), rot_dirVec]; congr 2; push_cast; ring
 
 /-- D-walks terminate.
 TODO: prove. What's missing: otherwise `Runs F b N` for all `N` (`runs_succ`), contradicting
 `Bprime_span` and `α₁ > 0`. Difficulty M. -/
 private theorem dwalk_stops (hX : Normal X) (F : DirField X) (hτ : tau X = √3 / 2) {v a b : Pt}
     (ht : IsTri F v a b) : ∃ N, Runs F b N ∧ ¬ ∃ q, RowR F (walk F b N) q := by
-  sorry
+  by_contra h
+  push Not at h
+  have hall : ∀ N, Runs F b N := by
+    intro N
+    induction N with
+    | zero => intro k hk; exact absurd hk (Nat.not_lt_zero k)
+    | succ N ih =>
+      obtain ⟨q, hq⟩ := h N ih
+      exact runs_succ hX ih hq
+  have hα := (alpha_pos hX).1
+  obtain ⟨N, hN⟩ := exists_nat_gt (π / 3 / alpha1 X)
+  have := Bprime_span hX F hτ ht (walk F b) N rfl (hall N)
+  rw [div_lt_iff₀ hα] at hN
+  nlinarith
 
 /-- A point in the relative interior of an arc of `C(w, Δ₂)` inside `K`, at distance `Δ₂` from
 `w′ ∈ X`: `w = w′` (the proof of `arc_centre_unique`, without the unused hypotheses).
@@ -1851,7 +1897,27 @@ TODO: prove. What's missing: `kwalk_arc`, `alpha_pos`, Archimedes. Difficulty S�
 private theorem kwalk_stops (hX : Normal X) (F : DirField X) (hτ : tau X = √3 / 2) {v a b : Pt}
     (ht : IsTri F v a b) {N : ℕ} (hN : Runs F b N) {j : ℕ} (hj : j < N) {v' b' : Pt}
     (ht' : IsTri F v' (walk F b j) b') : ∃ i, Runs F v i ∧ ¬ ∃ q, RowR F (walk F v i) q := by
-  sorry
+  have hΔ : 0 < diam X := hX.dist2_pos.trans_le (dist2_le_diam X)
+  have haw : ‖(diam X)⁻¹ • (a - F.partner v)‖ = 1 := by
+    rw [norm_smul, ← dist_eq_norm, ht.1.2.2.2.2.2, Real.norm_eq_abs, abs_of_pos (inv_pos.2 hΔ),
+      inv_mul_cancel₀ hΔ.ne']
+  obtain ⟨φ, -, hφ'⟩ := exists_angle haw
+  have hφ : a - F.partner v = diam X • dirVec φ := by
+    rw [hφ', smul_smul, mul_inv_cancel₀ hΔ.ne', one_smul]
+  by_contra h
+  push Not at h
+  have hall : ∀ i, Runs F v i := by
+    intro i
+    induction i with
+    | zero => intro k hk; exact absurd hk (Nat.not_lt_zero k)
+    | succ i ih =>
+      obtain ⟨q, hq⟩ := h i ih
+      exact runs_succ hX ih hq
+  have hα := alpha_pos hX
+  obtain ⟨i, hi⟩ := exists_nat_gt (((j : ℝ) + 1) * alpha1 X / alpha2 X)
+  have := (kwalk_arc hX F hτ ht hφ hN hj ht' i (hall i)).2
+  rw [div_lt_iff₀ hα.2] at hi
+  linarith
 
 /-- **No apex strictly inside** the arc `(θ_A, θ_B)` when `B` is the first successor of `A`.
 TODO: prove. What's missing: `centre_eq` (the apex's centre is `w`), `apex_angle` for it,
