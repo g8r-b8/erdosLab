@@ -509,3 +509,10 @@ K. Vesztergombi, *On large distances in planar sets*, Discrete Math. 67 (1987) 1
 - **Lead for Cor A1** (not verified): Cor A1 relies on CDL's citation of [Ve96, Prop 3], "every L₂′ vertex has degree exactly 2 in the 2-core G′".
   - Ve87's inner-point argument, Cases 1–3, looks like it proves exactly "degree ≤ 2" for interior points inside a min-degree-2 subgraph. Points used only as distance witnesses may stay in S even after they are pruned from the graph.
   - If this transfers, Cor A1 becomes unconditional, with Ve87 as its citation. It needs a careful check. Note in particular that Ve87 proceeds by deleting points, and deleting a point can remove every d₁ pair; Hopf–Pannwitz covers that case.
+
+## Audit 6 (2026-09-24): prior use of Kneser for distance sets on circles
+Found while drafting a blog post: K. Momihara and M. Shinohara, *Distance Sets on Circles*, Amer. Math. Monthly
+124(3) (2017) 241–254, doi 10.4169/amer.math.monthly.124.3.241. They show that n-point k-distance sets on the unit circle
+with k small relative to n lie on a regular 2k- or (2k+1)-gon, applying Kneser's addition theorem. Our Lemma K (angle_B2)
+and the paper's lem:kneser are a variant of this idea. This does not affect the novelty of Theorem AC or the Hit Lemma. The paper
+now cites them (v2, 2026-09-24).
