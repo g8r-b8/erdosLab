@@ -269,14 +269,70 @@ theorem card_tEdges_add_twoRung_lt (hX : Normal X) (F : DirField X)
 /-- **Breaks**: `#T + #breaks ≤ |S| + #mixed` (a pure T-edge is charged to its left end, which
 has a pure right T-neighbour; each vertex has `≤ 1` right T-neighbour).
 
-TODO: prove.
-What's missing: `tEdges = pure ⊔ mixedT`; the left-end map on pure T-edges is injective into
+TODO: none — proved.
+What's missing: (was) `tEdges = pure ⊔ mixedT`; the left-end map on pure T-edges is injective into
 `S ∖ breaks` (`rowR_fun`; orientation from `tstep_flip`/`T2`).
 Acceptance: no `sorry`.
 Depends on: `rowR_fun`, `tstep_flip`, `T2`, `mixedT_data`. Difficulty M. -/
 theorem card_tEdges_add_breaks_le (hX : Normal X) (F : DirField X) :
     (tEdges X F).card + (breaks X F).card ≤ (Sset X).card + (mixedT X F).card := by
-  sorry
+  classical
+  have tdata : ∀ {p q : Pt}, s(p, q) ∈ tEdges X F → dist p q = 1 ∧ IsTEdge F p q := by
+    intro p q h
+    obtain ⟨hg, hTall⟩ := mem_filter.1 h
+    obtain ⟨hee, -⟩ := mem_filter.1 hg
+    have hd : pairDist s(p, q) = minDist X := (mem_filter.1 hee).2
+    exact ⟨by rw [← hX.minDist_eq, ← hd]; rfl, hTall p q rfl⟩
+  have hleft : ∀ z ∈ tEdges X F \ mixedT X F, ∃ a b, z = s(a, b) ∧ RowR F a b := by
+    intro z hz
+    obtain ⟨hzT, hzM⟩ := mem_sdiff.1 hz
+    induction z using Sym2.ind with
+    | h p q =>
+    obtain ⟨hd, hTe⟩ := tdata hzT
+    have hS := (mem_edges (mem_filter.1 (mem_filter.1 hzT).1).1).2
+    have hp := hS p (Sym2.mem_mk_left _ _)
+    have hq := hS q (Sym2.mem_mk_right _ _)
+    have hg : ang (F.u p) (F.u q) ≤ beta := (mem_filter.1 (mem_filter.1 hzT).1).2 p q rfl
+    have hDD : (p ∈ Dset X ↔ q ∈ Dset X) := by
+      constructor
+      · intro hpD; by_contra hqD
+        exact hzM (mem_filter.2 ⟨hzT, q, p, Sym2.eq_swap, hqD, hpD⟩)
+      · intro hqD; by_contra hpD
+        exact hzM (mem_filter.2 ⟨hzT, p, q, rfl, hpD, hqD⟩)
+    have hl := lagrange (q - p) (F.u p)
+    rw [F.norm_u' hp, ← dist_eq_norm, dist_comm q p, hd] at hl
+    have ha := hTe.2.1
+    have hβ : beta = 1 / 100 := rfl
+    rw [hβ] at ha
+    rcases lt_or_gt_of_ne (show det2 (F.u p) (q - p) ≠ 0 by
+      intro h0; rw [h0] at hl; nlinarith [hTe.1]) with hb | hb
+    · exact ⟨p, q, rfl, ⟨hp, hq, hd, hg, hTe, by linarith⟩, hDD⟩
+    · have := tstep_flip hp hq hd hg hTe.1 hTe.2.1
+      have hb' : det2 (F.u q) (p - q) < 0 := by nlinarith
+      exact ⟨q, p, Sym2.eq_swap, ⟨hq, hp, by rw [dist_comm]; exact hd,
+        by rw [ang, InnerProductGeometry.angle_comm]; exact hg, hTe.symm, by linarith⟩, hDD.symm⟩
+  let g : Sym2 Pt → Pt := fun z =>
+    if h : ∃ a b, z = s(a, b) ∧ RowR F a b then h.choose else 0
+  have hg : ∀ z, (h : ∃ a b, z = s(a, b) ∧ RowR F a b) → ∃ b, z = s(g z, b) ∧ RowR F (g z) b := by
+    intro z h
+    have : g z = h.choose := dif_pos h
+    rw [this]; exact h.choose_spec
+  have hinj : Set.InjOn g ↑(tEdges X F \ mixedT X F) := by
+    intro z hz z' hz' e
+    obtain ⟨b, hzb, hr⟩ := hg z (hleft z hz)
+    obtain ⟨b', hzb', hr'⟩ := hg z' (hleft z' hz')
+    rw [e] at hzb hr
+    rw [rowR_fun hX hr hr'] at hzb
+    exact hzb.trans hzb'.symm
+  have hmaps : ∀ z ∈ tEdges X F \ mixedT X F, g z ∈ Sset X \ breaks X F := by
+    intro z hz
+    obtain ⟨b, -, hr⟩ := hg z (hleft z hz)
+    exact mem_sdiff.2 ⟨hr.1.1, fun hb => (mem_filter.1 hb).2 ⟨b, hr⟩⟩
+  have h1 := card_le_card_of_injOn g hmaps hinj
+  have h2 := card_sdiff_add_card_eq_card (show breaks X F ⊆ Sset X from filter_subset _ _)
+  have h3 : (tEdges X F).card ≤ (tEdges X F \ mixedT X F).card + (mixedT X F).card :=
+    card_le_card_sdiff_add_card
+  omega
 
 /-- **Lemma 7.1 in Region III** (F3): `#mixed T-edges ≤ 1500` for `√3/2 − 2β < τ < √3/2 + 3β`
 (`t ≥ τ > 0.846`, so `t − arcsin β > 0.835`).
