@@ -92,13 +92,89 @@ theorem arith_no_land {R t : ℝ} (hR : 10 ^ 4 ≤ R) (ht₁ : √3 / 2 < t) (ht
     (j : ℝ) * (2 * Real.arcsin (1 / (2 * R))) ≠ k * (2 * Real.arcsin (1 / (2 * (R + t)))) := by
   sorry
 
+/-! ## Private helpers (rung pairs) -/
+
+/-- `det(a, c b) = c det(a, b)`. -/
+private theorem det2_smul_right' (a b : Pt) (c : ℝ) : det2 a (c • b) = c * det2 a b := by
+  simp only [det2_pt, PiLp.smul_apply, smul_eq_mul]; ring
+
+/-- `det(a, b^⊥) = a·b`. -/
+private theorem det2_perp_right' (a b : Pt) : det2 a (perp b) = inner ℝ a b := by
+  rw [det2_pt, inner_pt]; simp
+
+/-- Two rungs `z ≠ z′` of `v`: `z − z′ = 2sκ u_v^⊥` and `z′ − v = −τu_v − κs u_v^⊥`, `κ = ±1`. -/
+private theorem rung_pair_kappa (F : DirField X) {v z z' : Pt} (hr : IsRung F v z)
+    (hr' : IsRung F v z') (hne : z ≠ z') :
+    ∃ κ : ℝ, (κ = 1 ∨ κ = -1) ∧ z - z' = (2 * sOff X * κ) • perp (F.u v) ∧
+      z' - v = (-tau X) • F.u v + (-κ * sOff X) • perp (F.u v) := by
+  obtain ⟨σ₁, hσ₁, e₁⟩ := rung_offset F hr
+  obtain ⟨σ₂, hσ₂, e₂⟩ := rung_offset F hr'
+  have hne12 : σ₁ ≠ σ₂ := by
+    rintro rfl; apply hne
+    have : z - v = z' - v := by rw [e₁, e₂]
+    exact sub_left_injective this
+  have hz : z - z' = (z - v) - (z' - v) := by abel
+  rcases hσ₁ with rfl | rfl <;> rcases hσ₂ with rfl | rfl
+  · exact absurd rfl hne12
+  · refine ⟨1, Or.inl rfl, ?_, ?_⟩
+    · rw [hz, e₁, e₂, show 2 * sOff X * 1 = 1 * sOff X - (-1) * sOff X by ring, sub_smul]; abel
+    · rw [e₂]; try ring_nf
+  · refine ⟨-1, Or.inr rfl, ?_, ?_⟩
+    · rw [hz, e₁, e₂, show 2 * sOff X * (-1) = (-1) * sOff X - 1 * sOff X by ring, sub_smul]; abel
+    · rw [e₂]; try ring_nf
+  · exact absurd rfl hne12
+
+/-- The side of `2sκ u^⊥` seen from `u′ ≈ u` has the sign of `κ`. -/
+private theorem side_sign {u u' : Pt} (hu : ‖u‖ = 1) (hu' : ‖u'‖ = 1) (huu : ‖u - u'‖ ≤ 1 / 100)
+    {s κ σ : ℝ} (hs : 0 < s) (h : 0 < σ * det2 u' ((2 * s * κ) • perp u)) : 0 < σ * κ := by
+  have huu' : 0 < inner ℝ u' u := by
+    have e := @norm_sub_sq_real _ _ _ u u'
+    rw [hu, hu', real_inner_comm] at e
+    nlinarith [norm_nonneg (u - u')]
+  rw [det2_smul_right', det2_perp_right'] at h
+  by_contra h'; push Not at h'
+  have : σ * (2 * s * κ * inner ℝ u' u) = (σ * κ) * (2 * s * inner ℝ u' u) := by ring
+  have h2 : 0 ≤ 2 * s * inner ℝ u' u := by positivity
+  nlinarith [mul_nonpos_of_nonpos_of_nonneg h' h2]
+
+/-- `u·u' > 0` for unit vectors with `|u − u'| ≤ 1/100`. -/
+private theorem inner_pos_of_close {u u' : Pt} (hu : ‖u‖ = 1) (hu' : ‖u'‖ = 1)
+    (huu : ‖u - u'‖ ≤ 1 / 100) : 0 < inner ℝ u' u := by
+  have e := @norm_sub_sq_real _ _ _ u u'
+  rw [hu, hu', real_inner_comm] at e
+  nlinarith [norm_nonneg (u - u')]
+
+/-- Two K-vertices whose rungs to a common end `b` have the same offset coefficient (in their own
+frames) and nearly equal normals coincide. -/
+private theorem eq_of_same_offset (hX : Normal X) (F : DirField X) {v v' b : Pt}
+    (hv : IsRung F v b) (hv' : IsRung F v' b) (huu : ‖F.u v' - F.u v‖ ≤ 2 / 100) {c : ℝ}
+    (hc : |c| ≤ 1) (hτ : |tau X| ≤ 1)
+    (h : b - v = (-tau X) • F.u v + c • perp (F.u v))
+    (h' : b - v' = (-tau X) • F.u v' + c • perp (F.u v')) : v = v' := by
+  refine eq_of_dist_lt_one hX.minDist_eq hv.memX.1 hv'.memX.1 ?_
+  have e : v - v' = (b - v') - (b - v) := by abel
+  rw [dist_eq_norm, e, h, h']
+  have : ((-tau X) • F.u v' + c • perp (F.u v')) - ((-tau X) • F.u v + c • perp (F.u v)) =
+      (-tau X) • (F.u v' - F.u v) + c • perp (F.u v' - F.u v) := by
+    rw [perp_sub, smul_sub, smul_sub]; abel
+  rw [this]
+  refine (norm_add_le _ _).trans_lt ?_
+  rw [norm_smul, norm_smul, norm_perp, Real.norm_eq_abs, Real.norm_eq_abs, abs_neg]
+  nlinarith [norm_nonneg (F.u v' - F.u v), abs_nonneg c, abs_nonneg (tau X)]
+
+/-- At `τ = √3/2`, `s = 1/2`. -/
+private theorem sOff_exact (hτ : tau X = √3 / 2) : sOff X = 1 / 2 := by
+  unfold sOff
+  rw [hτ, div_pow, Real.sq_sqrt (by norm_num)]
+  rw [show (1 : ℝ) - 3 / 2 ^ 2 = (1 / 2) ^ 2 by norm_num, Real.sqrt_sq (by norm_num)]
+
 /-! ## Triangles and bases -/
 
 /-- At `τ = √3/2` every two-rung vertex spans a triangle over a unit D–D base, which is bad or
 (in one orientation) a good pure right T-edge.
 
-TODO: prove.
-What's missing: `rung_offset` with `sOff = 1/2` gives `z − z′ = ±perp u_v` (`‖·‖ = 1`), so
+TODO: none — proved.
+What's missing: (was) `rung_offset` with `sOff = 1/2` gives `z − z′ = ±perp u_v` (`‖·‖ = 1`), so
 `s(z, z′) ∈ edges`; if good, `good_dichotomy` (both ends in `D`, so no rung) makes it a T-edge,
 and `tstep_flip`/`T2` orient it as `RowR`.
 Acceptance: no `sorry`.
@@ -108,14 +184,62 @@ theorem tri_of_twoRung (hX : Normal X) (F : DirField X) (hτ : tau X = √3 / 2)
     (hv : v ∈ twoRungVerts X F) :
     ∃ a b, IsRung F v a ∧ IsRung F v b ∧ s(v, a) ∈ rungs X F ∧ s(v, b) ∈ rungs X F ∧ a ≠ b ∧
       s(a, b) ∈ edges X ∧ (s(a, b) ∈ bad X F ∨ IsTri F v a b) := by
-  sorry
+  obtain ⟨z, z', hne, h1, h2, g1, g2⟩ := (mem_filter.1 hv).2
+  obtain ⟨κ, hκ, hd, -⟩ := rung_pair_kappa F h1 h2 hne
+  have hs := sOff_exact hτ
+  have hdist : dist z z' = 1 := by
+    rw [dist_eq_norm, hd, norm_smul, norm_perp, F.norm_u h1.1, hs]
+    rcases hκ with rfl | rfl <;> norm_num
+  have hz := h1.2.2.1
+  have hz' := h2.2.2.1
+  have hzD := h1.2.2.2.1
+  have hz'D := h2.2.2.2.1
+  have hedge : s(z, z') ∈ edges X := by
+    refine mem_filter.2 ⟨?_, ?_⟩
+    · simp only [pairsS, mem_filter, Finset.mk_mem_sym2_iff, Sym2.mk_isDiag_iff]
+      exact ⟨⟨hz, hz'⟩, hne⟩
+    · show dist z z' = minDist X
+      rw [hX.minDist_eq, hdist]
+  by_cases hgood : s(z, z') ∈ good X F
+  · have hg : ang (F.u z) (F.u z') ≤ beta := (mem_filter.1 hgood).2 z z' rfl
+    have hτ' : 2 * beta < tau X := by
+      rw [hτ]
+      have : (1.7 : ℝ) < √3 := by rw [Real.lt_sqrt (by norm_num)]; norm_num
+      unfold beta; linarith
+    have hT : IsTEdge F z z' := by
+      rcases good_dichotomy hX F hτ' hz hz' hdist hg with h | h | h
+      · exact h
+      · exact absurd hzD h.2.1
+      · exact absurd hz'D h.2.1
+    have hl := lagrange (z' - z) (F.u z)
+    rw [F.norm_u' hz, ← dist_eq_norm, dist_comm z' z, hdist] at hl
+    have ha := hT.2.1
+    have hβ : beta = 1 / 100 := rfl
+    rw [hβ] at ha
+    have hDD : (z ∈ Dset X ↔ z' ∈ Dset X) := ⟨fun _ => hz'D, fun _ => hzD⟩
+    rcases lt_or_gt_of_ne (show det2 (F.u z) (z' - z) ≠ 0 by
+      intro h0; rw [h0] at hl; nlinarith [hT.1]) with hb | hb
+    · exact ⟨z, z', h1, h2, g1, g2, hne, hedge, Or.inr ⟨h1, h2, g1, g2,
+        ⟨⟨hz, hz', hdist, hg, hT, by linarith⟩, hDD⟩, hgood⟩⟩
+    · have := tstep_flip hz hz' hdist hg hT.1 hT.2.1
+      have hb' : det2 (F.u z') (z - z') < 0 := by nlinarith
+      have hg' : ang (F.u z') (F.u z) ≤ beta := by
+        rw [ang, InnerProductGeometry.angle_comm]; exact hg
+      have hd' : dist z' z = 1 := by rw [dist_comm]; exact hdist
+      have hR : RowR F z' z := ⟨⟨hz', hz, hd', hg', hT.symm, by linarith⟩, hDD.symm⟩
+      have he' : s(z', z) ∈ edges X := Sym2.eq_swap ▸ hedge
+      have hgood' : s(z', z) ∈ good X F := Sym2.eq_swap ▸ hgood
+      exact ⟨z', z, h2, h1, g2, g1, hne.symm, he', Or.inr ⟨h2, h1, g2, g1, hR, hgood'⟩⟩
+  · exact ⟨z, z', h1, h2, g1, g2, hne, hedge,
+      Or.inl (mem_filter.2 ⟨hedge, fun h => hgood (mem_filter.2 ⟨hedge, h⟩)⟩)⟩
 
 /-- **Base determines apex**: the other point `v̄ = z′ − τu + ½u^⊥` of `C(z,1) ∩ C(z′,1)` violates
 Lemma 3.2(a) (`(v̄ − z′)·u_{z′} ≤ −τ cos β + ½ sin β < 0`), so two vertices with good rungs to
 the same two ends coincide.
 
-TODO: prove.
-What's missing: two circles of radius 1 meet in `≤ 2` points; the mirror apex contradicts
+TODO: none — proved (no mirror argument: goodness at `a` gives `|u_v − u_{v′}| ≤ 2β`, hence the
+same side `κ = κ′` of `a − b`, and then `|v − v′| ≤ 2β(τ + s) < 1`).
+What's missing: (was) two circles of radius 1 meet in `≤ 2` points; the mirror apex contradicts
 `exact_identity_a` at `z′` (`u_{z′}` within `β` of `u_v`).
 Acceptance: no `sorry`.
 Depends on: `rung_offset`, `exact_identity_a`, `RungM.ang`. Difficulty M. -/
@@ -123,7 +247,39 @@ theorem base_apex_unique (hX : Normal X) (F : DirField X) (hτ : tau X = √3 / 
     (hab : a ≠ b) (h₁ : IsRung F v a) (h₂ : IsRung F v b) (h₃ : IsRung F v' a)
     (h₄ : IsRung F v' b) (g₁ : s(v, a) ∈ rungs X F) (g₂ : s(v, b) ∈ rungs X F)
     (g₃ : s(v', a) ∈ rungs X F) (g₄ : s(v', b) ∈ rungs X F) : v = v' := by
-  sorry
+  obtain ⟨κ, hκ, hd, ho⟩ := rung_pair_kappa F h₁ h₂ hab
+  obtain ⟨κ', hκ', hd', ho'⟩ := rung_pair_kappa F h₃ h₄ hab
+  have hs := sOff_exact hτ
+  have hga : ang (F.u v) (F.u a) ≤ beta := (mem_filter.1 (mem_filter.1 g₁).1).2 v a rfl
+  have hga' : ang (F.u v') (F.u a) ≤ beta := (mem_filter.1 (mem_filter.1 g₃).1).2 v' a rfl
+  have hu := F.norm_u h₁.1
+  have hu' := F.norm_u h₃.1
+  have hua := F.norm_u h₁.2.2.1
+  have hb : beta = 1 / 100 := rfl
+  have h1 : ‖F.u v - F.u a‖ ≤ 1 / 100 := hb ▸ (norm_sub_le_angR hu hua).trans hga
+  have h2 : ‖F.u v' - F.u a‖ ≤ 1 / 100 := hb ▸ (norm_sub_le_angR hu' hua).trans hga'
+  have hs0 : (0 : ℝ) < sOff X := by rw [hs]; norm_num
+  -- the sign of `det(u_a, a − b)` is `κ` and `κ′`
+  have e2 : 0 < κ' * det2 (F.u a) ((2 * sOff X * κ') • perp (F.u v')) := by
+    rw [det2_smul_right', det2_perp_right']
+    have := inner_pos_of_close hu' hua h2
+    have hk : κ' * (2 * sOff X * κ' * inner ℝ (F.u a) (F.u v')) =
+        (κ' * κ') * (2 * sOff X * inner ℝ (F.u a) (F.u v')) := by ring
+    rw [hk, show κ' * κ' = 1 by rcases hκ' with rfl | rfl <;> norm_num, one_mul]
+    positivity
+  rw [← hd', hd] at e2
+  have e1 := side_sign hu hua h1 hs0 e2
+  have hκκ : κ = κ' := by
+    rcases hκ with rfl | rfl <;> rcases hκ' with rfl | rfl <;> first | rfl | nlinarith
+  subst hκκ
+  have hw : ‖F.u v' - F.u v‖ ≤ 2 / 100 := by
+    have := norm_sub_le (F.u v' - F.u a) (F.u v - F.u a)
+    rw [sub_sub_sub_cancel_right] at this
+    linarith
+  have h3 : √3 < 2 := by rw [Real.sqrt_lt' (by norm_num)]; norm_num
+  refine eq_of_same_offset hX F h₂ h₄ hw (c := -κ * sOff X) ?_ ?_ ho ho'
+  · rw [hs]; rcases hκ with rfl | rfl <;> norm_num
+  · rw [hτ, abs_le]; constructor <;> nlinarith [Real.sqrt_nonneg 3]
 
 /-- **(R)** rows are cyclic orders (K-row): the cap of `K` cut off by the line of a pure K–K
 T-edge `pq` (on the side away from `u_p`) lies within distance `< 1` of `p` or `q`.  Hence it
