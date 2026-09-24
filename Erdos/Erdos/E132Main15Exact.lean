@@ -585,11 +585,166 @@ theorem Bprime_walk_left (hX : Normal X) (F : DirField X) (hτ : tau X = √3 / 
     exact step_on_circle hX F hτ hwX hp.1.1 (hstep k hk').1.1 hp.1.2.1 hd1 hd2 a₁ a₁' a₂ a₂'
       (by nlinarith) (ih (by omega))
 
+private theorem rot_apply0 (θ : ℝ) (x : Pt) :
+    rot θ x 0 = Real.cos θ * x 0 - Real.sin θ * x 1 := by simp [rot]
+
+private theorem rot_apply1 (θ : ℝ) (x : Pt) :
+    rot θ x 1 = Real.sin θ * x 0 + Real.cos θ * x 1 := by simp [rot]
+
+/-- `|u|² det(w, e) = (w·u) det(u, e) − det(u, w) (e·u)`. -/
+private theorem det_frame (u w e : Pt) :
+    ‖u‖ ^ 2 * det2 w e = inner ℝ w u * det2 u e - det2 u w * inner ℝ e u := by
+  rw [norm_sq_pt, det2_pt, det2_pt, det2_pt, inner_pt, inner_pt]; ring
+
+/-- Two points of `C(w, Δ)` at distance `1`, the second counterclockwise from the first
+(`det(r₀, r₁) > 0`): `r₁ = rot α₁ r₀`. -/
+private theorem rot_of_det {r₀ r₁ : Pt} {Δ : ℝ} (hΔ : 1 ≤ Δ) (h₀ : ‖r₀‖ = Δ) (h₁ : ‖r₁‖ = Δ)
+    (h01 : ‖r₁ - r₀‖ = 1) (hdet : 0 < det2 r₀ r₁) :
+    r₁ = rot (2 * Real.arcsin (1 / (2 * Δ))) r₀ := by
+  set sα := 1 / (2 * Δ)
+  have hs0 : 0 < sα := by positivity
+  have hs1 : sα ≤ 1 / 2 := by
+    simp only [sα]; rw [div_le_div_iff₀ (by positivity) (by norm_num)]; linarith
+  set C := Real.cos (2 * Real.arcsin sα)
+  set S := Real.sin (2 * Real.arcsin sα)
+  have hC : C = 1 - 2 * sα ^ 2 := by
+    simp only [C]
+    rw [Real.cos_two_mul', Real.cos_sq', Real.sin_arcsin (by linarith) (by linarith)]; ring
+  have hS0 : 0 ≤ S := by
+    have := Real.arcsin_nonneg.2 hs0.le
+    have := Real.arcsin_le_pi_div_two sα
+    exact Real.sin_nonneg_of_nonneg_of_le_pi (by linarith) (by linarith)
+  have hCS : C ^ 2 + S ^ 2 = 1 := by rw [add_comm]; exact Real.sin_sq_add_cos_sq _
+  have n0 := norm_sq_pt r₀
+  have n1 := norm_sq_pt r₁
+  have n01 := norm_sq_pt (r₁ - r₀)
+  rw [h₀] at n0; rw [h₁] at n1; rw [h01] at n01
+  simp only [PiLp.sub_apply] at n01
+  rw [det2_pt] at hdet
+  set P := r₀ 0 * r₁ 0 + r₀ 1 * r₁ 1
+  set D := r₀ 0 * r₁ 1 - r₀ 1 * r₁ 0
+  have hP : P = C * Δ ^ 2 := by
+    rw [hC]; simp only [sα]; field_simp; simp only [P]; nlinarith
+  have hPD : P ^ 2 + D ^ 2 = Δ ^ 4 := by
+    have : P ^ 2 + D ^ 2 = (r₀ 0 ^ 2 + r₀ 1 ^ 2) * (r₁ 0 ^ 2 + r₁ 1 ^ 2) := by ring
+    rw [this, ← n0, ← n1]; ring
+  have hD : D = S * Δ ^ 2 := by
+    have h2 : D ^ 2 = (S * Δ ^ 2) ^ 2 := by
+      rw [hP] at hPD
+      have : S ^ 2 = 1 - C ^ 2 := by linarith
+      nlinarith
+    have : 0 ≤ S * Δ ^ 2 := by positivity
+    nlinarith [sq_nonneg (D - S * Δ ^ 2), sq_nonneg (D + S * Δ ^ 2)]
+  have hΔ2 : 0 < Δ ^ 2 := by positivity
+  rw [pt_ext_iff, rot_apply0, rot_apply1]
+  constructor
+  · have e : r₁ 0 * Δ ^ 2 = P * r₀ 0 - D * r₀ 1 := by
+      rw [n0]; simp only [P, D]; ring
+    rw [hP, hD] at e
+    have : (r₁ 0 - (C * r₀ 0 - S * r₀ 1)) * Δ ^ 2 = 0 := by linarith
+    have := (mul_eq_zero.1 this).resolve_right hΔ2.ne'
+    linarith
+  · have e : r₁ 1 * Δ ^ 2 = P * r₀ 1 + D * r₀ 0 := by
+      rw [n0]; simp only [P, D]; ring
+    rw [hP, hD] at e
+    have : (r₁ 1 - (S * r₀ 0 + C * r₀ 1)) * Δ ^ 2 = 0 := by linarith
+    have := (mul_eq_zero.1 this).resolve_right hΔ2.ne'
+    linarith
+
+/-- Orientation from two neighbours: with `ŵ = x u + y u^⊥` making nonnegative products with a
+right step `e₁` and a left step `e₂`, `det(ŵ, e₁) < 0`. -/
+private theorem det_real {a₁ c₁ a₂ c₂ x y : ℝ} (n1 : a₁ ^ 2 + c₁ ^ 2 = 1)
+    (n2 : a₂ ^ 2 + c₂ ^ 2 = 1) (nw : x ^ 2 + y ^ 2 = 1) (h1 : 0 < a₁) (h1' : a₁ < 1 / 100)
+    (h2 : 0 < a₂) (h2' : a₂ < 1 / 100) (hc1 : c₁ < 0) (hc2 : 0 < c₂)
+    (hη : 0 ≤ a₁ * x + c₁ * y) (hζ : 0 ≤ a₂ * x + c₂ * y) : x * c₁ - y * a₁ < 0 := by
+  have hc1' : c₁ ≤ -0.99 := by nlinarith
+  have hc2' : 0.99 ≤ c₂ := by nlinarith
+  have hx : 0 < x := by
+    by_contra h; push Not at h
+    have hy1 : 0 ≤ y := by
+      by_contra hy; push Not at hy
+      nlinarith [mul_nonpos_of_nonneg_of_nonpos h2.le h, mul_neg_of_pos_of_neg hc2 hy]
+    have hy2 : y ≤ 0 := by
+      by_contra hy; push Not at hy
+      nlinarith [mul_nonpos_of_nonneg_of_nonpos h1.le h, mul_neg_of_neg_of_pos hc1 hy]
+    have hy : y = 0 := le_antisymm hy2 hy1
+    subst hy
+    have : x = -1 := by nlinarith
+    subst this; nlinarith
+  -- `c₂ y ≥ −a₂ x`, so `−y a₁ ≤ a₁ a₂ x / c₂`
+  have k : -(y * a₁) * c₂ ≤ a₁ * a₂ * x := by nlinarith
+  have ha12 : a₁ * a₂ ≤ 1 / 10000 := by nlinarith
+  have k2 : a₁ * a₂ * x ≤ 1 / 10000 * x := mul_le_mul_of_nonneg_right ha12 hx.le
+  have hxc : x * c₁ ≤ -0.99 * x := by nlinarith
+  rcases le_or_gt (-(y * a₁)) 0 with k' | k'
+  · linarith
+  · have : -(y * a₁) * 0.99 ≤ -(y * a₁) * c₂ := mul_le_mul_of_nonneg_left hc2' k'.le
+    linarith
+
+/-- Orientation from closeness: `|ŵ − u| ≤ 0.011`, `e` a left step of `u`: `det(ŵ, e) > 0`. -/
+private theorem det_pos_of_close {u ŵ e : Pt} (hu : ‖u‖ = 1) (hŵ : ‖ŵ‖ = 1) (he : ‖e‖ = 1)
+    (hclose : ‖ŵ - u‖ ≤ 0.011) (ha : 0 < inner ℝ e u) (ha' : inner ℝ e u < 1 / 100)
+    (hc : 0 < det2 u e) : 0 < det2 ŵ e := by
+  have hf := det_frame u ŵ e
+  rw [hu, one_pow, one_mul] at hf
+  rw [hf]
+  have ne := inner_sq_add_det_sq (e := e) hu
+  rw [he] at ne
+  have hx : 0.9999 ≤ inner ℝ ŵ u := by
+    have e := @norm_sub_sq_real _ _ _ ŵ u
+    rw [hŵ, hu] at e
+    nlinarith [norm_nonneg (ŵ - u)]
+  have hy : |det2 u ŵ| ≤ 0.011 := by
+    have : det2 u ŵ = det2 u (ŵ - u) := by rw [det2_pt, det2_pt]; simp; ring
+    rw [this]
+    refine (abs_det2_leR u (ŵ - u)).trans ?_
+    rw [hu, one_mul]; exact hclose
+  have hc' : 0.99 ≤ det2 u e := by nlinarith
+  rw [abs_le] at hy
+  nlinarith
+
+/-- Vector form of `det_real`. -/
+private theorem det_neg_two_nbrs {u ŵ e₁ e₂ : Pt} (hu : ‖u‖ = 1) (hŵ : ‖ŵ‖ = 1)
+    (he₁ : ‖e₁‖ = 1) (he₂ : ‖e₂‖ = 1) (a₁ : 0 < inner ℝ e₁ u) (a₁' : inner ℝ e₁ u < beta)
+    (a₂ : 0 < inner ℝ e₂ u) (a₂' : inner ℝ e₂ u < beta) (hc1 : det2 u e₁ < 0)
+    (hc2 : 0 < det2 u e₂) (hη : 0 ≤ inner ℝ e₁ ŵ) (hζ : 0 ≤ inner ℝ e₂ ŵ) : det2 ŵ e₁ < 0 := by
+  have f1 := inner_mul_add_det_mul u e₁ ŵ
+  have f2 := inner_mul_add_det_mul u e₂ ŵ
+  have n1 := inner_sq_add_det_sq (e := e₁) hu
+  have n2 := inner_sq_add_det_sq (e := e₂) hu
+  have nw := inner_sq_add_det_sq (e := ŵ) hu
+  have hf := det_frame u ŵ e₁
+  rw [hu, one_pow, one_mul] at f1 f2 hf
+  rw [he₁] at n1; rw [he₂] at n2; rw [hŵ] at nw
+  rw [real_inner_comm e₁ u, real_inner_comm ŵ u] at f1
+  rw [real_inner_comm e₂ u, real_inner_comm ŵ u] at f2
+  have hb : beta = 1 / 100 := rfl
+  rw [hb] at a₁' a₂'
+  rw [← f1] at hη; rw [← f2] at hζ
+  rw [hf]
+  have := det_real (a₁ := inner ℝ e₁ u) (c₁ := det2 u e₁) (a₂ := inner ℝ e₂ u)
+    (c₂ := det2 u e₂) (x := inner ℝ ŵ u) (y := det2 u ŵ) (by linarith) (by linarith)
+    (by linarith) a₁ a₁' a₂ a₂' hc1 hc2 hη hζ
+  linarith
+
+/-- For `y ∈ X` at distance `1` from `z ∈ C(w, Δ)`: `(y − z)·(w − z) ≥ 1/2`. -/
+private theorem inner_nonneg_of_diam (hX : Normal X) {w z y : Pt} (hw : w ∈ X) (hy : y ∈ X)
+    (hzy : dist z y = 1) (hd : dist z w = diam X) : 1 / 2 ≤ inner ℝ (y - z) (w - z) := by
+  have hT := two_of_pos hX.dist2_pos
+  have := two_inner_sub y z w
+  have hyw := hT.le_diam y hy w hw
+  rw [dist_comm y z, hzy, dist_comm w z, hd] at this
+  nlinarith [dist_nonneg (x := y) (y := w)]
+
+private theorem det2_smul_left' (c : ℝ) (a b : Pt) : det2 (c • a) b = c * det2 a b := by
+  simp only [det2_pt, PiLp.smul_apply, smul_eq_mul]; ring
+
 /-- **(B′)** consecutive walk vertices differ by the rotation `rot α₁` about `w = w_v`
 (counterclockwise = right), starting with the base itself.
 
-TODO: prove.
-What's missing: two points of `C(w,Δ) ∩ C(z_k, 1)` are `w + rot (±α₁) (z_k − w)`; the right
+TODO: none — proved (`rot_of_det`; orientation from the two neighbours (`det_real`) for walk
+steps and from `ŵ_b ≈ u_v ≈ u_b` (`det_pos_of_close`) for the base).
+What's missing: (was) two points of `C(w,Δ) ∩ C(z_k, 1)` are `w + rot (±α₁) (z_k − w)`; the right
 T-neighbour is the counterclockwise one because `ŵ_k` is within `arcsin β` of `u_{z_k}`.
 Acceptance: no `sorry`.
 Depends on: `Bprime_walk_right`, `rot`, `alpha1`. Difficulty L. -/
@@ -598,7 +753,100 @@ theorem Bprime_rot (hX : Normal X) (F : DirField X) (hτ : tau X = √3 / 2) {v 
     (hstep : ∀ k < N, RowR F (z k) (z (k + 1))) :
     b - F.partner v = rot (alpha1 X) (a - F.partner v) ∧
       ∀ k < N, z (k + 1) - F.partner v = rot (alpha1 X) (z k - F.partner v) := by
-  sorry
+  have hwalk := Bprime_walk_right hX F hτ ht z N hz0 hstep
+  obtain ⟨hva, hvb, gva, gvb, hab, -⟩ := ht
+  set w := F.partner v
+  have hwX : w ∈ X := F.partner_mem v hva.1
+  have hpos := hX.dist2_pos
+  have hT := two_of_pos hpos
+  have hΔ : 0 < diam X := hpos.trans hT.lt
+  have hΔ1 : 1 ≤ diam X := by have := hX.large; linarith [hT.lt]
+  -- generic rotation step from an orientation
+  have hrot : ∀ z q : Pt, dist z w = diam X → dist q w = diam X → dist z q = 1 →
+      0 < det2 (z - w) (q - w) → q - w = rot (alpha1 X) (z - w) := by
+    intro z q hz hq hzq hdet
+    unfold alpha1
+    refine rot_of_det hΔ1 (by rw [← dist_eq_norm, hz]) (by rw [← dist_eq_norm, hq]) ?_ hdet
+    rw [show q - w - (z - w) = q - z by abel, ← dist_eq_norm, dist_comm, hzq]
+  have hdetE : ∀ z q : Pt, det2 (z - w) (q - w) =
+      -(diam X) * det2 ((diam X)⁻¹ • (w - z)) (q - z) := by
+    intro z q
+    rw [det2_smul_left', det2_pt, det2_pt]
+    simp only [PiLp.sub_apply]
+    field_simp; ring
+  have hŵ : ∀ z, dist z w = diam X → ‖(diam X)⁻¹ • (w - z)‖ = 1 := by
+    intro z hz
+    rw [norm_smul, ← dist_eq_norm, dist_comm, hz, Real.norm_eq_abs, abs_of_pos (inv_pos.2 hΔ),
+      inv_mul_cancel₀ hΔ.ne']
+  refine ⟨?_, fun k hk => ?_⟩
+  · -- the base: orientation from `ŵ_b ≈ u_v ≈ u_b`
+    have haw : dist a w = diam X := hva.2.2.2.2.2
+    have hbw : dist b w = diam X := hvb.2.2.2.2.2
+    have hab1 : dist a b = 1 := hab.1.2.2.1
+    have hba := T2 hX F hab.1
+    obtain ⟨hbS, haS, -, -, ⟨ea, ea', -, -⟩, ec⟩ := hba
+    have hvw : dist v w = dist2 X := F.partner_K v hva.1 hva.2.1
+    have huv : F.u v = (dist2 X)⁻¹ • (w - v) := by
+      unfold DirField.u; rw [hvw]
+    have hgood : ang (F.u v) (F.u b) ≤ beta := (mem_filter.1 (mem_filter.1 gvb).1).2 v b rfl
+    have hvb1 : dist v b = 1 := hvb.2.2.2.2.1
+    have hclose1 : ‖(diam X)⁻¹ • (w - b) - F.u v‖ ≤ 0.0002 := by
+      rw [huv]
+      have e : (diam X)⁻¹ • (w - b) - (dist2 X)⁻¹ • (w - v) =
+          ((diam X)⁻¹ - (dist2 X)⁻¹) • (w - b) + (dist2 X)⁻¹ • (v - b) := by
+        module
+      rw [e]
+      refine (norm_add_le _ _).trans ?_
+      rw [norm_smul, norm_smul, Real.norm_eq_abs, Real.norm_eq_abs, ← dist_eq_norm w b,
+        ← dist_eq_norm v b, dist_comm w b, hbw, hvb1, abs_of_pos (inv_pos.2 hpos), mul_one]
+      have hlt := hT.lt
+      obtain ⟨-, ht2⟩ := tgap_bounds_exact hX hτ
+      have h3 : √3 < 1.7321 := by rw [Real.sqrt_lt' (by norm_num)]; norm_num
+      have hL := hX.large
+      have hinv : (dist2 X)⁻¹ ≤ 1 / 10000 := by
+        rw [inv_eq_one_div, div_le_div_iff₀ hpos (by norm_num)]; linarith
+      have e2 : |(diam X)⁻¹ - (dist2 X)⁻¹| * diam X = (diam X - dist2 X) * (dist2 X)⁻¹ := by
+        rw [abs_of_nonpos (by rw [sub_nonpos]; exact inv_anti₀ hpos hlt.le)]
+        field_simp; ring
+      rw [e2]
+      have htg : diam X - dist2 X < 1 := by
+        have : 1 / (2 * dist2 X) ≤ 1 / 20000 := by
+          rw [div_le_div_iff₀ (by positivity) (by norm_num)]; linarith
+        unfold tgap at ht2; linarith
+      have := mul_le_mul_of_nonneg_right htg.le (inv_nonneg.2 hpos.le)
+      nlinarith
+    have hclose2 : ‖F.u v - F.u b‖ ≤ 1 / 100 :=
+      (norm_sub_le_angR (F.norm_u hva.1) (F.norm_u hbS)).trans hgood
+    have hclose : ‖(diam X)⁻¹ • (w - b) - F.u b‖ ≤ 0.011 := by
+      have := norm_sub_le ((diam X)⁻¹ • (w - b) - F.u v) (F.u b - F.u v)
+      rw [sub_sub_sub_cancel_right] at this
+      rw [norm_sub_rev (F.u b)] at this
+      linarith
+    have hpos' := det_pos_of_close (F.norm_u hbS) (hŵ b hbw)
+      (by rw [← dist_eq_norm, hab1]) hclose ea ea' (by linarith)
+    have hd : 0 < det2 (a - w) (b - w) := by
+      have e : det2 (a - w) (b - w) = -det2 (b - w) (a - w) := by
+        rw [det2_pt, det2_pt]; ring
+      rw [e, hdetE b a]; nlinarith
+    exact hrot a b haw hbw hab1 hd
+  · -- a walk step, orientation from the two neighbours of `z k`
+    have hzk := hwalk k hk.le
+    have hzk1 := hwalk (k + 1) hk
+    have hq := hstep k hk
+    obtain ⟨p, hp⟩ : ∃ p, RowR F p (z k) := by
+      cases k with
+      | zero => exact ⟨a, hz0 ▸ hab⟩
+      | succ k => exact ⟨z k, hstep k (by omega)⟩
+    obtain ⟨hzS, hqS, hd1, -, ⟨a₁, a₁', -, -⟩, s₁⟩ := hq.1
+    obtain ⟨-, hpS, hd2, -, ⟨a₂, a₂', -, -⟩, s₂⟩ := T2 hX F hp.1
+    have hη := inner_nonneg_of_diam hX hwX (Sset_sub hqS) hd1 hzk
+    have hζ := inner_nonneg_of_diam hX hwX (Sset_sub hpS) hd2 hzk
+    have hneg := det_neg_two_nbrs (F.norm_u hzS) (hŵ _ hzk)
+      (by rw [← dist_eq_norm, dist_comm, hd1]) (by rw [← dist_eq_norm, dist_comm, hd2])
+      a₁ a₁' a₂ a₂' (by linarith) (by linarith)
+      (by rw [real_inner_smul_right]; positivity) (by rw [real_inner_smul_right]; positivity)
+    refine hrot _ _ hzk hzk1 hd1 ?_
+    rw [hdetE]; nlinarith
 
 /-- **(B′)** span: a walk of `N` right steps from the base satisfies `(N + 1)·α₁ ≤ π/3`
 (points of `X` are `≤ Δ` apart; chord `2Δ sin(θ/2) ≤ Δ`), so D-walks are paths.
