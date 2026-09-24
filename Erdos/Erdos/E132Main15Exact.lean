@@ -1655,7 +1655,10 @@ What's missing: `rowR_fun` and `Classical.choose_spec`.
 Acceptance: no `sorry`. Depends on: `rowR_fun`. Difficulty S. -/
 private theorem nxt_eq (hX : Normal X) {F : DirField X} {p q : Pt} (h : RowR F p q) :
     nxt F p = q := by
-  sorry
+  have hc : ∃ q, RowR F p q := ⟨q, h⟩
+  unfold nxt
+  rw [dif_pos hc]
+  exact rowR_fun hX hc.choose_spec h
 
 private theorem walk_zero (F : DirField X) (p : Pt) : walk F p 0 = p := rfl
 
@@ -1665,38 +1668,65 @@ private theorem walk_succ (F : DirField X) (p : Pt) (k : ℕ) :
 /-- TODO: prove. What's missing: restriction. Acceptance: no `sorry`. Difficulty S. -/
 private theorem runs_mono {F : DirField X} {p : Pt} {N M : ℕ} (h : Runs F p N) (hM : M ≤ N) :
     Runs F p M := by
-  sorry
+  exact fun k hk => h k (lt_of_lt_of_le hk hM)
 
 /-- TODO: prove. What's missing: `nxt_eq`, `walk_succ`. Acceptance: no `sorry`. Difficulty S. -/
 private theorem runs_succ (hX : Normal X) {F : DirField X} {p q : Pt} {N : ℕ} (h : Runs F p N)
     (hq : RowR F (walk F p N) q) : Runs F p (N + 1) := by
-  sorry
+  intro k hk
+  rcases (Nat.lt_succ_iff.1 hk).lt_or_eq with h1 | rfl
+  · exact h k h1
+  · rw [walk_succ, nxt_eq hX hq]; exact hq
 
 /-- TODO: prove. What's missing: induction; `RowR` targets lie in `S`. Difficulty S. -/
 private theorem walk_mem_S {F : DirField X} {p : Pt} {N : ℕ} (h : Runs F p N) (hp : p ∈ Sset X) :
     ∀ k ≤ N, walk F p k ∈ Sset X := by
-  sorry
+  intro k hk
+  cases k with
+  | zero => exact hp
+  | succ k => exact (h k (by omega)).1.2.1
 
 /-- TODO: prove. What's missing: induction; `RowR` preserves `D`-membership. Difficulty S. -/
 private theorem walk_D_iff {F : DirField X} {p : Pt} {N : ℕ} (h : Runs F p N) :
     ∀ k ≤ N, (walk F p k ∈ Dset X ↔ p ∈ Dset X) := by
-  sorry
+  intro k hk
+  induction k with
+  | zero => exact Iff.rfl
+  | succ k ih => exact (h k (by omega)).2.symm.trans (ih (by omega))
 
 /-- Suffix property of walks (predecessors are unique, `rowR_inj`).
 TODO: prove. What's missing: induction on `i'` generalising `i`. Difficulty S–M. -/
 private theorem walk_suffix (hX : Normal X) {F : DirField X} {p p' : Pt} {i i' : ℕ}
     (h : Runs F p i) (h' : Runs F p' i') (he : walk F p i = walk F p' i') (hle : i' ≤ i) :
     walk F p (i - i') = p' := by
-  sorry
+  induction i' generalizing i with
+  | zero => rw [walk_zero] at he; simpa using he
+  | succ i' ih =>
+    have h1 := h' i' (by omega)
+    have h2 := h (i - 1) (by omega)
+    rw [show i - 1 + 1 = i by omega, he] at h2
+    have e := rowR_inj hX h2 h1
+    have := ih (i := i - 1) (runs_mono h (by omega)) (runs_mono h' (by omega)) e (by omega)
+    rwa [show i - 1 - i' = i - (i' + 1) by omega] at this
 
 /-- TODO: prove. What's missing: `pt_ext_iff`, `rot`, `cos_add`/`sin_add`. Difficulty S. -/
 private theorem rot_dirVec (ψ φ c : ℝ) : rot ψ (c • dirVec φ) = c • dirVec (φ + ψ) := by
-  sorry
+  rw [pt_ext_iff, rot_apply0, rot_apply1]
+  simp only [PiLp.smul_apply, smul_eq_mul, dirVec_apply0, dirVec_apply1, Real.cos_add,
+    Real.sin_add]
+  constructor <;> ring
 
 /-- TODO: prove. What's missing: sum-to-product in coordinates. Difficulty S. -/
 private theorem dirVec_add_half (φ α : ℝ) :
     dirVec φ + dirVec (φ + α) = (2 * Real.cos (α / 2)) • dirVec (φ + α / 2) := by
-  sorry
+  have gen : ∀ x y : ℝ, dirVec (x - y) + dirVec (x + y) = (2 * Real.cos y) • dirVec x := by
+    intro x y
+    rw [pt_ext_iff]
+    simp only [PiLp.add_apply, PiLp.smul_apply, smul_eq_mul, dirVec_apply0, dirVec_apply1,
+      Real.cos_sub, Real.cos_add, Real.sin_sub, Real.sin_add]
+    constructor <;> ring
+  have := gen (φ + α / 2) (α / 2)
+  rwa [show φ + α / 2 - α / 2 = φ by ring, show φ + α / 2 + α / 2 = φ + α by ring] at this
 
 /-- Two points of `C(w, R) ∩ X` at angular distance in `(0, 2 arcsin(1/(2R)))` would be `< 1`
 apart and distinct.
@@ -1704,11 +1734,58 @@ TODO: prove. What's missing: chord `|dirVec x − dirVec y| = 2|sin((x−y)/2)|`
 private theorem arc_sep (hX : Normal X) {w : Pt} {R x y : ℝ} (hR : 1 ≤ R)
     (hx : w + R • dirVec x ∈ X) (hy : w + R • dirVec y ∈ X) (h0 : 0 < x - y)
     (h1 : x - y < 2 * Real.arcsin (1 / (2 * R))) : False := by
-  sorry
+  have hR0 : 0 < R := by linarith
+  set d := (x - y) / 2
+  have hd0 : 0 < d := by simp only [d]; linarith
+  have hs0 : 0 < 1 / (2 * R) := by positivity
+  have hs1 : 1 / (2 * R) ≤ 1 / 2 := by
+    rw [div_le_div_iff₀ (by positivity) (by norm_num)]; linarith
+  have hA := Real.arcsin_le_pi_div_two (1 / (2 * R))
+  have hπ := Real.pi_gt_three
+  have hdA : d < Real.arcsin (1 / (2 * R)) := by simp only [d]; linarith
+  have hsin_pos : 0 < Real.sin d := Real.sin_pos_of_pos_of_lt_pi hd0 (by linarith)
+  have hsin_lt : Real.sin d < 1 / (2 * R) := by
+    have := Real.sin_lt_sin_of_lt_of_le_pi_div_two (by linarith) hA hdA
+    rwa [Real.sin_arcsin (by linarith) (by linarith)] at this
+  -- the chord
+  have hch : ‖dirVec x - dirVec y‖ ^ 2 = 4 * Real.sin d ^ 2 := by
+    rw [norm_sq_pt]
+    simp only [PiLp.sub_apply, dirVec_apply0, dirVec_apply1]
+    have e : x - y = 2 * d := by simp only [d]; ring
+    have hc : Real.cos x * Real.cos y + Real.sin x * Real.sin y = Real.cos (x - y) := by
+      rw [Real.cos_sub]
+    have hc2 : Real.cos (x - y) = 1 - 2 * Real.sin d ^ 2 := by
+      rw [e, Real.cos_two_mul', Real.cos_sq']; ring
+    have := Real.sin_sq_add_cos_sq x
+    have := Real.sin_sq_add_cos_sq y
+    nlinarith
+  have hn : ‖dirVec x - dirVec y‖ = 2 * Real.sin d := by
+    rw [← Real.sqrt_sq (norm_nonneg _), hch, show 4 * Real.sin d ^ 2 = (2 * Real.sin d) ^ 2 by ring,
+      Real.sqrt_sq (by positivity)]
+  have hdist : dist (w + R • dirVec x) (w + R • dirVec y) = R * (2 * Real.sin d) := by
+    rw [dist_eq_norm, add_sub_add_left_eq_sub, ← smul_sub, norm_smul, Real.norm_eq_abs,
+      abs_of_pos hR0, hn]
+  have hlt : dist (w + R • dirVec x) (w + R • dirVec y) < 1 := by
+    rw [hdist]
+    have := mul_lt_mul_of_pos_left hsin_lt (show (0 : ℝ) < 2 * R by positivity)
+    rw [show 2 * R * (1 / (2 * R)) = 1 by field_simp] at this
+    linarith
+  have heq := eq_of_dist_lt_one hX.minDist_eq hx hy hlt
+  rw [heq, dist_self] at hdist
+  have : 0 < R * (2 * Real.sin d) := by positivity
+  linarith
 
 /-- TODO: prove. What's missing: `arcsin` positivity. Difficulty S. -/
 private theorem alpha_pos (hX : Normal X) : 0 < alpha1 X ∧ 0 < alpha2 X := by
-  sorry
+  have hpos := hX.dist2_pos
+  have hΔ : 0 < diam X := hpos.trans_le (dist2_le_diam X)
+  constructor
+  · unfold alpha1
+    have := Real.arcsin_pos.2 (show 0 < 1 / (2 * diam X) by positivity)
+    linarith
+  · unfold alpha2
+    have := Real.arcsin_pos.2 (show 0 < 1 / (2 * dist2 X) by positivity)
+    linarith
 
 /-- The apex angle: if `a − w = Δ dirVec φ` then `v = w + Δ₂ dirVec(φ + α₁/2)`.
 TODO: prove. What's missing: `Bprime_rot` (with `N = 0`), `rot_dirVec`, `dirVec_add_half`,
@@ -1740,7 +1817,20 @@ private theorem centre_eq (hX : Normal X) {w w' : Pt} (hw' : w' ∈ X) {θ₁ θ
     (h₁ : θ₁ < θ) (h₂ : θ < θ₂)
     (harc : ∀ ψ ∈ Set.Icc θ₁ θ₂, w + dist2 X • dirVec ψ ∈ KBall X)
     (hd : dist (w + dist2 X • dirVec θ) w' = dist2 X) : w = w' := by
-  sorry
+  have hR := hX.dist2_pos
+  set R := dist2 X
+  set d := dirVec θ
+  set p := w + R • d with hpdef
+  have hK : p ∈ KBall X := harc θ ⟨h₁.le, h₂.le⟩
+  have hn := neg_mem_normalCone hK hw' hd 1 zero_le_one
+  obtain ⟨c, hc, e⟩ := normal_fact hX h₁ h₂ harc hn
+  have hc' : c = R := by
+    have := congrArg norm e
+    rw [norm_neg, one_smul, norm_smul, norm_dirVec, mul_one, Real.norm_eq_abs, abs_of_nonneg hc,
+      ← dist_eq_norm, dist_comm, hd] at this
+    exact this.symm
+  have e2 : w' = p - c • d := by rw [← e]; simp
+  rw [e2, hc', hpdef, add_sub_cancel_right]
 
 /-- **K-walk on the arc**: with `A = (v, a, b)`, `a − w = Δ dirVec φ`, and a triangle `B` whose
 left base end is `walk b j` (`j < N`), the pure right walk from `v` stays on `C(w, Δ₂)` in steps
