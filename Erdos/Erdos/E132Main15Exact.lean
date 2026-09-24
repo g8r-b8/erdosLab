@@ -77,12 +77,38 @@ theorem tgap_bounds_exact (hX : Normal X) (hτ : tau X = √3 / 2) :
       div_lt_div_of_pos_right (by nlinarith) hd
     linarith
 
+/-- `x ≤ arcsin x ≤ x + x³` for `0 < x ≤ 1/2`. -/
+private theorem arcsin_bounds {x : ℝ} (h0 : 0 < x) (h1 : x ≤ 1 / 2) :
+    x ≤ Real.arcsin x ∧ Real.arcsin x ≤ x + x ^ 3 := by
+  have hπ := Real.pi_gt_three
+  constructor
+  · have hs := Real.sin_arcsin (x := x) (by linarith) (by linarith)
+    have := Real.sin_le (Real.arcsin_nonneg.2 h0.le)
+    linarith
+  · have hx3 : x ^ 3 ≤ 1 / 8 := by
+      calc x ^ 3 ≤ (1 / 2) ^ 3 := by gcongr
+        _ = 1 / 8 := by norm_num
+    rw [Real.arcsin_le_iff_le_sin ⟨by linarith, by linarith⟩
+      ⟨by nlinarith [pow_pos h0 3], by linarith⟩]
+    have := Real.sin_gt_sub_cube (x := x + x ^ 3) (by positivity)
+    have hx2 : x ^ 2 ≤ 1 / 4 := by nlinarith
+    have : (x + x ^ 3) ^ 3 ≤ 6 * x ^ 3 := by
+      have e : (x + x ^ 3) ^ 3 = x ^ 3 * (1 + x ^ 2) ^ 3 := by ring
+      rw [e]
+      have : (1 + x ^ 2) ^ 3 ≤ 6 := by
+        have : 1 + x ^ 2 ≤ 5 / 4 := by linarith
+        calc (1 + x ^ 2) ^ 3 ≤ (5 / 4) ^ 3 := by gcongr
+          _ ≤ 6 := by norm_num
+      have : 0 < x ^ 3 := by positivity
+      nlinarith
+    linarith
+
 /-- **(Arith)** For `R ≥ 10⁴`, `Δ = R + t` with `√3/2 < t < √3/2 + 1/(2R)`, `α₁ = 2 arcsin(1/(2Δ))`,
 `α₂ = 2 arcsin(1/(2R))`: no `j ≥ 1`, `k` with `kα₁ < π/3` have `jα₂ = kα₁`.
 (`jα₂ = kα₁ ⇒ k > j ⇒ kα₁ ≥ α₁α₂/(α₂ − α₁) ≥ 1/(t + 1/(23R)) > 1/0.8662 > π/3`.)
 
-TODO: prove.
-What's missing: bounds on `f(ρ) = 1/α_ρ`: from `sin(α/2) = 1/(2ρ)` and
+TODO: none — proved (with `x ≤ arcsin x ≤ x + x³`: `1/α₁ ≤ R + t`, `1/α₂ ≥ R − 1/(4R)`).
+What's missing: (was) bounds on `f(ρ) = 1/α_ρ`: from `sin(α/2) = 1/(2ρ)` and
 `x − x³/6 ≤ sin x ≤ x`: `ρ − 1/(23ρ) ≤ f(ρ) ≤ ρ`; then `1/α₁ − 1/α₂ ≤ t + 1/(23R)`,
 `t + 1/(23R) < 0.8662 < 3/π` (`Real.pi_lt_d2`).
 Acceptance: no `sorry`.
@@ -90,7 +116,85 @@ Depends on: `Real.sin_arcsin`, `Real.sin_le`, `Real.sin_gt_sub_cube`-type bounds
 theorem arith_no_land {R t : ℝ} (hR : 10 ^ 4 ≤ R) (ht₁ : √3 / 2 < t) (ht₂ : t < √3 / 2 + 1 / (2 * R))
     {j k : ℕ} (hj : 1 ≤ j) (hk : (k : ℝ) * (2 * Real.arcsin (1 / (2 * (R + t)))) < π / 3) :
     (j : ℝ) * (2 * Real.arcsin (1 / (2 * R))) ≠ k * (2 * Real.arcsin (1 / (2 * (R + t)))) := by
-  sorry
+  intro hjk
+  have h3 : √3 < 1.7321 := by rw [Real.sqrt_lt' (by norm_num)]; norm_num
+  have h3' : (1.732 : ℝ) < √3 := by rw [Real.lt_sqrt (by norm_num)]; norm_num
+  have hR0 : 0 < R := by linarith
+  have ht0 : 0 < t := by linarith
+  set x₁ := 1 / (2 * (R + t)) with hx₁
+  set x₂ := 1 / (2 * R) with hx₂
+  set A := 2 * Real.arcsin x₁
+  set B := 2 * Real.arcsin x₂
+  have hx₁0 : 0 < x₁ := by positivity
+  have hx₂0 : 0 < x₂ := by positivity
+  have hx₂s : x₂ ≤ 1 / 20000 := by
+    rw [hx₂, div_le_div_iff₀ (by positivity) (by norm_num)]; linarith
+  have hx₁s : x₁ ≤ 1 / 2 := by
+    rw [hx₁, div_le_div_iff₀ (by positivity) (by norm_num)]; linarith
+  obtain ⟨a1, -⟩ := arcsin_bounds hx₁0 hx₁s
+  obtain ⟨-, b2⟩ := arcsin_bounds hx₂0 (by linarith)
+  have hA0 : 0 < A := by simp only [A]; linarith
+  -- `1/A ≤ R + t`
+  have hA : 1 / A ≤ R + t := by
+    rw [div_le_iff₀ hA0]
+    have : (R + t) * (2 * x₁) = 1 := by rw [hx₁]; field_simp
+    simp only [A]; nlinarith
+  -- `R − 1/(4R) ≤ 1/B`
+  have hB0 : 0 < B := by
+    have := arcsin_bounds hx₂0 (by linarith); simp only [B]; linarith [this.1]
+  have hR' : 0 < R - 1 / (4 * R) := by
+    have : 1 / (4 * R) ≤ 1 := by rw [div_le_one (by positivity)]; linarith
+    linarith
+  have hB : R - 1 / (4 * R) ≤ 1 / B := by
+    rw [le_div_iff₀ hB0]
+    have e : 2 * (x₂ + x₂ ^ 3) * (R - 1 / (4 * R)) = 1 - x₂ ^ 4 := by
+      rw [hx₂]; field_simp; ring
+    have : B ≤ 2 * (x₂ + x₂ ^ 3) := by simp only [B]; linarith
+    have := mul_le_mul_of_nonneg_right this hR'.le
+    nlinarith [pow_pos hx₂0 4]
+  -- `1/A − 1/B ≤ c := t + 1/(4R) < 0.8662`
+  set c := t + 1 / (4 * R)
+  have hc : c < 0.8662 := by
+    have h1 : 1 / (2 * R) ≤ 1 / 20000 := hx₂s
+    have h2 : 1 / (4 * R) ≤ 1 / 40000 := by
+      rw [div_le_div_iff₀ (by positivity) (by norm_num)]; linarith
+    simp only [c]; linarith
+  have hkey : B - A ≤ c * (A * B) := by
+    have h : 1 / A - 1 / B ≤ c := by simp only [c]; linarith
+    have : B - A = (1 / A - 1 / B) * (A * B) := by field_simp
+    rw [this]; exact mul_le_mul_of_nonneg_right h (by positivity)
+  -- integrality: `j (B − A) ≥ A`
+  have hAB : A < B := by
+    have : x₁ < x₂ := by
+      rw [hx₁, hx₂]; exact one_div_lt_one_div_of_lt (by positivity) (by linarith)
+    have := Real.arcsin_lt_arcsin (by linarith) this (by linarith)
+    simp only [A, B]; linarith
+  have hkj : (j : ℝ) + 1 ≤ k := by
+    have : j < k := by
+      by_contra hle; push Not at hle
+      have h1 : (k : ℝ) ≤ j := by exact_mod_cast hle
+      have hj0 : (0 : ℝ) < j := by exact_mod_cast hj
+      have : (k : ℝ) * A < j * B := by nlinarith
+      linarith
+    exact_mod_cast this
+  have hjBA : A ≤ j * (B - A) := by
+    have : 0 ≤ ((k : ℝ) - j - 1) * A := mul_nonneg (by linarith) hA0.le
+    nlinarith
+  -- `j B c ≥ 1`, but `j B = k A < π/3` and `c < 3/π`
+  have hj0 : (0 : ℝ) ≤ j := by positivity
+  have h1 : 1 ≤ j * B * c := by
+    have h2 := mul_le_mul_of_nonneg_left hkey hj0
+    have : A * 1 ≤ A * (j * B * c) := by
+      have : (j : ℝ) * (c * (A * B)) = A * (j * B * c) := by ring
+      linarith
+    exact le_of_mul_le_mul_left this hA0
+  have hπ := Real.pi_lt_d2
+  have hkA : (k : ℝ) * A < π / 3 := hk
+  have hjB : (j : ℝ) * B < π / 3 := by linarith
+  have hjB0 : 0 ≤ (j : ℝ) * B := by positivity
+  have e1 : (j : ℝ) * B * c ≤ (j * B) * 0.8662 := mul_le_mul_of_nonneg_left hc.le hjB0
+  have e2 : (j : ℝ) * B * 0.8662 ≤ π / 3 * 0.8662 := by linarith
+  linarith
 
 /-! ## Private helpers (rung pairs) -/
 
