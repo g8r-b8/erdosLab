@@ -456,13 +456,44 @@ theorem arc_centre_unique (hX : Normal X) {w w' : Pt} (hw : w ∈ X) (hw' : w' �
 
 /-- Triangles over **bad** bases number at most `cBad` (base determines apex).
 
-TODO: prove.
-What's missing: the map `v ↦ base` into `bad X F` is injective by `base_apex_unique`.
+TODO: none — proved.
+What's missing: (was) the map `v ↦ base` into `bad X F` is injective by `base_apex_unique`.
 Acceptance: no `sorry`.
 Depends on: `tri_of_twoRung`, `base_apex_unique`, `card_bad_le`. Difficulty M. -/
 theorem card_badBase_le (hX : Normal X) (F : DirField X) (hτ : tau X = √3 / 2) :
     (((twoRungVerts X F).filter (fun v => ¬ ∃ a b, IsTri F v a b)).card : ℝ) ≤ cBad := by
-  sorry
+  classical
+  set V := (twoRungVerts X F).filter (fun v => ¬ ∃ a b, IsTri F v a b)
+  let Q : Pt → Pt × Pt → Prop := fun v ab => IsRung F v ab.1 ∧ IsRung F v ab.2 ∧
+    s(v, ab.1) ∈ rungs X F ∧ s(v, ab.2) ∈ rungs X F ∧ ab.1 ≠ ab.2 ∧ s(ab.1, ab.2) ∈ bad X F
+  have hQ : ∀ v ∈ V, ∃ ab, Q v ab := by
+    intro v hv
+    obtain ⟨hv2, hnt⟩ := mem_filter.1 hv
+    obtain ⟨a, b, h1, h2, g1, g2, hab, -, hbt⟩ := tri_of_twoRung hX F hτ hv2
+    rcases hbt with hb | ht
+    · exact ⟨(a, b), h1, h2, g1, g2, hab, hb⟩
+    · exact absurd ⟨a, b, ht⟩ hnt
+  let f : Pt → Sym2 Pt := fun v => if h : ∃ ab, Q v ab then s(h.choose.1, h.choose.2) else s(0, 0)
+  have hf : ∀ v ∈ V, ∃ ab, Q v ab ∧ f v = s(ab.1, ab.2) := by
+    intro v hv
+    have h := hQ v hv
+    exact ⟨h.choose, h.choose_spec, dif_pos h⟩
+  have hmaps : ∀ v ∈ V, f v ∈ bad X F := by
+    intro v hv
+    obtain ⟨ab, hq, he⟩ := hf v hv
+    rw [he]; exact hq.2.2.2.2.2
+  have hinj : Set.InjOn f ↑V := by
+    intro v hv v' hv' e
+    obtain ⟨⟨a, b⟩, ⟨h1, h2, g1, g2, hab, -⟩, he⟩ := hf v hv
+    obtain ⟨⟨a', b'⟩, ⟨h1', h2', g1', g2', -, -⟩, he'⟩ := hf v' hv'
+    rw [he, he'] at e
+    rcases Sym2.eq_iff.1 e with ⟨rfl, rfl⟩ | ⟨rfl, rfl⟩
+    · exact base_apex_unique hX F hτ hab h1 h2 h1' h2' g1 g2 g1' g2'
+    · exact base_apex_unique hX F hτ hab h1 h2 h2' h1' g1 g2 g2' g1'
+  have h1 := card_le_card_of_injOn f hmaps hinj
+  have h2 := card_bad_le hX F
+  have : (V.card : ℝ) ≤ (bad X F).card := by exact_mod_cast h1
+  linarith
 
 /-- **(Count)** at `τ = √3/2`: `q₂ ≤ #breaks + cBad`.
 Each good-base triangle `A` is charged to a break: the K-break `b_{AB} ∈ [v_A, v_B)` if `A` has a
