@@ -1919,15 +1919,119 @@ private theorem kwalk_stops (hX : Normal X) (F : DirField X) (hτ : tau X = √3
   rw [div_lt_iff₀ hα.2] at hi
   linarith
 
+/-- A point at distance `R > 0` from `w` is `w + R • dirVec φ` for some angle `φ`. -/
+private theorem angle_of_dist {p w : Pt} {R : ℝ} (hR : 0 < R) (h : dist p w = R) :
+    ∃ φ : ℝ, p - w = R • dirVec φ := by
+  have hn : ‖R⁻¹ • (p - w)‖ = 1 := by
+    rw [norm_smul, ← dist_eq_norm, h, Real.norm_eq_abs, abs_of_pos (inv_pos.2 hR),
+      inv_mul_cancel₀ hR.ne']
+  obtain ⟨φ, -, hφ⟩ := exists_angle hn
+  exact ⟨φ, by rw [hφ, smul_smul, mul_inv_cancel₀ hR.ne', one_smul]⟩
+
+private theorem dirVec_shift {x y : ℝ} (h : dirVec x = dirVec y) (c : ℝ) :
+    dirVec (x + c) = dirVec (y + c) := by
+  rw [dirVec_addR, dirVec_addR, h]
+
 /-- **No apex strictly inside** the arc `(θ_A, θ_B)` when `B` is the first successor of `A`.
-TODO: prove. What's missing: `centre_eq` (the apex's centre is `w`), `apex_angle` for it,
-`dwalk_angle`, `arc_sep` on `C(w, Δ)` with `⌊(ψ − φ)/α₁⌋`. Difficulty L. -/
+TODO: none — proved (modulo the skeleton stubs it uses: `alpha_pos`, `kwalk_arc`,
+`dwalk_angle`, `apex_angle`, `walk_mem_S`, `centre_eq`, `arc_sep`). -/
 private theorem no_apex_inside (hX : Normal X) (F : DirField X) (hτ : tau X = √3 / 2)
     {v a b : Pt} (ht : IsTri F v a b) {N : ℕ} (hN : Runs F b N) {j : ℕ} (hj : j < N)
     {v' b' : Pt} (ht' : IsTri F v' (walk F b j) b')
     (hmin : ∀ j' < j, ¬ TriAt F (walk F b j')) {i : ℕ} (hi : 1 ≤ i) (hr : Runs F v i)
     {v'' a'' b'' : Pt} (ht'' : IsTri F v'' a'' b'') (hv'' : v'' = walk F v i) : False := by
-  sorry
+  obtain ⟨hα₁, hα₂⟩ := alpha_pos hX
+  have hR2 := hX.dist2_pos
+  have hΔ2 : dist2 X ≤ diam X := dist2_le_diam X
+  have hL := hX.large
+  have hΔ1 : 1 ≤ diam X := by linarith
+  have hΔ : 0 < diam X := by linarith
+  have hwX : F.partner v ∈ X := F.partner_mem v ht.1.1
+  obtain ⟨φ, hφ⟩ := angle_of_dist hΔ ht.1.2.2.2.2.2
+  obtain ⟨hv''pos, hlt⟩ := kwalk_arc hX F hτ ht hφ hN hj ht' i hr
+  have hD := dwalk_angle hX F hτ ht hφ hN
+  have hspan := Bprime_span hX F hτ ht (walk F b) N (walk_zero F b) hN
+  have hbS : b ∈ Sset X := ht.2.1.2.2.1
+  have hwalkX : ∀ m ≤ N, walk F b m ∈ X := fun m hm => Sset_sub (walk_mem_S hN hbS m hm)
+  have hiα : (0:ℝ) < (i:ℝ) * alpha2 X := mul_pos (by exact_mod_cast hi) hα₂
+  have hjN : ((j:ℝ) + 1) ≤ N := by exact_mod_cast hj
+  have hjα : 0 < ((j:ℝ) + 1) * alpha1 X := by positivity
+  have hmul := mul_le_mul_of_nonneg_right hjN hα₁.le
+  -- the two end points of the arc lie in `K`
+  have hvK : F.partner v + dist2 X • dirVec (φ + alpha1 X / 2) ∈ KBall X := by
+    rw [← apex_angle hX F hτ ht hφ]
+    exact ball_polygon_a (Sset_sub ht.1.1) ht.1.2.1
+  have hwv' : F.partner v = F.partner v' :=
+    W_center hX F hτ ht ht' (walk F b) N (walk_zero F b) hN ⟨j, hj.le, rfl⟩
+  have hφ' : walk F b j - F.partner v' = diam X • dirVec (φ + ((j:ℝ) + 1) * alpha1 X) := by
+    rw [← hwv']; exact hD j hj.le
+  have hv'K : F.partner v + dist2 X • dirVec (φ + alpha1 X / 2 + ((j:ℝ) + 1) * alpha1 X)
+      ∈ KBall X := by
+    have e := apex_angle hX F hτ ht' hφ'
+    rw [← hwv'] at e
+    rw [show φ + alpha1 X / 2 + ((j:ℝ) + 1) * alpha1 X
+        = φ + ((j:ℝ) + 1) * alpha1 X + alpha1 X / 2 by ring, ← e]
+    exact ball_polygon_a (Sset_sub ht'.1.1) ht'.1.2.1
+  have harc : ∀ ψ ∈ Set.Icc (φ + alpha1 X / 2) (φ + alpha1 X / 2 + ((j:ℝ) + 1) * alpha1 X),
+      F.partner v + dist2 X • dirVec ψ ∈ KBall X := fun ψ hψ =>
+    (arc_sub_K hX hwX (by linarith) (by linarith [Real.pi_pos]) hvK hv'K ψ hψ).1
+  -- the centre of `A''` is `w`
+  have hθ1 : φ + alpha1 X / 2 < φ + alpha1 X / 2 + (i:ℝ) * alpha2 X := by linarith
+  have hθ2 : φ + alpha1 X / 2 + (i:ℝ) * alpha2 X
+      < φ + alpha1 X / 2 + ((j:ℝ) + 1) * alpha1 X := by linarith
+  have hv''S := ht''.1.1
+  have hdw'' : dist (F.partner v + dist2 X • dirVec (φ + alpha1 X / 2 + (i:ℝ) * alpha2 X))
+      (F.partner v'') = dist2 X := by
+    rw [← hv''pos, ← hv'']; exact F.partner_K v'' hv''S ht''.1.2.1
+  have hww'' : F.partner v = F.partner v'' :=
+    centre_eq hX (F.partner_mem v'' hv''S) hθ1 hθ2 harc hdw''
+  -- the base end `a''` sits at angle `ψ = φ + i α₂` on `C(w, Δ)`
+  obtain ⟨φ'', hφ''⟩ := angle_of_dist hΔ ht''.1.2.2.2.2.2
+  have e'' := apex_angle hX F hτ ht'' hφ''
+  rw [← hww''] at e'' hφ''
+  have hdir : dirVec (φ'' + alpha1 X / 2) = dirVec (φ + alpha1 X / 2 + (i:ℝ) * alpha2 X) := by
+    have := e''.symm.trans (hv''.trans hv''pos)
+    exact smul_right_injective _ hR2.ne' (add_left_cancel this)
+  have hdir' : dirVec φ'' = dirVec (φ + (i:ℝ) * alpha2 X) := by
+    have := dirVec_shift hdir (-(alpha1 X / 2))
+    rwa [show φ'' + alpha1 X / 2 + -(alpha1 X / 2) = φ'' by ring,
+      show φ + alpha1 X / 2 + (i:ℝ) * alpha2 X + -(alpha1 X / 2) = φ + (i:ℝ) * alpha2 X by ring]
+      at this
+  rw [hdir'] at hφ''
+  have ha''X : F.partner v + diam X • dirVec (φ + (i:ℝ) * alpha2 X) ∈ X := by
+    rw [← sub_eq_iff_eq_add'.1 hφ'']; exact Sset_sub ht''.1.2.2.1
+  have hsep : ∀ y : ℝ, F.partner v + diam X • dirVec y ∈ X → y < φ + (i:ℝ) * alpha2 X →
+      φ + (i:ℝ) * alpha2 X - y < alpha1 X → False :=
+    fun y hy h0 h1 => arc_sep hX hΔ1 ha''X hy (by linarith) h1
+  -- `k = ⌊i α₂ / α₁⌋`
+  have hA : (0:ℝ) ≤ (i:ℝ) * alpha2 X / alpha1 X := by positivity
+  have hk1 := Nat.floor_le hA
+  have hk2 := Nat.lt_floor_add_one ((i:ℝ) * alpha2 X / alpha1 X)
+  generalize ⌊(i:ℝ) * alpha2 X / alpha1 X⌋₊ = k at hk1 hk2
+  rw [le_div_iff₀ hα₁] at hk1
+  rw [div_lt_iff₀ hα₁] at hk2
+  have hkj : k ≤ j := by
+    have : (k:ℝ) < (j:ℝ) + 1 := by
+      by_contra hc
+      push_neg at hc
+      nlinarith [mul_le_mul_of_nonneg_right hc hα₁.le]
+    have : k < j + 1 := by exact_mod_cast this
+    omega
+  rcases Nat.eq_zero_or_pos k with h0 | hpos
+  · subst h0
+    simp only [Nat.cast_zero, zero_add, one_mul] at hk2
+    refine hsep φ ?_ (by linarith) (by linarith)
+    rw [← sub_eq_iff_eq_add'.1 hφ]; exact Sset_sub ht.1.2.2.1
+  · obtain ⟨m, rfl⟩ : ∃ m, k = m + 1 := ⟨k - 1, by omega⟩
+    push_cast at hk1 hk2
+    have hmN : m ≤ N := by omega
+    have hwm := hD m hmN
+    have hwmX : F.partner v + diam X • dirVec (φ + ((m:ℝ) + 1) * alpha1 X) ∈ X := by
+      rw [← sub_eq_iff_eq_add'.1 hwm]; exact hwalkX m hmN
+    rcases lt_or_eq_of_le hk1 with hlt' | heq
+    · exact hsep _ hwmX (by linarith) (by linarith)
+    · refine hmin m (by omega) ⟨v'', a'', b'', ht'', ?_⟩
+      rw [sub_eq_iff_eq_add'.1 hφ'', sub_eq_iff_eq_add'.1 hwm, heq]
 
 /-- **(Count)** at `τ = √3/2`: `q₂ ≤ #breaks + cBad`.
 Each good-base triangle `A` is charged to a break: the K-break `b_{AB} ∈ [v_A, v_B)` if `A` has a
