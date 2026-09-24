@@ -193,7 +193,7 @@ theorem inner_pos_of_seg {K : Set Pt} {y q ν : Pt} {l : ℝ} (hy : y ∈ interi
 
 /-- **Flat case** (Lemma F, Euclidean-local form): `m_y ≤ 4`.
 
-TODO: prove.
+TODO: none — proved.
 What's missing: for each `S`-neighbour `q` of `y` (`Sset_not_interior`), take the frontier point
 `b = y + λ(q − y)` (`exists_frontier_seg`, `dist y b = λ ≤ 1`) and a unit normal `ν` there
 (`exists_unit_normal`); `inner_pos_of_seg` gives `(q−y)·ν > 0`, and flatness
@@ -204,19 +204,77 @@ Depends on: `Sset_not_interior`, `exists_frontier_seg`, `inner_pos_of_seg`, `exi
 `KBall_convex`, `KBall_isClosed`, `card_sep_arc_le_four`. Difficulty M. -/
 theorem mS_le_four_of_flat (hX : Normal X) {y : Pt} (hy : y ∈ interior (KBall X))
     (hflat : IsFlatAt X y) : mS X y ≤ 4 := by
-  sorry
+  obtain ⟨n, hn, hfl⟩ := hflat
+  unfold mS
+  apply card_sep_arc_le_four (y := y) hn
+  · intro q hq
+    obtain ⟨-, -, hd⟩ := mem_partners.1 (mem_filter.1 hq).1
+    rw [dist_comm, hd, hX.minDist_eq]
+  · intro q hq q' hq' hne
+    exact one_le_dist hX.minDist_eq (mem_partners.1 (mem_filter.1 hq).1).1
+      (mem_partners.1 (mem_filter.1 hq').1).1 hne
+  · intro q hq
+    obtain ⟨hqp, hqS⟩ := mem_filter.1 hq
+    obtain ⟨-, -, hd⟩ := mem_partners.1 hqp
+    rw [hX.minDist_eq] at hd
+    obtain ⟨l, hl0, hl1, hb⟩ :=
+      exists_frontier_seg (KBall_isClosed X) hy (Sset_not_interior hX hqS)
+    obtain ⟨ν, hν1, hν⟩ := exists_unit_normal (KBall_convex X) ⟨y, hy⟩ hb
+    have hdb : dist y (y + l • (q - y)) ≤ 1 := by
+      rw [dist_eq_norm, show y - (y + l • (q - y)) = -(l • (q - y)) by abel, norm_neg, norm_smul,
+        Real.norm_eq_abs, abs_of_pos hl0, ← dist_eq_norm, dist_comm, hd, mul_one]
+      exact hl1
+    have hνn := hfl _ hb hdb ν hν hν1
+    have hν0 : ν ≠ 0 := by rintro rfl; simp at hν1
+    have hpos := inner_pos_of_seg hy hl0 hν hν0
+    have hqy : ‖q - y‖ = 1 := by rw [← dist_eq_norm, dist_comm, hd]
+    have hab := abs_real_inner_le_norm (q - y) (n - ν)
+    rw [hqy, norm_sub_rev, one_mul] at hab
+    have hsplit : inner ℝ (q - y) n = inner ℝ (q - y) ν + inner ℝ (q - y) (n - ν) := by
+      rw [inner_sub_right]; ring
+    rw [hsplit]
+    have := (abs_le.1 (hab.trans hνn)).1
+    linarith
 
 /-- **`R ∩ D`** (Appendix A (0.3a)): for `y ∈ D` with diametral partner `w`, every other
 `x ∈ X` has `(x − y)·(w − y) ≥ |x − y|²/2 > 0`; so `m_y ≤ deg y ≤ 4`.
 
-TODO: prove.
+TODO: none — proved.
 What's missing: `|x − w| ≤ Δ` expands to the inequality; apply `card_sep_arc_le_four` with
 `n = (w − y)/Δ` to `partners X δ y` (the cone condition `> 0 > −1/4`).
 Acceptance: no `sorry`.
 Depends on: `dist_le_diam`, `card_sep_arc_le_four`. Difficulty S–M. -/
 theorem mS_le_four_of_D (hX : Normal X) {y : Pt} (hyX : y ∈ X) (hyD : y ∈ Dset X) :
     mS X y ≤ 4 := by
-  sorry
+  obtain ⟨w, hw⟩ := (mem_filter.1 hyD).2
+  obtain ⟨hwX, hwy, hdw⟩ := mem_partners.1 hw
+  have hΔ : 0 < diam X := by rw [← hdw]; exact dist_pos.2 (Ne.symm hwy)
+  set n : Pt := (diam X)⁻¹ • (w - y) with hndef
+  have hn : ‖n‖ = 1 := by
+    rw [hndef, norm_smul, Real.norm_eq_abs, abs_of_pos (inv_pos.2 hΔ), ← dist_eq_norm,
+      dist_comm, hdw, inv_mul_cancel₀ hΔ.ne']
+  unfold mS
+  apply card_sep_arc_le_four (y := y) hn
+  · intro q hq
+    obtain ⟨-, -, hd⟩ := mem_partners.1 (mem_filter.1 hq).1
+    rw [dist_comm, hd, hX.minDist_eq]
+  · intro q hq q' hq' hne
+    exact one_le_dist hX.minDist_eq (mem_partners.1 (mem_filter.1 hq).1).1
+      (mem_partners.1 (mem_filter.1 hq').1).1 hne
+  · intro q hq
+    obtain ⟨hqX, -, hd⟩ := mem_partners.1 (mem_filter.1 hq).1
+    rw [hX.minDist_eq] at hd
+    have hqw := dist_le_diam hqX hwX
+    have e1 := dist_sq_pt q w
+    have e2 := dist_sq_pt y q
+    have e3 := dist_sq_pt y w
+    rw [hd] at e2; rw [hdw] at e3
+    have hsq : dist q w ^ 2 ≤ diam X ^ 2 := pow_le_pow_left₀ dist_nonneg hqw 2
+    rw [hndef, inner_smul_right, inner_pt]
+    simp only [PiLp.sub_apply]
+    have : 0 < (q 0 - y 0) * (w 0 - y 0) + (q 1 - y 1) * (w 1 - y 1) := by nlinarith
+    have := mul_pos (inv_pos.2 hΔ) this
+    linarith
 
 /-- **(0.3b)** Every boundary point of `K` lies on a circle `C(w, Δ₂)` with `w ∈ X`, and
 `(b − w)/Δ₂` is then an outer normal at `b`.  (Used in the fatness step of Lemma T.)
@@ -275,7 +333,7 @@ theorem card_sep_box_le {P : Finset Pt} (hsep : ∀ a ∈ P, ∀ b ∈ P, a ≠ 
 
 /-- **Lemma T** (thin `K`): `|X ∖ D| ≤ 10⁴`.
 
-TODO: prove (wiring).
+TODO: none — proved.
 What's missing: `X ∖ D ⊆ K` (`ball_polygon_a`), points `≥ 1` apart (`one_le_dist`),
 `thin_box`, `card_sep_box_le`.
 Acceptance: no `sorry` (inherits).
@@ -286,7 +344,10 @@ theorem thin_card_le (hX : Normal X) {y b₁ b₂ ν₁ ν₂ : Pt} (hy : y ∈ 
     (hν₁ : ν₁ ∈ normalCone (KBall X) b₁) (hν₂ : ν₂ ∈ normalCone (KBall X) b₂)
     (hn₁ : ‖ν₁‖ = 1) (hn₂ : ‖ν₂‖ = 1) (hthin : inner ℝ ν₁ ν₂ ≤ -(1 - 1 / 10 ^ 4)) :
     ((X \ Dset X).card : ℝ) ≤ cThin := by
-  sorry
+  obtain ⟨e, he, c₀, c₁, hbox⟩ := thin_box hX hy hb₁ hb₂ h₁ h₂ hν₁ hν₂ hn₁ hn₂ hthin
+  refine card_sep_box_le (P := X \ Dset X) (fun a ha b hb hab => ?_) he (c₀ := c₀) (c₁ := c₁)
+    (fun x hx => hbox x (ball_polygon_a (mem_sdiff.1 hx).1 (mem_sdiff.1 hx).2))
+  exact one_le_dist hX.minDist_eq (mem_sdiff.1 ha).1 (mem_sdiff.1 hb).1 hab
 
 /-- **Support points stay close** (linear algebra of the non-thin case): if
 `|v·ν₁|, |v·ν₂| ≤ 1` for unit `ν₁, ν₂` with `|ν₁·ν₂| ≤ 1 − 10⁻⁴`, then `‖v‖ ≤ 150`.
@@ -360,19 +421,61 @@ theorem turning_ge_of_nonflat (hX : Normal X) {y b₁ b₂ ν₁ ν₂ : Pt} (hy
 /-- **Ball packing**: points pairwise `≥ 1` apart within distance `ρ` of `x` number at most
 `(4ρ + 1)²`.
 
-TODO: prove.
+TODO: none — proved.
 What's missing: grid pigeonhole (half-open cells of side `7/10`), generalising
 `card_sep_le_81` (the case `ρ = 2`).
 Acceptance: no `sorry`.
 Depends on: `Defs.floor_cell_lt`-style grid lemmas. Difficulty M. -/
 theorem card_sep_ball_le {P : Finset Pt} (hsep : ∀ a ∈ P, ∀ b ∈ P, a ≠ b → 1 ≤ dist a b)
     (x : Pt) (ρ : ℕ) (hx : ∀ a ∈ P, dist a x ≤ ρ) : P.card ≤ (4 * ρ + 1) ^ 2 := by
-  sorry
+  let f : Pt → ℤ × ℤ := fun a => (⌊2 * (a 0 - x 0)⌋, ⌊2 * (a 1 - x 1)⌋)
+  have hbox : ∀ a ∈ P, f a ∈ (Icc (-(2 * ρ : ℤ)) (2 * ρ)) ×ˢ (Icc (-(2 * ρ : ℤ)) (2 * ρ)) := by
+    intro a ha
+    have hd := hx a ha
+    have hsq := dist_sq_pt a x
+    have hρ : (0 : ℝ) ≤ ρ := Nat.cast_nonneg ρ
+    have h4 : dist a x ^ 2 ≤ (ρ : ℝ) ^ 2 := pow_le_pow_left₀ dist_nonneg hd 2
+    have b0 : |a 0 - x 0| ≤ ρ := by
+      rw [← abs_of_nonneg hρ]; apply sq_le_sq.1; nlinarith [sq_nonneg (a 1 - x 1)]
+    have b1 : |a 1 - x 1| ≤ ρ := by
+      rw [← abs_of_nonneg hρ]; apply sq_le_sq.1; nlinarith [sq_nonneg (a 0 - x 0)]
+    rw [abs_le] at b0 b1
+    simp only [f, mem_product, mem_Icc]
+    refine ⟨⟨?_, ?_⟩, ?_, ?_⟩
+    · rw [Int.le_floor]; push_cast; linarith
+    · rw [Int.floor_le_iff]; push_cast; linarith
+    · rw [Int.le_floor]; push_cast; linarith
+    · rw [Int.floor_le_iff]; push_cast; linarith
+  have := card_le_card_of_injOn f hbox (fun a ha b hb e => by
+    by_contra hab
+    have h1 := hsep a ha b hb hab
+    simp only [f, Prod.mk.injEq] at e
+    have c0 := Int.floor_le (2 * (a 0 - x 0))
+    have c1 := Int.lt_floor_add_one (2 * (a 0 - x 0))
+    have c2 := Int.floor_le (2 * (b 0 - x 0))
+    have c3 := Int.lt_floor_add_one (2 * (b 0 - x 0))
+    have c4 := Int.floor_le (2 * (a 1 - x 1))
+    have c5 := Int.lt_floor_add_one (2 * (a 1 - x 1))
+    have c6 := Int.floor_le (2 * (b 1 - x 1))
+    have c7 := Int.lt_floor_add_one (2 * (b 1 - x 1))
+    rw [e.1] at c0 c1; rw [e.2] at c4 c5
+    have d0 : |a 0 - b 0| < 1 / 2 := by rw [abs_lt]; constructor <;> linarith
+    have d1 : |a 1 - b 1| < 1 / 2 := by rw [abs_lt]; constructor <;> linarith
+    have hsq := dist_sq_pt a b
+    have : dist a b ^ 2 < 1 := by
+      rw [hsq]
+      have := sq_abs (a 0 - b 0); have := sq_abs (a 1 - b 1)
+      nlinarith [abs_nonneg (a 0 - b 0), abs_nonneg (a 1 - b 1)]
+    nlinarith [dist_nonneg (x := a) (y := b)])
+  rw [card_product, Int.card_Icc] at this
+  have e : (2 * (ρ : ℤ) + 1 - -(2 * ρ)).toNat = 4 * ρ + 1 := by omega
+  rw [e] at this
+  rw [sq]; exact this
 
 /-- **Lemma BT** (count): at most `8π·601²` points `y ∈ X` have
 `turning(K, ∂K ∩ B̄(y, 150)) ≥ 1/4`.
 
-TODO: prove.
+TODO: none — proved.
 What's missing: `turning_sum_le` with `γ_y = bdryNear X y` (closed, `⊆ frontier`), multiplicity
 `M = 601²` from `card_sep_ball_le` (a boundary point `b` lies in `B̄(y,150)` for at most
 `(4·150+1)²` points `y`, pairwise `≥ 1` apart); then `#Y · (1/4) ≤ 2π M`.
@@ -382,19 +485,47 @@ Depends on: `turning_sum_le`, `card_sep_ball_le`, `KBall_convex`, `KBall_isCompa
 theorem card_bigTurning_le (hX : Normal X) (Y : Finset Pt) (hY : Y ⊆ X)
     (hbig : ∀ y ∈ Y, 1 / 4 ≤ turning (KBall X) (bdryNear X y)) :
     (Y.card : ℝ) ≤ 8 * π * 601 ^ 2 := by
-  sorry
+  have hne : X.Nonempty := card_pos.1 (by have := hX.four_le; omega)
+  have hsep : ∀ a ∈ Y, ∀ b ∈ Y, a ≠ b → 1 ≤ dist a b := fun a ha b hb hab =>
+    one_le_dist hX.minDist_eq (hY ha) (hY hb) hab
+  have hsum := turning_sum_le (KBall_convex X) (KBall_isCompact hne) Y (fun y => bdryNear X y)
+    (fun y _ => Set.inter_subset_left)
+    (fun y _ => isClosed_frontier.inter Metric.isClosed_closedBall) (601 ^ 2)
+    (fun b => by
+      have := card_sep_ball_le (P := Y.filter (fun y => b ∈ bdryNear X y))
+        (fun a ha c hc hac => hsep a (mem_filter.1 ha).1 c (mem_filter.1 hc).1 hac) b 150
+        (fun a ha => by
+          have h := (mem_filter.1 ha).2.2
+          rw [Metric.mem_closedBall, dist_comm] at h
+          push_cast; exact h)
+      simpa using this)
+  have hle : ∑ y ∈ Y, (1 / 4 : ℝ) ≤ ∑ y ∈ Y, turning (KBall X) (bdryNear X y) :=
+    sum_le_sum hbig
+  rw [sum_const, nsmul_eq_mul] at hle
+  push_cast at hsum
+  linarith
 
 /-- The boundary data at a point of `R ∖ D` with `m_y ≥ 1`: a frontier point within distance `1`
 carrying a unit outer normal.
 
-TODO: prove (wiring).
+TODO: none — proved.
 What's missing: pick an `S`-neighbour `q`; `exists_frontier_seg`, `exists_unit_normal`.
 Acceptance: no `sorry` (inherits).
 Depends on: `Sset_not_interior`, `exists_frontier_seg`, `exists_unit_normal`. Difficulty S. -/
 theorem exists_near_normal (hX : Normal X) {y : Pt} (hy : y ∈ interior (KBall X))
     (hm : 0 < mS X y) :
     ∃ b ∈ frontier (KBall X), dist y b ≤ 1 ∧ ∃ ν ∈ normalCone (KBall X) b, ‖ν‖ = 1 := by
-  sorry
+  obtain ⟨q, hq⟩ := card_pos.1 hm
+  obtain ⟨hqp, hqS⟩ := mem_filter.1 hq
+  obtain ⟨-, -, hd⟩ := mem_partners.1 hqp
+  rw [hX.minDist_eq] at hd
+  obtain ⟨l, hl0, hl1, hb⟩ :=
+    exists_frontier_seg (KBall_isClosed X) hy (Sset_not_interior hX hqS)
+  obtain ⟨ν, hν1, hν⟩ := exists_unit_normal (KBall_convex X) ⟨y, hy⟩ hb
+  refine ⟨_, hb, ?_, ν, hν, hν1⟩
+  rw [dist_eq_norm, show y - (y + l • (q - y)) = -(l • (q - y)) by abel, norm_neg, norm_smul,
+    Real.norm_eq_abs, abs_of_pos hl0, ← dist_eq_norm, dist_comm, hd, mul_one]
+  exact hl1
 
 /-- The number `8π·601² + 10⁴` fits in `cN1 = 10⁷`.
 
