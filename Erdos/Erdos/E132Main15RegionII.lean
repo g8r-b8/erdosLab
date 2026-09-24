@@ -250,10 +250,89 @@ theorem lemmaC_numeric {τ R : ℝ} (h1 : √3 / 2 + 3 * beta ≤ τ) (h2 : τ �
   have hs0 := Real.sqrt_nonneg (1 - τ ^ 2)
   nlinarith
 
+/-- Lemma B threshold in terms of `τ`: `(Δ² − Δ₂² + 1)/2 = Δ₂τ + 1`.
+
+TODO: none — proved.
+Acceptance: no `sorry`. -/
+theorem lemmaB_threshold (hpos : 0 < dist2 X) :
+    (diam X ^ 2 - dist2 X ^ 2 + 1) / 2 = dist2 X * tau X + 1 := by
+  unfold tau tgap; field_simp; ring
+
+/-- For a rung `(v, z)` and a `Δ₂`-partner `w′` of `v` with `|zw′| = Δ`: `c·u′ = −τ`
+(Lemma 3.2(c) for the redirected field).
+
+TODO: none — proved.
+Acceptance: no `sorry`. -/
+theorem rung_inner_other (F : DirField X) {v z w' : Pt} (hr : IsRung F v z) (hw' : w' ∈ X)
+    (hw'v : dist v w' = dist2 X) (hzw : dist z w' = diam X) :
+    inner ℝ (z - v) ((dist2 X)⁻¹ • (w' - v)) = - tau X := by
+  have hv := hr.1
+  have hvD := hr.2.1
+  set F' := F.redirect hw' hw'v hvD
+  have hp' : F'.partner v = w' := F.redirect_partner hw' hw'v hvD
+  have hu'eq : F'.u v = (dist2 X)⁻¹ • (w' - v) := by
+    unfold DirField.u; rw [hp', hw'v]
+  rw [← hu'eq]
+  exact exact_identity_c F' hv hvD (by rw [hp']; exact hzw) (by rw [dist_comm]; exact hr.2.2.2.2.1)
+
+/-- The type-(ii) direction is the reflection of `u` in `ℝc`: `u′ = −2τc − u`.
+
+TODO: none — proved.
+Acceptance: no `sorry`. -/
+theorem reflect_eq {c u u' : Pt} {τ : ℝ} (hc : ‖c‖ = 1) (hu : ‖u‖ = 1) (hu' : ‖u'‖ = 1)
+    (h1 : inner ℝ c u = -τ) (h2 : inner ℝ c u' = -τ) (h3 : inner ℝ u u' = 2 * τ ^ 2 - 1) :
+    u' = (-(2 * τ)) • c - u := by
+  have n1 := unit_sq hc
+  have n2 := unit_sq hu
+  have n3 := unit_sq hu'
+  rw [inner_pt] at h1 h2 h3
+  have hsq : (u' 0 + 2 * τ * c 0 + u 0) ^ 2 + (u' 1 + 2 * τ * c 1 + u 1) ^ 2 = 0 := by
+    linear_combination n3 + 4 * τ ^ 2 * n1 + n2 + 4 * τ * h2 + 2 * h3 + 4 * τ * h1
+  have e0 : (u' 0 + 2 * τ * c 0 + u 0) ^ 2 = 0 := by
+    nlinarith [sq_nonneg (u' 0 + 2 * τ * c 0 + u 0), sq_nonneg (u' 1 + 2 * τ * c 1 + u 1)]
+  have e1 : (u' 1 + 2 * τ * c 1 + u 1) ^ 2 = 0 := by
+    nlinarith [sq_nonneg (u' 0 + 2 * τ * c 0 + u 0), sq_nonneg (u' 1 + 2 * τ * c 1 + u 1)]
+  have f0 := pow_eq_zero_iff (n := 2) (by norm_num) |>.1 e0
+  have f1 := pow_eq_zero_iff (n := 2) (by norm_num) |>.1 e1
+  rw [pt_ext_iff]
+  simp only [PiLp.sub_apply, PiLp.smul_apply, smul_eq_mul]
+  constructor <;> linarith
+
+/-- Two distinct points `z, z₁` with `|zz₁| = 1` cannot both lie on `C(w, Δ) ∩ C(w*, Δ)` when
+`|ww*| ≤ Δ`, `Δ ≥ 1` (in the frame of `z`: `p = w − z`, `q = w* − z`, `e = z₁ − z`).
+
+TODO: none — proved.
+Acceptance: no `sorry`. -/
+theorem two_circles {e p q : Pt} {Δ : ℝ} (he : ‖e‖ = 1) (hp : ‖p‖ = Δ) (hq : ‖q‖ = Δ)
+    (hep : inner ℝ p e = 1 / 2) (heq : inner ℝ q e = 1 / 2) (hpq : p ≠ q)
+    (hd : ‖p - q‖ ≤ Δ) (hΔ : 1 ≤ Δ) : False := by
+  have n₁ := inner_sq_add_det_sq (e := p) he
+  have n₂ := inner_sq_add_det_sq (e := q) he
+  rw [hep, hp] at n₁
+  rw [heq, hq] at n₂
+  have hL := inner_mul_add_det_mul e p q
+  rw [real_inner_comm, hep, real_inner_comm, heq, he] at hL
+  have hdne : det2 e p ≠ det2 e q := by
+    intro h; apply hpq
+    rw [decompR he p, decompR he q, hep, heq, h]
+  have hd' : det2 e p = - det2 e q := by
+    have : (det2 e p - det2 e q) * (det2 e p + det2 e q) = 0 := by linear_combination n₁ - n₂
+    rcases mul_eq_zero.1 this with h | h
+    · exact absurd (sub_eq_zero.1 h) hdne
+    · linarith
+  have hn : ‖p - q‖ ^ 2 = ‖p‖ ^ 2 - 2 * inner ℝ p q + ‖q‖ ^ 2 := @norm_sub_sq_real _ _ _ p q
+  rw [hp, hq] at hn
+  have h2 : ‖p - q‖ ^ 2 ≤ Δ ^ 2 := pow_le_pow_left₀ (norm_nonneg _) hd 2
+  rw [hd'] at hL
+  nlinarith
+
 /-- **Lemma C** (all of Region II): the rung partner `z` of a double vertex `v` (good rung) has
 no T-neighbour, pure or mixed.
 
-TODO: prove.
+TODO: none — proved.  (Formal route: bounds from the exact decomposition at `v` —
+`w − z = Δ₂u_v − c`, `w* − z = Δ₂u* − c` with `u* = −2τc − u_v` (`reflect_eq`), threshold
+`Δ₂τ + 1` (`lemmaB_threshold`), `s ≤ 0.445`; then `lemmaB` twice and `two_circles`
+(`|p + q|² = 4Δ² − |ww*|² ≥ 3Δ²`).  `lemmaC_numeric` is not needed.)
 What's missing (angle_R4 §2): `w = w_v`, `w*` the type-(ii) partner; `|zw| = |zw*| = Δ`.
 `ŵ = (w − z)/Δ` is within `arcsin(1/Δ)` of `u_v`, `ŵ*` within `arcsin(1/Δ)` of `u*`
 (`lemmaA_ii`: `∠(u_v, u*) = 2θ₀`), `∠(u_v, u_z) ≤ β` (good rung).  For a T-neighbour `z₁`,
@@ -268,7 +347,101 @@ Depends on: `lemmaA_ii`, `lemmaB`, `lemmaC_numeric`, `exact_identity_a`, `rung_o
 theorem lemmaC (hX : Normal X) (F : DirField X) (hτ₁ : √3 / 2 + 3 * beta ≤ tau X)
     (hτ₂ : tau X ≤ 1) {v z z₁ : Pt} (hd : IsDouble F v z) (hg : s(v, z) ∈ good X F)
     (hT : s(z, z₁) ∈ tEdges X F) : False := by
-  sorry
+  obtain ⟨hr, ws, hwsX, hvws, hne, hzws⟩ := hd
+  have hv := hr.1
+  have hvD := hr.2.1
+  have hzS := hr.2.2.1
+  have hpos : 0 < dist2 X := hX.dist2_pos
+  have hΔ1 : 1 ≤ diam X := hr.two.2.trans (dist2_le_diam X)
+  have hgd : ang (F.u v) (F.u z) ≤ beta := (mem_filter.1 hg).2 v z rfl
+  have hTe : IsTEdge F z z₁ := (mem_filter.1 hT).2 z z₁ rfl
+  have hze : s(z, z₁) ∈ edges X := (mem_filter.1 (mem_filter.1 hT).1).1
+  have hz₁S : z₁ ∈ Sset X := (mem_edges hze).2 z₁ (Sym2.mem_mk_right _ _)
+  have hz₁X := Sset_sub hz₁S
+  have hzz₁ : dist z z₁ = 1 := by
+    rw [← hX.minDist_eq]; exact (mem_filter.1 hze).2
+  have hwX : F.partner v ∈ X := F.partner_mem v hv
+  have hvw : dist v (F.partner v) = dist2 X := F.partner_K v hv hvD
+  have hzw : dist z (F.partner v) = diam X := hr.2.2.2.2.2
+  have hwv : F.partner v - v = dist2 X • F.u v := by
+    unfold DirField.u; rw [hvw, smul_smul, mul_inv_cancel₀ hpos.ne', one_smul]
+  have hwsv : ws - v = dist2 X • ((dist2 X)⁻¹ • (ws - v)) := by
+    rw [smul_smul, mul_inv_cancel₀ hpos.ne', one_smul]
+  have huv := F.norm_u hv
+  have huz := F.norm_u hzS
+  have husn : ‖(dist2 X)⁻¹ • (ws - v)‖ = 1 := by
+    rw [norm_smul, ← dist_eq_norm, dist_comm, hvws, Real.norm_eq_abs,
+      abs_of_pos (inv_pos.2 hpos), inv_mul_cancel₀ hpos.ne']
+  have hrefl := reflect_eq hr.norm_c huv husn hr.inner_eq
+    (rung_inner_other F hr hwsX hvws hzws) (lemmaA_ii F hr hwsX hvws hne hzws)
+  have hen : ‖z₁ - z‖ = 1 := by rw [← dist_eq_norm, dist_comm, hzz₁]
+  -- the scalars `a = e·u_v`, `x = e·c`
+  have hb : beta = 1 / 100 := rfl
+  have ha : -beta < inner ℝ (z₁ - z) (F.u v) ∧ inner ℝ (z₁ - z) (F.u v) < 2 * beta := by
+    have h1 : |inner ℝ (z₁ - z) (F.u v - F.u z)| ≤ beta := by
+      refine (abs_real_inner_le_norm _ _).trans ?_
+      rw [hen, one_mul]; exact (norm_sub_le_angR huv huz).trans hgd
+    rw [inner_sub_right] at h1
+    have := abs_le.1 h1
+    have := hTe.1
+    have := hTe.2.1
+    constructor <;> linarith
+  obtain ⟨σ, hσ, hoff⟩ := rung_offset F hr
+  have hs0 : 0 ≤ sOff X := Real.sqrt_nonneg _
+  have h3 : (1.732 : ℝ) < √3 := by rw [Real.lt_sqrt (by norm_num)]; norm_num
+  have hτ : (0.896 : ℝ) ≤ tau X := by rw [hb] at hτ₁; linarith
+  have hs : sOff X ≤ 0.445 := by
+    unfold sOff; rw [Real.sqrt_le_left (by norm_num)]; nlinarith
+  have hx : |inner ℝ (z₁ - z) (z - v)| ≤ 0.465 := by
+    rw [hoff, inner_add_right, inner_smul_right, inner_smul_right]
+    have hp1 : |inner ℝ (z₁ - z) (perp (F.u v))| ≤ 1 := by
+      refine (abs_real_inner_le_norm _ _).trans ?_
+      rw [hen, norm_perp, huv]; norm_num
+    have hσ1 : |σ| = 1 := by rcases hσ with rfl | rfl <;> norm_num
+    have ha' : |inner ℝ (z₁ - z) (F.u v)| ≤ 2 * beta := abs_le.2 ⟨by linarith, ha.2.le⟩
+    calc |-tau X * inner ℝ (z₁ - z) (F.u v) + σ * sOff X * inner ℝ (z₁ - z) (perp (F.u v))|
+        ≤ |-tau X * inner ℝ (z₁ - z) (F.u v)| + |σ * sOff X * inner ℝ (z₁ - z) (perp (F.u v))| :=
+          abs_add_le _ _
+      _ = tau X * |inner ℝ (z₁ - z) (F.u v)| +
+            sOff X * |inner ℝ (z₁ - z) (perp (F.u v))| := by
+          rw [abs_mul, abs_mul, abs_mul, hσ1, abs_neg, abs_of_nonneg (by linarith : 0 ≤ tau X),
+            abs_of_nonneg hs0, one_mul]
+      _ ≤ 1 * (2 * beta) + 0.445 * 1 := by
+          gcongr
+      _ ≤ 0.465 := by rw [hb]; norm_num
+  have hx' := abs_le.1 hx
+  have hthr := lemmaB_threshold hpos
+  -- Lemma B for `w = w_v`
+  have hB1 : dist z₁ (F.partner v) = diam X := by
+    refine lemmaB hX hwX hz₁X hzw (by rw [dist_comm]; exact hzz₁) ?_
+    rw [hthr, show F.partner v - z = (F.partner v - v) - (z - v) by abel, inner_sub_right, hwv,
+      inner_smul_right]
+    have : dist2 X * inner ℝ (z₁ - z) (F.u v) ≤ dist2 X * tau X := by
+      apply mul_le_mul_of_nonneg_left _ hpos.le; rw [hb] at ha; linarith
+    linarith
+  -- Lemma B for `w*`
+  have hB2 : dist z₁ ws = diam X := by
+    refine lemmaB hX hwsX hz₁X hzws (by rw [dist_comm]; exact hzz₁) ?_
+    rw [hthr, show ws - z = (ws - v) - (z - v) by abel, inner_sub_right, hwsv,
+      inner_smul_right, hrefl, inner_sub_right, inner_smul_right]
+    have hτ1 : tau X ≤ 1 := hτ₂
+    have hkey : -(2 * tau X) * inner ℝ (z₁ - z) (z - v) - inner ℝ (z₁ - z) (F.u v) ≤
+        tau X := by
+      rw [hb] at ha; nlinarith
+    have : dist2 X * (-(2 * tau X) * inner ℝ (z₁ - z) (z - v) - inner ℝ (z₁ - z) (F.u v)) ≤
+        dist2 X * tau X := mul_le_mul_of_nonneg_left hkey hpos.le
+    linarith
+  -- both give `e·(w − z) = 1/2`
+  have hi1 := lemmaB_sq z (F.partner v) z₁
+  have hi2 := lemmaB_sq z ws z₁
+  rw [hB1, hzw, dist_comm z₁ z, hzz₁] at hi1
+  rw [hB2, hzws, dist_comm z₁ z, hzz₁] at hi2
+  refine two_circles (e := z₁ - z) (p := F.partner v - z) (q := ws - z) (Δ := diam X) hen
+    (by rw [← dist_eq_norm, dist_comm]; exact hzw) (by rw [← dist_eq_norm, dist_comm]; exact hzws)
+    (by rw [real_inner_comm]; linarith) (by rw [real_inner_comm]; linarith)
+    (fun h => hne (sub_left_injective h).symm) ?_ hΔ1
+  rw [sub_sub_sub_cancel_right, ← dist_eq_norm]
+  exact dist_le_diam hwX hwsX
 
 /-! ## Counting -/
 
