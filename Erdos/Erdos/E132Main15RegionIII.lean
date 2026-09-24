@@ -334,18 +334,228 @@ theorem card_tEdges_add_breaks_le (hX : Normal X) (F : DirField X) :
     card_le_card_sdiff_add_card
   omega
 
+/-- Lemma 7.1 without the Region II hypothesis (the proof of `lemma71` never uses
+`√3/2 + 3β ≤ τ`); copied verbatim from `E132MainRegions.lemma71`. -/
+private theorem lemma71_III (hX : Normal X) (F : DirField X) {v z : Pt}
+    (hv : v ∈ Sset X) (hvD : v ∉ Dset X) (hz : z ∈ Sset X) (hzD : z ∈ Dset X)
+    (hvz : dist v z = 1) (hT : IsTEdge F v z) :
+    ∃ Γ : Set Pt, Γ ⊆ frontier (KBall X) ∧ (∀ x ∈ Γ, dist v x ≤ 2) ∧
+      tgap X - Real.arcsin beta ≤ turning (KBall X) Γ := by
+  set K := KBall X
+  refine ⟨frontier K ∩ Metric.closedBall v 2, Set.inter_subset_left,
+    fun x hx => by rw [dist_comm]; exact hx.2, ?_⟩
+  set Θ := tgap X - Real.arcsin beta
+  have hvK : v ∈ K := ball_polygon_a (Sset_sub hv) hvD
+  have ht1 : tgap X ≤ 1 := by
+    have := ball_polygon_c hzD hvK; rwa [dist_comm, hvz] at this
+  have hab0 : 0 ≤ Real.arcsin beta := Real.arcsin_nonneg.2 (by unfold beta; norm_num)
+  rcases le_or_gt Θ 0 with hΘ | hΘ
+  · exact hΘ.trans ENNReal.toReal_nonneg
+  have hΘ1 : Θ ≤ 1 := by linarith
+  have hπ := Real.pi_gt_three
+  -- the frame `(u, e₀)` at `v`, `e₀` pointing to `z`'s side
+  set u := F.u v
+  have hu : ‖u‖ = 1 := F.norm_u hv
+  set zh := z - v
+  have hzn : ‖zh‖ = 1 := by rw [← dist_eq_norm, dist_comm, hvz]
+  set a := inner ℝ zh u
+  set c := det2 u zh
+  have hac : a ^ 2 + c ^ 2 = 1 := by
+    have := inner_sq_add_det_sq (e := zh) hu; rw [hzn] at this; linarith
+  have ha0 : 0 < a := hT.1
+  have ha1 : a < beta := hT.2.1
+  have hbeta : beta = 1 / 100 := rfl
+  have hc0 : c ≠ 0 := by intro h; rw [h] at hac; rw [hbeta] at ha1; nlinarith
+  set ς : ℝ := if 0 < c then 1 else -1
+  have hς2 : ς * ς = 1 := by simp only [ς]; split_ifs <;> norm_num
+  have hςc : 0 < ς * c := by
+    simp only [ς]; split_ifs with h
+    · linarith
+    · have : c < 0 := lt_of_le_of_ne (not_lt.1 h) hc0
+      linarith
+  set e₀ : Pt := ς • perp u
+  have hie : ∀ x, inner ℝ x e₀ = ς * det2 u x := by
+    intro x; rw [inner_smul_right, real_inner_comm, det2_eq_inner_perpR]
+  have he₀ : ‖e₀‖ = 1 := by
+    rw [norm_smul, norm_perp, hu, mul_one, Real.norm_eq_abs]
+    simp only [ς]; split_ifs <;> norm_num
+  have hue : inner ℝ u e₀ = 0 := by rw [hie, det2_pt]; ring
+  -- `−u` is an outward normal at `v`
+  have hn₀ : -u ∈ normalCone K v := by
+    have := neg_mem_normalCone hvK (F.partner_mem v hv) (F.partner_K v hv hvD)
+      (dist v (F.partner v))⁻¹ (inv_nonneg.2 dist_nonneg)
+    exact this
+  -- `e₀` is close to `zh`
+  have hze : ‖e₀ - zh‖ ≤ Real.arcsin beta := by
+    have hsc : ς * c = Real.cos (Real.arcsin a) := by
+      rw [Real.cos_arcsin, eq_comm, Real.sqrt_eq_iff_mul_self_eq (by nlinarith) hςc.le]
+      linear_combination (-1) * hac - c ^ 2 * hς2
+    have hz2 : ‖e₀ - zh‖ ^ 2 = 2 - 2 * Real.cos (Real.arcsin a) := by
+      rw [@norm_sub_sq_real, he₀, hzn, real_inner_comm, hie, ← hsc]; ring
+    have hA0 : 0 ≤ Real.arcsin a := Real.arcsin_nonneg.2 ha0.le
+    have hA1 : Real.arcsin a ≤ Real.arcsin beta := Real.monotone_arcsin ha1.le
+    have hcos := Real.one_sub_sq_div_two_le_cos (x := Real.arcsin a)
+    have : ‖e₀ - zh‖ ^ 2 ≤ Real.arcsin beta ^ 2 := by rw [hz2]; nlinarith
+    exact (sq_le_sq₀ (norm_nonneg _) hab0).1 this
+  obtain ⟨xa, hxa⟩ : X.Nonempty := card_pos.1 (by linarith [hX.four_le])
+  have hKc := KBall_isCompact ⟨xa, hxa⟩
+  -- support points in the directions `ν(φ) = cos φ (−u) + sin φ e₀`, `0 < φ < Θ`
+  have hframe : ∀ x : Pt, inner ℝ x u ^ 2 + inner ℝ x e₀ ^ 2 = ‖x‖ ^ 2 := by
+    intro x
+    rw [hie, ← inner_sq_add_det_sq (e := x) hu]
+    linear_combination (det2 u x) ^ 2 * hς2
+  have key : ∀ φ ∈ Set.Ioo 0 Θ, ∃ y ∈ frontier K ∩ Metric.closedBall v 2,
+      (Real.cos φ • (-u) + Real.sin φ • e₀) ∈ normalCone K y := by
+    intro φ hφ
+    have hνn := norm_rot hu he₀ hue φ
+    obtain ⟨y, hyK, hmax⟩ := hKc.exists_isMaxOn ⟨v, hvK⟩
+      (f := fun y => inner ℝ y (Real.cos φ • (-u) + Real.sin φ • e₀))
+      (continuous_id.inner continuous_const).continuousOn
+    have hmax' : ∀ y' ∈ K, inner ℝ y' (Real.cos φ • (-u) + Real.sin φ • e₀) ≤
+        inner ℝ y (Real.cos φ • (-u) + Real.sin φ • e₀) := fun y' hy' => hmax hy'
+    refine ⟨y, ⟨mem_frontier_of_max hyK hνn hmax', ?_⟩, fun y' hy' => ?_⟩
+    · rw [Metric.mem_closedBall]
+      exact support_point_close hzD hvK hyK hu he₀ hframe hn₀ (hmax' v hvK) hφ.1
+        (by linarith [hφ.2]) (by linarith [hφ.2])
+    · rw [inner_sub_left]; linarith [hmax' y' hy']
+  -- the angle of `−u`, and the measure of the arc of directions
+  obtain ⟨θ₀, -, hθ₀⟩ := exists_angle (show ‖-u‖ = 1 by rw [norm_neg, hu])
+  unfold turning
+  have hfin : MeasureTheory.volume {θ : ℝ | θ ∈ Set.Ico 0 (2 * π) ∧
+      ∃ x ∈ frontier K ∩ Metric.closedBall v 2, dirVec θ ∈ normalCone K x} ≠ ⊤ := by
+    refine ne_top_of_le_ne_top ?_ (MeasureTheory.measure_mono (fun θ hθ => hθ.1))
+    rw [Real.volume_Ico]; exact ENNReal.ofReal_ne_top
+  rw [← ENNReal.ofReal_le_iff_le_toReal hfin]
+  have hς : ς = 1 ∨ ς = -1 := by simp only [ς]; split_ifs <;> simp
+  have hdir : ∀ φ : ℝ, dirVec (θ₀ + (-ς * φ)) = Real.cos φ • (-u) + Real.sin φ • e₀ := by
+    intro φ
+    rw [dirVec_addR, hθ₀, perp_neg]
+    simp only [e₀]
+    rcases hς with h | h <;> rw [h] <;> simp [Real.cos_neg, Real.sin_neg] <;> module
+  refine vol_arc_ge _ (a := if ς = 1 then θ₀ - Θ else θ₀) hΘ.le (by linarith) ?_
+  intro θ k hθ
+  set θ' := θ + k * (2 * π)
+  have hφ : ς * (θ₀ - θ') ∈ Set.Ioo 0 Θ := by
+    rcases hς with h | h <;>
+      simp only [h, if_true, if_neg (show (-1 : ℝ) ≠ 1 by norm_num)] at hθ ⊢ <;>
+      constructor <;> linarith [hθ.1, hθ.2]
+  obtain ⟨y, hyΓ, hyν⟩ := key _ hφ
+  refine ⟨y, hyΓ, ?_⟩
+  have e1 : dirVec θ = dirVec θ' := (dirVec_add_int θ k).symm
+  have e2 : θ' = θ₀ + (-ς * (ς * (θ₀ - θ'))) := by
+    have : -ς * (ς * (θ₀ - θ')) = -(ς * ς) * (θ₀ - θ') := by ring
+    rw [this, hς2]; ring
+  rw [e1, e2, hdir]; exact hyν
+
+/-- Region III version of `c5_tgap`: `t − arcsin β ≥ 0.835` (`t ≥ min(τ, 1) > 0.846`). -/
+private theorem tgap_arcsin_III (hX : Normal X) (hτ : √3 / 2 - 2 * beta < tau X) :
+    0.835 ≤ tgap X - Real.arcsin beta := by
+  have hb : beta = 1 / 100 := rfl
+  have h3' : (1.732 : ℝ) < √3 := by rw [Real.lt_sqrt (by norm_num)]; norm_num
+  have hpos := hX.dist2_pos
+  have ht : 0.846 ≤ tgap X := by
+    by_cases h1 : tgap X ≤ 1
+    · have e := tau_sub_tgap X
+      have : (tgap X ^ 2 - 1) / (2 * dist2 X) ≤ 0 := by
+        apply div_nonpos_of_nonpos_of_nonneg _ (by linarith)
+        have : 0 ≤ tgap X := by
+          have := (two_of_pos hpos).lt; unfold tgap; linarith
+        nlinarith
+      rw [hb] at hτ; linarith
+    · linarith
+  have hy : Real.arcsin beta < 0.01002 := by
+    rw [Real.arcsin_lt_iff_lt_sin ⟨by rw [hb]; norm_num, by rw [hb]; norm_num⟩
+      ⟨by linarith [Real.pi_gt_three], by linarith [Real.pi_gt_three]⟩]
+    have := Real.sin_gt_sub_cube (x := 0.01002) (by norm_num)
+    rw [hb]; norm_num at this ⊢; linarith
+  linarith
+
 /-- **Lemma 7.1 in Region III** (F3): `#mixed T-edges ≤ 1500` for `√3/2 − 2β < τ < √3/2 + 3β`
 (`t ≥ τ > 0.846`, so `t − arcsin β > 0.835`).
 
-TODO: prove.
-What's missing: re-run `lemma71` / `card_mixedT_le` with the Region III lower bound
+TODO: none — proved (via the private copy `lemma71_III` of `lemma71`, whose proof never used
+the Region II hypothesis, and `tgap_arcsin_III`; the count is `2·2π·81/0.835 < 1220`).
+What's missing: (was) re-run `lemma71` / `card_mixedT_le` with the Region III lower bound
 `t − arcsin β ≥ 0.835` in place of `c5_tgap` (`0.886`); the count becomes
 `2π·81/0.835·… ≤ 1500`.
 Acceptance: no `sorry`.
 Depends on: proofs of `lemma71`, `card_mixedT_le`, `c5_tgap`. Difficulty M–L. -/
 theorem card_mixedT_le_III (hX : Normal X) (F : DirField X) (hτ₁ : √3 / 2 - 2 * beta < tau X)
     (hτ₂ : tau X < √3 / 2 + 3 * beta) : ((mixedT X F).card : ℝ) ≤ 1500 := by
-  sorry
+  classical
+  have h1 := hX.minDist_eq
+  let Dat : Sym2 Pt → Pt → Pt → Prop := fun e v w => e = s(v, w) ∧ v ∈ Sset X ∧ v ∉ Dset X ∧
+    w ∈ Sset X ∧ w ∈ Dset X ∧ dist v w = 1 ∧ IsTEdge F v w ∧ ang (F.u v) (F.u w) ≤ beta
+  let kend : Sym2 Pt → Pt := fun e => if h : ∃ v w, Dat e v w then h.choose else 0
+  have hk : ∀ e ∈ mixedT X F, ∃ w, Dat e (kend e) w := by
+    intro e he
+    have h : ∃ v w, Dat e v w := mixedT_data he h1
+    have : kend e = h.choose := dif_pos h
+    rw [this]; exact h.choose_spec
+  set A := (mixedT X F).image kend
+  -- step 1: at most two mixed edges per K-end
+  have hA : (mixedT X F).card ≤ 2 * A.card := by
+    refine card_le_mul_card_image_of_maps_to (fun e he => mem_image_of_mem _ he) 2 ?_
+    intro v _
+    set G := (mixedT X F).filter (fun e => kend e = v)
+    let P : ℝ → Sym2 Pt → Prop := fun σ e => ∃ w, Dat e v w ∧ 0 < σ * det2 (F.u v) (w - v)
+    have hsplit : G ⊆ G.filter (P 1) ∪ G.filter (P (-1)) := by
+      intro e he
+      obtain ⟨he', hkv⟩ := mem_filter.1 he
+      obtain ⟨w, hd⟩ := hk e he'
+      rw [hkv] at hd
+      obtain ⟨-, hv, -, -, -, hvw, hT, -⟩ := id hd
+      have n := inner_sq_add_det_sq (e := w - v) (F.norm_u hv)
+      rw [← dist_eq_norm, dist_comm, hvw] at n
+      have hne : det2 (F.u v) (w - v) ≠ 0 := by
+        intro h0; rw [h0] at n
+        have := hT.2.1; unfold beta at this; nlinarith [hT.1]
+      rcases hne.lt_or_gt with h | h
+      · exact mem_union.2 (Or.inr (mem_filter.2 ⟨he, w, hd, by linarith⟩))
+      · exact mem_union.2 (Or.inl (mem_filter.2 ⟨he, w, hd, by linarith⟩))
+    have hside : ∀ σ, (G.filter (P σ)).card ≤ 1 := by
+      intro σ
+      refine card_le_one.2 fun e₁ he₁ e₂ he₂ => ?_
+      obtain ⟨w₁, ⟨r₁, hv, -, hw₁, -, d₁, t₁, -⟩, s₁⟩ := (mem_filter.1 he₁).2
+      obtain ⟨w₂, ⟨r₂, -, -, hw₂, -, d₂, t₂, -⟩, s₂⟩ := (mem_filter.1 he₂).2
+      rw [r₁, r₂, tnbr_unique hX hv hw₁ hw₂ d₁ d₂ t₁ t₂ s₁ s₂]
+    calc G.card ≤ (G.filter (P 1) ∪ G.filter (P (-1))).card := card_le_card hsplit
+      _ ≤ (G.filter (P 1)).card + (G.filter (P (-1))).card := card_union_le _ _
+      _ ≤ 2 := by linarith [hside 1, hside (-1)]
+  -- step 2: the boundary sets of Lemma 7.1 and the multiplicity bound
+  let Arc : Pt → Prop := fun v => ∃ Γ : Set Pt, Γ ⊆ frontier (KBall X) ∧ (∀ x ∈ Γ, dist v x ≤ 2) ∧
+    tgap X - Real.arcsin beta ≤ turning (KBall X) Γ
+  have hArc : ∀ v ∈ A, Arc v ∧ v ∈ Sset X := by
+    intro v hv
+    obtain ⟨e, he, rfl⟩ := mem_image.1 hv
+    obtain ⟨w, -, hv, hvD, hw, hwD, hvw, hT, -⟩ := hk e he
+    exact ⟨lemma71_III hX F hv hvD hw hwD hvw hT, hv⟩
+  let Γ : Pt → Set Pt := fun v => if h : Arc v then h.choose else ∅
+  have hΓ : ∀ v ∈ A, Γ v ⊆ frontier (KBall X) ∧ tgap X - Real.arcsin beta ≤ turning (KBall X) (Γ v)
+      ∧ ∀ x ∈ Γ v, dist v x ≤ 2 := by
+    intro v hv
+    have h := (hArc v hv).1
+    have e : Γ v = h.choose := dif_pos h
+    obtain ⟨hsub, hd, htu⟩ := h.choose_spec
+    rw [e]
+    exact ⟨hsub, htu, hd⟩
+  obtain ⟨a, ha⟩ : X.Nonempty := card_pos.1 (by linarith [hX.four_le])
+  have hsum := turning_sum_le_closure (KBall_convex X) (KBall_isCompact ⟨a, ha⟩) A Γ
+    (fun v hv => (hΓ v hv).1) 81 (fun x => by
+      refine card_sep_le_81 (fun a ha b hb hab => ?_) x (fun a ha => ?_)
+      · exact one_le_dist h1 (Sset_sub (hArc a (mem_filter.1 ha).1).2)
+          (Sset_sub (hArc b (mem_filter.1 hb).1).2) hab
+      · have hsub : Γ a ⊆ Metric.closedBall a 2 := fun y hy => by
+          rw [Metric.mem_closedBall, dist_comm]; exact (hΓ a (mem_filter.1 ha).1).2.2 y hy
+        have hx := closure_minimal hsub Metric.isClosed_closedBall (mem_filter.1 ha).2
+        rw [Metric.mem_closedBall] at hx; rw [dist_comm]; exact hx)
+  have hlow : ∑ v ∈ A, (0.835 : ℝ) ≤ ∑ v ∈ A, turning (KBall X) (Γ v) :=
+    sum_le_sum fun v hv => (tgap_arcsin_III hX hτ₁).trans (hΓ v hv).2.1
+  rw [sum_const, nsmul_eq_mul] at hlow
+  have hπ := Real.pi_lt_d4
+  have hAc : (A.card : ℝ) * 0.835 ≤ 2 * π * 81 := by push_cast at hsum; linarith
+  have hA' : ((mixedT X F).card : ℝ) ≤ 2 * A.card := by exact_mod_cast hA
+  nlinarith
 
 /-! ## Region III -/
 
