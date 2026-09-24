@@ -1650,7 +1650,7 @@ private def Runs (F : DirField X) (p : Pt) (N : ℕ) : Prop :=
 /-- `p` is the left base end of some triangle. -/
 private def TriAt (F : DirField X) (p : Pt) : Prop := ∃ v' a' b', IsTri F v' a' b' ∧ a' = p
 
-/-- TODO: prove.
+/-- TODO: none — proved.
 What's missing: `rowR_fun` and `Classical.choose_spec`.
 Acceptance: no `sorry`. Depends on: `rowR_fun`. Difficulty S. -/
 private theorem nxt_eq (hX : Normal X) {F : DirField X} {p q : Pt} (h : RowR F p q) :
@@ -1665,12 +1665,12 @@ private theorem walk_zero (F : DirField X) (p : Pt) : walk F p 0 = p := rfl
 private theorem walk_succ (F : DirField X) (p : Pt) (k : ℕ) :
     walk F p (k + 1) = nxt F (walk F p k) := Function.iterate_succ_apply' _ _ _
 
-/-- TODO: prove. What's missing: restriction. Acceptance: no `sorry`. Difficulty S. -/
+/-- TODO: none — proved. What's missing: restriction. Acceptance: no `sorry`. Difficulty S. -/
 private theorem runs_mono {F : DirField X} {p : Pt} {N M : ℕ} (h : Runs F p N) (hM : M ≤ N) :
     Runs F p M := by
   exact fun k hk => h k (lt_of_lt_of_le hk hM)
 
-/-- TODO: prove. What's missing: `nxt_eq`, `walk_succ`. Acceptance: no `sorry`. Difficulty S. -/
+/-- TODO: none — proved. What's missing: `nxt_eq`, `walk_succ`. Acceptance: no `sorry`. Difficulty S. -/
 private theorem runs_succ (hX : Normal X) {F : DirField X} {p q : Pt} {N : ℕ} (h : Runs F p N)
     (hq : RowR F (walk F p N) q) : Runs F p (N + 1) := by
   intro k hk
@@ -1678,7 +1678,7 @@ private theorem runs_succ (hX : Normal X) {F : DirField X} {p q : Pt} {N : ℕ} 
   · exact h k h1
   · rw [walk_succ, nxt_eq hX hq]; exact hq
 
-/-- TODO: prove. What's missing: induction; `RowR` targets lie in `S`. Difficulty S. -/
+/-- TODO: none — proved. What's missing: induction; `RowR` targets lie in `S`. Difficulty S. -/
 private theorem walk_mem_S {F : DirField X} {p : Pt} {N : ℕ} (h : Runs F p N) (hp : p ∈ Sset X) :
     ∀ k ≤ N, walk F p k ∈ Sset X := by
   intro k hk
@@ -1686,7 +1686,7 @@ private theorem walk_mem_S {F : DirField X} {p : Pt} {N : ℕ} (h : Runs F p N) 
   | zero => exact hp
   | succ k => exact (h k (by omega)).1.2.1
 
-/-- TODO: prove. What's missing: induction; `RowR` preserves `D`-membership. Difficulty S. -/
+/-- TODO: none — proved. What's missing: induction; `RowR` preserves `D`-membership. Difficulty S. -/
 private theorem walk_D_iff {F : DirField X} {p : Pt} {N : ℕ} (h : Runs F p N) :
     ∀ k ≤ N, (walk F p k ∈ Dset X ↔ p ∈ Dset X) := by
   intro k hk
@@ -1695,7 +1695,7 @@ private theorem walk_D_iff {F : DirField X} {p : Pt} {N : ℕ} (h : Runs F p N) 
   | succ k ih => exact (h k (by omega)).2.symm.trans (ih (by omega))
 
 /-- Suffix property of walks (predecessors are unique, `rowR_inj`).
-TODO: prove. What's missing: induction on `i'` generalising `i`. Difficulty S–M. -/
+TODO: none — proved. What's missing: induction on `i'` generalising `i`. Difficulty S–M. -/
 private theorem walk_suffix (hX : Normal X) {F : DirField X} {p p' : Pt} {i i' : ℕ}
     (h : Runs F p i) (h' : Runs F p' i') (he : walk F p i = walk F p' i') (hle : i' ≤ i) :
     walk F p (i - i') = p' := by
@@ -1709,14 +1709,14 @@ private theorem walk_suffix (hX : Normal X) {F : DirField X} {p p' : Pt} {i i' :
     have := ih (i := i - 1) (runs_mono h (by omega)) (runs_mono h' (by omega)) e (by omega)
     rwa [show i - 1 - i' = i - (i' + 1) by omega] at this
 
-/-- TODO: prove. What's missing: `pt_ext_iff`, `rot`, `cos_add`/`sin_add`. Difficulty S. -/
+/-- TODO: none — proved. What's missing: `pt_ext_iff`, `rot`, `cos_add`/`sin_add`. Difficulty S. -/
 private theorem rot_dirVec (ψ φ c : ℝ) : rot ψ (c • dirVec φ) = c • dirVec (φ + ψ) := by
   rw [pt_ext_iff, rot_apply0, rot_apply1]
   simp only [PiLp.smul_apply, smul_eq_mul, dirVec_apply0, dirVec_apply1, Real.cos_add,
     Real.sin_add]
   constructor <;> ring
 
-/-- TODO: prove. What's missing: sum-to-product in coordinates. Difficulty S. -/
+/-- TODO: none — proved. What's missing: sum-to-product in coordinates. Difficulty S. -/
 private theorem dirVec_add_half (φ α : ℝ) :
     dirVec φ + dirVec (φ + α) = (2 * Real.cos (α / 2)) • dirVec (φ + α / 2) := by
   have gen : ∀ x y : ℝ, dirVec (x - y) + dirVec (x + y) = (2 * Real.cos y) • dirVec x := by
@@ -1730,7 +1730,7 @@ private theorem dirVec_add_half (φ α : ℝ) :
 
 /-- Two points of `C(w, R) ∩ X` at angular distance in `(0, 2 arcsin(1/(2R)))` would be `< 1`
 apart and distinct.
-TODO: prove. What's missing: chord `|dirVec x − dirVec y| = 2|sin((x−y)/2)|`. Difficulty M. -/
+TODO: none — proved. What's missing: chord `|dirVec x − dirVec y| = 2|sin((x−y)/2)|`. Difficulty M. -/
 private theorem arc_sep (hX : Normal X) {w : Pt} {R x y : ℝ} (hR : 1 ≤ R)
     (hx : w + R • dirVec x ∈ X) (hy : w + R • dirVec y ∈ X) (h0 : 0 < x - y)
     (h1 : x - y < 2 * Real.arcsin (1 / (2 * R))) : False := by
@@ -1775,7 +1775,7 @@ private theorem arc_sep (hX : Normal X) {w : Pt} {R x y : ℝ} (hR : 1 ≤ R)
   have : 0 < R * (2 * Real.sin d) := by positivity
   linarith
 
-/-- TODO: prove. What's missing: `arcsin` positivity. Difficulty S. -/
+/-- TODO: none — proved. What's missing: `arcsin` positivity. Difficulty S. -/
 private theorem alpha_pos (hX : Normal X) : 0 < alpha1 X ∧ 0 < alpha2 X := by
   have hpos := hX.dist2_pos
   have hΔ : 0 < diam X := hpos.trans_le (dist2_le_diam X)
@@ -1788,7 +1788,7 @@ private theorem alpha_pos (hX : Normal X) : 0 < alpha1 X ∧ 0 < alpha2 X := by
     linarith
 
 /-- The apex angle: if `a − w = Δ dirVec φ` then `v = w + Δ₂ dirVec(φ + α₁/2)`.
-TODO: prove. What's missing: `Bprime_rot` (with `N = 0`), `rot_dirVec`, `dirVec_add_half`,
+TODO: none — proved. What's missing: `Bprime_rot` (with `N = 0`), `rot_dirVec`, `dirVec_add_half`,
 `apex_eq`. Difficulty M. -/
 private theorem apex_angle (hX : Normal X) (F : DirField X) (hτ : tau X = √3 / 2) {v a b : Pt}
     (ht : IsTri F v a b) {φ : ℝ} (hφ : a - F.partner v = diam X • dirVec φ) :
@@ -1823,7 +1823,7 @@ private theorem apex_angle (hX : Normal X) (F : DirField X) (hτ : tau X = √3 
   field_simp
 
 /-- D-walk positions: `walk b k − w = Δ dirVec(φ + (k+1)α₁)`.
-TODO: prove. What's missing: `Bprime_rot` with `z = walk F b`, `rot_dirVec`. Difficulty S–M. -/
+TODO: none — proved. What's missing: `Bprime_rot` with `z = walk F b`, `rot_dirVec`. Difficulty S–M. -/
 private theorem dwalk_angle (hX : Normal X) (F : DirField X) (hτ : tau X = √3 / 2) {v a b : Pt}
     (ht : IsTri F v a b) {φ : ℝ} (hφ : a - F.partner v = diam X • dirVec φ) {N : ℕ}
     (hN : Runs F b N) :
@@ -1837,7 +1837,7 @@ private theorem dwalk_angle (hX : Normal X) (F : DirField X) (hτ : tau X = √3
     rw [hsteps k (by omega), ih (by omega), rot_dirVec]; congr 2; push_cast; ring
 
 /-- D-walks terminate.
-TODO: prove. What's missing: otherwise `Runs F b N` for all `N` (`runs_succ`), contradicting
+TODO: none — proved. What's missing: otherwise `Runs F b N` for all `N` (`runs_succ`), contradicting
 `Bprime_span` and `α₁ > 0`. Difficulty M. -/
 private theorem dwalk_stops (hX : Normal X) (F : DirField X) (hτ : tau X = √3 / 2) {v a b : Pt}
     (ht : IsTri F v a b) : ∃ N, Runs F b N ∧ ¬ ∃ q, RowR F (walk F b N) q := by
@@ -1858,7 +1858,7 @@ private theorem dwalk_stops (hX : Normal X) (F : DirField X) (hτ : tau X = √3
 
 /-- A point in the relative interior of an arc of `C(w, Δ₂)` inside `K`, at distance `Δ₂` from
 `w′ ∈ X`: `w = w′` (the proof of `arc_centre_unique`, without the unused hypotheses).
-TODO: prove. What's missing: copy of the `arc_centre_unique` proof. Difficulty S. -/
+TODO: none — proved. What's missing: copy of the `arc_centre_unique` proof. Difficulty S. -/
 private theorem centre_eq (hX : Normal X) {w w' : Pt} (hw' : w' ∈ X) {θ₁ θ θ₂ : ℝ}
     (h₁ : θ₁ < θ) (h₂ : θ < θ₂)
     (harc : ∀ ψ ∈ Set.Icc θ₁ θ₂, w + dist2 X • dirVec ψ ∈ KBall X)
@@ -1881,7 +1881,7 @@ private theorem centre_eq (hX : Normal X) {w w' : Pt} (hw' : w' ∈ X) {θ₁ θ
 /-- **K-walk on the arc**: with `A = (v, a, b)`, `a − w = Δ dirVec φ`, and a triangle `B` whose
 left base end is `walk b j` (`j < N`), the pure right walk from `v` stays on `C(w, Δ₂)` in steps
 `α₂`, strictly before the apex of `B` (at angle `φ + α₁/2 + (j+1)α₁`).
-TODO: prove. What's missing: induction on `i`: room (`arc_sep`), `arc_sub_K`, `normal_fact`
+TODO: none — proved. What's missing: induction on `i`: room (`arc_sep`), `arc_sub_K`, `normal_fact`
 (`u = −dirVec θ_i`), `rigid_step`, `arith_no_land` + `Bprime_span`; `W_center`, `apex_angle`,
 `dwalk_angle` for the apex of `B`. Difficulty L. -/
 private theorem kwalk_arc (hX : Normal X) (F : DirField X) (hτ : tau X = √3 / 2) {v a b : Pt}
@@ -1890,10 +1890,113 @@ private theorem kwalk_arc (hX : Normal X) (F : DirField X) (hτ : tau X = √3 /
     ∀ i, Runs F v i → walk F v i = F.partner v +
         dist2 X • dirVec (φ + alpha1 X / 2 + (i : ℝ) * alpha2 X) ∧
       (i : ℝ) * alpha2 X < ((j : ℝ) + 1) * alpha1 X := by
-  sorry
+  obtain ⟨hα₁, hα₂⟩ := alpha_pos hX
+  have hR2 := hX.dist2_pos
+  have hΔ2 : dist2 X ≤ diam X := dist2_le_diam X
+  have hL := hX.large
+  have hwX : F.partner v ∈ X := F.partner_mem v ht.1.1
+  have hD := dwalk_angle hX F hτ ht hφ hN
+  have hspan := Bprime_span hX F hτ ht (walk F b) N (walk_zero F b) hN
+  have hjN : ((j:ℝ) + 1) ≤ N := by exact_mod_cast hj
+  have hjα : 0 < ((j:ℝ) + 1) * alpha1 X := by positivity
+  have hmul := mul_le_mul_of_nonneg_right hjN hα₁.le
+  have hkπ : ((j:ℝ) + 1) * alpha1 X < π / 3 := by nlinarith
+  -- the apexes of `A` and `B`
+  have hvpos := apex_angle hX F hτ ht hφ
+  have hwv' : F.partner v = F.partner v' :=
+    W_center hX F hτ ht ht' (walk F b) N (walk_zero F b) hN ⟨j, hj.le, rfl⟩
+  have hφ' : walk F b j - F.partner v' = diam X • dirVec (φ + ((j:ℝ) + 1) * alpha1 X) := by
+    rw [← hwv']; exact hD j hj.le
+  have hv'pos : v' = F.partner v + dist2 X • dirVec (φ + alpha1 X / 2 + ((j:ℝ) + 1) * alpha1 X) := by
+    have e := apex_angle hX F hτ ht' hφ'
+    rw [← hwv'] at e
+    rw [e]; congr 3; ring
+  have hvK : F.partner v + dist2 X • dirVec (φ + alpha1 X / 2) ∈ KBall X := by
+    rw [← hvpos]; exact ball_polygon_a (Sset_sub ht.1.1) ht.1.2.1
+  have hv'K : F.partner v + dist2 X • dirVec (φ + alpha1 X / 2 + ((j:ℝ) + 1) * alpha1 X)
+      ∈ KBall X := by
+    rw [← hv'pos]; exact ball_polygon_a (Sset_sub ht'.1.1) ht'.1.2.1
+  have harc : ∀ ψ ∈ Set.Icc (φ + alpha1 X / 2) (φ + alpha1 X / 2 + ((j:ℝ) + 1) * alpha1 X),
+      F.partner v + dist2 X • dirVec ψ ∈ KBall X := fun ψ hψ =>
+    (arc_sub_K hX hwX (by linarith) (by linarith [Real.pi_pos]) hvK hv'K ψ hψ).1
+  have hv'X : F.partner v + dist2 X • dirVec (φ + alpha1 X / 2 + ((j:ℝ) + 1) * alpha1 X) ∈ X := by
+    rw [← hv'pos]; exact Sset_sub ht'.1.1
+  obtain ⟨ht1, ht2⟩ := tgap_bounds_exact hX hτ
+  have hdt : dist2 X + tgap X = diam X := by unfold tgap; ring
+  intro i
+  induction i with
+  | zero =>
+    intro _
+    simp only [Nat.cast_zero, zero_mul, add_zero, walk_zero]
+    exact ⟨hvpos, hjα⟩
+  | succ i ih =>
+    intro hr
+    obtain ⟨hpos_i, hlt_i⟩ := ih (runs_mono hr (by omega))
+    have hRi : RowR F (walk F v i) (walk F v (i + 1)) := hr i (by omega)
+    have hyS : walk F v i ∈ Sset X := hRi.1.1
+    have hyD : walk F v i ∉ Dset X := fun h => ht.1.2.1 ((walk_D_iff hr i (by omega)).1 h)
+    set θi := φ + alpha1 X / 2 + (i : ℝ) * alpha2 X with hθi
+    set θB := φ + alpha1 X / 2 + ((j:ℝ) + 1) * alpha1 X with hθB
+    rw [hpos_i] at hRi hyS hyD
+    have hyX : F.partner v + dist2 X • dirVec θi ∈ X := Sset_sub hyS
+    have hθ1 : φ + alpha1 X / 2 ≤ θi := by
+      have : 0 ≤ (i : ℝ) * alpha2 X := by positivity
+      linarith
+    -- room for one more step
+    have hroom : θi + alpha2 X ≤ θB := by
+      by_contra h; push Not at h
+      exact arc_sep hX (by linarith) hv'X hyX (by linarith)
+        (by simp only [alpha2] at h; linarith)
+    -- the inward normal at `y_i`
+    have hu : F.u (F.partner v + dist2 X • dirVec θi) = -dirVec θi := by
+      rcases Nat.eq_zero_or_pos i with h0 | hpos
+      · have e0 : θi = φ + alpha1 X / 2 := by rw [hθi, h0]; simp
+        rw [e0, ← hvpos]
+        unfold DirField.u
+        rw [F.partner_K v ht.1.1 ht.1.2.1]
+        have e1 : v - F.partner v = dist2 X • dirVec (φ + alpha1 X / 2) :=
+          sub_eq_iff_eq_add'.2 hvpos
+        rw [← neg_sub, e1, smul_neg, smul_smul, inv_mul_cancel₀ hR2.ne', one_smul]
+      · have hlo : φ + alpha1 X / 2 < θi := by
+          have : 0 < (i : ℝ) * alpha2 X := mul_pos (by exact_mod_cast hpos) hα₂
+          linarith
+        have hn := neg_mem_normalCone (harc θi ⟨hθ1, by linarith⟩)
+          (F.partner_mem _ hyS) (F.partner_K _ hyS hyD)
+          (dist (F.partner v + dist2 X • dirVec θi) (F.partner (F.partner v + dist2 X • dirVec θi)))⁻¹
+          (inv_nonneg.2 dist_nonneg)
+        obtain ⟨c, hc, e⟩ := normal_fact hX hlo (by linarith) harc hn
+        set y := F.partner v + dist2 X • dirVec θi
+        have hFu : F.u y = (dist y (F.partner y))⁻¹ • (F.partner y - y) := rfl
+        rw [← hFu] at e
+        have hc1 : c = 1 := by
+          have := congrArg norm e
+          rw [norm_neg, F.norm_u hyS, norm_smul, norm_dirVec, mul_one, Real.norm_eq_abs,
+            abs_of_nonneg hc] at this
+          exact this.symm
+        rw [hc1, one_smul] at e
+        rw [← e, neg_neg]
+    -- the rigid step
+    have hq := rigid_step hX F hτ hwX (θ := θi) (θ₂ := θB)
+      (fun ψ hψ => harc ψ ⟨hθ1.trans hψ.1, hψ.2⟩) hroom hyS hyD hu hRi
+    have hnext : (((i + 1 : ℕ) : ℝ)) * alpha2 X = (i : ℝ) * alpha2 X + alpha2 X := by
+      push_cast; ring
+    refine ⟨?_, ?_⟩
+    · rw [hq, hθi, hnext, add_assoc]
+    · have hle : (((i + 1 : ℕ) : ℝ)) * alpha2 X ≤ ((j : ℝ) + 1) * alpha1 X := by
+        rw [hnext]; linarith
+      rcases hle.lt_or_eq with h | h
+      · exact h
+      · exfalso
+        refine arith_no_land (R := dist2 X) (t := tgap X) hL ht1 ht2 (j := i + 1) (k := j + 1)
+          (by omega) ?_ ?_
+        · rw [hdt]; push_cast; exact hkπ
+        · rw [hdt]
+          have e2 : alpha2 X = 2 * Real.arcsin (1 / (2 * dist2 X)) := rfl
+          have e1 : alpha1 X = 2 * Real.arcsin (1 / (2 * diam X)) := rfl
+          rw [← e1, ← e2]; push_cast at h ⊢; exact h
 
 /-- K-walks from an apex with a successor terminate.
-TODO: prove. What's missing: `kwalk_arc`, `alpha_pos`, Archimedes. Difficulty S–M. -/
+TODO: none — proved. What's missing: `kwalk_arc`, `alpha_pos`, Archimedes. Difficulty S–M. -/
 private theorem kwalk_stops (hX : Normal X) (F : DirField X) (hτ : tau X = √3 / 2) {v a b : Pt}
     (ht : IsTri F v a b) {N : ℕ} (hN : Runs F b N) {j : ℕ} (hj : j < N) {v' b' : Pt}
     (ht' : IsTri F v' (walk F b j) b') : ∃ i, Runs F v i ∧ ¬ ∃ q, RowR F (walk F v i) q := by
@@ -1933,8 +2036,7 @@ private theorem dirVec_shift {x y : ℝ} (h : dirVec x = dirVec y) (c : ℝ) :
   rw [dirVec_addR, dirVec_addR, h]
 
 /-- **No apex strictly inside** the arc `(θ_A, θ_B)` when `B` is the first successor of `A`.
-TODO: none — proved (modulo the skeleton stubs it uses: `alpha_pos`, `kwalk_arc`,
-`dwalk_angle`, `apex_angle`, `walk_mem_S`, `centre_eq`, `arc_sep`). -/
+TODO: none — proved (child agent r3c3). -/
 private theorem no_apex_inside (hX : Normal X) (F : DirField X) (hτ : tau X = √3 / 2)
     {v a b : Pt} (ht : IsTri F v a b) {N : ℕ} (hN : Runs F b N) {j : ℕ} (hj : j < N)
     {v' b' : Pt} (ht' : IsTri F v' (walk F b j) b')
@@ -2040,8 +2142,9 @@ D-break, (B′)).  K-breaks of different triangles lie on disjoint half-open arc
 (`arc_centre_unique`, one triangle per apex); D-breaks of different walks are distinct
 (`rowR_inj`); K- and D-breaks differ (`∉ D` vs `∈ D`).
 
-TODO: proved from the private skeleton lemmas above (`dwalk_stops`, `kwalk_stops`,
-`no_apex_inside`, `walk_suffix`, …), some of which are still `sorry` — see their docstrings.
+TODO: none — proved (charging relation `Ch`: successor-free triangles are charged to the end
+of their D-walk, the others to the first break of their K-walk (`kwalk_arc`); injectivity via
+`walk_suffix`, `base_apex_unique`, `no_apex_inside`, and `D`-membership).
 What's missing: (was) the injection and its well-definedness (walk iteration via `rowR_fun`, a
 `Nat.find` for the first break), assembling the chain lemmas above.
 Acceptance: no `sorry`.
