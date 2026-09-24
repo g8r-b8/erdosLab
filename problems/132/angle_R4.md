@@ -32,8 +32,20 @@ There are two separate losses.
    - The LP with weights 10/13 and 3/13 gives (18/13)s − (2/13)p + (18/13)r ≤ 18n/13 (`r4_lp_checks.py`).
 2. **Loss 2: the term 6r in (E), μ(δ) ≤ e(S) + 6r (open).** This is now the *entire* gap between 18/13 and 9/7.
    - The exact identity is μ(δ) = e(S) + Σ_{y∈R}(deg y + m_y)/2, where m_y := #δ-neighbours of y in S.
-   - Suppose deg y + m_y ≤ 2c for all but o(n) of the y ∈ R. Then min{μ(Δ₂), μ(δ)} ≤ (3c/(2c+1))·n + o(n) (Region I form; see the table in `r4_lp_checks.py`).
-   - The values are: 2c = 12 gives 18/13, 10 gives 15/11, 9 gives 27/20, 8 gives 4/3, 6 gives **9/7**.
+   - Suppose deg y + m_y ≤ 2c for all but o(n) of the y ∈ R. Then:
+     - in Region I, where e(S) ≤ |S|, min{μ(Δ₂), μ(δ)} ≤ (3c/(2c+1))·n + o(n);
+     - with the |Q| term (Regions II and III), the bound is max{4/3, 3c/(2c+1)}·n, because the weight on μ(Δ₂) must be at least 2/3.
+   - The values are (`r4_lp_checks.py`):
+
+     | 2c | Region I | with the \|Q\| term |
+     |---|---|---|
+     | 12 | 18/13 | 18/13 |
+     | 10 | 15/11 | 15/11 |
+     | 9 | 27/20 | 27/20 |
+     | 8 | 4/3 | 4/3 |
+     | 6 | 9/7 | 4/3 |
+
+   - So 9/7 also needs the Δ₂ side to be sharpened in Regions II and III.
    - In ienjoymath's construction e(S) = |S|, and the patch points have m_y = 0 and deg ≤ 6, i.e. 2c = 6. That is why it sits exactly at 9/7.
 
 ## 2. Region II (τ ≥ √3/2 + 3β) gives e(S) ≤ |S| + |Q| + C
