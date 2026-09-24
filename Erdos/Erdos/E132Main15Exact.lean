@@ -490,6 +490,51 @@ theorem apex_eq (hX : Normal X) (F : DirField X) (hτ : tau X = √3 / 2) {v a b
 
 /-! ## (Arc), (Rigid) -/
 
+/-- Interpolation for sinusoids: `g ≥ m ≥ 0` at the ends of an interval of length `< π` gives
+`g ≥ m` on it (`g(θ) sin(θ₂ − θ₁) = g(θ₁) sin(θ₂ − θ) + g(θ₂) sin(θ − θ₁)`). -/
+private theorem sinusoid_interp {a b m θ₁ θ θ₂ : ℝ} (hm : 0 ≤ m) (h1 : θ₁ ≤ θ) (h2 : θ ≤ θ₂)
+    (hπ : θ₂ - θ₁ < π) (g1 : m ≤ a * Real.cos θ₁ + b * Real.sin θ₁)
+    (g2 : m ≤ a * Real.cos θ₂ + b * Real.sin θ₂) : m ≤ a * Real.cos θ + b * Real.sin θ := by
+  rcases h1.eq_or_lt with rfl | h1'
+  · exact g1
+  have hsΔ : 0 < Real.sin (θ₂ - θ₁) := Real.sin_pos_of_pos_of_lt_pi (by linarith) hπ
+  have hsα : 0 ≤ Real.sin (θ₂ - θ) :=
+    Real.sin_nonneg_of_nonneg_of_le_pi (by linarith) (by linarith)
+  have hsβ : 0 ≤ Real.sin (θ - θ₁) :=
+    Real.sin_nonneg_of_nonneg_of_le_pi (by linarith) (by linarith)
+  have hid : (a * Real.cos θ + b * Real.sin θ) * Real.sin (θ₂ - θ₁) =
+      (a * Real.cos θ₁ + b * Real.sin θ₁) * Real.sin (θ₂ - θ) +
+        (a * Real.cos θ₂ + b * Real.sin θ₂) * Real.sin (θ - θ₁) := by
+    rw [Real.sin_sub, Real.sin_sub, Real.sin_sub]; ring
+  have hsum : Real.sin (θ₂ - θ₁) ≤ Real.sin (θ₂ - θ) + Real.sin (θ - θ₁) := by
+    have e : θ₂ - θ₁ = (θ₂ - θ) + (θ - θ₁) := by ring
+    rw [e, Real.sin_add]
+    have := Real.cos_le_one (θ - θ₁)
+    have := Real.cos_le_one (θ₂ - θ)
+    nlinarith
+  have : m * Real.sin (θ₂ - θ₁) ≤ (a * Real.cos θ + b * Real.sin θ) * Real.sin (θ₂ - θ₁) := by
+    rw [hid]
+    nlinarith [mul_le_mul_of_nonneg_right g1 hsα, mul_le_mul_of_nonneg_right g2 hsβ,
+      mul_le_mul_of_nonneg_left hsum hm]
+  exact le_of_mul_le_mul_right this hsΔ
+
+/-- `|w + R·dirVec φ − x|² = |x − w|² − 2R((x−w)·dirVec φ) + R²`, in coordinates. -/
+private theorem dist_arc_sq (w x : Pt) (R φ : ℝ) :
+    dist (w + R • dirVec φ) x ^ 2 = ((x 0 - w 0) ^ 2 + (x 1 - w 1) ^ 2) -
+      2 * R * ((x 0 - w 0) * Real.cos φ + (x 1 - w 1) * Real.sin φ) + R ^ 2 := by
+  rw [dist_sq_pt]
+  simp only [PiLp.add_apply, PiLp.smul_apply, smul_eq_mul, dirVec_apply0, dirVec_apply1]
+  have := Real.sin_sq_add_cos_sq φ
+  linear_combination R ^ 2 * this
+
+/-- `C(w, R)` membership in `K` along an arc, pointwise criterion. -/
+private theorem arc_mem_iff {w x : Pt} {R φ : ℝ} (hR : 0 < R) :
+    dist (w + R • dirVec φ) x ≤ R ↔
+      ((x 0 - w 0) ^ 2 + (x 1 - w 1) ^ 2) / (2 * R) ≤
+        (x 0 - w 0) * Real.cos φ + (x 1 - w 1) * Real.sin φ := by
+  rw [div_le_iff₀ (by positivity), ← sq_le_sq₀ dist_nonneg hR.le, dist_arc_sq]
+  constructor <;> intro h <;> nlinarith
+
 /-- **(Arc)** spindle convexity: if two points of `C(w, Δ₂)` (`w ∈ X`) at angles `θ₁ ≤ θ₂`,
 `θ₂ − θ₁ < π`, lie in `K`, the whole short arc between them lies in `K`, hence in `∂K`.
 
@@ -503,7 +548,24 @@ theorem arc_sub_K (hX : Normal X) {w : Pt} (hw : w ∈ X) {θ₁ θ₂ : ℝ} (h
     (hθπ : θ₂ - θ₁ < π) (h₁ : w + dist2 X • dirVec θ₁ ∈ KBall X)
     (h₂ : w + dist2 X • dirVec θ₂ ∈ KBall X) :
     ∀ θ ∈ Set.Icc θ₁ θ₂, w + dist2 X • dirVec θ ∈ KBall X ∩ frontier (KBall X) := by
-  sorry
+  intro θ hθ
+  have hR := hX.dist2_pos
+  have hK : w + dist2 X • dirVec θ ∈ KBall X := by
+    rw [mem_KBall]
+    intro x hx
+    rw [arc_mem_iff hR]
+    have g1 := (arc_mem_iff (x := x) (φ := θ₁) hR).1 ((mem_KBall.1 h₁) x hx)
+    have g2 := (arc_mem_iff (x := x) (φ := θ₂) hR).1 ((mem_KBall.1 h₂) x hx)
+    exact sinusoid_interp (by positivity) hθ.1 hθ.2 hθπ g1 g2
+  refine ⟨hK, mem_frontier_of_normal hK (n := dirVec θ) ?_ ?_⟩
+  · intro h0; have := norm_dirVec θ; rw [h0, norm_zero] at this; norm_num at this
+  · have hd : dist (w + dist2 X • dirVec θ) w = dist2 X := by
+      rw [dist_eq_norm, add_sub_cancel_left, norm_smul, norm_dirVec, mul_one, Real.norm_eq_abs,
+        abs_of_pos hR]
+    have := neg_mem_normalCone hK hw hd (dist2 X)⁻¹ (inv_nonneg.2 hR.le)
+    have e : -((dist2 X)⁻¹ • (w - (w + dist2 X • dirVec θ))) = dirVec θ := by
+      rw [sub_add_cancel_left, smul_neg, neg_neg, smul_smul, inv_mul_cancel₀ hR.ne', one_smul]
+    rwa [e] at this
 
 /-- **(Rigid), normal fact**: at a relative-interior point of an arc of `C(w, Δ₂)` contained in
 `K`, the outer normal cone is the single ray through `dirVec θ`.
