@@ -1,0 +1,237 @@
+% ---------------------------------------------------------------------------
+% Fragment for paper v2, branch "oddn-include".
+% To be inserted into \section{Sets in convex position} (sec:convex), after the
+% paragraph on odd n (the configuration D = m+1, k = 2, m-1 frequent classes).
+% Uses only macros/environments of paper.tex (amsart; lemma, proposition,
+% corollary, remark; cleveref). Bib keys used: Fi95, Alt63, Alt72.
+% ---------------------------------------------------------------------------
+
+\subsection{Odd \texorpdfstring{$n$}{n}: rigidity lemmas for the remaining configuration}\label{sec:oddrigid}
+
+For odd $n=2m+1$, a set in convex position with $k\le2$ has $D=m+1$ and $m-1$ frequent distances (see above). This subsection records rigidity statements about convex $(2m+1)$-sets with $m+1$ distances. They are proved in full, but each of them excludes only a special sub-configuration. They do not prove $k\ge3$ for any odd $n$ not already covered above; see \cref{rem:oddscope}.
+
+\emph{Conventions.} A convex polygon $Q=(1,2,\dots,q)$ is listed in convex cyclic order, and we identify a vertex with its label, so $|ij|$ is the distance between vertices $i$ and $j$. In this subsection the distinct distances of a finite set $Y$ are listed in \emph{decreasing} order, $e_1(Y)>e_2(Y)>\cdots>e_{D(Y)}(Y)$, so $e_1(Y)=\operatorname{diam}Y$. A pair $(i,j)$ is \emph{max} in $Q$ if $|ij|=e_1(Q)$, and \emph{uniquely max} if moreover no other pair of $Q$ has this length. Points $v_1,\dots,v_s$ form a \emph{regular arc} with centre $o$, radius $r$ and step $\theta\in(0,\pi)$ if $v_i=o+r(\cos(\varphi+i\theta),\sin(\varphi+i\theta))$ for some $\varphi$ and $(s-1)\theta<2\pi$. We write
+\[
+c(w):=2r\sin(w\theta/2),
+\]
+so $|v_iv_j|=c(j-i)$ for $i<j$. For $w\theta\le\pi$ the chord $c(w)$ increases with $w$. Moreover, $c(1)<\dots<c(s-1)$ if and only if $(2s-3)\theta<2\pi$.
+
+We use two elementary facts.
+\begin{itemize}[leftmargin=2em]
+\item[(P)] Given two points $a\ne b$ and two lengths, there is at most one point on each open side of the line $ab$ with these distances to $a$ and $b$ (the fact behind Lemma~T in \cref{sec:sat}).
+\item[(Cy)] If $Y$ lies on a circle, every distance class of $Y$ has maximum degree at most $2$, hence at most $|Y|$ pairs.
+\end{itemize}
+We also use the following two lemmas of Altman~\cite{Alt63}, in the form stated in~\cite[p.~69]{Fi95}. Let $Q=(1,\dots,q)$ be a convex polygon with $e_i=e_i(Q)$.
+\begin{itemize}[leftmargin=2em]
+\item[(A1)] If the side $(1,q)$ is max, then $D(Q)\ge q-2$; if it is uniquely max, then $D(Q)\ge q-1$.
+\item[(A2)] If $(1,q)$ is uniquely max and $D(Q)=q-1$, then $|k,q-k+1|=e_{2k-1}$ for $1\le k\le\lfloor q/2\rfloor$, and $|k,q-k+2|=|k-1,q-k+1|=e_{2k-2}$ for $2\le k\le\lfloor(q+1)/2\rfloor$. Equivalently, with $f(w):=e_{q-w}$ for $1\le w\le q-1$,
+\begin{equation}\label{eq:altman2}
+|ij|=f(j-i)\qquad\text{for all }1\le i<j\le q\text{ with }q\le i+j\le q+2 .
+\end{equation}
+\end{itemize}
+(The equivalence is a re-indexing: the pairs with $i+j=q+1$ are the $(k,q+1-k)$, and those with $i+j\in\{q,q+2\}$ are the $(k-1,q+1-k)$ and $(k,q+2-k)$.) Note that $f(1)<f(2)<\dots<f(q-1)=e_1$.
+
+\begin{lemma}[arc rigidity]\label{lem:arcrigid}
+Let $s\ge5$, and let $v_1,\dots,v_s$ be a regular arc on a circle $O$ with centre $o$, radius $r$ and step $\theta$, where $(2s-3)\theta<2\pi$. Let $w$ be a point such that $(v_1,\dots,v_s,w)$ is a strictly convex polygon in this cyclic order, and suppose that $|wv_i|\in\{c(1),\dots,c(s-1)\}$ for every $i$. Then $w\in O$ or $w=o$.
+\end{lemma}
+
+\begin{proof}
+Suppose $w\notin O$ and $w\ne o$. Write $|wv_i|=c(\rho_i)$ with $\rho_i\in\{1,\dots,s-1\}$. Recall that $\theta<\pi$.
+
+\emph{Step 1: $|\rho_i-\rho_{i+1}|\ne1$ for $1\le i<s$.} Suppose $\rho_i=j$ and $\rho_{i+1}=j+1$. Let $p\in O$ be the point obtained by rotating $v_i$ about $o$ through the angle $j\theta$ away from $v_{i+1}$. Then $|pv_i|=c(j)$ and $|pv_{i+1}|=c(j+1)$, because $(j+1)\theta\le(s-1)\theta<2\pi$. Since $(j+1)\theta<2\pi$, $p$ is not on the closed minor arc between $v_i$ and $v_{i+1}$. Hence $p$ lies on the same side of the line $v_iv_{i+1}$ as $o$, as do all $v_k$ with $k\ne i,i+1$. By strict convexity, $w$ lies on the same side of that line as those $v_k$. By (P), $w=p\in O$, a contradiction. The case $\rho_i=j+1$, $\rho_{i+1}=j$ is symmetric.
+
+\emph{Step 2: monotone runs.} Let $t:=|ow|>0$ and let $\epsilon_\pm:=o\pm r(w-o)/t\in O$. For $v\in O$ we have $|wv|^2=r^2+t^2-2rt\cos\psi(v)$, where $\psi(v)\in[0,\pi]$ is the angle $\angle(v\,o\,\epsilon_+)$. So $|wv|$ is a strictly increasing function of $\psi(v)$. Along any arc of $O$ whose interior contains neither $\epsilon_+$ nor $\epsilon_-$, the function $\psi$ is strictly monotone. Let $v_i,\dots,v_j$ be points of such an arc. Then $\rho_i,\dots,\rho_j$ is strictly monotone, and by Step~1 consecutive terms differ by at least $2$. As $1\le\rho\le s-1$, this gives $1+2(j-i)\le s-1$, i.e.
+\begin{equation}\label{eq:runlength}
+\text{a run } v_i,\dots,v_j \text{ has at most } s/2 \text{ points.}
+\end{equation}
+
+\emph{Step 3: position of $\epsilon_\pm$.} Let $A$ be the arc of $O$ from $v_1$ to $v_s$ through the $v_i$. It has length $(s-1)\theta<2\pi$, and $A^\circ$ denotes its interior.
+\begin{itemize}[leftmargin=2em]
+\item If neither $\epsilon_+$ nor $\epsilon_-$ lies in $A^\circ$, then all $s$ points form one run, contradicting \eqref{eq:runlength}.
+\item If both lie in $A^\circ$, then $A$ contains one of the two open half-circles bounded by $\epsilon_\pm$. That half-circle has length $\pi$. An open arc of length $\pi$ contains at least $\lceil\pi/\theta\rceil-1$ points of the progression of step $\theta$. Since $\pi/\theta>s-\tfrac32$, this half-circle contains at least $s-2$ of the points $v_i$, and these form a run. By \eqref{eq:runlength}, $s-2\le s/2$, so $s\le4$, a contradiction.
+\item Suppose exactly one of them, say $\epsilon$, lies in $A^\circ$.
+ \begin{itemize}[leftmargin=1.5em]
+ \item If $\epsilon=v_i$, the runs $v_1,\dots,v_i$ and $v_i,\dots,v_s$ give $i+(s-i+1)\le s$, a contradiction.
+ \item Otherwise $\epsilon$ lies strictly between $v_i$ and $v_{i+1}$. The runs $v_1,\dots,v_i$ and $v_{i+1},\dots,v_s$ force $s$ even and $i=s/2$. Each run then consists of $s/2$ integers in $[1,s-1]$ with gaps at least $2$, so its ranks are exactly $1,3,\dots,s-1$.
+ \end{itemize}
+\end{itemize}
+In particular $s$ is even, so $s\ge6$. Since $\psi$ has its minimum ($\epsilon=\epsilon_+$) or its maximum ($\epsilon=\epsilon_-$) between $v_{s/2}$ and $v_{s/2+1}$, we get $\rho_{s/2}=\rho_{s/2+1}=1$ or $\rho_{s/2}=\rho_{s/2+1}=s-1$ respectively. So $w$ lies on the perpendicular bisector $\ell$ of $v_{s/2}v_{s/2+1}$, which passes through $o$.
+
+\emph{Step 4: the two symmetric patterns.} Scale so that $r=1$. Let $u$ be the unit vector from $o$ towards the midpoint of $v_{s/2}v_{s/2+1}$, and write $w=o+\tau u$ with $\tau\ne0$. The points $v_{s/2+1-k}$ and $v_{s/2+k}$ make the angle $\alpha_k:=(2k-1)\theta/2$ with $u$, for $1\le k\le s/2$. These angles lie in $(0,\pi)$, so the numbers $\cos\alpha_k$ are distinct.
+\begin{itemize}[leftmargin=2em]
+\item If $\epsilon=\epsilon_+$ (minimum in the middle), then $\rho_{s/2+k}=2k-1$. So
+\[
+1+\tau^2-2\tau\cos\alpha_k=4\sin^2\alpha_k=4-4\cos^2\alpha_k\qquad(1\le k\le s/2).
+\]
+This is a quadratic equation in $\cos\alpha_k$ with leading coefficient $4$. It cannot have the $s/2\ge3$ distinct roots $\cos\alpha_k$.
+\item If $\epsilon=\epsilon_-$ (maximum in the middle), then $\rho_s=1$, so $|wv_s|=2\sin(\theta/2)$. Since $w\in\ell$, we have $|wv_s|\ge\dist(v_s,\ell)=\sin\beta$ with $\beta:=(s-1)\theta/2$. If $\beta\le\pi/2$, then $\sin\beta\ge2\beta/\pi\ge5\theta/\pi>\theta>2\sin(\theta/2)$. If $\beta>\pi/2$, then $\beta=\frac{(2s-3)\theta+\theta}{4}<\frac\pi2+\frac\theta4$ and $\theta<\frac{2\pi}{2s-3}\le\frac{2\pi}9$. Since $\sin$ decreases on $[\pi/2,\pi]$, $\sin\beta>\cos(\theta/4)>4\sin(\theta/4)\cos(\theta/4)=2\sin(\theta/2)$, using $\sin(\theta/4)<\sin(\pi/18)<\tfrac14$. In both cases $|wv_s|>2\sin(\theta/2)$, a contradiction.\qedhere
+\end{itemize}
+\end{proof}
+
+The congruent-triangle step (Step~1) is the one used by Fishburn in the proof of~\cite[Lemma~8]{Fi95}.
+
+\begin{proposition}[double ladder]\label{prop:ladder}
+Let $q\ge4$ and let $Q=(1,\dots,q)$ be a convex polygon such that:
+\begin{itemize}[leftmargin=2em]
+\item the side $(1,q)$ is uniquely max and $D(Q)=q-1$;
+\item the second-largest distance $e_2(Q)$ is attained by no pair of $Q$ other than $(1,q-1)$ and $(2,q)$.
+\end{itemize}
+Then $1,\dots,q$ form a regular arc (in this order) with $(2q-3)\theta<2\pi$, and $|ij|=c(j-i)=f(j-i)$ for all $i<j$.
+\end{proposition}
+
+\begin{proof}
+Let $e_i=e_i(Q)$ and let $f$ be as in \eqref{eq:altman2}. Every distance of $Q$ is one of $f(1)<\dots<f(q-1)$.
+
+\emph{Step 0: the band.} By (A2), $|1,q-1|=|2,q|=e_2$. Let $Q_1:=(1,\dots,q-1)$. It does not contain the pair $(1,q)$, so its largest distance is $e_2$, attained by its side $(1,q-1)$ and, by hypothesis, by no other pair. By (A1), $D(Q_1)\ge q-2$. Its distances lie among $e_2,\dots,e_{q-1}$, so $D(Q_1)=q-2$ and $e_i(Q_1)=e_{i+1}$. By (A2) for $Q_1$, $|ij|=e_{(q-1)-(j-i)+1}=f(j-i)$ whenever $q-1\le i+j\le q+1$. The same argument for $Q_2:=(2,\dots,q)$, whose labels are shifted by one, gives $|ij|=f(j-i)$ whenever $q+1\le i+j\le q+3$. Together with \eqref{eq:altman2} for $Q$:
+\begin{equation}\label{eq:band}
+|ij|=f(j-i)\qquad\text{for all }1\le i<j\le q\text{ with }q-1\le i+j\le q+3 .
+\end{equation}
+
+\emph{Blocks.} A \emph{block} is a set of consecutive labels $[a,b]=\{a,\dots,b\}$ with $a+b=q+1$ and width $W:=b-a\ge2$. We say $[a,b]$ is \emph{good} if $a,\dots,b$ form a regular arc (centre $o$, radius $r$, step $\theta$) and $f(w)=c(w)$ for $1\le w\le W$. Since the $W+1$ points are distinct points of a circle in convex position, $W\theta<2\pi$, and hence $\theta<\pi$.
+
+\emph{Step 1: a good starting block.} Suppose $q=2h$ is even (so $h\ge2$). By \eqref{eq:band}:
+\begin{itemize}[leftmargin=2em]
+\item $|h-1,h|=|h,h+1|=|h+1,h+2|=f(1)$ (levels $q-1,q+1,q+3$);
+\item $|h-1,h+1|=|h,h+2|=f(2)$;
+\item $|h-1,h+2|=f(3)$.
+\end{itemize}
+Let $\sigma$ be the reflection in the perpendicular bisector of $h,h+1$. It swaps $h$ and $h+1$ and preserves each side of the line through $h,h+1$. So $\sigma(h-1)$ is at distance $f(1)$ from $h+1$ and $f(2)$ from $h$, and lies on the same side of that line as $h+2$. By (P), $\sigma(h-1)=h+2$. So $h-1,h,h+1,h+2$ is an isosceles trapezoid, hence lies on a circle, in this order.
+
+Its three equal chords cut off three of the four arcs between consecutive points. If one of these three arcs exceeded $\pi$, the three would sum to more than $2\pi$. So the three arcs are equal, and the four points form a regular arc. Then $f(w)=c(w)$ for $w=1,2,3$, and $[h-1,h+2]$ is good.
+
+If $q=2h+1$ is odd, then $|h,h+1|=|h+1,h+2|=f(1)$ and $|h,h+2|=f(2)$ by \eqref{eq:altman2}. The circumcircle of $h,h+1,h+2$ shows that $[h,h+2]$ is good.
+
+\emph{Step 2: extension.} Let $[a,b]$ be good with $a\ge2$ (so $b\le q-1$). Put $x:=a-1$ and $y:=b+1$. By \eqref{eq:band} (levels $q-1,q,q+2,q+3,q+1$):
+\begin{equation}\label{eq:xy}
+|x,b-1|=|y,a+1|=f(W),\quad |x,b|=|y,a|=f(W+1),\quad |xy|=f(W+2).
+\end{equation}
+Let $\ell$ be the perpendicular bisector of $ab$, and $\sigma$ the reflection in $\ell$; it maps $a+i$ to $b-i$.
+\begin{enumerate}[leftmargin=2em,label=(\roman*)]
+\item $y=\sigma(x)$. By \eqref{eq:xy}, $\sigma(x)$ and $y$ have the same distances to $a$ and $a+1$. The vertex $x$ lies on the same side of the side-line $(b-1,b)$ of $Q$ as $a$. So $\sigma(x)$ lies on the same side of the line $(a+1,a)$ as $b$, and so does $y$. Now apply (P).
+\item $x\ne o$, since $|x,b-1|\ne|x,b|$. Let $t:=|ox|>0$. For $v\in O$, $|xv|$ is a strictly increasing function of the angle $\psi(v)=\angle(v\,o\,x)\in[0,\pi]$.
+\item Let $p\in O$ be the point obtained by rotating $a$ about $o$ through $\theta$ away from $a+1$. Since $\theta<\pi$, $p$ is not on the minor arc between $a$ and $a+1$. So $p$ lies on the same side of the line $(a,a+1)$ as $b$, and also $|pa|=c(1)$ and $|p,a+1|=c(2)$.
+\end{enumerate}
+Let $A$ be the arc of $O$ from $a$ to $b$ through the block, of length $W\theta$, and $A^\circ$ its interior. We show that $x=p$.
+
+\emph{Case 1: the ray from $o$ through $x$ does not meet $A^\circ$.} On $A$, the function $\psi$ has no interior minimum. So it has at most one turning point, a maximum. Since $|x,b|>|x,b-1|$, i.e.\ $\psi(b)>\psi(b-1)$, the maximum is not at or before $b-1$. Hence $\psi$ is strictly increasing on $a,a+1,\dots,b-1$, and
+\[
+|xa|<|x,a+1|<\dots<|x,b-1|=f(W).
+\]
+These are $W$ distances of $Q$ that are at most $f(W)$. Exactly $W$ distances of $Q$ have this property, namely $f(1),\dots,f(W)$. Hence $|xa|=f(1)=c(1)$ and $|x,a+1|=f(2)=c(2)$. By convexity, $x$ lies on the same side of the line $(a,a+1)$ as $b$. By (iii) and (P), $x=p$.
+
+\emph{Case 2: the ray from $o$ through $x$ meets $A^\circ$.} We show that this is impossible.
+\begin{itemize}[leftmargin=2em]
+\item \emph{$t>r$.} The ray meets a chord $[j,j+1]$ of the block ($a\le j<b$) at distance at most $r$ from $o$. Beyond that point it is on the side of the line $(j,j+1)$ not containing $o$. So $x$ is separated by the side-line $(j,j+1)$ of $Q$ from the other block points, which contradicts convexity.
+\item \emph{$t=r$.} Then $x$ lies on the open arc $A^\circ$. Points of a circle in convex position occur in their circular order. But $x$ would lie strictly between two block points on $O$, while in $Q$ it is adjacent to $a$ and outside the block. This is a contradiction.
+\item \emph{$t<r$.} By convexity, $x$ lies strictly on the other side of the diagonal $(a,b)$ from $a+1,\dots,b-1$.
+ \begin{itemize}[leftmargin=1.5em]
+ \item If $W\theta\ge\pi$, the points $a+1,\dots,b-1$ lie on the major arc (or on a half-circle, if $W\theta=\pi$). So the other side of the line $(a,b)$ is the side away from $o$, or the open half-plane bounded by the diameter $ab$. Its points in the open disc have directions from $o$ in the closed arc complementary to $A^\circ$, a contradiction.
+ \item If $W\theta<\pi$, it is the side containing $o$, so $x$ lies in the triangle $oab$, and so does $y=\sigma(x)$. We may assume that $x$ lies in the closed half-plane of $\ell$ containing $a$; otherwise exchange the roles of $x$ and $y$, of $a$ and $b$. Then, by \eqref{eq:xy} and since $x,b$ lie on opposite sides of $\ell$,
+\[
+2\dist(x,\ell)=|xy|=f(W+2)>f(W+1)=|xb|\ge\dist(x,\ell)+\dist(b,\ell).
+\]
+ So $\dist(x,\ell)>\dist(b,\ell)=\dist(a,\ell)$. But this is impossible for a point of the triangle $oab$ on $a$'s side of $\ell$.
+ \end{itemize}
+\end{itemize}
+
+So $x=p$ and, by (i), $y=\sigma(p)$. The points $a-1,\dots,b+1$ form a regular arc with the same centre, radius and step. By \eqref{eq:xy}, $f(W+1)=|pb|=c(W+1)$ and $f(W+2)=|p\,\sigma(p)|=c(W+2)$, using $(W+2)\theta<2\pi$. Thus $[a-1,b+1]$ is good.
+
+\emph{Conclusion.} Starting from Step~1 and applying Step~2 until $a=1$, we find that $[1,q]$ is good. Here the last application uses $|1q|=f(q-1)$ from \eqref{eq:altman2}. So $|ij|=c(j-i)=f(j-i)$ for all $i<j$. Finally, $c(q-2)=f(q-2)<f(q-1)=c(q-1)$ with $(q-1)\theta<2\pi$ gives $(2q-3)\theta<2\pi$.
+\end{proof}
+
+The strategy of growing a regular arc two points at a time from a symmetric band of Altman equalities is that of Fishburn's proof of~\cite[Lemma~6]{Fi95}, which treats the situation where (A1)--(A2) are replaced by Altman's Lemma~3 on the large polygon. The case analysis in Step~2 replaces his auxiliary Lemma~9.
+
+\begin{corollary}\label{cor:ladder}
+Let $X$ be a set of $n=2m+1\ge7$ points in convex position with $D(X)=m+1$, labelled $1,\dots,n$ in convex cyclic order. Let $q:=m+2$ and $Q:=(1,\dots,q)$. Suppose that $(1,q)$ is uniquely max in $Q$ and that $e_2(X)$ is attained among the pairs of $Q$ only by $(1,q-1)$ and $(2,q)$. Then at most one distance of $X$ is frequent; in particular $k(X)\ge D-1=m\ge3$.
+\end{corollary}
+
+\begin{proof}
+By (A1), $D(Q)\ge q-1=m+1=D(X)$. So $Q$ realises every distance of $X$, $D(Q)=q-1$, and $e_i(Q)=e_i(X)$. By \cref{prop:ladder}, $Q$ is a regular arc on a circle $O$ with centre $o$ and $(2q-3)\theta<2\pi$, and the distances of $X$ are $c(1),\dots,c(q-1)$.
+
+Every $w\in X\setminus Q$ satisfies the hypotheses of \cref{lem:arcrigid} with $s=q\ge5$, so $w\in O$ or $w=o$. If $o\notin X$, then $X$ is cocircular and has no frequent distance by (Cy). If $o\in X$, every distance other than the radius $r$ has all its pairs in the cocircular set $X\setminus\{o\}$, hence at most $2m$ pairs by (Cy). So at most one distance is frequent.
+\end{proof}
+
+So in a convex $(2m+1)$-set with $k\le2$ (so $m-1\ge2$ frequent distances), for every $i$:
+\begin{itemize}[leftmargin=2em]
+\item either the pair $(i,i+m+1)$ is not uniquely max in the $(m+2)$-gon $(i,\dots,i+m+1)$,
+\item or the second-largest distance occurs in that $(m+2)$-gon at a pair other than $(i,i+m)$ and $(i+1,i+m+1)$.
+\end{itemize}
+Here labels are taken modulo $n$.
+
+For a point strictly inside a circle we also have a quantitative rigidity statement.
+
+\begin{lemma}[Lipschitz lemma]\label{lem:lipschitz}
+Let $w$ lie strictly inside a circle $G$ with centre $O$ and radius $R$. For $\alpha\in\R$ let $g(\alpha):=O+R(\cos\alpha,\sin\alpha)$ and $B(\alpha):=2\arcsin\bigl(|w\,g(\alpha)|/2R\bigr)$, the central angle of a chord of $G$ of length $|w\,g(\alpha)|$. Then $|B(\alpha)-B(\alpha')|<|\alpha-\alpha'|$ for all $\alpha\ne\alpha'$.
+
+Consequently, let $u,u'$ be vertices of a regular $M$-gon inscribed in $G$ that are $\kappa$ steps apart along $G$, and suppose that $|wu|$ and $|wu'|$ are chords of that $M$-gon, of spans $i$ and $j$ ($1\le i,j\le M/2$). Then $|i-j|<\kappa$. In particular, if $u,u'$ are adjacent, then $|wu|=|wu'|$.
+\end{lemma}
+
+\begin{proof}
+If $w=O$, then $B$ is constant. Otherwise let $\rho:=|Ow|\in(0,R)$, let $\gamma:=\alpha-\arg(w-O)$, and let $F:=|w\,g(\alpha)|$, so $F^2=R^2+\rho^2-2R\rho\cos\gamma$ and $0<R-\rho\le F\le R+\rho<2R$. Then $B$ is differentiable and
+\[
+B'(\alpha)=\frac{\rho\sin\gamma}{F\sqrt{1-F^2/4R^2}},
+\]
+so $|B'|<1$ if and only if $4R^2\rho^2\sin^2\gamma<4R^2F^2-F^4$. One checks the identity
+\[
+4R^2F^2-F^4-4R^2\rho^2\sin^2\gamma=(R^2-\rho^2)(3R^2+\rho^2-4R\rho\cos\gamma).
+\]
+Its right-hand side is at least $(R^2-\rho^2)(3R-\rho)(R-\rho)>0$. So $|B'|<1$ everywhere, and the first claim follows from the mean value theorem.
+
+For the second claim, choose $\alpha,\alpha'$ with $g(\alpha)=u$, $g(\alpha')=u'$ and $|\alpha-\alpha'|=2\pi\kappa/M$. A chord of span $i\le M/2$ has central angle $2\pi i/M$, so $B(\alpha)=2\pi i/M$ and $B(\alpha')=2\pi j/M$.
+\end{proof}
+
+\begin{proposition}[no long arc of $R_{2m+1}$]\label{prop:arcext}
+Let $m\ge4$ and let $X$ be a set of $2m+1$ points in convex position with $D(X)=m+1$. Then $X$ contains no points $u_0,\dots,u_{m+1}$ with all of the following properties:
+\begin{itemize}[leftmargin=2em]
+\item they are consecutive in the convex cyclic order of $X$;
+\item they are consecutive vertices of a regular $(2m+1)$-gon $R$;
+\item $|u_0u_{m+1}|=\operatorname{diam}X$.
+\end{itemize}
+\end{proposition}
+
+\begin{proof}
+Suppose such points exist. Let $U:=\{u_0,\dots,u_{m+1}\}$, and let $G$, $O$, $R_G$ be the circumcircle, centre and radius of $R$. Put $\theta:=2\pi/(2m+1)$ and $c_j:=2R_G\sin(j\theta/2)$ for $1\le j\le m$, the distances of $R$.
+
+Since $U$ contains pairs of spans $1,\dots,m+1$, and span $m+1$ gives the chord $c_m$, $U$ realises $c_1,\dots,c_m$. So the distances of $X$ are $c_1<\dots<c_m$ and one further value $\lambda$. By hypothesis $c_m=|u_0u_{m+1}|=\operatorname{diam}X$, so $\lambda<c_m$.
+
+Let $\nu$ be the unit vector from $O$ towards the midpoint of the arc of $G$ between $u_{m+1}$ and $u_0$ that avoids $U$. This arc has length $m\theta<\pi$. The line $L:=u_0u_{m+1}$ is at distance $R_G\cos(m\theta/2)>0$ from $O$, with $O$ on the side of $U$. By convexity, every $w\in X\setminus U$ lies strictly on the other side of $L$, so $(w-O)\cdot\nu>0$. Fix such a $w$; we show that $w$ is a vertex of $R$.
+
+\emph{$w$ is not outside $G$.} Suppose $|Ow|>R_G$, and let $g$ be the radial projection of $w$ onto $G$. For every $v\in G$, $|wv|>|gv|$: if $w=O+\lambda'(g-O)$ with $\lambda'>1$, then $|wv|^2-|gv|^2=R_G^2(\lambda'-1)(\lambda'+1-2\cos\angle(g\,O\,v))>0$. The antipode $\bar g$ of $g$ satisfies $\angle(\bar g-O,\nu)>\pi/2>m\theta/2$, so $\bar g$ lies on the arc of $U$. Hence some $u\in U$ satisfies $\angle(u\,O\,\bar g)\le\theta/2$, which gives $|gu|\ge2R_G\cos(\theta/4)=c_m$. So $|wu|>c_m=\operatorname{diam}X$, a contradiction.
+
+\emph{If $w\in G$, then $w$ is a vertex of $R$.} Otherwise no angle $\angle(u\,O\,w)$ with $u\in U$ is a multiple of $\theta$. Then no $|wu|$ is a chord $c_j$, so $|wu|=\lambda$ for all $m+2\ge3$ points $u\in U$. This forces $w=O\notin G$.
+
+\emph{$w$ is not strictly inside $G$.} Suppose $|Ow|<R_G$. Then $w$ lies in the open circular segment cut off by $L$, so $w\ne O$ and the direction $\epsilon$ of $w-O$ lies within angle $m\theta/2<\pi/2$ of $\nu$. So $-\epsilon$ lies in the interior of the arc of $U$. As in Step~2 of \cref{lem:arcrigid}, the sequence $F_i:=|wu_i|$ ($0\le i\le m+1$) is strictly increasing up to the direction $-\epsilon$ and strictly decreasing after it. Hence:
+\begin{itemize}[leftmargin=2em]
+\item $F_i=F_{i+1}$ for at most one $i$ (the \emph{tie});
+\item each value occurs at most twice;
+\item $F_i=F_j$ with $i\ne j$ only if $u_i,u_j$ are mirror images in the line $Ow$.
+\end{itemize}
+By \cref{lem:lipschitz}, two adjacent positions $i,i+1$ with $F_i,F_{i+1}\in\{c_1,\dots,c_m\}$ form the tie.
+
+At most two positions have $F_i=\lambda$. They cut $\{0,\dots,m+1\}$ into at most three runs of chord-valued positions. Each run has at most one position, except that one run may contain the tie. So there are at most $4$ chord-valued positions, and $m+2\le6$. This is a contradiction for $m\ge5$.
+
+For $m=4$, equality must hold throughout. There are two $\lambda$-positions and a tie, and both pairs are symmetric about the line $Ow$, which bisects the tie. Since the three runs have sizes $1,1,2$ and the size-$2$ run contains the tie, the only symmetric arrangement has the tie at positions $2,3$ and $\lambda$ at positions $1,4$. So the pattern is
+\[
+(F_0,\dots,F_5)=(c_{b'},\lambda,c_b,c_b,\lambda,c_{b'}),\qquad b'<b.
+\]
+\Cref{lem:lipschitz} for $u_0,u_2$ (two steps apart) gives $b'=b-1$, with $2\le b\le4$. Normalise $R_G=1$, $u_j=(\cos j\theta,\sin j\theta)$ and $w=\tau(\cos7\theta,\sin7\theta)$ (the direction opposite to the midpoint of $u_2u_3$). The equation $|wu_2|^2-|wu_0|^2=c_b^2-c_{b-1}^2$ is linear in $\tau$ and determines it. Substituting into $|wu_0|^2-c_{b-1}^2$ gives, for $b=2,3,4$, the numbers $0.6304\ldots$, $-0.4967\ldots$ and $-1.9811\ldots$. These are algebraic numbers with minimal polynomials $x^3-9x^2-9x+9$, $9x^3+9x^2-36x-19$ and $9x^3+9x^2-18x-1$ respectively. None of these polynomials vanishes at $0$, so the two equations are inconsistent.
+
+Hence every $w\in X\setminus U$ is a vertex of $R$. Then $X$ is the vertex set of $R$, so $D(X)=m$, a contradiction.
+\end{proof}
+
+\begin{remark}[scope]\label{rem:oddscope}
+\begin{enumerate}[leftmargin=2em,label=(\alph*)]
+\item \emph{What is not proved.} \Cref{cor:ladder} uses only that at least two distances are frequent, and \cref{prop:arcext} uses no multiplicity information at all. The complementary situation is not excluded: every $(m+2)$-gon $(i,\dots,i+m+1)$ either has $(i,i+m+1)$ not uniquely max, or has its second-largest distance at a further pair. (A pair $(i,i+m+1)$ that is uniquely max in its $(m+2)$-gon is automatically a diameter of $X$, by (A1). So nothing is said when no such pair is a diameter.) The cocircular sets $R_{n+1}$ minus one vertex and $R_{n+2}$ minus two vertices have $D=m+1$, so any proof that $k\ge3$ must use the multiplicity condition in an essential, global way. The results of this subsection do not decide $k\ge3$ for any odd $n$ that is open.
+\item \emph{Conditional.} Suppose Fishburn's~\cite[Lemma~6]{Fi95} holds for an $(N+2)$-gon under its internal hypotheses alone; it is stated under a global assumption on the whole polygon, and we have not re-derived its proof in our setting. Then \cref{lem:arcrigid,prop:arcext} exclude two further sub-configurations, in which a large side of a diameter satisfies the hypotheses of that lemma. Nothing in this paper depends on this.
+\end{enumerate}
+\end{remark}
+
+\emph{Checks.} The following independent checks were run.
+\begin{itemize}[leftmargin=2em]
+\item \texttt{r1\_geo\_lipschitz.py} verifies the identity in \cref{lem:lipschitz} symbolically. It also computes the three residuals of the case $m=4$ of \cref{prop:arcext} (to $30$ digits). The minimal polynomials quoted there were computed with \texttt{sympy}.
+\item \texttt{r1\_geo\_arc.py} checks \cref{lem:arcrigid} for arcs of $R_{2m+2}$ and $R_{2m+3}$, $m\le12$. It enumerates, at $60$ digits, all intersections of two chord circles about $v_1,v_2$.
+\item \texttt{r1\_geo\_b1step.py} checks the extension step of \cref{prop:ladder}. It scans $4\cdot10^5$ positions of $x$ for each $W\le9$ and finds only $x=p$.
+\item \texttt{r1\_geo\_b1ladder.py} runs least-squares searches for polygons satisfying the hypotheses of \cref{prop:ladder}. At $q=7$ it finds only regular arcs.
+\item \texttt{r1\_geo\_arcext.py} checks \cref{prop:arcext} for $m=4,\dots,7$. It finds only the missing vertices of $R$.
+\end{itemize}
+Only the $m=4$ computation in \cref{prop:arcext} is a proof step. The other scripts are sanity checks with floating-point or finite-precision arithmetic.

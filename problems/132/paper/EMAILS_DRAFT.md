@@ -17,23 +17,24 @@ Fill in every `<…>` placeholder. Take recipient addresses from the authors' **
 - **Dingyuan Liu**, Karlsruhe Institute of Technology. Public pages: https://www.math.kit.edu/iag6/~d.liu/en and https://sites.google.com/view/liudyyy
 
 **To:** `<Clemen address>`, `<Dumitrescu address>`, `<Liu address>`
-**Subject:** An upper bound 54/37 for Problem 1.6 in "On multiplicities of interpoint distances"
+**Subject:** An upper bound 15/11 for Problem 1.6 in "On multiplicities of interpoint distances"
 
 > Dear Dr Clemen, Dr Dumitrescu and Mr Liu,
 >
 > I have been working on Problem 1.6 of your paper "On multiplicities of interpoint distances" (arXiv:2505.04283; Acta Math. Hungar. 2025). It asks for
 > L = limsup_n max_{|X|=n} min{μ(Δ₂), μ(δ)}/n, and the known bounds were 9/7 ≤ L ≤ 3/2. The lower bound 9/7 is a construction posted by the user ienjoymath on the erdosproblems.com #132 forum thread; the upper bound is Vesztergombi's μ(Δ₂) ≤ 3n/2.
 >
-> I have written a paper proving that min{μ(Δ₂), μ(δ)} ≤ (54/37)n + C₀ for every n-point planar set, where C₀ is an absolute constant (not optimised). Hence L ≤ 54/37 ≈ 1.4595. In outline:
-> - apply Vesztergombi's bound to the set S of points having a Δ₂-partner;
-> - show that almost all δ-edges inside S join points of the "Δ₂-boundary" with nearly equal normals;
-> - bound the density of such edges by 4/3 through a rigidity/counting argument.
+> I have written a paper proving that min{μ(Δ₂), μ(δ)} ≤ (15/11)n + C₀ for every n-point planar set, where C₀ is an absolute constant (not optimised). Hence L ≤ 15/11 ≈ 1.3636; in one regime of the proof the bound is (4/3)n + C₀. In outline:
+> - apply Vesztergombi's bound to the points having a Δ₂-partner, keeping track of those with only one partner;
+> - show that almost all δ-edges among these points join points of the "Δ₂-boundary" with nearly equal normals, and that each extra ("rung") edge is paid for by a Δ₂-degree-1 endpoint or a missing tangential edge;
+> - show that the remaining points have at most 4 δ-neighbours among them, up to O(1) exceptions.
 >
-> The theorem is also fully formalised in Lean 4 with Mathlib. There is no `sorry`, and only the standard axioms are used. The formalisation includes Vesztergombi's and Hopf–Pannwitz's bounds, so no result is used as a black box.
+> A weaker bound, 54/37, obtained earlier with the same set-up, is fully formalised in Lean 4 with Mathlib (no `sorry`, standard axioms only, including Vesztergombi's and Hopf–Pannwitz's bounds). The 15/11 bound itself is not formalised.
 >
-> To be clear about scope: this is an upper bound for your Problem 1.6 only. It does not decide whether L = 9/7, and it does not resolve Erdős Problem #132. The paper also has two smaller results on #132:
+> To be clear about scope: this is an upper bound for your Problem 1.6 only. It does not decide whether L = 9/7, and it does not resolve Erdős Problem #132. The paper also has smaller results on #132:
 > - a layer condition under which Δ₂ occurs at most n times;
-> - for convex position, at least three distances of multiplicity in [1, n] for even n ≥ 6 and for n = 7, 9, 11, 13.
+> - for convex position, at least three distances of multiplicity in [1, n] for even n ≥ 6 and for 6 ≤ n ≤ 18 (n = 11, 13, 15, 17 computer-assisted);
+> - for convex sets with all but w points on one circle, at least (n − 3w + 1)/4 such distances when n + w ≥ 91.
 >
 > The even case is a parity-sharp version of the argument in your Theorem 1.2.
 >
@@ -60,11 +61,11 @@ Fill in every `<…>` placeholder. Take recipient addresses from the authors' **
 ## (b) To Thomas Bloom (erdosproblems.com)
 
 **To:** `<contact address from https://www.erdosproblems.com (About/contact page)>`
-**Subject:** Erdős Problem #132: forum post on CDL Problem 1.6 (bound 54/37)
+**Subject:** Erdős Problem #132: forum post on CDL Problem 1.6 (bound 15/11)
 
 > Dear Dr Bloom,
 >
-> I have posted a comment in the #132 forum thread: <link to forum comment>. It gives an upper bound (54/37)n + O(1) for min{μ(Δ₂), μ(δ)}, which is Problem 1.6 of Clemen–Dumitrescu–Liu, the extremal question discussed in that thread. This improves Vesztergombi's 3/2. The proof is in a preprint (<arXiv link>) and is fully formalised in Lean 4/Mathlib: sorry-free, standard axioms only (<repository URL>).
+> I have posted a comment in the #132 forum thread: <link to forum comment>. It gives an upper bound (15/11)n + O(1) for min{μ(Δ₂), μ(δ)}, which is Problem 1.6 of Clemen–Dumitrescu–Liu, the extremal question discussed in that thread. This improves Vesztergombi's 3/2. The proof is in a preprint (<arXiv link>); a weaker bound, (54/37)n + O(1), is fully formalised in Lean 4/Mathlib, sorry-free with standard axioms only (<repository URL>). The 15/11 bound is not formalised.
 >
 > This is partial progress related to #132, not a solution of either question in #132. I mention it in case it is useful for the page's references or the formalisation status.
 >

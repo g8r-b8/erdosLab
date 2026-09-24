@@ -19,6 +19,18 @@ Edward Altman, \emph{On a problem of {P}.~{E}rd{\H{o}}s}, Amer. Math. Monthly
 Gilles Audemard and Laurent Simon, \emph{Predicting learnt clauses quality in
   modern {SAT} solvers}, Proceedings of IJCAI 2009, 2009, pp.~399--404.
 
+\bibitem{BS02}
+Frits Beukers and Chris~J. Smyth, \emph{Cyclotomic points on curves}, Number
+  Theory for the Millennium, I (Urbana, IL, 2000), A K Peters, Natick, MA,
+  2002, pp.~67--85.
+
+\bibitem{kissat}
+Armin Biere, Tobias Faller, Katalin Fazekas, Mathias Fleury, Nils Froleyks, and
+  Florian Pollitt, \emph{{CaDiCaL}, {Gimsatul}, {IsaSAT} and {Kissat} entering
+  the {SAT} {C}ompetition 2024}, Proceedings of SAT Competition 2024: Solver,
+  Benchmark and Proof Checker Descriptions, Department of Computer Science
+  Report Series B, no. B-2024-1, University of Helsinki, 2024, pp.~8--10.
+
 \bibitem{EP132}
 Thomas~F. Bloom, \emph{Erd{\H{o}}s {P}roblem \#132},
   \url{https://www.erdosproblems.com/132}, Accessed 23 September 2026. The page
@@ -77,6 +89,10 @@ Heinz Hopf and Erika Pannwitz, \emph{Aufgabe {N}r.~167}, Jahresber. Deutsch.
   \url{https://www.erdosproblems.com/forum/thread/132}, 25 July 2026; note at
   \url{https://github.com/mathematiclover1337/erdos-132-note}, 2026.
 
+\bibitem{Kn53}
+Martin Kneser, \emph{Absch{\"a}tzung der asymptotischen {D}ichte von
+  {S}ummenmengen}, Math. Z. \textbf{58} (1953), 459--484.
+
 \bibitem{lyfar}
 {lyfar}, \emph{rare-distance-fields},
   \url{https://github.com/lyfar/rare-distance-fields}, 2026, Lean project on
@@ -86,6 +102,10 @@ Heinz Hopf and Erika Pannwitz, \emph{Aufgabe {N}r.~167}, Jahresber. Deutsch.
 \bibitem{MP11}
 Filip Mori\'c and David Pritchard, \emph{Counting large distances in convex
   polygons: a computational approach}, arXiv:1103.0412, 2011.
+
+\bibitem{TV06}
+Terence Tao and Van~H. Vu, \emph{Additive combinatorics}, Cambridge Studies in
+  Advanced Mathematics, vol. 105, Cambridge University Press, 2006.
 
 \bibitem{mathlib}
 {The mathlib Community}, \emph{The {L}ean mathematical library}, Proceedings of
