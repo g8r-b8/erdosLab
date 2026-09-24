@@ -227,6 +227,7 @@ and d_3. So in B1a some d_2 pair of Q1 is (1,k), 2 ≤ k ≤ q−2, or the mirro
 - *B2-4 (conditional on L6).* No interior run diameter has D(U_h) = m: L6 plus arc extension. So in Case B every
   large side U_h realises all m+1 distances, and contains a pair of the second rare distance ρ.
 - *B2-5 (conditional on Fishburn Thm 2, the D = m classification for 2m ≥ 8): a = 2 is impossible in B2.*
+  - **⚠ GAP (found 2026-09-24 by the paper-v2 odd-n drafter, scratchpad/R4/v2/oddn/REPORT.md):** the case where the apex is outside the circle and the missing vertex is not under it is unjustified; the count then only gives m ≤ 5. Fishburn Thm 2 is published, so the label "conditional on Fishburn Thm 2" hides a real gap. Treat B2-5 as UNPROVED.
   - Deleting the apex leaves R_{2m} or R_{2m+1}−1.
   - The apex, inside G, is killed by the Lipschitz corollary; outside G, by rank jumps ≥ 2.
   - Checks: `r1_geo_apex.py`, and the positive control `r1_geo_apex_ctrl.py`.
