@@ -2,9 +2,17 @@
 
 Date: 2026-09-23. Scratch files are in `scratchpad/R4/`, and the scripts are `scripts/r4_*.py`.
 
-**Result: L ≤ 18/13 ≈ 1.3846.** The previous bound was 54/37 ≈ 1.4595, and the lower bound is 9/7 ≈ 1.2857.
+**Result: L ≤ 15/11 ≈ 1.3636.** The previous bound was 54/37 ≈ 1.4595, and the lower bound is 9/7 ≈ 1.2857. The proof has two steps:
+1. 54/37 → 18/13: fix Loss 1, §§2–4.
+2. 18/13 → 15/11: the R-neighbour lemma, §5.1 and Appendix A.
 
-- Two independent referee passes found no gap. One sub-agent checked Region II. For Region III, one sub-agent checked the τ ≠ √3/2 case and a second, independent one checked the τ = √3/2 case.
+Region II alone gives 4/3.
+
+- Referee passes found no gap in any step:
+  - Region II: one referee;
+  - Region III, τ ≠ √3/2: one referee;
+  - Region III, τ = √3/2: two independent referees;
+  - Theorems N1 and N2: one independent referee (REF4).
 - The exact constants and the LP certificates are checked in rationals:
   - `scripts/r4_regionII_checks.py` (17 assertions);
   - `scripts/r4_regionIII_checks.py` (18 assertions);
@@ -282,40 +290,63 @@ The LP uses μ(Δ₂) ≤ p + (3/2)(s − p) + C_V and μ(δ) ≤ s + p + 6r + C
 
 ## 4. Theorem
 
-**Theorem (R4).** Every n-point set X ⊂ ℝ² satisfies min{μ(Δ₂), μ(δ)} ≤ (18/13)·n + C₀ for an absolute constant C₀. Hence **L ≤ 18/13**.
+**Theorem (R4).** There is an absolute constant C₀ such that every n-point set X ⊂ ℝ² satisfies
+
+  min{μ(Δ₂), μ(δ)} ≤ (15/11)·n + C₀.
+
+Hence **L ≤ 15/11**. Two regime refinements:
+- In the nondegenerate regime with τ ≥ √3/2 + 3β (Region II), the bound improves to (4/3)·n + C₀.
+- The degenerate regime Δ > 1.94Δ₂ gives n + 1.
 
 *Proof.*
-1. The degenerate regime and small Δ₂ are handled as in WRITEUP_A2 §8 and §4.
-2. In the nondegenerate regime, §§2–3 together with Region I (WRITEUP_A2 §6) give e(S) ≤ |S| + |Q| + C in every τ-regime. (In Region I, Q = ∅ suffices.)
-3. The two sides are bounded by μ(Δ₂) ≤ p + (3/2)(s − p) + C_V ([Ve87] applied to S∖Q, or Hopf–Pannwitz) and μ(δ) ≤ s + p + 6r + C.
-4. With weights 10/13 and 3/13 these combine to 18n/13 + C. ∎
+1. **Degenerate regime and small Δ₂.** These are handled as in WRITEUP_A2 §8 and §4. The O(1) exceptional sets of the lemmas below only enlarge C₀.
+2. **Step 1: bounding e(S).** In the nondegenerate regime, §§2–3 together with Region I (WRITEUP_A2 §6) give e(S) ≤ |S| + |Q| + C in every τ-regime. (In Region I, Q = ∅ already suffices.)
+3. **Step 2: bounding the R-contribution.** By Theorem N1 (§5.1, Appendix A), deg y + m_y ≤ 10 for all but O(1) points y ∈ R. Hence μ(δ) = e(S) + Σ_{y∈R}(deg y + m_y)/2 ≤ s + p + 5r + C.
+4. **The Δ₂ side.** μ(Δ₂) ≤ p + (3/2)(s − p) + C_V. This is [Ve87] applied to S∖Q, or Hopf–Pannwitz when S∖Q contains no diametral pair.
+5. **Combining.** With weight 8/11 on μ(Δ₂) and 3/11 on μ(δ), the bound is (15/11)(s + r) − (1/11)p + C ≤ 15n/11 + C.
+6. **Region II.** Theorem N2 gives 4r in place of 5r, and weights 2/3 and 1/3 then give 4n/3 + C. ∎
 
-18/13 exceeds 9/7, so this is consistent with ienjoymath's lower bound. The construction lies in Region I (t/δ → 0) and has e(S) = |S|. The Region I LP is tight for the inputs used: the adversary takes s = 12n/13 with r-points of δ-weight 6. Such weight-6 R-points do not occur in the construction.
+If one uses only step 1 together with the trivial bound (E), μ(δ) ≤ e(S) + 6r, the weights 10/13 and 3/13 give 18/13.
 
-## 5. Beyond 18/13: the 6r term
+**Consistency.** The new bound 15/11 exceeds 9/7, so it agrees with ienjoymath's lower bound.
+- The construction lies in Region I (t/δ → 0) and has e(S) = |S|.
+- Its patch points have deg + m ≤ 6, not 10.
+- The LP adversary for 15/11 uses s = 10n/11 together with R-points of δ-weight 5 (deg + m = 10). Whether such R-points can make up Θ(n) of a near-extremal set is exactly the open question of §5.1.
+
+## 5. Loss 2: the 6r term
 
 Both routes attack Loss 2 (§1).
 
-### 5.1 Local route: the R-neighbour lemma (CLAIMED, referee pass in progress)
+### 5.1 Local route: the R-neighbour lemma (PROVED; independent referee REF4: correct)
 
-The full proofs are in `scratchpad/R4/rnb/N1N2_proof.md`. The scripts are `scripts/r4_nb_exact.py` (60-digit sharpness example), `r4_nb_search.py` (adversarial search) and `r4_nb_ring16_check.py` (the construction).
+The full proof is in Appendix A. The scripts are:
+- `scripts/r4_nb_exact.py`: the 60-digit sharpness example;
+- `scripts/r4_nb_search.py`: adversarial search, 0 violations;
+- `scripts/r4_nb_ring16_check.py`: the construction;
+- `scripts/r4_nb_referee_checks.py`: the referee's exact Fraction checks with rigorous Taylor bounds.
 
-**Claimed results.**
-- **Lemma T (thin K).** If some point of ∂K within distance 1 of y is not on the 232-arc around y's nearest boundary point, then diam K < 409, so |X∖D| = O(1).
-  - The proof uses: every point of ∂K lies on some C(w,Δ₂) with w ∈ X and outer normal (p−w)/Δ₂, together with Δ ≤ 1.94Δ₂.
-  - Consequence: the three-row strip obstruction cannot occur.
-- **Lemma BT.** Points y whose 464-arc turns by more than 1/50 number fewer than 6.9·10⁷, by Lemma 3.4 of WRITEUP_A2.
-- **Lemma F (flat case).** Near y, K is the subgraph of a concave function with |f′| ≤ tan(1/50). Hence:
-  - S-neighbours of y satisfy cos ψ > −ε;
-  - D-neighbours satisfy cos ψ ≥ h + t − ε.
-- **Theorem N1 (every τ).** All but O(1) points y ∈ R have m_y ≤ 4, so deg + m ≤ 10.
-  - Combined with §§2–4, this would give **L ≤ 15/11 ≈ 1.3636**.
-- **Theorem N2.** In Region II, deg + m ≤ 8, which would give **4/3 in Region II**.
-- **Sharpness.** 10 cannot be improved locally for τ ≤ √3/2. An exact chord-midpoint configuration has deg = 6 and m = 4, using the identity c_D(0) = τ.
-  - In that example the D-neighbours have no Δ₂-partner.
-  - Whether Θ(n) such y can exist with S-neighbours is open.
+**Theorem N1 (every τ).** All but fewer than 7·10⁷ points y ∈ R have m_y ≤ 4, hence deg y + m_y ≤ 10.
 
-**Status.** Unverified. It will only be promoted to "proved" after the independent referee (`scratchpad/R4/ref4/`) reports.
+*Why.*
+- Points in R∩D have all their neighbours in an open half-plane, so deg + m ≤ 6.
+- R∖D ⊂ int K, because ∂K ⊂ ∪_{w∈X} C(w,Δ₂).
+- **Lemma T (thin K).** If some point of ∂K near y is off the 232-arc around y's nearest boundary point, then K lies in a 400 × 9 box, so |X∖D| = O(1). This uses that every point p ∈ ∂K has an outer normal (p − w)/Δ₂ with w ∈ X, and Δ ≤ 1.94Δ₂.
+- **Lemma BT.** A large turning of the 464-arc happens for O(1) points y, by Lemma 3.4.
+- **Lemma F (flat case).** K is locally the subgraph of a concave function with |f′| ≤ tan(1/50). So every S-neighbour of y lies in an open arc of < 183°, and at most 4 points can sit in such an arc 60° apart.
+
+**Theorem N2 (t > √3/2 + tan(1/50), in particular Region II).** deg y + m_y ≤ 8 for all but O(1) points y.
+
+**Consequence.** μ(δ) ≤ e(S) + 5r + C ≤ s + p + 5r + C. The LP with weights 8/11 on μ(Δ₂) and 3/11 on μ(δ) gives s-coefficient 15/11, r-coefficient 15/11 and p-coefficient −1/11. Hence
+
+  **min{μ(Δ₂), μ(δ)} ≤ (15/11)·n + C for every n-point set, and ≤ (4/3)·n + C in Region II.**
+
+**Sharpness of the local method.** For τ < √3/2, an exact "chord-midpoint fan" has deg = 6 and m = 4 locally:
+- K-row points p± are the ends of a chord of length 2 of C(w,Δ₂), and y is its midpoint;
+- two D-points sit at y ± e/2 + (√3/2)n, using the identity c_D(0) = τ.
+
+So 10 is the best that local arguments can give there. Whether Θ(n) such y can exist, with D-points in S and μ(Δ₂) large, is open.
+
+The natural next step is a charging argument: each 10-point y is the inner apex of a unit D–D edge z₁z₂, and y ↦ z₁z₂ is injective.
 
 ### 5.2 Global route: Euler/peel (PARTIAL; one sub-agent's proof, not refereed)
 
@@ -355,3 +386,225 @@ Def(δ-graph) ≥ 2|S| − o(n), i.e. μ(δ) + (4/3)μ(Δ₂) ≤ 3n + o(n).
 - **Region I accounting.** The server–vertex δ-edges u_i–v_{i+m/2}, u_i–v_{i+m/2+1} are exceptions for u_i (v_{i+m/2} is antipodal to u_i's partner v_i). So e(S) = 2m = |S|, which is exactly Region I's k = 1.
 - **Δ₂-degrees.** Servers have Δ₂-degree 2 and ring vertices have Δ₂-degree 4, so Q = ∅ and μ(Δ₂) = 1.5|S| is tight.
 - **The patch.** Patch points have m_y = 0 and deg ≤ 6, so they contribute 3 each, not 6. That gap is precisely Loss 2.
+
+## Appendix A. The R-neighbour lemma: Theorems N1 and N2 (full proofs, transcribed from the local-route sub-agent; the degree-1 set is renamed Q)
+
+Notation as in problems/132/WRITEUP_A2.md. δ = 1, R := Δ₂, t = Δ − Δ₂, τ = t − (1−t²)/(2R),
+K = ∩_{w∈X} D(w,R), D = diametral endpoints, S = points with a Δ₂-partner, R-set := X∖S (written 𝓡 below
+to avoid a clash with the radius R). For y ∈ 𝓡: deg y = δ-degree, m_y = #δ-neighbours of y in S.
+Standing hypotheses: nondegenerate regime (Δ ≤ 1.94R) and R ≥ 10⁴ (WRITEUP §4). No assumption on τ.
+Checks: `r4_nb_exact.py` (Fractions/Decimal; rigorous rational bounds for sin/cos/tan), `r4_nb_search.py`
+(float screening), `r4_nb_ring16_check.py` (consistency with ienjoymath's construction).
+
+### A.0. Identity, LP, and trivial cases
+
+(0.1) μ(δ) = e(S) + Σ_{y∈𝓡} (deg y + m_y)/2. (S–S edges: e(S); S–𝓡 edges: Σ m_y; 𝓡–𝓡 edges: Σ (deg y − m_y)/2.)
+
+(0.2) LP. With μ(Δ₂) ≤ 1.5s − 0.5p + C and μ(δ) ≤ s + p + c·r + C (p = |Q|), the best weight is
+λ = max{(c−1)/(c+½), 2/3} (λ ≥ 2/3 is needed to kill the p-term), giving
+min{μ(Δ₂),μ(δ)} ≤ max{4/3, 3c/(2c+1)}·n + C. Values: 2c = 6 → 4/3 (NOT 9/7; 9/7 only without the Q term),
+8 → 4/3, 9 → 27/20, 10 → 15/11, 12 → 18/13. Without the Q term (Region I, e(S) ≤ |S| + C) the value is
+3c/(2c+1) for all c ≥ 1. [r4_nb_exact.py (2)]
+
+(0.3) Structure of 𝓡.
+ (a) y ∈ 𝓡 ∩ D: by Lemma 3.2(a) every other point lies in the open half-plane {(x−y)·u_y > 0}; neighbours are
+     pairwise ≥ 60° apart as seen from y, so deg y ≤ 3 and deg y + m_y ≤ 6.
+ (b) ∂K ⊂ ∪_{w∈X} C(w,R): a point x ∈ K with |x−w| < R for all (finitely many) w ∈ X is interior. Hence a point
+     of X∖D on ∂K has a Δ₂-partner, i.e. is in S. With X∖D ⊂ K (Lemma 3.1a): 𝓡∖D ⊂ int K, S∖D = (X∖D) ∩ ∂K.
+ (c) For y ∈ 𝓡∖D put h := dist(y, ∂K) > 0. Every S-neighbour q of y is ∉ int K: either q ∈ S∖D ⊂ ∂K, or
+     q ∈ D, and D ∩ K = ∅ with dist(q,K) ≥ t (Lemma 3.1c). The segment [y,q] leaves K at some b ∈ ∂K, so
+     h ≤ |y b| ≤ 1; for q ∈ D even h ≤ |yb| ≤ 1 − |bq| ≤ 1 − t.
+     **Consequently if h > 1 then m_y = 0 and deg y + m_y ≤ 6.** This is the answer to "points near D-points but
+     far from ∂K": such points do not exist — a D-neighbour forces h ≤ 1 − t, and points with h > 1 have no
+     S-neighbour at all. All y with h ≤ 1 (whatever their D-neighbours) are treated below; D-neighbours enter
+     only through constraint (F3).
+
+Throughout §§1–3, y ∈ 𝓡∖D with h ≤ 1; p₀ ∈ ∂K is a nearest boundary point, n₀ := (p₀ − y)/h is an outer
+normal of K at p₀, H₀ := {x : (x − p₀)·n₀ ≤ 0} ⊃ K, and ℓ₀ = ∂H₀.
+
+Turning (WRITEUP §3): for a closed boundary arc γ, turning(γ) = length of the union of the normal cones at all
+points of γ, endpoints' full cones included. Lemma 3.4 (multiplicity): Σ turning(γ_i) ≤ 2πM if every boundary
+point is in ≤ M of the arcs.
+
+Small-K clause: if per(K) < 464 then diam K < 232, and |X∖D| ≤ (2·232+1)² (disjoint discs of radius ½), so
+|𝓡∖D| = O(1). Assume per(K) ≥ 464 from now on and define
+  **γ_y := the closed arc of ∂K consisting of points at arc-length distance ≤ 232 from p₀.**
+
+### A.1. Thin-K lemma
+
+**Lemma T.** If some b ∈ ∂K ∩ B̄(y,1) is not in γ_y, then diam K < 409, hence |X∖D| ≤ 410² = O(1).
+
+*Proof.* Let ν_b be any outer normal of K at b, H_b = {(x − b)·ν_b ≤ 0} ⊃ K, ℓ_b = ∂H_b. Note
+dist(y, ℓ₀) = h ≤ 1 and dist(y, ℓ_b) ≤ |yb| ≤ 1. Both arcs of ∂K from p₀ to b have length > 232 (b ∉ γ_y).
+
+Case ν_b = n₀. Then ℓ₀ = ℓ_b: otherwise one of p₀ ∈ ℓ₀, b ∈ ℓ_b lies strictly outside the other half-plane, but
+both are in K ⊂ H₀ ∩ H_b. So [p₀, b] ⊂ K ∩ ℓ₀ ⊂ ∂K is a boundary arc of length |p₀b| ≤ 2 < 232. Contradiction.
+
+Case ν_b not parallel to n₀. ℓ₀, ℓ_b meet at A and Z := H₀ ∩ H_b is a closed cone with apex A and opening
+θ = π − ∠(n₀, ν_b) ∈ (0, π). y ∈ Z has distance ≤ 1 to both bounding lines, so |yA| ≤ 1/sin(θ/2) (the set of
+points of the cone at distance ≤ 1 from both lines is a rhombus with far vertex on the bisector at distance
+1/sin(θ/2)). p₀ ∈ ℓ₀ ∩ K ⊂ ℓ₀ ∩ Z, which is the boundary ray of Z on ℓ₀; similarly b lies on the other ray.
+|Ap₀| ≤ |Ay| + |yp₀| ≤ 1 + 1/sin(θ/2), and likewise |Ab|. Let H⁺ be the closed half-plane bounded by line p₀b
+containing A; Z ∩ H⁺ = triangle T(A, p₀, b). If [p₀,b] ⊂ ∂K we are done as before; otherwise the line p₀b meets
+∂K only in p₀, b and ∂K ∩ H⁺ is one of the two arcs from p₀ to b. K ∩ H⁺ ⊂ T is convex, so by monotonicity of
+perimeter, length(∂K ∩ H⁺) + |p₀b| ≤ per(T), i.e. length ≤ |Ap₀| + |Ab| ≤ 2 + 2/sin(θ/2).
+ (i) θ ≥ 1°: length ≤ 2 + 2/sin(0.5°) < 231.2 < 232 [exact, (3)]. Contradiction.
+ (ii) θ < 1°: fatness step below.
+Case ν_b = −n₀ (strip): Z is a strip of width ≤ 2 containing y; treat as (ii) with θ = 0.
+
+*Fatness step (θ < 1° or strip).* Let e be the bisector direction of Z (the strip direction if θ = 0), e⊥ a unit
+normal to it; "level" = coordinate along e, "height" = coordinate along e⊥. The cross-section of Z at level s has
+height-length w(s) = w(s_y) + 2 tan(θ/2)(s − s_y) (s_y the level of y, sign chosen so the cone opens towards
+increasing s; if K extends to the other side the cross-sections are only smaller), and
+w(s_y) = (d₁ + d₂)/cos(θ/2) ≤ 2/cos(θ/2) =: w_y, d_i ≤ 1 the distances from y to the two lines.
+Let [E₋, E₊] be the range of levels of K (it contains s_y), L := E₊ − E₋ > 0 (K has interior), and W the
+height-width of K. Then W ≤ w_y + 2 tan(θ/2)·L, and L ≤ diam K ≤ 2R (K ⊂ D(w,R)).
+Pick a, a′ ∈ K at levels E₋, E₊ and let m := (E₋+E₊)/2. The section of K at level m is a segment of positive
+length (m is an interior level of a convex body with interior) with top p_top and bottom p_bot.
+Let n_top = cos φ·e⊥ + sin φ·e be an outer normal at p_top. From n_top·(a − p_top) ≤ 0 and n_top·(a′ − p_top) ≤ 0,
+with a − p_top = −(L/2)e + v_a e⊥, a′ − p_top = (L/2)e + v_{a′} e⊥, |v_a|, |v_{a′}| ≤ W:
+  −(L/2) sin φ + v_a cos φ ≤ 0,  (L/2) sin φ + v_{a′} cos φ ≤ 0.
+If cos φ ≤ 0 these force v_a, v_{a′} ≥ 0 ≥ v_a + v_{a′} (the midpoint of a a′ is in K, at level m, below p_top),
+so v_a = v_{a′} = 0, sin φ = 0, n_top = −e⊥, and then K lies on or above the line through p_top, contradicting
+p_bot ≠ p_top below it. So cos φ > 0 and |tan φ| ≤ 2W/L. Same at p_bot with −e⊥.
+Every boundary point lies on some C(w,R) with w ∈ X (0.3b), and (p − w)/R is then an outer normal at p (K ⊂ D(w,R)).
+Choose such w_top for p_top and w_bot for p_bot and use their normals above. Then
+  (w_bot − w_top)·e⊥ = (p_bot − p_top)·e⊥ + R(n_top·e⊥ − n_bot·e⊥) ≥ −W + 2R cos φ*,  tan φ* = 2W/L,
+while |w_bot − w_top| ≤ Δ ≤ 1.94R. Suppose L ≥ 400. Then tan φ* ≤ 2w_y/400 + 4 tan(θ/2) and
+W ≤ w_y + 4R tan(θ/2), so (2R cos φ* − W)/R ≥ 2(1 − tan²φ*/2) − 4 tan(θ/2) − w_y/10⁴ > 1.94 + 0.0229
+[exact rational bounds, (3)], contradicting 1.94R. Hence L < 400, W ≤ w_y + 800 tan(0.5°) < 9.0, and
+diam K ≤ L + W < 409. ∎
+
+Remark. The argument only uses boundary points of K and centres in X, so corners and non-X boundary points are
+covered. It kills the "three-row strip" obstruction: a K of width ≈ √3 has length < 409.
+
+### A.2. Big turning is O(1)
+
+**Lemma BT.** Fix ε₀ ∈ (0, π/6). #{y ∈ 𝓡∖D : h ≤ 1, turning(γ_y) > ε₀} < 2πM/ε₀ with M = 468².
+
+*Proof.* If b ∈ γ_y then |b − p₀| ≤ 232 (chord ≤ arc), so |b − y| ≤ 233. The points y are ≥ 1 apart, so for a
+fixed b at most (2·233.5)² ≤ 468² of them (disjoint discs of radius ½ in B(b, 233.5)). Apply Lemma 3.4. ∎
+With ε₀ = 1/50: < 6.9·10⁷ [(3)].
+
+### A.3. Flat-case lemma
+
+**Lemma F.** Suppose ∂K ∩ B̄(y,1) ⊂ γ_y and turning(γ_y) ≤ ε₀ < π/6; put ε := tan ε₀. Use coordinates with
+origin p₀, x-axis t₀ ⊥ n₀, z-axis n₀; so y = (0, −h). Then there is a concave f on [−231, 231] with f(0) = 0,
+f ≤ 0, |f(x)| ≤ ε|x|, whose graph is contained in γ_y ⊂ ∂K, and
+  U := B̄(y,1) ∩ {z < f(x)} ⊂ int K.
+Writing a neighbour as q = y + (sin ψ, cos ψ) (ψ measured from n₀):
+ (F1) every neighbour q ∉ int K (in particular every S-neighbour, and every D-neighbour) has
+      cos ψ ≥ h + f(sin ψ) ≥ h − ε|sin ψ| > −ε;
+ (F2) every neighbour q ∈ S∖D (K-row) has cos ψ = h + f(sin ψ) ∈ [h − ε, h];
+ (F3) every neighbour z ∈ D (whether in S or in 𝓡) has cos ψ ≥ h + t + f(sin ψ) ≥ h + t − ε;
+ (F4) every neighbour in int K has cos ψ < h.
+
+*Proof.* The normal set N(γ_y) is an arc of S¹ of length ≤ ε₀ containing n₀ ∈ N(p₀). Parametrise γ_y by arc length
+s ∈ [−232, 232], γ(0) = p₀. Every one-sided tangent is perpendicular to a normal in N(γ_y), hence within ε₀ of
+±t₀, and (orienting) γ′(s)·t₀ ≥ cos ε₀ > 0. So x(s) := γ(s)·t₀ is strictly increasing with |x(±232)| ≥ 232 cos ε₀
+> 231, and γ_y ⊃ graph of a function f on [−231, 231] with |f′| ≤ tan ε₀ = ε a.e.; f(0) = 0 so |f(x)| ≤ ε|x|.
+f ≤ 0 because K ⊂ H₀. At each graph point the outer normals have positive n₀-component (≥ cos ε₀), and K lies in
+the corresponding supporting half-plane, so K lies below every supporting line of the graph: f is concave.
+U is convex (disc ∩ strict hypograph of a concave function; x-range of B̄(y,1) is [−1,1] ⊂ [−231,231]),
+contains y (−h < 0 = f(0)), and U ∩ ∂K = ∅, since ∂K ∩ B̄(y,1) ⊂ γ_y and γ_y ∩ B̄(y,1) lies on the graph, where
+z = f(x). A connected set meeting int K and missing ∂K lies in int K. So U ⊂ int K.
+(F1) q ∈ B̄(y,1), q ∉ int K ⇒ q ∉ U ⇒ q_z ≥ f(q_x), i.e. cos ψ − h ≥ f(sin ψ); and h > 0.
+(F2) q ∈ ∂K ∩ B̄(y,1) ⊂ graph ⇒ equality.
+(F3) The graph point g = (sin ψ, f(sin ψ)) is in K and lies directly below z (by F1), so
+     t ≤ dist(z, K) ≤ |z − g| = cos ψ − h − f(sin ψ).
+(F4) a neighbour in int K is not on ∂K; if it had cos ψ ≥ h it would satisfy z ≥ 0 ≥ f(x), i.e. lie on or
+     above the graph; points strictly above a graph point are outside K (K below the supporting line), and
+     points on the graph are in ∂K. So cos ψ − h < f(sin ψ) ≤ 0. ∎
+(Every neighbour of y is in int K, in S∖D ⊂ ∂K, or in D; there is no fourth kind, by 0.3b.)
+
+### A.4. Theorem N1 (all τ-regimes)
+
+**Theorem N1.** In the nondegenerate regime with R ≥ 10⁴, for all but C₁ < 7·10⁷ + 2·10⁵ points y ∈ 𝓡:
+m_y ≤ 4, hence deg y + m_y ≤ 10. Consequently μ(δ) ≤ e(S) + 5r + C, and via (0.2):
+Region I (e(S) ≤ |S| + C): 15n/11 + C; Regions II/III (e(S) ≤ |S| + |Q| + C): 15n/11 + C.
+
+*Proof.* y ∈ 𝓡∩D: deg + m ≤ 6 (0.3a). y ∈ 𝓡∖D with h > 1: m = 0 (0.3c). Otherwise h ≤ 1:
+ – if some point of ∂K ∩ B̄(y,1) is outside γ_y: Lemma T, |𝓡∖D| ≤ 410² in total (or the small-K clause);
+ – else if turning(γ_y) > ε₀ = 1/50: Lemma BT, < 6.9·10⁷ such y;
+ – else Lemma F applies. By (F1) every S-neighbour has cos ψ > −ε, i.e. |ψ| < π/2 + arcsin ε: an open arc of length
+   π + 2 arcsin ε < 4π/3. Neighbours are pairwise ≥ 60° apart (distinct points of X are ≥ 1 apart), and an open
+   arc of length < 240° contains at most 4 such points. So m_y ≤ 4. ∎
+Only ε₀ < π/6 is used here, so N1 is uniform and holds in Region I, II, III, at τ = √3/2, for τ ≤ 0 and τ > 1.
+Nothing about rungs or τ enters.
+
+### A.5. Theorem N2 (t > √3/2 + ε; in particular Region II)
+
+**Theorem N2.** Let ε₀ ∈ (0, π/6), ε = tan ε₀, and suppose t > √3/2 + ε (this implies t > ½ + 2ε).
+Then for all but C(ε₀) = 2π·468²/ε₀ + 410² + 465² points y ∈ 𝓡: m_y ≤ 3, and deg y = 6 ⇒ m_y ≤ 2. So
+deg y + m_y ≤ 8, μ(δ) ≤ e(S) + 4r + C and, with e(S) ≤ |S| + |Q| + C, the bound is **4n/3 + C**.
+In Region II (τ ≥ √3/2 + 3β) take ε₀ = 1/50: ε < 0.0201 < 0.03, and t ≥ √3/2 + 3β (WRITEUP §7.1: t ≥ τ if t ≤ 1,
+else t > 1), so the hypothesis holds with an absolute constant.
+
+*Proof.* Exceptions as in N1; so let y be in the flat case of Lemma F, h ≤ 1.
+(i) At most one D-neighbour. By (F3) a D-neighbour has cos ψ ≥ t − ε > √3/2, i.e. |ψ| < 30°; two neighbours at
+    angular distance ≥ 60° cannot both lie in this open 60° arc. (This applies to all D-neighbours, in S or not.)
+(ii) At most one K-row neighbour with ψ ∈ [0, π) and at most one with ψ ∈ (−π, 0]. If 0 ≤ ψ₁ < ψ₂ with
+    ψ₂ − ψ₁ ≥ 60° are both K-row, then by (F1) ψ₂ < 90° + arcsin ε, so (ψ₁+ψ₂)/2 ∈ [30°, 91.2°] and
+    (ψ₂−ψ₁)/2 ∈ [30°, 45.6°], hence cos ψ₁ − cos ψ₂ = 2 sin((ψ₁+ψ₂)/2) sin((ψ₂−ψ₁)/2) ≥ ½ > ε,
+    contradicting (F2) (both cosines lie in [h−ε, h]).
+So m_y ≤ 3, and m_y = 3 means the S-neighbours are one D-point at ψ_D (|ψ_D| < 30°) and K-row points K₊ (ψ ≥ 0),
+K₋ (ψ ≤ 0).
+(iii) deg y = 6 and m_y = 3 is impossible. Six neighbours pairwise ≥ 60° apart are exactly 60° apart: at
+    ψ_D + 60°k. K₊, K₋ are two of the five directions ψ_D ± 60°, ψ_D ± 120°, ψ_D + 180°, with cosines in
+    [h − ε, h] (F2), so they differ by at most ε.
+  • ψ_D + 180°: cos = −cos ψ_D < −√3/2 < −ε, contradicting (F1).
+  • {ψ_D + 60°, ψ_D − 60°}: |cos(ψ_D+60°) − cos(ψ_D−60°)| = √3|sin ψ_D| ≤ ε, so |sin ψ_D| ≤ ε/√3 and
+    cos(ψ_D ± 60°) ≥ ½cos ψ_D − (√3/2)|sin ψ_D| ≥ ½(1 − ε²/3) − ε/2 ≥ ½ − ε. By (F2) h ≥ ½ − ε, and then
+    (F3) gives cos ψ_D ≥ h + t − ε ≥ ½ + t − 2ε > 1. Contradiction.
+  • {ψ_D + 120°, ψ_D − 60°} (or the mirror pair {ψ_D − 120°, ψ_D + 60°}): cos(ψ_D − 60°) = −cos(ψ_D + 120°), so
+    both lie in an interval of length ε only if |cos(ψ_D+120°)| ≤ ε/2; hence h ≤ 3ε/2 by (F2). As
+    ψ_D + 120° ∈ (90°, 150°), this forces ψ_D + 120° ≤ 90° + arcsin(ε/2), i.e. ψ_D + 60° ∈ (30°, 31.2°]. The
+    neighbour at ψ_D + 60° is not in S (m = 3); cos(ψ_D+60°) > ½ > h, so by (F4) it is not in int K, hence it is
+    in D, and (F3) puts a second D-neighbour in |ψ| < 30°, contradicting (i).
+  • {ψ_D + 120°, ψ_D − 120°}: both angles have |ψ| > 90° (|ψ_D| < 30°), so their cosines are < 0 and h ≤ ε by
+    (F2). The neighbours at ψ_D ± 60° are not in S; one of them has |ψ| ≤ 60°, so cos ψ ≥ ½ > h, it is not in
+    int K by (F4), hence in D, and (F3) gives a second D-neighbour in |ψ| < 30°: contradiction with (i).
+  • Two directions on the same side are excluded by (ii).
+Hence deg 6 ⇒ m ≤ 2 (deg + m ≤ 8), and deg ≤ 5 ⇒ deg + m ≤ 5 + 3 = 8. ∎
+
+Regimes. N2 needs t > √3/2 + ε with ε > 0 fixed: it holds uniformly in Region II (and for τ > 1). In Region III
+with τ ≥ √3/2 + η it holds with ε₀ = arctan(η/2), but the exceptional count ~ 1/η is not uniform as η → 0.
+It gives nothing for τ ≤ √3/2 (Region I, lower Region III, τ = √3/2): there only N1 (deg + m ≤ 10) is proved.
+
+### A.6. Sharpness for τ < √3/2 (N1 cannot be improved locally)
+
+Single-arc model (K = D(w,R) near y, |y − w| = R − h). A neighbour at angle ψ from the outward radial satisfies
+|q − w|² = (R−h)² + 1 + 2(R−h)cos ψ, so
+  K-row ⇔ cos ψ = c_K(h) := h + (h² − 1)/(2(R−h)),  D-feasible ⇔ cos ψ ≥ c_D(h) := h + t + ((h+t)² − 1)/(2(R−h)),
+with the identity **c_D(0) = τ** and c_D increasing in h [(1)]. Two D-neighbours 60° apart need c_D(h) ≤ cos 30°,
+so m = 4 or (deg 6, m 3) needs τ < √3/2. For τ < √3/2 it is attained:
+
+Example (verified in 60-digit Decimal, r4_nb_exact.py (4)). w = 0, R = 10⁴. On C(w,R) take chords [p₋,p₊] of
+length 2 (every other chord position); y := chord midpoint (depth R − √(R²−1) ≈ 1/(2R)); e := (p₊−p₋)/2,
+n := y/|y|; z± := y ± e/2 + (√3/2)n; a± := y ± e/2 − (√3/2)n. Then |y p±| = |y z±| = |y a±| = 1, all pairwise
+distances are ≥ 1, the z± lie on C(w, R + t) with t = 0.86598790…, τ = √3/2 − 5.0·10⁻⁵, dist(z±, D(w,R)) = t,
+and a± ∈ int D(w,R). So every y has deg 6, two K-row neighbours and two D-feasible neighbours: deg + m = 10 as
+soon as z± ∈ S. In this one-centre fan the z's have no Δ₂-partner (they are 𝓡∩D, so there m_y = 2); whether
+Θ(n) such y with z± ∈ S can exist globally is OPEN. Locally the constraint on the z's is only dist(z,K) ≥ t, so
+the same local picture is admissible for every t ≤ √3/2 − O(1/R), i.e. throughout Region I.
+Structure of a 10-point (flat case, deg 6, m 4): the order is K,D,D,K at ψ ≈ −90°, −30°, 30°, 90° (within O(ε₀)),
+h ≤ O(ε), |z₁z₂| = 1, and p₋z₁, z₂p₊ are unit edges. y is the inner apex of the equilateral triangle on the
+D–D edge z₁z₂, so y ↦ z₁z₂ is injective. A charging argument on this structure is the next step for Region I.
+
+At τ = √3/2 exactly: N1 holds. In the pure single-arc case deg 6 ∧ m 4 is impossible (c_D(h*) > c_D(0) = √3/2),
+but small corners (turning ≤ ε₀) are not excluded by the argument above, so nothing better than 10 is proved there.
+
+### A.7. Checks
+- ienjoymath ring construction (n = 60, 120, 250): all 𝓡-points have m_y = 0 and deg + m ≤ 6.
+- Float search (172 random local boundaries with corners, R = 10⁴): never m > 4 when turning < 30°. With turning
+  < 30°, τ ≥ √3/2 gives max deg + m = 8 and τ < √3/2 gives max 9 (10 needs the exact chord depth; see §6).
+  10 appeared only with large turning, which is the O(1) case.
+
+**Referee fixes (REF4), which override the text above where they differ.**
+1. **Lemma T, the case cos φ ≤ 0.** Adding the two inequalities gives v_a + v_{a′} = 0. So the midpoint of aa′ is p_top, and a, a′ lie on the supporting line.
+   - If cos φ < 0, then p_bot violates the half-plane.
+   - If cos φ = 0, the two inequalities contradict each other, since L > 0.
+   - Either way, cos φ > 0.
+2. **The bound on |X∖D| in the thin case.** Use the box L < 400, W < 9, which gives fewer than 5106 points. The bound diam K < 409 on its own does not give 410².
+3. **The remark "only ε₀ < π/6 is used".** This needs the sharp form |ψ| < 90° + ε₀ of (F1). The coarse form needs tan ε₀ < 1/2. Neither matters at ε₀ = 1/50.
+4. The degree-1 set is renamed from P₁ to Q.
