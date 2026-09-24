@@ -385,12 +385,100 @@ theorem base_apex_unique (hX : Normal X) (F : DirField X) (hτ : tau X = √3 / 
   · rw [hs]; rcases hκ with rfl | rfl <;> norm_num
   · rw [hτ, abs_le]; constructor <;> nlinarith [Real.sqrt_nonneg 3]
 
+/-- Pure real core in the frame `(e, perp e)`. -/
+private theorem cap_real {x₀ y A B b b' : ℝ} (hy : y ≤ 0) (hA : 0 < A) (hA' : A < 1 / 100)
+    (hB : 0 < B) (hB' : B < 1 / 100) (hb : 0 < b) (hb2 : b ^ 2 = 1 - A ^ 2) (hb' : 0 < b')
+    (hb2' : b' ^ 2 = 1 - B ^ 2) (h1 : 0 ≤ x₀ * A + y * b) (h2 : 0 ≤ (1 - x₀) * B + y * b') :
+    x₀ ^ 2 + y ^ 2 < 1 ∨ (x₀ - 1) ^ 2 + y ^ 2 < 1 := by
+  have hb99 : 99 / 100 ≤ b := by nlinarith
+  have hb99' : 99 / 100 ≤ b' := by nlinarith
+  have hny : 0 ≤ -y := by linarith
+  have k1 : -y * (99 / 100) ≤ -y * b := mul_le_mul_of_nonneg_left hb99 hny
+  have k2 : -y * (99 / 100) ≤ -y * b' := mul_le_mul_of_nonneg_left hb99' hny
+  have hx0 : 0 ≤ x₀ := by
+    by_contra hc; push Not at hc; nlinarith [mul_neg_of_neg_of_pos hc hA]
+  have hx1 : x₀ ≤ 1 := by
+    by_contra hc; push Not at hc
+    have : 1 - x₀ < 0 := by linarith
+    nlinarith [mul_neg_of_neg_of_pos this hB]
+  have hy1 : -y * (99 / 100) ≤ x₀ / 100 := by
+    nlinarith [mul_le_mul_of_nonneg_left hA'.le hx0]
+  have hy2 : -y * (99 / 100) ≤ (1 - x₀) / 100 := by
+    have : 0 ≤ 1 - x₀ := by linarith
+    nlinarith [mul_le_mul_of_nonneg_left hB'.le this]
+  rcases le_total x₀ (1 / 2) with hx | hx
+  · left
+    have : -y ≤ 1 / 100 := by linarith
+    nlinarith
+  · right
+    have : -y ≤ 1 / 100 := by linarith
+    nlinarith
+
+/-- Coordinate form, with `e = q − p`, `v = x − p`. -/
+private theorem cap_coord {e0 e1 v0 v1 a0 a1 c0 c1 n0 n1 : ℝ}
+    (he : e0 ^ 2 + e1 ^ 2 = 1) (ha : a0 ^ 2 + a1 ^ 2 = 1)
+    (hc : c0 ^ 2 + c1 ^ 2 = 1)
+    (hA : 0 < e0 * a0 + e1 * a1) (hA' : e0 * a0 + e1 * a1 < 1 / 100)
+    (hB : 0 < -(e0 * c0 + e1 * c1)) (hB' : -(e0 * c0 + e1 * c1) < 1 / 100)
+    (hdet : a0 * e1 - a1 * e0 < 0) (hdet2 : 0 < e0 * c1 - e1 * c0)
+    (hn : n0 ^ 2 + n1 ^ 2 = 1)
+    (hnq : n0 * e0 + n1 * e1 = 0) (hnu : 0 < n0 * a0 + n1 * a1)
+    (k1 : 0 ≤ v0 * a0 + v1 * a1) (k2 : 0 ≤ (v0 - e0) * c0 + (v1 - e1) * c1)
+    (hcap : v0 * n0 + v1 * n1 ≤ 0) :
+    v0 ^ 2 + v1 ^ 2 < 1 ∨ (v0 - e0) ^ 2 + (v1 - e1) ^ 2 < 1 := by
+  have hn0 : n0 = -(e0 * n1 - e1 * n0) * e1 := by linear_combination (-n0) * he + e0 * hnq
+  have hn1 : n1 = (e0 * n1 - e1 * n0) * e0 := by linear_combination (-n1) * he + e1 * hnq
+  obtain ⟨s, hs⟩ : ∃ s, s = e0 * n1 - e1 * n0 := ⟨_, rfl⟩
+  rw [← hs] at hn0 hn1
+  have hs2 : s ^ 2 = 1 := by
+    have : n0 ^ 2 + n1 ^ 2 = s ^ 2 * (e0 ^ 2 + e1 ^ 2) := by rw [hn0, hn1]; ring
+    rw [he, hn] at this; linarith
+  have hbpos : 0 < e0 * a1 - e1 * a0 := by linarith
+  have hsb : 0 < s * (e0 * a1 - e1 * a0) := by
+    have : n0 * a0 + n1 * a1 = s * (e0 * a1 - e1 * a0) := by rw [hn0, hn1]; ring
+    linarith
+  have hspos : 0 < s := by
+    by_contra hc; push Not at hc
+    have := mul_nonpos_of_nonpos_of_nonneg hc hbpos.le
+    linarith
+  have hs1 : s = 1 := by
+    have : (s - 1) * (s + 1) = 0 := by linear_combination hs2
+    rcases mul_eq_zero.1 this with h | h
+    · linarith
+    · linarith
+  have hy : e0 * v1 - e1 * v0 ≤ 0 := by
+    have : v0 * n0 + v1 * n1 = s * (e0 * v1 - e1 * v0) := by rw [hn0, hn1]; ring
+    rw [hs1] at this; linarith
+  have r := cap_real (x₀ := e0 * v0 + e1 * v1) (y := e0 * v1 - e1 * v0) (A := e0 * a0 + e1 * a1)
+    (B := -(e0 * c0 + e1 * c1)) (b := e0 * a1 - e1 * a0) (b' := e0 * c1 - e1 * c0) hy hA hA'
+    hB hB' hbpos (by linear_combination (a0 ^ 2 + a1 ^ 2) * he + ha) hdet2
+    (by linear_combination (c0 ^ 2 + c1 ^ 2) * he + hc)
+    (by
+      have : (e0 * v0 + e1 * v1) * (e0 * a0 + e1 * a1) + (e0 * v1 - e1 * v0) * (e0 * a1 - e1 * a0)
+          = v0 * a0 + v1 * a1 := by linear_combination (v0 * a0 + v1 * a1) * he
+      linarith)
+    (by
+      have : (1 - (e0 * v0 + e1 * v1)) * -(e0 * c0 + e1 * c1) +
+          (e0 * v1 - e1 * v0) * (e0 * c1 - e1 * c0) = (v0 - e0) * c0 + (v1 - e1) * c1 := by
+        linear_combination (v0 * c0 + v1 * c1) * he
+      linarith)
+  rcases r with r | r
+  · left
+    have : (e0 * v0 + e1 * v1) ^ 2 + (e0 * v1 - e1 * v0) ^ 2 = v0 ^ 2 + v1 ^ 2 := by
+      linear_combination (v0 ^ 2 + v1 ^ 2) * he
+    linarith
+  · right
+    have : (e0 * v0 + e1 * v1 - 1) ^ 2 + (e0 * v1 - e1 * v0) ^ 2 =
+        (v0 - e0) ^ 2 + (v1 - e1) ^ 2 := by
+      linear_combination (v0 ^ 2 + v1 ^ 2 - 1) * he
+    linarith
+
 /-- **(R)** rows are cyclic orders (K-row): the cap of `K` cut off by the line of a pure K–K
 T-edge `pq` (on the side away from `u_p`) lies within distance `< 1` of `p` or `q`.  Hence it
 contains no other point of `X`.  *Not used by the slot formulation.*
 
-TODO: prove.
-What's missing: coordinates `p = (0,0)`, `q = (1,0)`, `u_p = (sin ε, cos ε)`,
+TODO: none — proved (child agent r3c2: `cap_real`, `cap_coord`; `ang(u_p, u_q) ≤ β` unused).
+What's missing: (was) coordinates `p = (0,0)`, `q = (1,0)`, `u_p = (sin ε, cos ε)`,
 `u_q = (−sin ε′, cos ε′)` with `ε, ε′ ∈ (0, arcsin β)`; the cap lies in the triangle
 `{y ≤ 0, y ≥ −x tan ε, y ≥ (x − 1) tan ε′}`, every point of which is within
 `√(1/4 + tan²(arcsin β)) < 1` of `p` or `q`.
@@ -400,7 +488,42 @@ theorem rowR_cap_K (hX : Normal X) (F : DirField X) {p q n : Pt} (h : RowR F p q
     (hpD : p ∉ Dset X) (hn : ‖n‖ = 1) (hnq : inner ℝ n (q - p) = 0)
     (hnu : 0 < inner ℝ n (F.u p)) {x : Pt} (hx : x ∈ KBall X) (hcap : inner ℝ (x - p) n ≤ 0) :
     dist x p < 1 ∨ dist x q < 1 := by
-  sorry
+  have hp : p ∈ Sset X := h.1.1
+  have hq : q ∈ Sset X := h.1.2.1
+  have hqD : q ∉ Dset X := fun hq' => hpD (h.2.2 hq')
+  obtain ⟨hstep, hA, hA', hdet⟩ := h.1.step
+  obtain ⟨-, -, -, -, ⟨hB, hB', -, -⟩, hs2⟩ := T2 hX F h.1
+  have hpK := ball_polygon_a (Finset.mem_filter.1 hp).1 hpD
+  have hqK := ball_polygon_a (Finset.mem_filter.1 hq).1 hqD
+  have k1 : 0 ≤ inner ℝ (x - p) (F.u p) := by
+    have := neg_mem_normalCone hpK (F.partner_mem p hp) (F.partner_K p hp hpD)
+      (dist p (F.partner p))⁻¹ (inv_nonneg.2 dist_nonneg) x hx
+    rw [inner_neg_right] at this
+    have e : F.u p = (dist p (F.partner p))⁻¹ • (F.partner p - p) := rfl
+    rw [e]; linarith
+  have k2 : 0 ≤ inner ℝ (x - q) (F.u q) := by
+    have := neg_mem_normalCone hqK (F.partner_mem q hq) (F.partner_K q hq hqD)
+      (dist q (F.partner q))⁻¹ (inv_nonneg.2 dist_nonneg) x hx
+    rw [inner_neg_right] at this
+    have e : F.u q = (dist q (F.partner q))⁻¹ • (F.partner q - q) := rfl
+    rw [e]; linarith
+  have hup := unit_sq (F.norm_u hp)
+  have huq := unit_sq (F.norm_u hq)
+  have hn' := unit_sq hn
+  have he : ‖q - p‖ ^ 2 = 1 := by rw [hstep]; norm_num
+  rw [norm_sq_pt] at he
+  have hβ : beta = 1 / 100 := rfl
+  rw [hβ] at hA' hB'
+  have d1 := dist_sq_pt x p
+  have d2 := dist_sq_pt x q
+  simp only [inner_pt, det2_pt, PiLp.sub_apply, one_mul] at hA hA' hB hB' hdet hs2
+  simp only [inner_pt, PiLp.sub_apply] at hnq hnu k1 k2 hcap he
+  have r := cap_coord (e0 := q 0 - p 0) (e1 := q 1 - p 1) (v0 := x 0 - p 0) (v1 := x 1 - p 1)
+    he hup huq hA hA' (by linarith) (by linarith) hdet (by linarith) hn' (by linarith)
+    hnu k1 (by linarith) hcap
+  rcases r with r | r
+  · left; nlinarith [dist_nonneg (x := x) (y := p)]
+  · right; nlinarith [dist_nonneg (x := x) (y := q)]
 
 /-! ## (B′), (W) -/
 
