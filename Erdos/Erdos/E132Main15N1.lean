@@ -71,34 +71,59 @@ theorem card_sep_arc_le_four {y n : Pt} (hn : ‖n‖ = 1) (P : Finset Pt)
     (hcone : ∀ q ∈ P, -(1 / 4) < inner ℝ (q - y) n) : P.card ≤ 4 := by
   sorry
 
+/-- Helper: a point strictly inside every disc `D(w, Δ₂)` is interior to `K`. -/
+theorem n1_mem_interior_of_lt {z : Pt} (h : ∀ w ∈ X, dist z w < dist2 X) :
+    z ∈ interior (KBall X) := by
+  have hsub : (⋂ w ∈ X, Metric.ball w (dist2 X)) ⊆ KBall X :=
+    Set.iInter₂_mono fun _ _ => Metric.ball_subset_closedBall
+  have hopen : IsOpen (⋂ w ∈ X, Metric.ball w (dist2 X)) :=
+    isOpen_biInter_finset fun _ _ => Metric.isOpen_ball
+  refine interior_mono hsub (hopen.interior_eq.symm ▸ ?_)
+  simp only [Set.mem_iInter, Metric.mem_ball]
+  exact h
+
 /-- `R ∖ D ⊂ int K` (Appendix A (0.3b)): `y` has no partner at distance `Δ₂` or `Δ`, so
 `|y − w| < Δ₂` for all `w ∈ X`, and a finite intersection of open discs is open.
 
-TODO: prove.
+TODO: none — proved.
 What's missing: `dist y w ≤ Δ₂` (`dist_le_dist2`, `y ∉ D`) and `≠ Δ₂` (`y ∉ S`) for `w ∈ X`,
 `w ≠ y`; then `⋂_{w∈X} ball w Δ₂` is open, contains `y`, and is `⊆ KBall X`.
 Acceptance: no `sorry`.
 Depends on: `dist_le_dist2`, `mem_KBall`. Difficulty S–M. -/
 theorem Rset_interior (hX : Normal X) {y : Pt} (hy : y ∈ Rset X) (hyD : y ∉ Dset X) :
     y ∈ interior (KBall X) := by
-  sorry
+  have hyX : y ∈ X := (mem_sdiff.1 hy).1
+  have hyS : y ∉ Sset X := (mem_sdiff.1 hy).2
+  have hpos := hX.dist2_pos
+  refine n1_mem_interior_of_lt fun w hw => ?_
+  by_cases hwy : w = y
+  · subst hwy; simpa using hpos
+  have hle := dist_le_dist2 hyX hw (dist_ne_diam_of_not_mem_Dset hyX hyD hw hwy)
+  refine lt_of_le_of_ne hle fun heq => hyS ?_
+  exact mem_filter.2 ⟨hyX, w, mem_partners.2 ⟨hw, hwy, heq⟩⟩
 
 /-- Points of `S` are not interior to `K`: `S ∖ D ⊂ ∂K` (`ball_polygon_b`) and `D ∩ K = ∅`
 (`ball_polygon_c` with `t > 0`).
 
-TODO: prove.
+TODO: none — proved.
 What's missing: case split on `q ∈ Dset X`; `frontier ∩ interior = ∅` for a closed set;
 `tgap X > 0` from `Two X`.
 Acceptance: no `sorry`.
 Depends on: `ball_polygon_b`, `ball_polygon_c`, `two_of_pos`. Difficulty S. -/
 theorem Sset_not_interior (hX : Normal X) {q : Pt} (hq : q ∈ Sset X) :
     q ∉ interior (KBall X) := by
-  sorry
+  by_cases hqD : q ∈ Dset X
+  · intro hint
+    have hT := two_of_pos hX.dist2_pos
+    have h := ball_polygon_c hqD (interior_subset hint)
+    rw [dist_self] at h
+    unfold tgap at h; linarith [hT.lt]
+  · exact (ball_polygon_b hq hqD).2
 
 /-- A segment from an interior point to a non-interior point meets the frontier at a point
 `y + λ(q − y)` with `λ ∈ (0, 1]`.
 
-TODO: prove.
+TODO: none — proved.
 What's missing: `λ₀ := sSup {λ ∈ [0,1] | y + λ(q−y) ∈ interior K}`; closedness of `K`
 puts the point at `λ₀` in `K`, maximality puts it outside `interior K`; `λ₀ > 0` since
 `interior K` is open.  (Or: `IsConnected` of the segment + `frontier` meets it.)
@@ -107,19 +132,62 @@ Depends on: Mathlib topology. Difficulty M. -/
 theorem exists_frontier_seg {K : Set Pt} (hKc : IsClosed K) {y q : Pt} (hy : y ∈ interior K)
     (hq : q ∉ interior K) :
     ∃ l : ℝ, 0 < l ∧ l ≤ 1 ∧ y + l • (q - y) ∈ frontier K := by
-  sorry
+  set f : ℝ → Pt := fun l => y + l • (q - y) with hfdef
+  have hf : Continuous f := by fun_prop
+  set S := Set.Icc (0 : ℝ) 1 ∩ f ⁻¹' (interior K)ᶜ with hSdef
+  have hSc : IsClosed S := isClosed_Icc.inter (isOpen_interior.isClosed_compl.preimage hf)
+  have hS1 : (1 : ℝ) ∈ S := ⟨⟨zero_le_one, le_rfl⟩, by simp [f, hq]⟩
+  have hSne : S.Nonempty := ⟨1, hS1⟩
+  have hSbdd : BddBelow S := ⟨0, fun l hl => hl.1.1⟩
+  set l₀ := sInf S with hl₀def
+  have hl₀ : l₀ ∈ S := hSc.csInf_mem hSne hSbdd
+  have hl₀pos : 0 < l₀ := by
+    rcases hl₀.1.1.eq_or_lt with h | h
+    · exfalso
+      have h2 := hl₀.2
+      rw [← h] at h2
+      simp [f] at h2
+      exact h2 hy
+    · exact h
+  refine ⟨l₀, hl₀pos, hl₀.1.2, ?_⟩
+  rw [hKc.frontier_eq]
+  refine ⟨?_, hl₀.2⟩
+  have hin : ∀ l ∈ Set.Ico 0 l₀, f l ∈ K := fun l hl => by
+    by_contra hK
+    have : l₀ ≤ l := csInf_le hSbdd
+      ⟨⟨hl.1, by linarith [hl.2, hl₀.1.2]⟩, fun hi => hK (interior_subset hi)⟩
+    linarith [hl.2]
+  have hcl : l₀ ∈ closure (Set.Ico 0 l₀) := by
+    rw [closure_Ico hl₀pos.ne]; exact ⟨hl₀pos.le, le_rfl⟩
+  have hmem := hf.continuousAt.continuousWithinAt.mem_closure_image hcl
+  exact closure_minimal (Set.image_subset_iff.2 hin) hKc hmem
 
 /-- A nonzero outer normal at a boundary point `b = y + λ(q − y)` (`λ > 0`) of the segment
 from an interior point `y` satisfies `(q − y)·ν > 0`.
 
-TODO: prove.
+TODO: none — proved.
 What's missing: `y + ε ν ∈ K` for small `ε > 0` (interior), so
 `(y + εν − b)·ν ≤ 0`, i.e. `−λ (q−y)·ν + ε‖ν‖² ≤ 0`.
 Acceptance: no `sorry`.
 Depends on: `normalCone`. Difficulty S–M. -/
 theorem inner_pos_of_seg {K : Set Pt} {y q ν : Pt} {l : ℝ} (hy : y ∈ interior K) (hl : 0 < l)
     (hν : ν ∈ normalCone K (y + l • (q - y))) (hν0 : ν ≠ 0) : 0 < inner ℝ (q - y) ν := by
-  sorry
+  obtain ⟨ε, hε, hball⟩ := Metric.mem_nhds_iff.1 (mem_interior_iff_mem_nhds.1 hy)
+  have hνpos : 0 < ‖ν‖ := norm_pos_iff.2 hν0
+  set t := ε / 2 / ‖ν‖ with htdef
+  have ht : 0 < t := by positivity
+  have hmem : y + t • ν ∈ K := hball (by
+    rw [Metric.mem_ball, dist_eq_norm, add_sub_cancel_left, norm_smul, Real.norm_eq_abs,
+      abs_of_pos ht, htdef, div_mul_cancel₀ _ hνpos.ne']
+    linarith)
+  have h := hν _ hmem
+  have e : y + t • ν - (y + l • (q - y)) = t • ν - l • (q - y) := by abel
+  rw [e, inner_sub_left, inner_smul_left, inner_smul_left, real_inner_self_eq_norm_sq] at h
+  simp only [conj_trivial] at h
+  have h2 : 0 < t * ‖ν‖ ^ 2 := by positivity
+  by_contra hc
+  push Not at hc
+  nlinarith
 
 /-! ## The three cases -/
 
@@ -153,14 +221,18 @@ theorem mS_le_four_of_D (hX : Normal X) {y : Pt} (hyX : y ∈ X) (hyD : y ∈ Ds
 /-- **(0.3b)** Every boundary point of `K` lies on a circle `C(w, Δ₂)` with `w ∈ X`, and
 `(b − w)/Δ₂` is then an outer normal at `b`.  (Used in the fatness step of Lemma T.)
 
-TODO: prove.
+TODO: none — proved.
 What's missing: if `|b − w| < Δ₂` for all `w ∈ X` then `b` is interior (finite intersection of
 open discs); `K ⊂ D(w, Δ₂)` gives the normal (`neg_mem_normalCone`).
 Acceptance: no `sorry`.
 Depends on: `mem_KBall`, `neg_mem_normalCone`. Difficulty S–M. -/
 theorem frontier_on_circle (hX : Normal X) {b : Pt} (hb : b ∈ frontier (KBall X)) :
     ∃ w ∈ X, dist b w = dist2 X := by
-  sorry
+  have hbK : b ∈ KBall X := (KBall_isClosed X).closure_eq ▸ hb.1
+  by_contra hne
+  push Not at hne
+  exact hb.2 (n1_mem_interior_of_lt fun w hw =>
+    lt_of_le_of_ne (mem_KBall.1 hbK w hw) (hne w hw))
 
 /-- **Lemma T, fatness step** (Appendix A.1 with REF4 fix 1): if two boundary points within
 distance 1 of `y ∈ K` have nearly antipodal unit outer normals (`K` lies in a cone of opening
@@ -220,14 +292,45 @@ theorem thin_card_le (hX : Normal X) {y b₁ b₂ ν₁ ν₂ : Pt} (hy : y ∈ 
 `|v·ν₁|, |v·ν₂| ≤ 1` for unit `ν₁, ν₂` with `|ν₁·ν₂| ≤ 1 − 10⁻⁴`, then `‖v‖ ≤ 150`.
 (`(1 − c²)‖v‖² = s₁² − 2c s₁s₂ + s₂² ≤ 2(1 + |c|)`, so `‖v‖² ≤ 2/(1 − |c|) ≤ 2·10⁴`.)
 
-TODO: prove.
+TODO: none — proved.
 What's missing: the 2D Gram identity in coordinates (`inner_pt`, `unit_sq`), then `nlinarith`.
 Acceptance: no `sorry`.
 Depends on: `inner_pt`, `norm_sq_pt`. Difficulty S–M. -/
 theorem norm_le_of_inner_bounds {ν₁ ν₂ v : Pt} (hn₁ : ‖ν₁‖ = 1) (hn₂ : ‖ν₂‖ = 1)
     (hc : |inner ℝ ν₁ ν₂| ≤ 1 - 1 / 10 ^ 4) (hs₁ : |inner ℝ v ν₁| ≤ 1)
     (hs₂ : |inner ℝ v ν₂| ≤ 1) : ‖v‖ ≤ 150 := by
-  sorry
+  have ha := unit_sq hn₁
+  have hb := unit_sq hn₂
+  have hv := norm_sq_pt v
+  rw [inner_pt] at hc hs₁ hs₂
+  have key : (1 - (ν₁ 0 * ν₂ 0 + ν₁ 1 * ν₂ 1) ^ 2) * (v 0 ^ 2 + v 1 ^ 2) =
+      (v 0 * ν₁ 0 + v 1 * ν₁ 1) ^ 2 + (v 0 * ν₂ 0 + v 1 * ν₂ 1) ^ 2 -
+        2 * (ν₁ 0 * ν₂ 0 + ν₁ 1 * ν₂ 1) * (v 0 * ν₁ 0 + v 1 * ν₁ 1) *
+          (v 0 * ν₂ 0 + v 1 * ν₂ 1) := by
+    linear_combination ((v 0 * ν₁ 0 + v 1 * ν₁ 1) ^ 2 -
+      (ν₁ 0 ^ 2 + ν₁ 1 ^ 2) * (v 0 ^ 2 + v 1 ^ 2)) * hb +
+      ((v 0 * ν₂ 0 + v 1 * ν₂ 1) ^ 2 - (v 0 ^ 2 + v 1 ^ 2)) * ha
+  rw [← hv] at key
+  generalize ν₁ 0 * ν₂ 0 + ν₁ 1 * ν₂ 1 = c at hc key
+  generalize v 0 * ν₁ 0 + v 1 * ν₁ 1 = s₁ at hs₁ key
+  generalize v 0 * ν₂ 0 + v 1 * ν₂ 1 = s₂ at hs₂ key
+  have hc1 : |c| ≤ 1 := by linarith
+  have hp : |c * s₁ * s₂| ≤ 1 := by
+    rw [abs_mul, abs_mul]
+    have := abs_nonneg c; have := abs_nonneg s₁; have := abs_nonneg s₂
+    calc |c| * |s₁| * |s₂| ≤ 1 * 1 * 1 := by gcongr
+      _ = 1 := by norm_num
+  have hp' := neg_abs_le (c * s₁ * s₂)
+  have h1 : s₁ ^ 2 ≤ 1 := (sq_le_one_iff_abs_le_one s₁).2 hs₁
+  have h2 : s₂ ^ 2 ≤ 1 := (sq_le_one_iff_abs_le_one s₂).2 hs₂
+  have hc2 : c ^ 2 ≤ (1 - 1 / 10 ^ 4) ^ 2 := by
+    rw [← sq_abs]; exact pow_le_pow_left₀ (abs_nonneg c) hc 2
+  have hV0 : 0 ≤ ‖v‖ ^ 2 := by positivity
+  have h4 : (1 - c ^ 2) * ‖v‖ ^ 2 ≤ 4 := by rw [key]; linarith
+  have h5 : (1 - (1 - 1 / 10 ^ 4) ^ 2) * ‖v‖ ^ 2 ≤ (1 - c ^ 2) * ‖v‖ ^ 2 :=
+    mul_le_mul_of_nonneg_right (by linarith) hV0
+  have hVb : ‖v‖ ^ 2 ≤ 150 ^ 2 := by norm_num at h5 ⊢; linarith
+  exact (pow_le_pow_iff_left₀ (norm_nonneg v) (by norm_num) two_ne_zero).1 hVb
 
 /-- **Non-flat, non-thin ⇒ big turning** (Lemma BT, local part): every direction `d` strictly
 between `ν₁` and `ν₂` (short arc, length `∠(ν₁,ν₂) ≥ ‖ν₁ − ν₂‖ > 1/4`) is an outer normal at a
