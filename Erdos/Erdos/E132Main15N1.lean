@@ -316,9 +316,27 @@ theorem thin_box (hX : Normal X) {y b₁ b₂ ν₁ ν₂ : Pt} (hy : y ∈ KBal
         c₁ ≤ inner ℝ x (perp e) ∧ inner ℝ x (perp e) ≤ c₁ + 9 := by
   sorry
 
+/-- Helper: squared norm in the orthonormal frame `(e, perp e)`. -/
+theorem n1_norm_sq_frame {e : Pt} (he : ‖e‖ = 1) (w : Pt) :
+    ‖w‖ ^ 2 = inner ℝ w e ^ 2 + inner ℝ w (perp e) ^ 2 := by
+  rw [norm_sq_frame he, det2_eq_inner_perp]
+
+/-- Helper: two reals in the same cell of side `7/10` (floor index) differ by less than `7/10`. -/
+theorem n1_close_of_floor_eq {t t' : ℝ} (h : ⌊t / (7 / 10)⌋ = ⌊t' / (7 / 10)⌋) :
+    |t - t'| < 7 / 10 := by
+  have a1 := Int.floor_le (t / (7 / 10))
+  have a2 := Int.lt_floor_add_one (t / (7 / 10))
+  have b1 := Int.floor_le (t' / (7 / 10))
+  have b2 := Int.lt_floor_add_one (t' / (7 / 10))
+  rw [h] at a1 a2
+  have e : t - t' = (7 / 10) * (t / (7 / 10) - t' / (7 / 10)) := by field_simp
+  rw [e, abs_mul, abs_of_pos (by norm_num : (0 : ℝ) < 7 / 10)]
+  have : |t / (7 / 10) - t' / (7 / 10)| < 1 := by rw [abs_lt]; constructor <;> linarith
+  linarith
+
 /-- **Box packing**: points pairwise `≥ 1` apart in a `400 × 9` box number at most `10⁴`.
 
-TODO: prove.
+TODO: none — proved.
 What's missing: grid pigeonhole with half-open cells of side `7/10` (diameter `< 1`):
 `⌈400/0.7⌉·⌈9/0.7⌉ ≤ 572·13 < 10⁴` cells, at most one point per cell
 (as in `card_lt_N0` / `card_sep_le_81`).
@@ -329,7 +347,40 @@ theorem card_sep_box_le {P : Finset Pt} (hsep : ∀ a ∈ P, ∀ b ∈ P, a ≠ 
     (hbox : ∀ x ∈ P, c₀ ≤ inner ℝ x e ∧ inner ℝ x e ≤ c₀ + 400 ∧
       c₁ ≤ inner ℝ x (perp e) ∧ inner ℝ x (perp e) ≤ c₁ + 9) :
     (P.card : ℝ) ≤ cThin := by
-  sorry
+  let f : Pt → ℤ × ℤ := fun a =>
+    (⌊(inner ℝ a e - c₀) / (7 / 10)⌋, ⌊(inner ℝ a (perp e) - c₁) / (7 / 10)⌋)
+  obtain ⟨N₁, hN₁⟩ : ∃ N : ℤ, N = 571 := ⟨_, rfl⟩
+  obtain ⟨N₂, hN₂⟩ : ∃ N : ℤ, N = 12 := ⟨_, rfl⟩
+  have hmaps : ∀ a ∈ P, f a ∈ (Icc (0 : ℤ) N₁) ×ˢ (Icc (0 : ℤ) N₂) := by
+    intro a ha
+    obtain ⟨h1, h2, h3, h4⟩ := hbox a ha
+    simp only [f, mem_product, mem_Icc, hN₁, hN₂]
+    refine ⟨⟨?_, ?_⟩, ?_, ?_⟩
+    · rw [Int.le_floor]; push_cast; apply div_nonneg <;> linarith
+    · rw [Int.floor_le_iff, div_lt_iff₀ (by norm_num)]; push_cast; linarith
+    · rw [Int.le_floor]; push_cast; apply div_nonneg <;> linarith
+    · rw [Int.floor_le_iff, div_lt_iff₀ (by norm_num)]; push_cast; linarith
+  have := card_le_card_of_injOn f hmaps (fun a ha b hb hfe => by
+    by_contra hab
+    have h1 := hsep a ha b hb hab
+    simp only [f, Prod.mk.injEq] at hfe
+    have d0 := n1_close_of_floor_eq hfe.1
+    have d1 := n1_close_of_floor_eq hfe.2
+    have e0 : inner ℝ a e - c₀ - (inner ℝ b e - c₀) = inner ℝ (a - b) e := by
+      rw [inner_sub_left]; ring
+    have e1 : inner ℝ a (perp e) - c₁ - (inner ℝ b (perp e) - c₁) = inner ℝ (a - b) (perp e) := by
+      rw [inner_sub_left]; ring
+    rw [e0] at d0; rw [e1] at d1
+    have hn := n1_norm_sq_frame he (a - b)
+    rw [← dist_eq_norm] at hn
+    have := sq_abs (inner ℝ (a - b) e); have := sq_abs (inner ℝ (a - b) (perp e))
+    have : dist a b ^ 2 < 1 := by
+      rw [hn]
+      nlinarith [abs_nonneg (inner ℝ (a - b) e), abs_nonneg (inner ℝ (a - b) (perp e))]
+    nlinarith [dist_nonneg (x := a) (y := b)])
+  rw [card_product, Int.card_Icc, Int.card_Icc, hN₁, hN₂] at this
+  have h' : (P.card : ℝ) ≤ 7436 := by exact_mod_cast this.trans (by norm_num)
+  unfold cThin; linarith
 
 /-- **Lemma T** (thin `K`): `|X ∖ D| ≤ 10⁴`.
 
