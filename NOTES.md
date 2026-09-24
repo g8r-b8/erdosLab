@@ -147,6 +147,13 @@ then ¬(almost-all o(N)) as in PR #4076's Erdos468MinimalPreimageLittleOAlmostAl
   R5.4: min(μ₂, μ₃, μ₄) ≤ n. Charge Lemma conjectured (0 violations in ~205k sets).
 - The paper and Lean proof still state 54/37. The upgrade to 15/11 awaits the user's decision.
 
+## ★ Lean milestone 3 (2026-09-24): 15/11 fully formalised
+- Erdos132Main.erdos132_main15: min{μ(Δ₂),μ(δ)} ≤ 15/11·n + C₀, sorry-free, axioms = propext, Classical.choice,
+  Quot.sound; leanchecker passes on all 6 E132Main15* modules (5,251 lines, 141 theorems; commit 1619776).
+  N2 (4/3 in Region II) is not formalised. The blog (post 15/11) and the public repo get updated once the Lean files are pushed.
+- The 9/7 research (R6) continues: 21/16 in Region I (unrefereed); Theorem E + Lemma F nearly give 9/7 for τ > 1
+  (the general-fat-K step is sketched); a pair-gap obstruction and Theorem 2L conditional on H1.
+
 ## ★ Lean milestone 2 (2026-09-23): #132 54/37 bound fully formalised
 - Erdos132Main.erdos132_main (CDL Problem 1.6: min{μ(Δ₂),μ(δ)} ≤ 54/37·n + C₀) sorry-free, axioms = propext,
   Classical.choice, Quot.sound. Also Vesztergombi 1987, Hopf–Pannwitz, Cor A1 (E132Layer). Full lake build OK.
