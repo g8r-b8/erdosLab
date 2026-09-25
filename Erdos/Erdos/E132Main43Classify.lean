@@ -166,7 +166,7 @@ private theorem c43_tgap_pos (hX : Normal X) : 0 < tgap X := by
 `≥ h − 1/49 > −1/4` (`frame_outside`), and an open arc of length `< 240°` holds at most four
 points `60°` apart.
 
-TODO: prove.
+TODO: none — proved.
 What's missing: `card_sep_arc_le_four` with `n`; cone from `frame_outside`
 (`|Xq| ≤ ‖q − y‖ = 1`, `h > 0`) and `Sset_not_interior`; separation `one_le_dist`.
 Acceptance: no `sorry`.
@@ -197,7 +197,7 @@ Lemma P: the distance from `e₂` to the mirror image `(−X₁, Z₁)` of `e₁
 `√((X₁+X₂)² + (Z₁−Z₂)²) = 2|sin((ψ₁+ψ₂)/2)| ≤ 2|Z₁ − Z₂|`.  (For a pair at `≈ ±90°`,
 `X₁ + X₂ ≈ 0` automatically and the mirror error is all in `Z₁ − Z₂`.)
 
-TODO: prove.
+TODO: none — proved.
 What's missing: coordinates (`n1_inner_frame`/`inner_pt`, `unit_sq`); the identity above is a
 polynomial identity under `X_i² + Z_i² = 1`; then `nlinarith`/`sq_le_sq'`.
 Acceptance: no `sorry`.
@@ -238,7 +238,7 @@ theorem pair_sym {n e₁ e₂ : Pt} (hn : ‖n‖ = 1) (h₁ : ‖e₁‖ = 1) (
 /-- **Lemma P (K)**: two distinct K-row neighbours are mirror-symmetric: heights within
 `1/49` (both in `[h − 1/49, h]`) and `|X₁ + X₂| ≤ √3/49 < 1/25`.
 
-TODO: prove.
+TODO: none — proved.
 What's missing: heights from `Frame43.top` (`ball_polygon_a`) and `frame_outside`
 (`Sset_not_interior`), `|X_i| ≤ 1`; `pair_sym` with `e_i = q_i − y`
 (`dist_of_mem_nbδ`, `one_le_dist`).
@@ -272,7 +272,7 @@ theorem pair_K (hX : Normal X) {y n : Pt} (hF : Frame43 X y n) {q₁ q₂ : Pt}
 /-- **Lemma P (D)**: two distinct D-neighbours are mirror-symmetric: heights differ by
 `≤ (9/400)|X₁ − X₂| ≤ 9/200` and `|X₁ + X₂| ≤ √3·(9/200) < 2/25`.
 
-TODO: prove.
+TODO: none — proved.
 What's missing: `dd_heights`, `|X₁ − X₂| ≤ 2`, `pair_sym`.
 Acceptance: no `sorry`.
 Depends on: `dd_heights`, `pair_sym`, `dist_of_mem_nbδ`, `one_le_dist`. Difficulty M. -/
@@ -541,7 +541,7 @@ private theorem c43_arc4 {y n : Pt} (hn : ‖n‖ = 1) (P : Finset Pt) (hcard : 
 /-- **Exact hexagon**: if `y` has six `δ`-neighbours, they form a regular hexagon: the set of
 neighbours is invariant under rotation by `60°` about `y`.
 
-TODO: prove.
+TODO: none — proved.
 What's missing: write `q − y = dirVec(θ_q)`; distinct neighbours are `≥ 1` apart, i.e. the
 angles are pairwise `≥ π/3` apart on the circle; six such angles have all six consecutive gaps
 `≥ π/3` summing to `2π`, so every gap equals `π/3`; hence `rot (π/3)` maps each neighbour to
@@ -900,12 +900,473 @@ private theorem c43_three_D (hX : Normal X) {y n : Pt} (hF : Frame43 X y n) {a b
   have h2 := c43_sq_le hx
   linarith
 
+/-! ### Lemma H: the six pair cases
+
+Notation: `a` and `b` are the two same-kind `S`-neighbours, `b` is the hexagon vertex `j` steps
+(of `60°`) after `a` (`j ∈ {1, 2, 3}` after swapping `a, b`), `c` is the third `S`-neighbour.
+The mirror estimate pins `a` (`c43_pin`), the hexagon (`c43g_slot`) pins all other vertices. -/
+
+/-- K pair at `±30°` (`j = 1`): the D-point would need height `≈ 0.85`; impossible. -/
+private theorem c43_coreK1 (hX : Normal X) {y n : Pt} (hF : Frame43 X y n)
+    (hd : degδ X y = 6) (_hm : mS X y = 3) {a c : Pt} (ha : a ∈ nbδ X y) (hc : c ∈ nbδ X y)
+    (hab : a ≠ c43g y a) (hac : a ≠ c) (hbc : c43g y a ≠ c) (hSa : a ∈ Sset X)
+    (hDa : a ∉ Dset X) (hSb : c43g y a ∈ Sset X) (hDb : c43g y a ∉ Dset X)
+    (_hSc : c ∈ Sset X) (hDc : c ∈ Dset X) : False := by
+  have hn := hF.unit
+  have hr := c43_r_lo
+  have m1 := c43g_mem hX hd ha
+  obtain ⟨g1, -⟩ := c43g_coords (n := n) y a
+  obtain ⟨hPa, hPb⟩ := abs_le.1 (pair_K hX hF ha m1 hab hSa hDa hSb hDb).1
+  have hQ : |-(Real.sin (-(π / 6))) * inner ℝ (a - y) n +
+      Real.cos (-(π / 6)) * inner ℝ (a - y) (perp n)| ≤ 1 / 49 := by
+    rw [c43_cs_m6.1, c43_cs_m6.2, abs_le]; constructor <;> linarith
+  have hSa' := c43_S_gt hX hF ha hSa
+  rcases Or.symm <| c43_pin (η := 3 / 100) hn (by norm_num) (by norm_num) (c43_unit hX hn ha) hQ
+    with sa | sa
+  · obtain ⟨-, -, za, -, -⟩ := c43_ZX hn 0 sa (θ' := π - π / 6) (by push_cast; ring) c43_cs_p56
+    linarith
+  obtain ⟨-, za, -, -, -⟩ := c43_ZX hn 0 sa (θ' := -(π / 6)) (by push_cast; ring) c43_cs_m6
+  have s1 := c43g_slot sa
+  have s2 := c43g_slot s1
+  have s3 := c43g_slot s2
+  have s4 := c43g_slot s3
+  have s5 := c43g_slot s4
+  have hKD := c43_KD hX hF ha hDa hc hDc
+  rcases c43_hex_enum hX hd ha c hc with h | h | h | h | h | h
+  · exact hac h.symm
+  · exact hbc h.symm
+  · subst h
+    obtain ⟨-, -, z, -, -⟩ := c43_ZX hn 0 s2 (θ' := π / 2) (by push_cast; ring) c43_cs_p2
+    linarith
+  · subst h
+    obtain ⟨-, -, z, -, -⟩ := c43_ZX hn 0 s3 (θ' := π - π / 6) (by push_cast; ring) c43_cs_p56
+    linarith
+  · subst h
+    obtain ⟨-, -, z, -, -⟩ :=
+      c43_ZX hn 1 s4 (θ' := -(π - π / 6)) (by push_cast; ring) c43_cs_m56
+    linarith
+  · subst h
+    obtain ⟨-, -, z, -, -⟩ := c43_ZX hn 1 s5 (θ' := -(π / 2)) (by push_cast; ring) c43_cs_m2
+    linarith
+
+/-- K pair at `±60°` (`j = 2`): the D-point is at `0°`, a **cap**. -/
+private theorem c43_coreK2 (hX : Normal X) {y n : Pt} (hF : Frame43 X y n)
+    (hd : degδ X y = 6) (hm : mS X y = 3) {a c : Pt} (ha : a ∈ nbδ X y) (hc : c ∈ nbδ X y)
+    (hab : a ≠ c43g y (c43g y a)) (hac : a ≠ c) (hbc : c43g y (c43g y a) ≠ c)
+    (hSa : a ∈ Sset X) (hDa : a ∉ Dset X) (hSb : c43g y (c43g y a) ∈ Sset X)
+    (hDb : c43g y (c43g y a) ∉ Dset X) (hSc : c ∈ Sset X) (hDc : c ∈ Dset X) :
+    FanShape X y n ∨ CapShape X y n := by
+  have hn := hF.unit
+  have hr := c43_r_lo
+  have m1 := c43g_mem hX hd ha
+  have m2 := c43g_mem hX hd m1
+  have m3 := c43g_mem hX hd m2
+  have m4 := c43g_mem hX hd m3
+  obtain ⟨g1, -⟩ := c43g2_coords (n := n) y a
+  obtain ⟨hPa, hPb⟩ := abs_le.1 (pair_K hX hF ha m2 hab hSa hDa hSb hDb).1
+  have e : inner ℝ (a - y) n - inner ℝ (c43g y (c43g y a) - y) n =
+      √3 * (√3 / 2 * inner ℝ (a - y) n + 1 / 2 * inner ℝ (a - y) (perp n)) := by
+    rw [g1]; linear_combination (-(inner ℝ (a - y) n) / 2) * c43_r_sq
+  have hQ' : |√3 / 2 * inner ℝ (a - y) n + 1 / 2 * inner ℝ (a - y) (perp n)| ≤ 12 / 1000 := by
+    have h1 : |√3 * (√3 / 2 * inner ℝ (a - y) n + 1 / 2 * inner ℝ (a - y) (perp n))| ≤
+        1 / 49 := by
+      rw [← e, abs_le]; exact ⟨hPa, hPb⟩
+    rw [abs_mul, abs_of_pos (by positivity : (0 : ℝ) < √3)] at h1
+    nlinarith [mul_le_mul_of_nonneg_right hr.le
+      (abs_nonneg (√3 / 2 * inner ℝ (a - y) n + 1 / 2 * inner ℝ (a - y) (perp n)))]
+  have hQ : |-(Real.sin (-(π / 3))) * inner ℝ (a - y) n +
+      Real.cos (-(π / 3)) * inner ℝ (a - y) (perp n)| ≤ 12 / 1000 := by
+    rw [c43_cs_m3.1, c43_cs_m3.2, neg_neg]; exact hQ'
+  have hSa' := c43_S_gt hX hF ha hSa
+  have hSc' := c43_S_gt hX hF hc hSc
+  rcases Or.symm <| c43_pin (η := 1 / 50) hn (by norm_num) (by norm_num) (c43_unit hX hn ha) hQ
+    with sa | sa
+  · obtain ⟨-, -, za, -, -⟩ := c43_ZX hn 0 sa (θ' := π - π / 3) (by push_cast; ring) c43_cs_p23
+    linarith
+  obtain ⟨sl0, za0, -, -, -⟩ := c43_ZX hn 0 sa (θ' := -(π / 3)) (by push_cast; ring) c43_cs_m3
+  have s1 := c43g_slot sa
+  obtain ⟨sl1, z10, -, -, -⟩ := c43_ZX hn 0 s1 (θ' := 0) (by push_cast; ring) c43_cs_0
+  have s2 := c43g_slot s1
+  obtain ⟨-, z20, -, -, -⟩ := c43_ZX hn 0 s2 (θ' := π / 3) (by push_cast; ring) c43_cs_p3
+  have s3 := c43g_slot s2
+  obtain ⟨-, z30, z31, -, -⟩ := c43_ZX hn 0 s3 (θ' := π - π / 3) (by push_cast; ring) c43_cs_p23
+  have s4 := c43g_slot s3
+  obtain ⟨sl4, -, z41, -, -⟩ := c43_ZX hn 0 s4 (θ' := π) (by push_cast; ring) c43_cs_pi
+  have s5 := c43g_slot s4
+  obtain ⟨-, z50, z51, -, -⟩ :=
+    c43_ZX hn 1 s5 (θ' := -(π - π / 3)) (by push_cast; ring) c43_cs_m23
+  rcases c43_hex_enum hX hd ha c hc with h | h | h | h | h | h
+  · exact absurd h.symm hac
+  · subst h
+    refine Or.inr ⟨⟨-1, Or.inr rfl, a, ha, c43g y a, m1, hSa, hDa, hDc,
+      c43_slot_fix sl0 (by ring) (by norm_num), c43_slot_fix sl1 rfl (by norm_num)⟩, ?_, ?_⟩
+    · intro x hx hZ
+      rcases c43_hex_enum hX hd ha x hx with h | h | h | h | h | h <;> subst h
+      · exfalso; linarith
+      · exfalso; linarith
+      · exfalso; linarith
+      · exfalso; linarith
+      · exact c43_slot_pi (c43_slot_mono sl4 (by norm_num))
+      · exfalso; linarith
+    · have hmem : c43g y (c43g y (c43g y (c43g y a))) ∈
+          (nbδ X y).filter (fun x => inner ℝ (x - y) n ≤ -(4 / 5)) :=
+        mem_filter.2 ⟨m4, by linarith⟩
+      have := card_pos.2 ⟨_, hmem⟩
+      unfold vR; rw [hd, hm]; omega
+  · exact absurd h.symm hbc
+  · subst h; linarith
+  · subst h; linarith
+  · subst h; linarith
+
+/-- K pair at `±90°` (`j = 3`): the D-point is at `±30°`, fan **HF1**. -/
+private theorem c43_coreK3 (hX : Normal X) {y n : Pt} (hF : Frame43 X y n)
+    (hd : degδ X y = 6) (hm : mS X y = 3) {a c : Pt} (ha : a ∈ nbδ X y) (hc : c ∈ nbδ X y)
+    (hab : a ≠ c43g y (c43g y (c43g y a))) (hac : a ≠ c)
+    (hbc : c43g y (c43g y (c43g y a)) ≠ c) (hSa : a ∈ Sset X) (hDa : a ∉ Dset X)
+    (hSb : c43g y (c43g y (c43g y a)) ∈ Sset X) (hDb : c43g y (c43g y (c43g y a)) ∉ Dset X)
+    (hSc : c ∈ Sset X) (hDc : c ∈ Dset X) : FanShape X y n ∨ CapShape X y n := by
+  have hn := hF.unit
+  have hr := c43_r_lo
+  have m1 := c43g_mem hX hd ha
+  have m2 := c43g_mem hX hd m1
+  have m3 := c43g_mem hX hd m2
+  have m4 := c43g_mem hX hd m3
+  have m5 := c43g_mem hX hd m4
+  have eb : c43g y (c43g y (c43g y a)) - y = -(a - y) := by rw [c43g3]; abel
+  obtain ⟨hPa, hPb⟩ := abs_le.1 (pair_K hX hF ha m3 hab hSa hDa hSb hDb).1
+  rw [eb, inner_neg_left] at hPa hPb
+  have hQ : |-(Real.sin (π / 2)) * inner ℝ (a - y) n +
+      Real.cos (π / 2) * inner ℝ (a - y) (perp n)| ≤ 1 / 98 := by
+    rw [c43_cs_p2.1, c43_cs_p2.2, abs_le]; constructor <;> linarith
+  have hSc' := c43_S_gt hX hF hc hSc
+  rcases c43_pin (η := 1 / 50) hn (by norm_num) (by norm_num) (c43_unit hX hn ha) hQ
+    with sa | sa
+  · -- `a` at `90°`, `b` at `−90°`
+    obtain ⟨sl0, za0, -, -, -⟩ := c43_ZX hn 0 sa (θ' := π / 2) (by push_cast; ring) c43_cs_p2
+    have s1 := c43g_slot sa
+    obtain ⟨-, -, z11, -, -⟩ :=
+      c43_ZX hn 0 s1 (θ' := π - π / 6) (by push_cast; ring) c43_cs_p56
+    have s2 := c43g_slot s1
+    obtain ⟨-, -, z21, -, -⟩ :=
+      c43_ZX hn 1 s2 (θ' := -(π - π / 6)) (by push_cast; ring) c43_cs_m56
+    have s3 := c43g_slot s2
+    obtain ⟨sl3, z30, -, -, -⟩ :=
+      c43_ZX hn 1 s3 (θ' := -(π / 2)) (by push_cast; ring) c43_cs_m2
+    have s4 := c43g_slot s3
+    obtain ⟨sl4, z40, -, -, -⟩ :=
+      c43_ZX hn 1 s4 (θ' := -(π / 6)) (by push_cast; ring) c43_cs_m6
+    have s5 := c43g_slot s4
+    obtain ⟨sl5, z50, -, -, -⟩ := c43_ZX hn 1 s5 (θ' := π / 6) (by push_cast; ring) c43_cs_p6
+    have hlow : ∀ x ∈ nbδ X y, inner ℝ (x - y) n ≤ -(2 / 3) →
+        inner ℝ (x - y) n ≤ -(4 / 5) := by
+      intro x hx hZ
+      rcases c43_hex_enum hX hd ha x hx with h | h | h | h | h | h <;> subst h <;> linarith
+    have hcnt : vR X y ≤ 8 +
+        ((nbδ X y).filter (fun x => inner ℝ (x - y) n ≤ -(4 / 5))).card := by
+      have hmem : c43g y a ∈ (nbδ X y).filter (fun x => inner ℝ (x - y) n ≤ -(4 / 5)) :=
+        mem_filter.2 ⟨m1, by linarith⟩
+      have := card_pos.2 ⟨_, hmem⟩
+      unfold vR; rw [hd, hm]; omega
+    rcases c43_hex_enum hX hd ha c hc with h | h | h | h | h | h
+    · exact absurd h.symm hac
+    · subst h; linarith
+    · subst h; linarith
+    · exact absurd h.symm hbc
+    · subst h
+      exact Or.inl ⟨⟨-1, Or.inr rfl, a, ha, _, m3, _, m4, hSa, hDa, hDc,
+        c43_slot_fix sl0 (by ring) (by norm_num), c43_slot_fix sl3 (by ring) (by norm_num),
+        c43_slot_fix sl4 (by ring) (by norm_num), Or.inl hSb⟩, hlow, hcnt⟩
+    · subst h
+      exact Or.inl ⟨⟨1, Or.inl rfl, _, m3, a, ha, _, m5, hSb, hDb, hDc,
+        c43_slot_fix sl3 (by ring) (by norm_num), c43_slot_fix sl0 (by ring) (by norm_num),
+        c43_slot_fix sl5 (by ring) (by norm_num), Or.inl hSa⟩, hlow, hcnt⟩
+  · -- `a` at `−90°`, `b` at `90°`
+    obtain ⟨sl0, za0, -, -, -⟩ := c43_ZX hn 1 sa (θ' := -(π / 2)) (by push_cast; ring) c43_cs_m2
+    have s1 := c43g_slot sa
+    obtain ⟨sl1, z10, -, -, -⟩ :=
+      c43_ZX hn 1 s1 (θ' := -(π / 6)) (by push_cast; ring) c43_cs_m6
+    have s2 := c43g_slot s1
+    obtain ⟨sl2, z20, -, -, -⟩ := c43_ZX hn 1 s2 (θ' := π / 6) (by push_cast; ring) c43_cs_p6
+    have s3 := c43g_slot s2
+    obtain ⟨sl3, z30, -, -, -⟩ := c43_ZX hn 1 s3 (θ' := π / 2) (by push_cast; ring) c43_cs_p2
+    have s4 := c43g_slot s3
+    obtain ⟨-, -, z41, -, -⟩ :=
+      c43_ZX hn 1 s4 (θ' := π - π / 6) (by push_cast; ring) c43_cs_p56
+    have s5 := c43g_slot s4
+    obtain ⟨-, -, z51, -, -⟩ :=
+      c43_ZX hn 2 s5 (θ' := -(π - π / 6)) (by push_cast; ring) c43_cs_m56
+    have hlow : ∀ x ∈ nbδ X y, inner ℝ (x - y) n ≤ -(2 / 3) →
+        inner ℝ (x - y) n ≤ -(4 / 5) := by
+      intro x hx hZ
+      rcases c43_hex_enum hX hd ha x hx with h | h | h | h | h | h <;> subst h <;> linarith
+    have hcnt : vR X y ≤ 8 +
+        ((nbδ X y).filter (fun x => inner ℝ (x - y) n ≤ -(4 / 5))).card := by
+      have hmem : c43g y (c43g y (c43g y (c43g y a))) ∈
+          (nbδ X y).filter (fun x => inner ℝ (x - y) n ≤ -(4 / 5)) :=
+        mem_filter.2 ⟨m4, by linarith⟩
+      have := card_pos.2 ⟨_, hmem⟩
+      unfold vR; rw [hd, hm]; omega
+    rcases c43_hex_enum hX hd ha c hc with h | h | h | h | h | h
+    · exact absurd h.symm hac
+    · subst h
+      exact Or.inl ⟨⟨-1, Or.inr rfl, _, m3, a, ha, _, m1, hSb, hDb, hDc,
+        c43_slot_fix sl3 (by ring) (by norm_num), c43_slot_fix sl0 (by ring) (by norm_num),
+        c43_slot_fix sl1 (by ring) (by norm_num), Or.inl hSa⟩, hlow, hcnt⟩
+    · subst h
+      exact Or.inl ⟨⟨1, Or.inl rfl, a, ha, _, m3, _, m2, hSa, hDa, hDc,
+        c43_slot_fix sl0 (by ring) (by norm_num), c43_slot_fix sl3 (by ring) (by norm_num),
+        c43_slot_fix sl2 (by ring) (by norm_num), Or.inl hSb⟩, hlow, hcnt⟩
+    · exact absurd h.symm hbc
+    · subst h; linarith
+    · subst h; linarith
+
+/-- D pair at `±30°` (`j = 1`): the K-point is at `±90°`, fan **HF2**. -/
+private theorem c43_coreD1 (hX : Normal X) {y n : Pt} (hF : Frame43 X y n)
+    (hd : degδ X y = 6) (hm : mS X y = 3) {a c : Pt} (ha : a ∈ nbδ X y) (hc : c ∈ nbδ X y)
+    (hab : a ≠ c43g y a) (hac : a ≠ c) (hbc : c43g y a ≠ c) (hSa : a ∈ Sset X)
+    (hDa : a ∈ Dset X) (_hSb : c43g y a ∈ Sset X) (hDb : c43g y a ∈ Dset X)
+    (hSc : c ∈ Sset X) (hDc : c ∉ Dset X) : FanShape X y n ∨ CapShape X y n := by
+  have hn := hF.unit
+  have hr := c43_r_lo
+  have m1 := c43g_mem hX hd ha
+  have m2 := c43g_mem hX hd m1
+  have m3 := c43g_mem hX hd m2
+  have m4 := c43g_mem hX hd m3
+  have m5 := c43g_mem hX hd m4
+  obtain ⟨g1, g2⟩ := c43g_coords (n := n) y a
+  have hu := c43_unit hX hn ha
+  have hdd := dd_heights hX hF hDa hDb (dist_of_mem_nbδ hX ha).le (dist_of_mem_nbδ hX m1).le
+  rw [g1, g2] at hdd
+  have ht : (inner ℝ (a - y) n - (1 / 2 * inner ℝ (a - y) n -
+      √3 / 2 * inner ℝ (a - y) (perp n))) ^ 2 + (inner ℝ (a - y) (perp n) -
+      (√3 / 2 * inner ℝ (a - y) n + 1 / 2 * inner ℝ (a - y) (perp n))) ^ 2 = 1 := by
+    linear_combination
+      ((inner ℝ (a - y) n ^ 2 + inner ℝ (a - y) (perp n) ^ 2) / 4) * c43_r_sq + hu
+  have hXd : |inner ℝ (a - y) (perp n) -
+      (√3 / 2 * inner ℝ (a - y) n + 1 / 2 * inner ℝ (a - y) (perp n))| ≤ 1 :=
+    (sq_le_one_iff_abs_le_one _).1 (by nlinarith [sq_nonneg (inner ℝ (a - y) n -
+      (1 / 2 * inner ℝ (a - y) n - √3 / 2 * inner ℝ (a - y) (perp n)))])
+  have hQ : |-(Real.sin (-(π / 6))) * inner ℝ (a - y) n +
+      Real.cos (-(π / 6)) * inner ℝ (a - y) (perp n)| ≤ 9 / 400 := by
+    rw [c43_cs_m6.1, c43_cs_m6.2,
+      show -(-(1 / 2 : ℝ)) * inner ℝ (a - y) n + √3 / 2 * inner ℝ (a - y) (perp n) =
+        inner ℝ (a - y) n - (1 / 2 * inner ℝ (a - y) n - √3 / 2 * inner ℝ (a - y) (perp n))
+        by ring]
+    linarith
+  have hSa' := c43_S_gt hX hF ha hSa
+  have hSc' := c43_S_gt hX hF hc hSc
+  rcases Or.symm <| c43_pin (η := 1 / 30) hn (by norm_num) (by norm_num) hu hQ with sa | sa
+  · obtain ⟨-, -, za, -, -⟩ := c43_ZX hn 0 sa (θ' := π - π / 6) (by push_cast; ring) c43_cs_p56
+    linarith
+  obtain ⟨sl0, za0, -, -, -⟩ := c43_ZX hn 0 sa (θ' := -(π / 6)) (by push_cast; ring) c43_cs_m6
+  have s1 := c43g_slot sa
+  obtain ⟨sl1, z10, -, -, -⟩ := c43_ZX hn 0 s1 (θ' := π / 6) (by push_cast; ring) c43_cs_p6
+  have s2 := c43g_slot s1
+  obtain ⟨sl2, z20, -, -, -⟩ := c43_ZX hn 0 s2 (θ' := π / 2) (by push_cast; ring) c43_cs_p2
+  have s3 := c43g_slot s2
+  obtain ⟨-, -, z31, -, -⟩ := c43_ZX hn 0 s3 (θ' := π - π / 6) (by push_cast; ring) c43_cs_p56
+  have s4 := c43g_slot s3
+  obtain ⟨-, -, z41, -, -⟩ :=
+    c43_ZX hn 1 s4 (θ' := -(π - π / 6)) (by push_cast; ring) c43_cs_m56
+  have s5 := c43g_slot s4
+  obtain ⟨sl5, z50, -, -, -⟩ := c43_ZX hn 1 s5 (θ' := -(π / 2)) (by push_cast; ring) c43_cs_m2
+  have hlow : ∀ x ∈ nbδ X y, inner ℝ (x - y) n ≤ -(2 / 3) →
+      inner ℝ (x - y) n ≤ -(4 / 5) := by
+    intro x hx hZ
+    rcases c43_hex_enum hX hd ha x hx with h | h | h | h | h | h <;> subst h <;> linarith
+  have hcnt : vR X y ≤ 8 +
+      ((nbδ X y).filter (fun x => inner ℝ (x - y) n ≤ -(4 / 5))).card := by
+    have hmem : c43g y (c43g y (c43g y a)) ∈
+        (nbδ X y).filter (fun x => inner ℝ (x - y) n ≤ -(4 / 5)) :=
+      mem_filter.2 ⟨m3, by linarith⟩
+    have := card_pos.2 ⟨_, hmem⟩
+    unfold vR; rw [hd, hm]; omega
+  have hdist : dist a (c43g y a) = minDist X := by
+    rw [hX.minDist_eq]; exact c43g_dist hX hn ha
+  rcases c43_hex_enum hX hd ha c hc with h | h | h | h | h | h
+  · exact absurd h.symm hac
+  · exact absurd h.symm hbc
+  · subst h
+    exact Or.inl ⟨⟨-1, Or.inr rfl, _, m2, _, m5, a, ha, hSc, hDc, hDa,
+      c43_slot_fix sl2 (by ring) (by norm_num), c43_slot_fix sl5 (by ring) (by norm_num),
+      c43_slot_fix sl0 (by ring) (by norm_num),
+      Or.inr ⟨_, m1, hDb, c43_slot_fix sl1 (by ring) (by norm_num), hdist⟩⟩, hlow, hcnt⟩
+  · subst h; linarith
+  · subst h; linarith
+  · subst h
+    exact Or.inl ⟨⟨1, Or.inl rfl, _, m5, _, m2, _, m1, hSc, hDc, hDb,
+      c43_slot_fix sl5 (by ring) (by norm_num), c43_slot_fix sl2 (by ring) (by norm_num),
+      c43_slot_fix sl1 (by ring) (by norm_num),
+      Or.inr ⟨a, ha, hDa, c43_slot_fix sl0 (by ring) (by norm_num),
+        by rw [dist_comm]; exact hdist⟩⟩, hlow, hcnt⟩
+
+/-- D pair at `±60°` (`j = 2`): the K-point would be at `0°`, above the D-points; impossible. -/
+private theorem c43_coreD2 (hX : Normal X) {y n : Pt} (hF : Frame43 X y n)
+    (hd : degδ X y = 6) (_hm : mS X y = 3) {a c : Pt} (ha : a ∈ nbδ X y) (hc : c ∈ nbδ X y)
+    (hab : a ≠ c43g y (c43g y a)) (hac : a ≠ c) (hbc : c43g y (c43g y a) ≠ c)
+    (hSa : a ∈ Sset X) (hDa : a ∈ Dset X) (_hSb : c43g y (c43g y a) ∈ Sset X)
+    (hDb : c43g y (c43g y a) ∈ Dset X) (hSc : c ∈ Sset X) (hDc : c ∉ Dset X) : False := by
+  have hn := hF.unit
+  have hr := c43_r_lo
+  have m1 := c43g_mem hX hd ha
+  have m2 := c43g_mem hX hd m1
+  obtain ⟨g1, -⟩ := c43g2_coords (n := n) y a
+  obtain ⟨hPa, hPb⟩ := abs_le.1 (pair_D hX hF ha m2 hab hDa hDb).1
+  have e : inner ℝ (a - y) n - inner ℝ (c43g y (c43g y a) - y) n =
+      √3 * (√3 / 2 * inner ℝ (a - y) n + 1 / 2 * inner ℝ (a - y) (perp n)) := by
+    rw [g1]; linear_combination (-(inner ℝ (a - y) n) / 2) * c43_r_sq
+  have hQ' : |√3 / 2 * inner ℝ (a - y) n + 1 / 2 * inner ℝ (a - y) (perp n)| ≤ 26 / 1000 := by
+    have h1 : |√3 * (√3 / 2 * inner ℝ (a - y) n + 1 / 2 * inner ℝ (a - y) (perp n))| ≤
+        9 / 200 := by
+      rw [← e, abs_le]; exact ⟨hPa, hPb⟩
+    rw [abs_mul, abs_of_pos (by positivity : (0 : ℝ) < √3)] at h1
+    nlinarith [mul_le_mul_of_nonneg_right hr.le
+      (abs_nonneg (√3 / 2 * inner ℝ (a - y) n + 1 / 2 * inner ℝ (a - y) (perp n)))]
+  have hQ : |-(Real.sin (-(π / 3))) * inner ℝ (a - y) n +
+      Real.cos (-(π / 3)) * inner ℝ (a - y) (perp n)| ≤ 26 / 1000 := by
+    rw [c43_cs_m3.1, c43_cs_m3.2, neg_neg]; exact hQ'
+  have hSa' := c43_S_gt hX hF ha hSa
+  have hSc' := c43_S_gt hX hF hc hSc
+  rcases Or.symm <| c43_pin (η := 37 / 1000) hn (by norm_num) (by norm_num) (c43_unit hX hn ha) hQ
+    with sa | sa
+  · obtain ⟨-, -, za, -, -⟩ := c43_ZX hn 0 sa (θ' := π - π / 3) (by push_cast; ring) c43_cs_p23
+    linarith
+  obtain ⟨-, -, za1, -, -⟩ := c43_ZX hn 0 sa (θ' := -(π / 3)) (by push_cast; ring) c43_cs_m3
+  have s1 := c43g_slot sa
+  have s2 := c43g_slot s1
+  have s3 := c43g_slot s2
+  have s4 := c43g_slot s3
+  have s5 := c43g_slot s4
+  rcases c43_hex_enum hX hd ha c hc with h | h | h | h | h | h
+  · exact hac h.symm
+  · subst h
+    obtain ⟨-, z, -, -, -⟩ := c43_ZX hn 0 s1 (θ' := 0) (by push_cast; ring) c43_cs_0
+    have := c43_KD hX hF hc hDc ha hDa
+    linarith
+  · exact hbc h.symm
+  · subst h
+    obtain ⟨-, -, z, -, -⟩ := c43_ZX hn 0 s3 (θ' := π - π / 3) (by push_cast; ring) c43_cs_p23
+    linarith
+  · subst h
+    obtain ⟨-, -, z, -, -⟩ := c43_ZX hn 0 s4 (θ' := π) (by push_cast; ring) c43_cs_pi
+    linarith
+  · subst h
+    obtain ⟨-, -, z, -, -⟩ :=
+      c43_ZX hn 1 s5 (θ' := -(π - π / 3)) (by push_cast; ring) c43_cs_m23
+    linarith
+
+/-- D pair at `±90°` (`j = 3`): the K-point would be at `±30°`, above the D-points;
+impossible. -/
+private theorem c43_coreD3 (hX : Normal X) {y n : Pt} (hF : Frame43 X y n)
+    (hd : degδ X y = 6) (_hm : mS X y = 3) {a c : Pt} (ha : a ∈ nbδ X y) (hc : c ∈ nbδ X y)
+    (hab : a ≠ c43g y (c43g y (c43g y a))) (hac : a ≠ c)
+    (hbc : c43g y (c43g y (c43g y a)) ≠ c) (_hSa : a ∈ Sset X) (hDa : a ∈ Dset X)
+    (_hSb : c43g y (c43g y (c43g y a)) ∈ Sset X) (hDb : c43g y (c43g y (c43g y a)) ∈ Dset X)
+    (hSc : c ∈ Sset X) (hDc : c ∉ Dset X) : False := by
+  have hn := hF.unit
+  have hr := c43_r_lo
+  have m1 := c43g_mem hX hd ha
+  have m2 := c43g_mem hX hd m1
+  have m3 := c43g_mem hX hd m2
+  have eb : c43g y (c43g y (c43g y a)) - y = -(a - y) := by rw [c43g3]; abel
+  obtain ⟨hPa, hPb⟩ := abs_le.1 (pair_D hX hF ha m3 hab hDa hDb).1
+  rw [eb, inner_neg_left] at hPa hPb
+  have hQ : |-(Real.sin (π / 2)) * inner ℝ (a - y) n +
+      Real.cos (π / 2) * inner ℝ (a - y) (perp n)| ≤ 9 / 400 := by
+    rw [c43_cs_p2.1, c43_cs_p2.2, abs_le]; constructor <;> linarith
+  have hSc' := c43_S_gt hX hF hc hSc
+  have hKD := c43_KD hX hF hc hDc ha hDa
+  rcases c43_pin (η := 1 / 30) hn (by norm_num) (by norm_num) (c43_unit hX hn ha) hQ
+    with sa | sa
+  · obtain ⟨-, -, za1, -, -⟩ := c43_ZX hn 0 sa (θ' := π / 2) (by push_cast; ring) c43_cs_p2
+    have s1 := c43g_slot sa
+    have s2 := c43g_slot s1
+    have s3 := c43g_slot s2
+    have s4 := c43g_slot s3
+    have s5 := c43g_slot s4
+    rcases c43_hex_enum hX hd ha c hc with h | h | h | h | h | h
+    · exact hac h.symm
+    · subst h
+      obtain ⟨-, -, z, -, -⟩ :=
+        c43_ZX hn 0 s1 (θ' := π - π / 6) (by push_cast; ring) c43_cs_p56
+      linarith
+    · subst h
+      obtain ⟨-, -, z, -, -⟩ :=
+        c43_ZX hn 1 s2 (θ' := -(π - π / 6)) (by push_cast; ring) c43_cs_m56
+      linarith
+    · exact hbc h.symm
+    · subst h
+      obtain ⟨-, z, -, -, -⟩ := c43_ZX hn 1 s4 (θ' := -(π / 6)) (by push_cast; ring) c43_cs_m6
+      linarith
+    · subst h
+      obtain ⟨-, z, -, -, -⟩ := c43_ZX hn 1 s5 (θ' := π / 6) (by push_cast; ring) c43_cs_p6
+      linarith
+  · obtain ⟨-, -, za1, -, -⟩ := c43_ZX hn 1 sa (θ' := -(π / 2)) (by push_cast; ring) c43_cs_m2
+    have s1 := c43g_slot sa
+    have s2 := c43g_slot s1
+    have s3 := c43g_slot s2
+    have s4 := c43g_slot s3
+    have s5 := c43g_slot s4
+    rcases c43_hex_enum hX hd ha c hc with h | h | h | h | h | h
+    · exact hac h.symm
+    · subst h
+      obtain ⟨-, z, -, -, -⟩ := c43_ZX hn 1 s1 (θ' := -(π / 6)) (by push_cast; ring) c43_cs_m6
+      linarith
+    · subst h
+      obtain ⟨-, z, -, -, -⟩ := c43_ZX hn 1 s2 (θ' := π / 6) (by push_cast; ring) c43_cs_p6
+      linarith
+    · exact hbc h.symm
+    · subst h
+      obtain ⟨-, -, z, -, -⟩ :=
+        c43_ZX hn 1 s4 (θ' := π - π / 6) (by push_cast; ring) c43_cs_p56
+      linarith
+    · subst h
+      obtain ⟨-, -, z, -, -⟩ :=
+        c43_ZX hn 2 s5 (θ' := -(π - π / 6)) (by push_cast; ring) c43_cs_m56
+      linarith
+
+/-- A K pair `a, b` and a D-point `c` among the `S`-neighbours. -/
+private theorem c43_coreK (hX : Normal X) {y n : Pt} (hF : Frame43 X y n)
+    (hd : degδ X y = 6) (hm : mS X y = 3) {a b c : Pt} (ha : a ∈ nbδ X y) (hb : b ∈ nbδ X y)
+    (hc : c ∈ nbδ X y) (hab : a ≠ b) (hac : a ≠ c) (hbc : b ≠ c) (hSa : a ∈ Sset X)
+    (hDa : a ∉ Dset X) (hSb : b ∈ Sset X) (hDb : b ∉ Dset X) (hSc : c ∈ Sset X)
+    (hDc : c ∈ Dset X) : FanShape X y n ∨ CapShape X y n := by
+  rcases c43_hex_enum hX hd ha b hb with h | h | h | h | h | h
+  · exact absurd h.symm hab
+  · subst h; exact (c43_coreK1 hX hF hd hm ha hc hab hac hbc hSa hDa hSb hDb hSc hDc).elim
+  · subst h; exact c43_coreK2 hX hF hd hm ha hc hab hac hbc hSa hDa hSb hDb hSc hDc
+  · subst h; exact c43_coreK3 hX hF hd hm ha hc hab hac hbc hSa hDa hSb hDb hSc hDc
+  · have h' : a = c43g y (c43g y b) := by rw [h, c43g3, c43g3]; abel
+    subst h'
+    exact c43_coreK2 hX hF hd hm hb hc (Ne.symm hab) hbc hac hSb hDb hSa hDa hSc hDc
+  · have h' : a = c43g y b := by rw [h, c43g3, c43g3]; abel
+    subst h'
+    exact (c43_coreK1 hX hF hd hm hb hc (Ne.symm hab) hbc hac hSb hDb hSa hDa hSc hDc).elim
+
+/-- A D pair `a, b` and a K-point `c` among the `S`-neighbours. -/
+private theorem c43_coreD (hX : Normal X) {y n : Pt} (hF : Frame43 X y n)
+    (hd : degδ X y = 6) (hm : mS X y = 3) {a b c : Pt} (ha : a ∈ nbδ X y) (hb : b ∈ nbδ X y)
+    (hc : c ∈ nbδ X y) (hab : a ≠ b) (hac : a ≠ c) (hbc : b ≠ c) (hSa : a ∈ Sset X)
+    (hDa : a ∈ Dset X) (hSb : b ∈ Sset X) (hDb : b ∈ Dset X) (hSc : c ∈ Sset X)
+    (hDc : c ∉ Dset X) : FanShape X y n ∨ CapShape X y n := by
+  rcases c43_hex_enum hX hd ha b hb with h | h | h | h | h | h
+  · exact absurd h.symm hab
+  · subst h; exact c43_coreD1 hX hF hd hm ha hc hab hac hbc hSa hDa hSb hDb hSc hDc
+  · subst h; exact (c43_coreD2 hX hF hd hm ha hc hab hac hbc hSa hDa hSb hDb hSc hDc).elim
+  · subst h; exact (c43_coreD3 hX hF hd hm ha hc hab hac hbc hSa hDa hSb hDb hSc hDc).elim
+  · have h' : a = c43g y (c43g y b) := by rw [h, c43g3, c43g3]; abel
+    subst h'
+    exact (c43_coreD2 hX hF hd hm hb hc (Ne.symm hab) hbc hac hSb hDb hSa hDa hSc hDc).elim
+  · have h' : a = c43g y b := by rw [h, c43g3, c43g3]; abel
+    subst h'
+    exact c43_coreD1 hX hF hd hm hb hc (Ne.symm hab) hbc hac hSb hDb hSa hDa hSc hDc
+
 /-! ## Lemma M and Lemma H -/
 
 /-- **Lemma M** (`m_y = 4`): the four `S`-neighbours are K-row points within `1/40` of the
 slots `±90°` and D-points (in `S`) within `1/40` of the slots `±30°`.
 
-TODO: prove.
+TODO: none — proved.
 What's missing (paper §1.3): all four have angle in `[−91.17°, 91.17°]` (height
 `≥ −1/49`) and are pairwise `≥ 60°` apart, so their angles are within `1.17°` of
 `−90°, −30°, 30°, 90°` (chord `≤ 0.0204 < 1/40`).  By `pair_K`/`pair_D` at most two of each
@@ -994,7 +1455,7 @@ theorem lemmaM (hX : Normal X) {y n : Pt} (hF : Frame43 X y n) (hy : y ∈ Rset 
 
 /-- **F6 / F5** (`m = 4`, `deg ≥ 5`) have fan shape.
 
-TODO: prove.
+TODO: none — proved.
 What's missing: `lemmaM`; slots with `σ = 1`, `p = p₂`, `q = p₁ ∈ S`, `z₁`.  Remaining
 neighbours (one for F5, two for F6) are `≥ 60°` from the slots `±90°` (within `1.17°`), so
 their angle is in `[148.8°, 211.2°]`: height `≤ −cos 31.2° < −0.85`; all other neighbours have
@@ -1069,7 +1530,7 @@ theorem fanShape_of_m4 (hX : Normal X) {y n : Pt} (hF : Frame43 X y n) (hy : y �
 `{±30°, ±90°, ±150°}` (HF1: K pair at `±90°` + D at `±30°`; HF2: D pair at `±30°` + K at
 `±90°`) or of `{0°, ±60°, ±120°, 180°}` (cap: K pair at `±60°` + D at `0°`).
 
-TODO: prove.
+TODO: none — proved.
 What's missing (paper §1.3 enumeration): two of the three `S`-neighbours have the same kind
 (`pair_K`/`pair_D`: mirror pair), which pins the hexagon offset (`hexagon_exact`) to `≈ 0°` or
 `≈ 30°`; only slots with height `> −1/49` can hold `S`-points; excluded cases (K pair at
@@ -1087,14 +1548,32 @@ Depends on: `hexagon_exact`, `pair_K`, `pair_D`, `frame_outside`, `frame_D`, `Fr
 `Sset_not_interior`. Difficulty L. -/
 theorem lemmaH (hX : Normal X) {y n : Pt} (hF : Frame43 X y n) (hy : y ∈ Rset X)
     (hd : degδ X y = 6) (hm : mS X y = 3) : FanShape X y n ∨ CapShape X y n := by
-  sorry
+  have hPc : ((nbδ X y).filter (· ∈ Sset X)).card = 3 := hm
+  obtain ⟨p1, p2, p3, h12, h13, h23, hPeq⟩ := card_eq_three.1 hPc
+  have hmem : ∀ p, p = p1 ∨ p = p2 ∨ p = p3 → p ∈ nbδ X y ∧ p ∈ Sset X := by
+    intro p hp
+    have : p ∈ (nbδ X y).filter (· ∈ Sset X) := by
+      rw [hPeq]; rcases hp with rfl | rfl | rfl <;> simp
+    exact mem_filter.1 this
+  obtain ⟨hn1, hS1⟩ := hmem p1 (Or.inl rfl)
+  obtain ⟨hn2, hS2⟩ := hmem p2 (Or.inr (Or.inl rfl))
+  obtain ⟨hn3, hS3⟩ := hmem p3 (Or.inr (Or.inr rfl))
+  by_cases d1 : p1 ∈ Dset X <;> by_cases d2 : p2 ∈ Dset X <;> by_cases d3 : p3 ∈ Dset X
+  · exact (c43_three_D hX hF hn1 hn2 hn3 h12 h13 h23 d1 d2 d3).elim
+  · exact c43_coreD hX hF hd hm hn1 hn2 hn3 h12 h13 h23 hS1 d1 hS2 d2 hS3 d3
+  · exact c43_coreD hX hF hd hm hn1 hn3 hn2 h13 h12 (Ne.symm h23) hS1 d1 hS3 d3 hS2 d2
+  · exact c43_coreK hX hF hd hm hn2 hn3 hn1 h23 (Ne.symm h12) (Ne.symm h13) hS2 d2 hS3 d3 hS1 d1
+  · exact c43_coreD hX hF hd hm hn2 hn3 hn1 h23 (Ne.symm h12) (Ne.symm h13) hS2 d2 hS3 d3 hS1 d1
+  · exact c43_coreK hX hF hd hm hn1 hn3 hn2 h13 h12 (Ne.symm h23) hS1 d1 hS3 d3 hS2 d2
+  · exact c43_coreK hX hF hd hm hn1 hn2 hn3 h12 h13 h23 hS1 d1 hS2 d2 hS3 d3
+  · exact (c43_three_K hX hF hn1 hn2 hn3 h12 h13 h23 hS1 d1 hS2 d2 hS3 d3).elim
 
 /-! ## Lemma Pin -/
 
 /-- **Lemma Pin (fan)**: fan slots force `t ≥ 0.7` (paper: `t ∈ [0.74, 0.99]`, referee exact
 window `[0.751, 0.950]`).
 
-TODO: prove.
+TODO: none — proved.
 What's missing: `p` (K-row, slot `−σ·90°`, height `≤ 1/20`) and `z₁` (D, slot `σ·30°`, height
 `≥ √3/2 − 1/20`): `Δc ≥ 0.766`.  Take `w` from `n1_circle_normal` (`|p − w| = Δ₂`,
 `ν = (p − w)/Δ₂` an outer unit normal at `p ∈ ∂K`, `ball_polygon_b`); `‖ν − n‖ ≤ 1/50`
@@ -1191,7 +1670,7 @@ theorem pin_fan (hX : Normal X) {y n : Pt} (hF : Frame43 X y n) (hs : FanSlots X
 /-- **Lemma Pin (cap)**: cap shape forces `t ≤ 0.6` (paper: `[0.43, 0.57]`, referee
 `[0.442, 0.558]`).
 
-TODO: prove.
+TODO: none — proved.
 What's missing: `frame_D` at `z` (slot `0°`: height `≤ 1`, `|Xz| ≤ 1/20`) and `Frame43.top` at
 `p` (slot `σ·60°`: height `≥ 1/2 − 1/20`): `t ≤ Z z − Z p + |Xz|/49 ≤ 0.551`.
 Acceptance: no `sorry`.
