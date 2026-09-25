@@ -102,10 +102,7 @@ then ¬(almost-all o(N)) as in PR #4076's Erdos468MinimalPreimageLittleOAlmostAl
 - 19, 475, 506, 551: decidable-but-infeasible finite checks.
 - 1218, 1220: large-cardinal set theory, not Mathlib-friendly.
 - 1221: asymptotic analysis on circle, no obvious handle.
-- 885 k=5 PARKED (2026-09-23): a Lean-checkable finite witness would only be a partial result, and
-  Aleksanndr_NFA is actively searching (posted today). Fixing 5 d's gives a genus-17 curve in x
-  (4 quadrics in P^5), so a blind search needs luck. Revisit only with a parametric/EC idea + PARI/gp,
-  or if the competitor's thread goes quiet.
+- 885 k=5: parked 2026-09-23, UN-PARKED 2026-09-25 (user) → see problems/885/README.md.
 
 ## Iteration 8 (2026-09-23)
 - Agents running: 132 novelty audit (A2, B2), 132 A2 write-up, 132 convex n=7 (angle_B3),
