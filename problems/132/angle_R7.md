@@ -11,7 +11,7 @@ Starting point: angle_R6.md — L ≤ 4/3 overall (N3, refereed); 21/16 in Regio
 | B | average R-weight ≤ 7 in Region II (⇒ 21/16 there, given A2) | **DONE: PROVED, REFEREED (REF_B: correct with fixes)** (§3) |
 | C | break the Region III resonance window via diametral partners (Lemma DP) | **DONE: Theorem W PROVED, REFEREED (REF_C: correct with minor fixes)** (§4) |
 | D1 | Region I: average weight ≤ 6 (Conjecture C1) ⇒ 9/7 | **DONE: Theorem G PROVED, unrefereed** (§5). Reconstructed by D1r (`angle_R7_reports/D1_report.md`); **REFEREED ONCE (REF_D1: correct with cosmetic fixes)**; a second independent referee is queued |
-| E | Region III fan zone: quantify fans in both directions | **DONE: overall 81/61 + η PROVED, unrefereed** (§6); hostile REF_E next |
+| E | Region III fan zone: quantify fans in both directions | **DONE: overall 81/61 + η, REFEREED ONCE (REF_E: correct with expository fixes)**; conditional on D1r Cor 6.1 and Theorem W (§6) |
 | D2 | Region I: cross-edge e(D, X∖D) ≤ ½g_D + o(n) via E′ on conv X ⇒ 9/7 | pending |
 
 **Data loss (2026-09-25).** Two kernel panics caused by memory exhaustion in another session wiped the scratchpad, including all R6/R7 scratch reports.
@@ -22,7 +22,7 @@ Process: after a usage-limit outage killed all six first-launch agents (no outpu
 at most two at a time; this file is checkpointed and committed after each branch reports.
 
 ## Established so far
-Overall bound still **4/3** (refereed). **Off the fan zone: 9/7 + η, refereed once (D1r + REF_D1).** **Candidate new overall bound: 81/61 + η ≈ 1.3279 (branch E, UNREFEREED).** After A2 and A3, the |Q| term is removed (refereed) everywhere except the Region III
+Overall bound still **4/3** (refereed). **Off the fan zone: 9/7 + η, refereed once (D1r + REF_D1).** **New overall bound: 81/61 + η ≈ 1.3279 (branch E, refereed once by REF_E).** It is conditional on D1r (refereed once) and Theorem W (refereed once, but its full C and REF_C reports were LOST; reconstruction in progress). After A2 and A3, the |Q| term is removed (refereed) everywhere except the Region III
 resonance window τ = √3/2 + O(1/R). Off that window, every regime has value max{5/4, 3c/(2c+1)}, so the bound drops below 4/3
 as soon as the average R-weight 2c is < 8 there (branch B). The window itself is branch C.
 Branch B, refereed by REF_B, gives 2c = 7 in Region II, so **21/16 is REFEREED in Regions I, II and τ > 1**.
@@ -300,3 +300,26 @@ Referee flags from E:
 6. The orientation step in ORD.
 
 Scripts (all pass under memcap): `r7_E_window.py`, `r7_E_structure.py`, `r7_E_lp.py`, `r7_E_reuleaux.py`.
+
+### 6.1 REF_E: hostile referee of E (`angle_R7_reports/REF_E_report.md`, FINAL)
+
+**Verdict: CORRECT WITH FIXES (expository).** 81/61 + η stands.
+- The exact LP vertex is (s, p, f, r) = (55, 3, 3, 6)/61. The 53/40 vertex is (36, 2, 2, 4)/40.
+- Scripts: `r7_refE7_{lp,geom}.py`.
+- The result is conditional on D1r's Corollary 6.1 and on Theorem W.
+
+Fixes:
+- E1: use e(S) ≤ s + θ|Q| + C and write p = |Q|.
+- E2: Theorem W's constant must be independent of d in Region III.
+- E3: in C2(a), use the first sentence of (G5) at k (replacement text in REF_E §4).
+- E4: 53/40 needs REF_C's θ = ½ to cover G = 2.
+- ORD: the proof is replaced by a cyclic-interleaving argument (REF_E §6).
+
+New: the factor 2 in Proposition F is locally sharp.
+
+**Dependency warning.** Going below 4/3 needs **both** Theorem W and Proposition F. The C and REF_C reports behind Theorem W were lost in the panic; only §4 above and the
+scripts `r7_C_*.py` and `r7_refC_*.py` survive. Next steps, one agent at a time:
+1. Reconstruct W in full into `angle_R7_reports/W_report.md`. The reconstruction must state Q′ ⊆ Q up to O(1), give a d-independent constant, and handle G = 2.
+2. A fresh independent referee of W.
+3. A second referee of D1r.
+4. The fan-count branches.
