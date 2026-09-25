@@ -10,9 +10,13 @@ Starting point: angle_R6.md — L ≤ 4/3 overall (N3, refereed); 21/16 in Regio
 | A3 | referee Region III off-window e(S) ≤ s + 70/d + C, resonance strip, Lemma DP | **DONE: CORRECT WITH FIXES** (§2) |
 | B | average R-weight ≤ 7 in Region II (⇒ 21/16 there, given A2) | **DONE: PROVED, REFEREED (REF_B: correct with fixes)** (§3) |
 | C | break the Region III resonance window via diametral partners (Lemma DP) | **DONE: Theorem W PROVED, REFEREED (REF_C: correct with minor fixes)** (§4) |
-| D1 | Region I: average weight ≤ 6 (Conjecture C1) ⇒ 9/7 | **DONE: Theorem G PROVED, unrefereed** (§5); hostile referee REF_D1 running |
-| E | Region III off the fan pin (\|t − √3/2\| ≥ O(ε₀)): weight ≤ 7 and the \|Q\| term there | queued |
+| D1 | Region I: average weight ≤ 6 (Conjecture C1) ⇒ 9/7 | **DONE: Theorem G PROVED, unrefereed** (§5). The full report was LOST in the scratchpad wipe; D1r is reconstructing it, then the hostile referee REF_D1 |
+| E | Region III fan zone \|t − √3/2\| ≤ κ₁: bound \|F*\| or the average weight (off the fan zone, D1 covers it) | running (relaunched after the panics) |
 | D2 | Region I: cross-edge e(D, X∖D) ≤ ½g_D + o(n) via E′ on conv X ⇒ 9/7 | pending |
+
+**Data loss (2026-09-25).** Two kernel panics caused by memory exhaustion in another session wiped the scratchpad, including all R6/R7 scratch reports.
+What survives is the summaries in this file and angle_R6.md, all committed scripts, and `angle_R7_reports/`. From now on, reports are written
+directly to `problems/132/angle_R7_reports/` and committed. Jobs are wrapped in the `memcap.sh` RSS watchdog.
 
 Process: after a usage-limit outage killed all six first-launch agents (no output produced), branches run staggered,
 at most two at a time; this file is checkpointed and committed after each branch reports.
