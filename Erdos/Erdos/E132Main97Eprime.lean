@@ -180,22 +180,66 @@ theorem card_le_sq_diam (h1 : minDist X = 1) : (X.card : ℝ) ≤ (2 * diam X + 
 `ρ₀ = ⌊min(n^{1/3}, Δ₂/400)⌋`, `ρ₀ ≤ ρ < 2ρ₀`, `h = ρ + ½`:
 `h < Δ₂/200`, `2000 h ≤ CE n^{2/3}`, and `E(h) + 3n/ρ₀ ≤ CE n^{2/3}`.
 
-TODO: prove.
+TODO: none — proved.
 What's missing: real arithmetic with `rpow`: `h < 2n^{1/3}`, `⌊m⌋ ≥ m/2` for `m ≥ 1`,
 `3n/ρ₀ ≤ 6n^{2/3} + 2400 n/Δ₂ ≤ 6n^{2/3} + 9600 √n`, `E(h) ≤ 7506 n^{2/3}`,
 `√n ≤ n^{2/3}`, `n^{1/3} ≤ n^{2/3}` (`n ≥ 1`).
 Acceptance: no `sorry`.
 Depends on: nothing (analysis of `Real.rpow`, `Nat.floor`). Difficulty M. -/
 theorem eprime_arith {n D₂ : ℝ} {ρ₀ ρ : ℕ} (hn : 4 ≤ n) (hD : 10 ^ 4 ≤ D₂) (hnD : n ≤ (4 * D₂) ^ 2)
-    (hρ₀ : ρ₀ = ⌊min (n ^ (1 / 3 : ℝ)) (D₂ / 400)⌋₊) (h₁ : ρ₀ ≤ ρ) (h₂ : ρ < 2 * ρ₀) :
+    (hρ₀ : ρ₀ = ⌊min (n ^ (1 / 3 : ℝ)) (D₂ / 400)⌋₊) (_h₁ : ρ₀ ≤ ρ) (h₂ : ρ < 2 * ρ₀) :
     1 ≤ ρ₀ ∧ ((ρ : ℝ) + 1 / 2) < D₂ / 200 ∧ 2000 * ((ρ : ℝ) + 1 / 2) ≤ CE * n ^ (2 / 3 : ℝ) ∧
       Eh ((ρ : ℝ) + 1 / 2) + 3 * n / ρ₀ ≤ CE * n ^ (2 / 3 : ℝ) := by
-  sorry
+  have hn0 : 0 ≤ n := by linarith
+  set c := n ^ (1 / 3 : ℝ) with hcdef
+  have hc3 : c ^ 3 = n := by
+    rw [hcdef, ← Real.rpow_natCast, ← Real.rpow_mul hn0]; norm_num
+  have hn23 : n ^ (2 / 3 : ℝ) = c ^ 2 := by
+    rw [hcdef, ← Real.rpow_natCast, ← Real.rpow_mul hn0]; norm_num
+  rw [hn23]
+  have hc1 : 1 ≤ c := Real.one_le_rpow (by linarith) (by norm_num)
+  set m := min c (D₂ / 400) with hm
+  have hm1 : 1 ≤ m := le_min hc1 (by linarith)
+  have hmc : m ≤ c := min_le_left _ _
+  have hmD : m ≤ D₂ / 400 := min_le_right _ _
+  have hρ₀1 : 1 ≤ ρ₀ := by rw [hρ₀]; exact Nat.le_floor (by simpa using hm1)
+  have hρ₀m : (ρ₀ : ℝ) ≤ m := by rw [hρ₀]; exact Nat.floor_le (by linarith)
+  have hmρ₀ : m < ρ₀ + 1 := by rw [hρ₀]; exact Nat.lt_floor_add_one m
+  have hρ₀r : (1 : ℝ) ≤ ρ₀ := by exact_mod_cast hρ₀1
+  have hρ : (ρ : ℝ) + 1 ≤ 2 * ρ₀ := by exact_mod_cast h₂
+  have hh2c : (ρ : ℝ) + 1 / 2 < 2 * c := by linarith
+  have hh0 : (0 : ℝ) ≤ (ρ : ℝ) + 1 / 2 := by positivity
+  refine ⟨hρ₀1, by linarith, ?_, ?_⟩
+  · have : c ≤ c ^ 2 := by nlinarith
+    unfold CE; nlinarith
+  · have hE : Eh ((ρ : ℝ) + 1 / 2) ≤ 7506 * c ^ 2 := by
+      unfold Eh
+      have h1 : ((ρ : ℝ) + 1 / 2) ^ 2 ≤ 4 * c ^ 2 := by nlinarith
+      have : c ≤ c ^ 2 := by nlinarith
+      nlinarith
+    have hm2 : m ≤ 2 * ρ₀ := by linarith
+    have hshell : 3 * n / ρ₀ ≤ 9600 * c ^ 2 := by
+      rw [div_le_iff₀ (by linarith)]
+      rcases min_choice c (D₂ / 400) with hmin | hmin
+      · -- `m = c`: `3n ≤ 6 c² · c ≤ 9600 c² ρ₀`
+        rw [hm, hmin] at hm2
+        rw [← hc3]; nlinarith
+      · -- `m = Δ₂/400`: `c ≤ 4Δ₂`, so `3n = 3c³ ≤ 12 c² Δ₂ ≤ 9600 c² ρ₀`
+        rw [hm, hmin] at hm2
+        have hc4 : c ≤ 4 * D₂ := by
+          by_contra hlt
+          push Not at hlt
+          have : (4 * D₂) ^ 3 < c ^ 3 := by
+            exact pow_lt_pow_left₀ hlt (by linarith) (by norm_num)
+          nlinarith
+        rw [← hc3]; nlinarith
+    have := sq_nonneg c
+    unfold CE; linarith
 
 /-- **Theorem E′** (applied to `Y = X ∖ D`, §5.1 "Application"), from `CoreE`:
 `Def(G[X ∖ D]) ≥ 2|S ∖ D| − CE·n^{2/3}`.
 
-TODO: prove (wiring).
+TODO: none — proved (modulo `hcore`).
 What's missing: `n ≤ (2Δ + 2)² ≤ (4Δ₂)²` (`card_le_sq_diam`, `Normal.nondeg`, `Δ₂ ≥ 10⁴`);
 choose `ρ₀`, `ρ` (`shell_pigeonhole`), `eprime_arith`; case `|A| ≤ 1000h`: `defc_nonneg`;
 case `|A| > 1000h`: `hcore` + `shell_removal`.
@@ -204,7 +248,34 @@ Depends on: `card_le_sq_diam`, `shell_pigeonhole`, `eprime_arith`, `shell_remova
 `defc_nonneg`. Difficulty M. -/
 theorem eprime (hcore : CoreE) (hX : Normal X) :
     2 * ((Aset X).card : ℝ) - CE * (X.card : ℝ) ^ (2 / 3 : ℝ) ≤ defc (Yset X) := by
-  sorry
+  have h1 := hX.minDist_eq
+  have hn : (4 : ℝ) ≤ X.card := by exact_mod_cast hX.four_le
+  have hD := hX.large
+  have hnd := hX.nondeg
+  have hΔ0 := Defs.diam_nonneg X
+  have hnD : (X.card : ℝ) ≤ (4 * dist2 X) ^ 2 := by
+    have := card_le_sq_diam h1
+    have h2 : 2 * diam X + 2 ≤ 4 * dist2 X := by linarith
+    have h3 : (2 * diam X + 2) ^ 2 ≤ (4 * dist2 X) ^ 2 := pow_le_pow_left₀ (by linarith) h2 2
+    linarith
+  set ρ₀ := ⌊min ((X.card : ℝ) ^ (1 / 3 : ℝ)) (dist2 X / 400)⌋₊ with hρ₀
+  have hρ₀1 : 1 ≤ ρ₀ := by
+    rw [hρ₀]
+    refine Nat.le_floor ?_
+    push_cast
+    exact le_min (Real.one_le_rpow (by linarith) (by norm_num)) (by linarith)
+  obtain ⟨ρ, hρ1, hρ2, hsh⟩ := shell_pigeonhole (X := X) ρ₀ hρ₀1
+  obtain ⟨-, hh, hA2000, hEh⟩ := eprime_arith hn hD hnD hρ₀ hρ1 hρ2
+  have hsr := shell_removal h1 (ρ : ℝ)
+  have hdn : 0 ≤ defc (Yset X) := defc_nonneg h1 sdiff_subset
+  have hρ₀r : (0 : ℝ) < ρ₀ := by exact_mod_cast hρ₀1
+  have hshell : 3 * ((Yshell X ρ).card : ℝ) ≤ 3 * (X.card : ℝ) / ρ₀ := by
+    rw [le_div_iff₀ hρ₀r]; linarith
+  by_cases hA : 1000 * ((ρ : ℝ) + 1 / 2) < (Aset X).card
+  · have := hcore X ρ hX (by omega) hh hA
+    linarith
+  · push Not at hA
+    linarith
 
 end
 
