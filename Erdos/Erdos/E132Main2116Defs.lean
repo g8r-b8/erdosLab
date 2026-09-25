@@ -8,9 +8,9 @@ and for `τ > 1`) and §11 (`sec:II`: Theorem IIe `e(S) ≤ s + p/2 + C` and The
 weight `7` in Region II with `τ ≤ 1`).  Target:
 
 ```
-theorem erdos132_main2116 : ∃ C₁ : ℝ, ∀ X : Finset Pt, 2 ≤ X.card →
-    (tauInv X ≤ √3/2 - 1/50 ∨ √3/2 + 3/100 ≤ tauInv X) →
-    (min (mult X (dist2 X)) (mult X (minDist X)) : ℝ) ≤ 21/16 * X.card + C₁
+  theorem erdos132_main2116 : ∃ C₁ : ℝ, ∀ X : Finset Pt, 2 ≤ X.card →
+      (tauInv X ≤ √3/2 - 1/50 ∨ √3/2 + 3/100 ≤ tauInv X) →
+      (min (mult X (dist2 X)) (mult X (minDist X)) : ℝ) ≤ 21/16 * X.card + C₁
 ```
 
 Everything of the `54/37`, `15/11` and `4/3` developments is reused unchanged (this file imports
