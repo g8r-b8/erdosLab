@@ -83,14 +83,44 @@ def hooks(X: list[Pt], kind: str) -> tuple[list[tuple[int, int, int, int]], dict
 
 
 def check_set(X: list[Pt], kind: str, C: Counter) -> None:
-    """Run the CH, LD, CC, EX, K8+ tests on one set and update the counter.
-
-    TODO: implement.
-    What's missing: the tests.
-    Acceptance: increments C['sets']; any violation increments C['VIOL <name>'] and prints X.
-    Depends on: hooks.
-    """
-    raise NotImplementedError("per-set tests")
+    """Run the CH, LD, CC, EX, K8+ tests on one set and update the counter."""
+    H, info = hooks(X, kind)
+    if not info['ok']:
+        return
+    C['sets'] += 1
+    C['hooks'] += len(H)
+    C['case2 (mu2 > n)'] += info['mu2'] > len(X)
+    viol: list[str] = []
+    if info['online']:
+        viol.append('online')
+    if info['noDelta']:
+        viol.append('EX (Lemma M)')
+    per_xo: dict[tuple[int, int], set[tuple[int, int]]] = {}
+    for (p, w, x, o) in H:
+        per_xo.setdefault((x, o), set()).add((p, w))
+        if x not in info['VD']:
+            viol.append('EX (x not in V_Delta)')
+    for (x, o), pw in per_xo.items():
+        if len(pw) > 1:
+            viol.append('CH')
+            ws = [w for (_, w) in pw]
+            if len(set(ws)) < len(ws):
+                viol.append('LD')
+            if len(set(ws)) > 1:
+                viol.append('CC')
+        C['(x,orient) pairs with a hook'] += 1
+    L1, L2, core, VD = info['L1'], info['L2'], info['core'], info['VD']
+    bound = len(L1) + len(L2) + len(VD & L1 & core)
+    if info['mu2'] > bound:
+        viol.append('K8+')
+    if info['E'] > 2 * len(VD & L1 & core):
+        viol.append('E <= 2|V_Delta n L1\'|')
+    C['K8+ tight (mu2 = bound)'] += info['mu2'] == bound
+    for v in sorted(set(viol)):
+        C['VIOL ' + v] += 1
+    if viol and C['printed'] < 5:
+        C['printed'] += 1
+        print('VIOL', sorted(set(viol)), X, flush=True)
 
 
 def run(kind: str, r2max: int, cap: int) -> Counter:
