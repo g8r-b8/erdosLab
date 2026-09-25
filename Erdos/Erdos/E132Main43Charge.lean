@@ -44,7 +44,49 @@ Depends on: `Low_Z`, `frame_outside`, `Sset_not_interior`, `card_cone_le_two`,
 `dist_of_mem_nbδ`, `one_le_dist`, `Low_subset`. Difficulty M. -/
 theorem mS_le_one_of_Low (hX : Normal X) {y n : Pt} (hF : Frame43 X y n) (hy : y ∈ Rset X)
     {a : Pt} (ha : a ∈ Low X y) : mS X a ≤ 1 := by
-  sorry
+  have hZa := Low_Z hX hF ha
+  have hay : a ∈ nbδ X y := Low_subset X y ha
+  have hdya : dist a y = 1 := dist_of_mem_nbδ hX hay
+  have hyX : y ∈ X := (mem_sdiff.1 hy).1
+  have hyS : y ∉ Sset X := (mem_sdiff.1 hy).2
+  have hdep := hF.depth_pos
+  set Q := (nbδ X a).filter (· ∈ Sset X) with hQ
+  have hmS : mS X a = Q.card := rfl
+  have hyQ : y ∉ Q := fun h => hyS (mem_filter.1 h).2
+  have hcard := card_cone_le_two (a := a) hF.unit (insert y Q) ?_ ?_ ?_
+  · rw [card_insert_of_notMem hyQ] at hcard
+    omega
+  · intro q hq
+    rcases mem_insert.1 hq with rfl | hq
+    · rw [dist_comm]; exact hdya
+    · exact dist_of_mem_nbδ hX (mem_filter.1 hq).1
+  · intro q hq q' hq' hne
+    have hmem : ∀ r ∈ insert y Q, r ∈ X := by
+      intro r hr
+      rcases mem_insert.1 hr with rfl | hr
+      · exact hyX
+      · exact (mem_nbδ.1 (mem_filter.1 hr).1).1
+    exact one_le_dist hX.minDist_eq (hmem q hq) (hmem q' hq') hne
+  · intro q hq
+    rcases mem_insert.1 hq with rfl | hq
+    · have e : inner ℝ (q - a) n = -inner ℝ (a - q) n := by
+        rw [← inner_neg_left, neg_sub]
+      rw [e]; linarith
+    · obtain ⟨hqa, hqS⟩ := mem_filter.1 hq
+      have hdqa := dist_of_mem_nbδ hX hqa
+      have hdqy : dist q y ≤ 2 := by
+        have := dist_triangle q a y
+        linarith
+      have hout := frame_outside hX hF (by linarith) (Sset_not_interior hX hqS)
+      have hper : |inner ℝ (q - y) (perp n)| ≤ 2 := by
+        have := abs_real_inner_le_norm (q - y) (perp n)
+        rw [norm_perp, hF.unit, mul_one, ← dist_eq_norm] at this
+        linarith
+      have e : inner ℝ (q - a) n = inner ℝ (q - y) n - inner ℝ (a - y) n := by
+        rw [← inner_sub_left]; congr 1; abel
+      rw [e]
+      unfold ε43 at hout
+      nlinarith [abs_nonneg (inner ℝ (q - y) (perp n))]
 
 /-- **Receivers are in `R` and have weight `≤ 7`.**
 
