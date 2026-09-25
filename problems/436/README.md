@@ -178,3 +178,7 @@ Purpose: locate the SAT→hard transition. A quick SAT result raises the lower b
 - References (DOIs checked on Crossref): Tschebotareff, Math. Ann. 95 (1926) 191–228, doi:10.1007/BF01206606 (GDZ scan in
   novelty_sources/); Neukirch, ANT, doi:10.1007/978-3-662-03983-0; Lang, Algebra, doi:10.1007/978-1-4613-0041-0; LLMS 1962,
   doi:10.1090/S0025-5718-1962-0162379-2; Conrey–Holmstrom–McLaughlin, "Smooth neighbors", Exp. Math. (2013), doi:10.1080/10586458.2013.768483.
+- 2026-09-25 — THEORY §7 (+ referee §8, fixes folded in, fb60170): Λ(5,3) < ∞ ⟺ G_5 (strongly non-pretentious
+  g: N → μ_5 have a zero run); cases A (pretentious) and B (weakly pretentious, via KMT) proved; 12 trivial-product
+  3-point terms open; log 3-point Elliott ⇒ Λ(k,3) < ∞ for all odd k (presumably folklore). Blog posts: lower bound
+  (with 2026-09-25 correction note) and https://g8r-b8.github.io/erdos-lab/2026/09/finiteness-of-lambda-5-3-reduces-to-twelve-correlations/
