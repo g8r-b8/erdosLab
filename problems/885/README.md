@@ -74,8 +74,18 @@ not in Choudhry's list; Bremner 2019 full text (paywalled) not read — must che
 even passes the modular filter**, so there is no 5th common difference p/q with q ≤ 10⁶. The row side
 rediscovers only the known 5th row (validation).
 
-**Rational extension of the 32 distinct 4×4 configurations (ext.c, q ≤ 1e5, all 32):** 6.9e9 divisor
-candidates, 223 filter survivors, **0 genuine** after exact gp verification (verify_ext.py).
+**★ Second K₅,₄** (from the rational extension search: configuration 60 of data/k44.tsv,
+d = 504, 2520, 4380, 12780, gains the 5th row x = 1337472000/841; scaled by 29, verified in gp):
+
+    N = 1337472000, 7847539200, 51941513169, 152967808000, 374066035200
+    common D = {29232, 146160, 254040, 741240}   (exactly these four; x-form d = 14616, 73080, 127020, 370620)
+
+Its difference ratios differ from the first K₅,₄, so the two are not scalings of each other.
+
+**Rational extension of all 101 distinct 4×4 configurations (ext.c, q ≤ 1e5):** 1.5e11 divisor candidates,
+503671 filter survivors, all verified exactly in gp: the only genuine extensions are (a) the known 5th rows of the
+first K₅,₄ (configurations 34–38, its 4-row subsets, validation) and (b) the new row for configuration 60 above.
+**No 5th column (difference) for any 4×4 configuration.**
 
 **Observation:** besides the one K₅,₄, none of the ~80 K₄,₄ configurations extends by a row or column.
 Height heuristic: #K_{m,n} of height ≤ H ≈ H^{m+n−1−mn/2}, i.e. H^{−3.5} for 5 × 5 (and H^{−1} already for 4 × 4,
