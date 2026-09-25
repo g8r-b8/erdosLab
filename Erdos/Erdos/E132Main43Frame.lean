@@ -214,6 +214,100 @@ theorem D_inner {z w k : Pt} (hw : w ∈ X) (hk : k ∈ X) (hzw : dist z w = dia
 
 /-! ## Lemma DN -/
 
+/-- Helper: for a diametral pair `(z, w)`, every `k ∈ K` has `⟨k − z, w − z⟩ > 0`. -/
+private theorem D_inner_pos (hX : Normal X) {z w k : Pt} (hw : w ∈ X) (hzw : dist z w = diam X)
+    (hk : k ∈ KBall X) : 0 < inner ℝ (k - z) (w - z) := by
+  have e := norm_sub_sq_real (k - z) (w - z)
+  rw [show k - z - (w - z) = k - w by abel] at e
+  have h1 : ‖k - w‖ ≤ dist2 X := by rw [← dist_eq_norm]; exact mem_KBall.1 hk w hw
+  have h2 : ‖w - z‖ = diam X := by rw [← dist_eq_norm, dist_comm]; exact hzw
+  have hT := two_of_pos hX.dist2_pos
+  have h0 : 0 ≤ dist2 X := hX.dist2_pos.le
+  have h3 : ‖k - w‖ ^ 2 ≤ dist2 X ^ 2 := pow_le_pow_left₀ (norm_nonneg _) h1 2
+  have h4 : dist2 X ^ 2 < diam X ^ 2 := pow_lt_pow_left₀ hT.lt h0 two_ne_zero
+  rw [h2] at e
+  nlinarith [sq_nonneg ‖k - z‖]
+
+/-- Helper: frame coordinates of a vector are bounded by its norm. -/
+private theorem frame_coords_le {n v : Pt} (hn : ‖n‖ = 1) :
+    |inner ℝ v n| ≤ ‖v‖ ∧ |inner ℝ v (perp n)| ≤ ‖v‖ := by
+  have h1 := abs_real_inner_le_norm v n
+  have h2 := abs_real_inner_le_norm v (perp n)
+  rw [hn, mul_one] at h1
+  rw [norm_perp, hn, mul_one] at h2
+  exact ⟨h1, h2⟩
+
+/-- Helper (common core of `frame_dn`, `frame_dn1`): for `z ∈ D` with `dist z y ≤ r ≤ 3` and a
+diametral partner `w`, `⟨w − z, n⟩ < 0` and `(463 − r)|⟨w − z, perp n⟩| ≤ (9.31 + r)(−⟨w − z, n⟩)`. -/
+private theorem dn_core (hX : Normal X) {y n : Pt} (hF : Frame43 X y n) {z w : Pt}
+    (hz : z ∈ Dset X) {r : ℝ} (hr : r ≤ 3) (hzy : dist z y ≤ r) (hw : w ∈ X)
+    (hzw : dist z w = diam X) :
+    inner ℝ (w - z) n < 0 ∧
+      (463 - r) * |inner ℝ (w - z) (perp n)| ≤ (931 / 100 + r) * -inner ℝ (w - z) n := by
+  have hzn : ‖z - y‖ ≤ r := by rw [← dist_eq_norm]; exact hzy
+  obtain ⟨hZz, hXz⟩ := frame_coords_le (v := z - y) hF.unit
+  have hZz' := abs_le.1 hZz
+  have hXz' := abs_le.1 hXz
+  have hh0 : 0 ≤ depth X y := hF.depth_pos.le
+  have hh1 := hF.depth_le
+  have hfD := frame_D hX hF hz (hzy.trans hr)
+  have ht0 : 0 < tgap X := by
+    have hT := two_of_pos hX.dist2_pos
+    unfold tgap; linarith [hT.lt]
+  -- (i) `⟨u, n⟩ < 0`
+  set s := inner ℝ (z - y) n - depth X y + ε43 * |inner ℝ (z - y) (perp n)| + 1 / 100 with hs
+  have hs0 : 0 < s := by rw [hs]; linarith
+  have e1 : inner ℝ ((z - y) - s • n) (perp n) = inner ℝ (z - y) (perp n) := by
+    rw [inner_sub_left, real_inner_smul_left, inner_self_perp, mul_zero, sub_zero]
+  have e2 : inner ℝ ((z - y) - s • n) n = inner ℝ (z - y) n - s := by
+    rw [inner_sub_left, real_inner_smul_left, real_inner_self_eq_norm_sq, hF.unit]; ring
+  have eG : z - s • n - y = (z - y) - s • n := by abel
+  have hε : ε43 * |inner ℝ (z - y) (perp n)| ≤ 3 / 49 := by
+    unfold ε43; linarith
+  have hε0 : 0 ≤ ε43 * |inner ℝ (z - y) (perp n)| := by unfold ε43; positivity
+  have hGy : dist (z - s • n) y ≤ 6 := by
+    rw [dist_eq_norm, eG]
+    have hf := n1_norm_sq_frame hF.unit ((z - y) - s • n)
+    rw [e1, e2] at hf
+    have hf2 := n1_norm_sq_frame hF.unit (z - y)
+    have hzn2 : ‖z - y‖ ^ 2 ≤ 9 := by nlinarith [norm_nonneg (z - y)]
+    have hZG : inner ℝ (z - y) n - s = depth X y - ε43 * |inner ℝ (z - y) (perp n)| - 1 / 100 := by
+      rw [hs]; ring
+    rw [hZG] at hf
+    nlinarith [norm_nonneg ((z - y) - s • n), sq_nonneg (inner ℝ (z - y) n)]
+  have hGint : z - s • n ∈ interior (KBall X) := by
+    refine frame_mem_interior hX hF hGy ?_
+    rw [eG, e1, e2, hs]; linarith
+  have hG := D_inner_pos hX hw hzw (interior_subset hGint)
+  rw [show z - s • n - z = -(s • n) by abel, inner_neg_left, real_inner_smul_left,
+    real_inner_comm] at hG
+  have hc : inner ℝ (w - z) n < 0 := by
+    by_contra hc; push Not at hc; nlinarith
+  refine ⟨hc, ?_⟩
+  -- (ii) the far points
+  have far : ∀ σ : ℝ, (σ = 1 ∨ σ = -1) →
+      -(931 / 100 + r) * -inner ℝ (w - z) n <
+        (σ * 463 - inner ℝ (z - y) (perp n)) * inner ℝ (w - z) (perp n) := by
+    intro σ hσ
+    obtain ⟨g, hgK, hgX, hgZ⟩ := hF.far σ hσ
+    have hp := D_inner_pos hX hw hzw hgK
+    have eg : g - z = (g - y) - (z - y) := by abel
+    have g1 : inner ℝ (g - z) n = inner ℝ (g - y) n - inner ℝ (z - y) n := by
+      rw [eg, inner_sub_left]
+    have g2 : inner ℝ (g - z) (perp n) = σ * 463 - inner ℝ (z - y) (perp n) := by
+      rw [eg, inner_sub_left, hgX]
+    rw [n1_inner_frame hF.unit, g1, g2] at hp
+    have hZ : -(931 / 100 + r) ≤ inner ℝ (g - y) n - inner ℝ (z - y) n := by linarith
+    have := mul_le_mul_of_nonneg_right hZ (by linarith : 0 ≤ -inner ℝ (w - z) n)
+    nlinarith
+  have f1 := far 1 (Or.inl rfl)
+  have f2 := far (-1) (Or.inr rfl)
+  rcases le_or_gt 0 (inner ℝ (w - z) (perp n)) with ha | ha
+  · rw [abs_of_nonneg ha]
+    nlinarith [mul_nonneg (by linarith : 0 ≤ inner ℝ (z - y) (perp n) + r) ha]
+  · rw [abs_of_neg ha]
+    nlinarith [mul_nonneg (by linarith : 0 ≤ r - inner ℝ (z - y) (perp n)) (neg_nonneg.2 ha.le)]
+
 /-- **Lemma DN** (D-normals are nearly vertical): for `z ∈ D` within `3` of `y` and a diametral
 partner `w`, `u = w − z` points downwards and `|⟨u, perp n⟩| ≤ (3/100)·(−⟨u, n⟩)`
 (paper: `τ₃ = (463ε + 3)/460 < 0.0267`).
@@ -232,7 +326,9 @@ Depends on: `frame_D`, `frame_mem_interior`, `Frame43.far`, `Frame43.top`, `n1_i
 theorem frame_dn (hX : Normal X) {y n : Pt} (hF : Frame43 X y n) {z w : Pt} (hz : z ∈ Dset X)
     (hzy : dist z y ≤ 3) (hw : w ∈ X) (hzw : dist z w = diam X) :
     inner ℝ (w - z) n < 0 ∧ |inner ℝ (w - z) (perp n)| ≤ 3 / 100 * -inner ℝ (w - z) n := by
-  sorry
+  obtain ⟨hc, hb⟩ := dn_core hX hF hz le_rfl hzy hw hzw
+  refine ⟨hc, ?_⟩
+  linarith
 
 /-- **Lemma DN for D-neighbours** (`dist z y ≤ 1`): `|⟨u, perp n⟩| ≤ (9/400)·(−⟨u, n⟩)`
 (paper: `τ* = (463ε + 1)/462 < 0.0224`; here `(9.31 + 1)/462 < 0.02232 ≤ 9/400`).
@@ -244,7 +340,9 @@ Depends on: as `frame_dn` (or share a helper). Difficulty M. -/
 theorem frame_dn1 (hX : Normal X) {y n : Pt} (hF : Frame43 X y n) {z w : Pt} (hz : z ∈ Dset X)
     (hzy : dist z y ≤ 1) (hw : w ∈ X) (hzw : dist z w = diam X) :
     inner ℝ (w - z) n < 0 ∧ |inner ℝ (w - z) (perp n)| ≤ 9 / 400 * -inner ℝ (w - z) n := by
-  sorry
+  obtain ⟨hc, hb⟩ := dn_core hX hF hz (by norm_num : (1 : ℝ) ≤ 3) hzy hw hzw
+  refine ⟨hc, ?_⟩
+  linarith
 
 /-- **Corollary (D–D heights)**: two diametral points within `1` of `y` have
 `|Z z₁ − Z z₂| ≤ (9/400)|Xz₁ − Xz₂|`.
