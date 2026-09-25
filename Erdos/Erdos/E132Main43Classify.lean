@@ -615,6 +615,291 @@ theorem hexagon_exact (hX : Normal X) {y : Pt} (h6 : degδ X y = 6) :
   rw [hrot, show y + (m - y) = m by abel]
   exact (hPm m hm).1
 
+/-! ## Hexagon toolkit (private helpers for Lemma H) -/
+
+private theorem c43_sq_le {t c : ℝ} (h : |t| ≤ c) : t ^ 2 ≤ c ^ 2 := by
+  rw [← sq_abs]; exact pow_le_pow_left₀ (abs_nonneg t) h 2
+
+private theorem c43_rot_dirF (φ θ : ℝ) (n : Pt) : rot φ (dirF n θ) = dirF n (θ + φ) := by
+  rw [pt_ext_iff]
+  refine ⟨?_, ?_⟩ <;> simp [rot, dirF, perp, Real.cos_add, Real.sin_add] <;> ring
+
+private theorem c43_rot_sub (φ : ℝ) (a b : Pt) : rot φ (a - b) = rot φ a - rot φ b := by
+  rw [pt_ext_iff]; refine ⟨?_, ?_⟩ <;> simp [rot] <;> ring
+
+private theorem c43_rot_rot (α β : ℝ) (x : Pt) : rot α (rot β x) = rot (α + β) x := by
+  rw [pt_ext_iff]; refine ⟨?_, ?_⟩ <;> simp [rot, Real.cos_add, Real.sin_add] <;> ring
+
+private theorem c43_rot_norm (φ : ℝ) (x : Pt) : ‖rot φ x‖ = ‖x‖ := by
+  have h : ‖rot φ x‖ ^ 2 = ‖x‖ ^ 2 := by
+    rw [norm_sq_coord, norm_sq_coord]
+    have e0 : rot φ x 0 = Real.cos φ * x 0 - Real.sin φ * x 1 := by simp [rot]
+    have e1 : rot φ x 1 = Real.sin φ * x 0 + Real.cos φ * x 1 := by simp [rot]
+    rw [e0, e1]
+    linear_combination (x 0 ^ 2 + x 1 ^ 2) * Real.sin_sq_add_cos_sq φ
+  exact (sq_eq_sq₀ (norm_nonneg _) (norm_nonneg _)).1 h
+
+private theorem c43_perp_inner (w n : Pt) :
+    inner ℝ (perp w) n = -inner ℝ w (perp n) ∧ inner ℝ (perp w) (perp n) = inner ℝ w n := by
+  constructor <;> simp [inner_pt, perp] <;> ring
+
+/-- The rotation by `60°` about `y`. -/
+private def c43g (y x : Pt) : Pt := y + rot (π / 3) (x - y)
+
+private theorem c43g_mem (hX : Normal X) {y x : Pt} (h6 : degδ X y = 6) (hx : x ∈ nbδ X y) :
+    c43g y x ∈ nbδ X y :=
+  hexagon_exact hX h6 x hx
+
+private theorem c43g_slot {y n x : Pt} {θ η : ℝ} (h : Slot y n θ η x) :
+    Slot y n (θ + π / 3) η (c43g y x) := by
+  unfold Slot at h ⊢
+  have e : c43g y x - y - dirF n (θ + π / 3) = rot (π / 3) (x - y - dirF n θ) := by
+    rw [c43_rot_sub (π / 3) (x - y) (dirF n θ), c43_rot_dirF]; unfold c43g; abel
+  rw [e, c43_rot_norm]; exact h
+
+private theorem c43g3 (y x : Pt) : c43g y (c43g y (c43g y x)) = y - (x - y) := by
+  unfold c43g
+  simp only [add_sub_cancel_left]
+  rw [c43_rot_rot, c43_rot_rot, show π / 3 + π / 3 + π / 3 = π by ring]
+  have : rot π (x - y) = -(x - y) := by
+    rw [pt_ext_iff]; refine ⟨?_, ?_⟩ <;> simp [rot]
+  rw [this, ← sub_eq_add_neg]
+
+private theorem c43g_coords {n : Pt} (y x : Pt) :
+    inner ℝ (c43g y x - y) n =
+        1 / 2 * inner ℝ (x - y) n - √3 / 2 * inner ℝ (x - y) (perp n) ∧
+      inner ℝ (c43g y x - y) (perp n) =
+        √3 / 2 * inner ℝ (x - y) n + 1 / 2 * inner ℝ (x - y) (perp n) := by
+  have e : c43g y x - y = Real.sin (π / 3) • perp (x - y) + Real.cos (π / 3) • (x - y) := by
+    simp only [c43g, add_sub_cancel_left, c43_rot_eq, dirF]
+  rw [e, Real.sin_pi_div_three, Real.cos_pi_div_three]
+  obtain ⟨p1, p2⟩ := c43_perp_inner (x - y) n
+  constructor
+  · rw [inner_add_left, real_inner_smul_left, real_inner_smul_left, p1]; ring
+  · rw [inner_add_left, real_inner_smul_left, real_inner_smul_left, p2]
+
+private theorem c43g2_coords {n : Pt} (y x : Pt) :
+    inner ℝ (c43g y (c43g y x) - y) n =
+        -(1 / 2) * inner ℝ (x - y) n - √3 / 2 * inner ℝ (x - y) (perp n) ∧
+      inner ℝ (c43g y (c43g y x) - y) (perp n) =
+        √3 / 2 * inner ℝ (x - y) n - 1 / 2 * inner ℝ (x - y) (perp n) := by
+  obtain ⟨a1, a2⟩ := c43g_coords (n := n) y x
+  obtain ⟨b1, b2⟩ := c43g_coords (n := n) y (c43g y x)
+  rw [b1, b2, a1, a2]
+  constructor
+  · linear_combination (-(inner ℝ (x - y) n) / 4) * c43_r_sq
+  · linear_combination (-(inner ℝ (x - y) (perp n)) / 4) * c43_r_sq
+
+/-- Adjacent hexagon vertices are at distance `1`. -/
+private theorem c43g_dist (hX : Normal X) {y n x : Pt} (hn : ‖n‖ = 1) (hx : x ∈ nbδ X y) :
+    dist x (c43g y x) = 1 := by
+  obtain ⟨g1, g2⟩ := c43g_coords (n := n) y x
+  have hu := c43_unit hX hn hx
+  have e := c43_sq hn ((x - y) - (c43g y x - y))
+  rw [inner_sub_left (x - y) (c43g y x - y) n,
+    inner_sub_left (x - y) (c43g y x - y) (perp n), g1, g2] at e
+  have h1 : ‖(x - y) - (c43g y x - y)‖ ^ 2 = 1 ^ 2 := by
+    rw [e]
+    linear_combination
+      ((inner ℝ (x - y) n ^ 2 + inner ℝ (x - y) (perp n) ^ 2) / 4) * c43_r_sq + hu
+  rw [sub_sub_sub_cancel_right] at h1
+  rw [dist_eq_norm]
+  exact (sq_eq_sq₀ (norm_nonneg _) zero_le_one).1 h1
+
+private theorem c43_slot_congr {y n q : Pt} {θ θ' η : ℝ} (h : Slot y n θ η q)
+    (hc : Real.cos θ = Real.cos θ') (hs : Real.sin θ = Real.sin θ') : Slot y n θ' η q := by
+  unfold Slot dirF at *; rw [← hc, ← hs]; exact h
+
+private theorem c43_slot_fix {y n q : Pt} {θ θ' η η' : ℝ} (h : Slot y n θ η q) (hθ : θ = θ')
+    (hη : η ≤ η') : Slot y n θ' η' q := by
+  subst hθ; exact le_trans h hη
+
+private theorem c43_slot_pi {y n q : Pt} {η : ℝ} (h : Slot y n π η q) : ‖q - y + n‖ ≤ η := by
+  unfold Slot dirF at h
+  rwa [Real.sin_pi, Real.cos_pi, zero_smul, zero_add, neg_one_smul, sub_neg_eq_add] at h
+
+/-- Slot at an angle `θ = θ' + 2πk`, with the coordinates. -/
+private theorem c43_ZX {y n q : Pt} (hn : ‖n‖ = 1) {θ θ' η C S : ℝ} (k : ℤ)
+    (h : Slot y n θ η q) (hθ : θ = θ' + k * (2 * π))
+    (hcs : Real.cos θ' = C ∧ Real.sin θ' = S) :
+    Slot y n θ' η q ∧ C - η ≤ inner ℝ (q - y) n ∧ inner ℝ (q - y) n ≤ C + η ∧
+      S - η ≤ inner ℝ (q - y) (perp n) ∧ inner ℝ (q - y) (perp n) ≤ S + η := by
+  have hs : Slot y n θ' η q := c43_slot_congr h (by rw [hθ, Real.cos_add_int_mul_two_pi])
+    (by rw [hθ, Real.sin_add_int_mul_two_pi])
+  obtain ⟨h1, h2⟩ := c43_slot_coords hn hs
+  rw [hcs.1] at h1
+  rw [hcs.2] at h2
+  obtain ⟨a1, a2⟩ := abs_le.1 h1
+  obtain ⟨b1, b2⟩ := abs_le.1 h2
+  exact ⟨hs, by linarith, by linarith, by linarith, by linarith⟩
+
+private theorem c43_cs_0 : Real.cos 0 = 1 ∧ Real.sin 0 = 0 := ⟨Real.cos_zero, Real.sin_zero⟩
+private theorem c43_cs_p6 : Real.cos (π / 6) = √3 / 2 ∧ Real.sin (π / 6) = 1 / 2 :=
+  ⟨Real.cos_pi_div_six, Real.sin_pi_div_six⟩
+private theorem c43_cs_m6 : Real.cos (-(π / 6)) = √3 / 2 ∧ Real.sin (-(π / 6)) = -(1 / 2) :=
+  ⟨by rw [Real.cos_neg, Real.cos_pi_div_six], by rw [Real.sin_neg, Real.sin_pi_div_six]⟩
+private theorem c43_cs_p3 : Real.cos (π / 3) = 1 / 2 ∧ Real.sin (π / 3) = √3 / 2 :=
+  ⟨Real.cos_pi_div_three, Real.sin_pi_div_three⟩
+private theorem c43_cs_m3 : Real.cos (-(π / 3)) = 1 / 2 ∧ Real.sin (-(π / 3)) = -(√3 / 2) :=
+  ⟨by rw [Real.cos_neg, Real.cos_pi_div_three], by rw [Real.sin_neg, Real.sin_pi_div_three]⟩
+private theorem c43_cs_p2 : Real.cos (π / 2) = 0 ∧ Real.sin (π / 2) = 1 :=
+  ⟨Real.cos_pi_div_two, Real.sin_pi_div_two⟩
+private theorem c43_cs_m2 : Real.cos (-(π / 2)) = 0 ∧ Real.sin (-(π / 2)) = -1 :=
+  ⟨by rw [Real.cos_neg, Real.cos_pi_div_two], by rw [Real.sin_neg, Real.sin_pi_div_two]⟩
+private theorem c43_cs_p23 : Real.cos (π - π / 3) = -(1 / 2) ∧ Real.sin (π - π / 3) = √3 / 2 :=
+  ⟨by rw [Real.cos_pi_sub, Real.cos_pi_div_three], by rw [Real.sin_pi_sub, Real.sin_pi_div_three]⟩
+private theorem c43_cs_m23 :
+    Real.cos (-(π - π / 3)) = -(1 / 2) ∧ Real.sin (-(π - π / 3)) = -(√3 / 2) :=
+  ⟨by rw [Real.cos_neg, Real.cos_pi_sub, Real.cos_pi_div_three],
+    by rw [Real.sin_neg, Real.sin_pi_sub, Real.sin_pi_div_three]⟩
+private theorem c43_cs_p56 : Real.cos (π - π / 6) = -(√3 / 2) ∧ Real.sin (π - π / 6) = 1 / 2 :=
+  ⟨by rw [Real.cos_pi_sub, Real.cos_pi_div_six], by rw [Real.sin_pi_sub, Real.sin_pi_div_six]⟩
+private theorem c43_cs_m56 :
+    Real.cos (-(π - π / 6)) = -(√3 / 2) ∧ Real.sin (-(π - π / 6)) = -(1 / 2) :=
+  ⟨by rw [Real.cos_neg, Real.cos_pi_sub, Real.cos_pi_div_six],
+    by rw [Real.sin_neg, Real.sin_pi_sub, Real.sin_pi_div_six]⟩
+private theorem c43_cs_pi : Real.cos π = -1 ∧ Real.sin π = 0 := ⟨Real.cos_pi, Real.sin_pi⟩
+
+/-- **Hexagon enumeration**: at a point of degree `6` the neighbours are the six rotations of
+any one of them by multiples of `60°`. -/
+private theorem c43_hex_enum (hX : Normal X) {y a : Pt} (h6 : degδ X y = 6)
+    (ha : a ∈ nbδ X y) :
+    ∀ x ∈ nbδ X y, x = a ∨ x = c43g y a ∨ x = c43g y (c43g y a) ∨
+      x = c43g y (c43g y (c43g y a)) ∨ x = c43g y (c43g y (c43g y (c43g y a))) ∨
+      x = c43g y (c43g y (c43g y (c43g y (c43g y a)))) := by
+  intro x hx
+  have hπ := Real.pi_pos
+  have he : ‖a - y‖ = 1 := by rw [← dist_eq_norm, dist_of_mem_nbδ hX ha]
+  have m1 := c43g_mem hX h6 ha
+  have m2 := c43g_mem hX h6 m1
+  have m3 := c43g_mem hX h6 m2
+  have m4 := c43g_mem hX h6 m3
+  have m5 := c43g_mem hX h6 m4
+  have s0 : Slot y (a - y) 0 0 a := by
+    unfold Slot dirF
+    rw [Real.sin_zero, Real.cos_zero, zero_smul, one_smul, zero_add, sub_self, norm_zero]
+  have s1 := c43g_slot s0
+  have s2 := c43g_slot s1
+  have s3 := c43g_slot s2
+  have s4 := c43g_slot s3
+  have s5 := c43g_slot s4
+  obtain ⟨ψ, h1, h2, hc, hs⟩ := c43_angle (c43_unit hX he hx)
+  have key : ∀ R ∈ nbδ X y, ∀ θ : ℝ, Slot y (a - y) θ 0 R → 1 / 2 < Real.cos (ψ - θ) →
+      x = R := by
+    intro R hR θ hsl hlt
+    by_contra hne
+    obtain ⟨c1, c2⟩ := c43_slot_coords he hsl
+    have hZ : inner ℝ (R - y) (a - y) = Real.cos θ := by
+      have := abs_nonpos_iff.1 c1; linarith
+    have hX' : inner ℝ (R - y) (perp (a - y)) = Real.sin θ := by
+      have := abs_nonpos_iff.1 c2; linarith
+    have hsep := c43_sep hX he hx hR hne
+    rw [hZ, hX', ← hc, ← hs, c43_chord] at hsep
+    linarith
+  have gt2 : ∀ d : ℝ, |d + 2 * π| < π / 3 → 1 / 2 < Real.cos d := by
+    intro d h; rw [← Real.cos_add_two_pi]; exact c43_cos_gt_half h
+  rcases lt_or_ge ψ (-(5 * π / 6)) with c | c
+  · right; right; right; left
+    exact key _ m3 _ s3 (gt2 _ (by rw [abs_lt]; constructor <;> linarith))
+  rcases lt_or_ge ψ (-(π / 2)) with c' | c'
+  · right; right; right; right; left
+    exact key _ m4 _ s4 (gt2 _ (by rw [abs_lt]; constructor <;> linarith))
+  rcases lt_or_ge ψ (-(π / 6)) with c'' | c''
+  · right; right; right; right; right
+    exact key _ m5 _ s5 (gt2 _ (by rw [abs_lt]; constructor <;> linarith))
+  rcases lt_or_ge ψ (π / 6) with d | d
+  · left
+    exact key _ ha _ s0 (c43_cos_gt_half (by rw [abs_lt]; constructor <;> linarith))
+  rcases lt_or_ge ψ (π / 2) with d' | d'
+  · right; left
+    exact key _ m1 _ s1 (c43_cos_gt_half (by rw [abs_lt]; constructor <;> linarith))
+  rcases lt_or_ge ψ (5 * π / 6) with d'' | d''
+  · right; right; left
+    exact key _ m2 _ s2 (c43_cos_gt_half (by rw [abs_lt]; constructor <;> linarith))
+  · right; right; right; left
+    exact key _ m3 _ s3 (c43_cos_gt_half (by rw [abs_lt]; constructor <;> linarith))
+
+/-- **Pinning** (algebra): if the component of the unit vector `(u, v)` orthogonal to the unit
+vector `(c, s)` is `≤ δ`, then `(u, v)` is within `η` (`2δ² ≤ η²`) of `±(c, s)`. -/
+private theorem c43_pin_alg {u v c s δ η : ℝ} (hu : u ^ 2 + v ^ 2 = 1) (hcs : s ^ 2 + c ^ 2 = 1)
+    (hδ : 2 * δ ^ 2 ≤ η ^ 2) (hQ : |-s * u + c * v| ≤ δ) :
+    (u - c) ^ 2 + (v - s) ^ 2 ≤ η ^ 2 ∨ (u + c) ^ 2 + (v + s) ^ 2 ≤ η ^ 2 := by
+  have hPQ : (c * u + s * v) ^ 2 + (-s * u + c * v) ^ 2 = 1 := by
+    linear_combination (u ^ 2 + v ^ 2) * hcs + hu
+  have hQ2 := c43_sq_le hQ
+  have hP1 : c * u + s * v ≤ 1 := by nlinarith [sq_nonneg (-s * u + c * v)]
+  have hPm1 : -1 ≤ c * u + s * v := by nlinarith [sq_nonneg (-s * u + c * v)]
+  rcases le_total 0 (c * u + s * v) with h0 | h0
+  · left
+    have e : (u - c) ^ 2 + (v - s) ^ 2 = 2 - 2 * (c * u + s * v) := by
+      linear_combination hu + hcs
+    rw [e]; nlinarith [mul_nonneg h0 (sub_nonneg.2 hP1)]
+  · right
+    have e : (u + c) ^ 2 + (v + s) ^ 2 = 2 + 2 * (c * u + s * v) := by
+      linear_combination hu + hcs
+    rw [e]; nlinarith [mul_nonneg (neg_nonneg.2 h0) (by linarith : (0 : ℝ) ≤ 1 + (c * u + s * v))]
+
+/-- **Pinning**: a unit neighbour whose component orthogonal to the slot `θ` is `≤ δ` lies within
+`η` (`2δ² ≤ η²`) of the slot `θ` or of the antipodal slot `θ + π`. -/
+private theorem c43_pin {y n q : Pt} (hn : ‖n‖ = 1) {θ δ η : ℝ} (hη : 0 ≤ η)
+    (hδ : 2 * δ ^ 2 ≤ η ^ 2)
+    (hu : inner ℝ (q - y) n ^ 2 + inner ℝ (q - y) (perp n) ^ 2 = 1)
+    (hQ : |-(Real.sin θ) * inner ℝ (q - y) n + Real.cos θ * inner ℝ (q - y) (perp n)| ≤ δ) :
+    Slot y n θ η q ∨ Slot y n (θ + π) η q := by
+  rcases c43_pin_alg hu (Real.sin_sq_add_cos_sq θ) hδ hQ with h | h
+  · exact Or.inl (c43_slot_of hn hη h)
+  · refine Or.inr (c43_slot_of hn hη ?_)
+    rw [Real.cos_add_pi, Real.sin_add_pi, sub_neg_eq_add, sub_neg_eq_add]; exact h
+
+private theorem c43_S_gt (hX : Normal X) {y n q : Pt} (hF : Frame43 X y n) (hq : q ∈ nbδ X y)
+    (hS : q ∈ Sset X) : -(1 / 49) < inner ℝ (q - y) n := by
+  have h1 := c43_S_low hX hF hq hS
+  have h2 := c43_abs_le_one (c43_unit hX hF.unit hq)
+  have := hF.depth_pos
+  linarith
+
+private theorem c43_KD (hX : Normal X) {y n p z : Pt} (hF : Frame43 X y n) (hp : p ∈ nbδ X y)
+    (hpD : p ∉ Dset X) (hz : z ∈ nbδ X y) (hzD : z ∈ Dset X) :
+    inner ℝ (p - y) n - 1 / 49 < inner ℝ (z - y) n := by
+  have h1 := c43_K_top hF hp hpD
+  have h2 := c43_D_low hX hF hz hzD
+  have h3 := c43_abs_le_one (c43_unit hX hF.unit hz)
+  have := c43_tgap_pos hX
+  linarith
+
+/-- Three K-row neighbours are impossible (Lemma P). -/
+private theorem c43_three_K (hX : Normal X) {y n : Pt} (hF : Frame43 X y n) {a b c : Pt}
+    (ha : a ∈ nbδ X y) (hb : b ∈ nbδ X y) (hc : c ∈ nbδ X y) (hab : a ≠ b) (hac : a ≠ c)
+    (hbc : b ≠ c) (hSa : a ∈ Sset X) (hDa : a ∉ Dset X) (hSb : b ∈ Sset X) (hDb : b ∉ Dset X)
+    (hSc : c ∈ Sset X) (hDc : c ∉ Dset X) : False := by
+  obtain ⟨z1, -⟩ := pair_K hX hF ha hb hab hSa hDa hSb hDb
+  obtain ⟨-, x2⟩ := pair_K hX hF ha hc hac hSa hDa hSc hDc
+  obtain ⟨-, x3⟩ := pair_K hX hF hb hc hbc hSb hDb hSc hDc
+  have hs := c43_sep hX hF.unit ha hb hab
+  obtain ⟨x2a, x2b⟩ := abs_le.1 x2
+  obtain ⟨x3a, x3b⟩ := abs_le.1 x3
+  have hx : |inner ℝ (a - y) (perp n) - inner ℝ (b - y) (perp n)| ≤ 2 / 25 := by
+    rw [abs_le]; constructor <;> linarith
+  have h1 := c43_sq_le z1
+  have h2 := c43_sq_le hx
+  linarith
+
+/-- Three D-neighbours are impossible (Lemma P). -/
+private theorem c43_three_D (hX : Normal X) {y n : Pt} (hF : Frame43 X y n) {a b c : Pt}
+    (ha : a ∈ nbδ X y) (hb : b ∈ nbδ X y) (hc : c ∈ nbδ X y) (hab : a ≠ b) (hac : a ≠ c)
+    (hbc : b ≠ c) (hDa : a ∈ Dset X) (hDb : b ∈ Dset X) (hDc : c ∈ Dset X) : False := by
+  obtain ⟨z1, -⟩ := pair_D hX hF ha hb hab hDa hDb
+  obtain ⟨-, x2⟩ := pair_D hX hF ha hc hac hDa hDc
+  obtain ⟨-, x3⟩ := pair_D hX hF hb hc hbc hDb hDc
+  have hs := c43_sep hX hF.unit ha hb hab
+  obtain ⟨x2a, x2b⟩ := abs_le.1 x2
+  obtain ⟨x3a, x3b⟩ := abs_le.1 x3
+  have hx : |inner ℝ (a - y) (perp n) - inner ℝ (b - y) (perp n)| ≤ 4 / 25 := by
+    rw [abs_le]; constructor <;> linarith
+  have h1 := c43_sq_le z1
+  have h2 := c43_sq_le hx
+  linarith
+
 /-! ## Lemma M and Lemma H -/
 
 /-- **Lemma M** (`m_y = 4`): the four `S`-neighbours are K-row points within `1/40` of the
