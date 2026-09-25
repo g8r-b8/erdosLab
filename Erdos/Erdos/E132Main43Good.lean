@@ -86,7 +86,76 @@ Difficulty M. -/
 theorem exists_foot (hX : Normal X) {y : Pt} (hy : y ∈ interior (KBall X)) :
     ∃ n : Pt, ‖n‖ = 1 ∧ 0 < depth X y ∧ y + depth X y • n ∈ frontier (KBall X) ∧
       n ∈ normalCone (KBall X) (y + depth X y • n) := by
-  sorry
+  have hne : X.Nonempty := card_pos.1 (by have := hX.four_le; omega)
+  have hKc := KBall_isCompact hne
+  have hyK : y ∈ KBall X := interior_subset hy
+  have hFc : IsCompact (frontier (KBall X)) :=
+    hKc.of_isClosed_subset isClosed_frontier
+      (frontier_subset_closure.trans (KBall_isClosed X).closure_eq.subset)
+  obtain ⟨x, hxK, hxmax⟩ := hKc.exists_isMaxOn ⟨y, hyK⟩
+    (continuous_id.inner continuous_const :
+      Continuous fun z : Pt => inner ℝ z (dirVec 0)).continuousOn
+  have hxF : x ∈ frontier (KBall X) :=
+    mem_frontier_of_max hxK (norm_dirVec 0) (fun z hz => hxmax hz)
+  obtain ⟨p, hpF, hpd⟩ := hFc.exists_infDist_eq_dist ⟨x, hxF⟩ y
+  have hdep : depth X y = dist y p := hpd
+  have hyp : y ≠ p := by rintro rfl; exact hpF.2 hy
+  have hpos : 0 < depth X y := by rw [hdep]; exact dist_pos.2 hyp
+  set h := depth X y with hh
+  set n : Pt := h⁻¹ • (p - y) with hndef
+  have hpy : ‖p - y‖ = h := by rw [← dist_eq_norm, dist_comm, ← hdep]
+  have hn : ‖n‖ = 1 := by
+    rw [hndef, norm_smul, norm_inv, Real.norm_eq_abs, abs_of_pos hpos, hpy,
+      inv_mul_cancel₀ hpos.ne']
+  have hp : y + h • n = p := by
+    rw [hndef, smul_smul, mul_inv_cancel₀ hpos.ne', one_smul, add_sub_cancel]
+  refine ⟨n, hn, hpos, ?_⟩
+  rw [hp]
+  refine ⟨hpF, ?_⟩
+  -- the open ball `B(y, h)` lies in `K`
+  have hball : ∀ z, dist z y < h → z ∈ KBall X := by
+    intro z hz
+    by_contra hzK
+    have hzI : z ∉ interior (KBall X) := fun hi => hzK (interior_subset hi)
+    obtain ⟨l, hl0, hl1, hb⟩ := exists_frontier_seg (KBall_isClosed X) hy hzI
+    have h1 : h ≤ dist y (y + l • (z - y)) := by
+      rw [hh]; exact Metric.infDist_le_dist_of_mem hb
+    have h2 : dist y (y + l • (z - y)) = l * dist z y := by
+      rw [dist_eq_norm, show y - (y + l • (z - y)) = -(l • (z - y)) by abel, norm_neg,
+        norm_smul, Real.norm_eq_abs, abs_of_pos hl0, dist_eq_norm]
+    have : l * dist z y ≤ dist z y := by nlinarith [dist_nonneg (x := z) (y := y)]
+    linarith
+  obtain ⟨ν, hν1, hν⟩ := exists_unit_normal (KBall_convex X) ⟨y, hy⟩ hpF
+  have hge : h ≤ inner ℝ (p - y) ν := by
+    by_contra hlt
+    push Not at hlt
+    have hcs : -h ≤ inner ℝ (p - y) ν := by
+      have := neg_abs_le (inner ℝ (p - y) ν)
+      have := abs_real_inner_le_norm (p - y) ν
+      rw [hpy, hν1, mul_one] at this
+      linarith
+    set a := inner ℝ (p - y) ν with ha
+    set t := (a / h + 1) / 2 with htdef
+    have has : a = a / h * h := by field_simp
+    have hs1 : a / h < 1 := by rw [div_lt_one hpos]; exact hlt
+    have hsm : -1 ≤ a / h := by rw [le_div_iff₀ hpos]; linarith
+    have hz : y + (t * h) • ν ∈ KBall X := hball _ (by
+      rw [dist_eq_norm, add_sub_cancel_left, norm_smul, hν1, mul_one, Real.norm_eq_abs,
+        abs_lt]
+      constructor <;> nlinarith)
+    have := hν _ hz
+    have e : y + (t * h) • ν - p = (t * h) • ν - (p - y) := by abel
+    rw [e, inner_sub_left, real_inner_smul_left, real_inner_self_eq_norm_sq, hν1, ← ha] at this
+    nlinarith
+  have hnν : 1 ≤ inner ℝ n ν := by
+    rw [hndef, real_inner_smul_left, le_inv_mul_iff₀ hpos, mul_one]; exact hge
+  have hsq := norm_sub_sq_real n ν
+  rw [hn, hν1] at hsq
+  have h0 : ‖n - ν‖ = 0 := by
+    have : ‖n - ν‖ ^ 2 ≤ 0 := by linarith
+    exact pow_eq_zero_iff two_ne_zero |>.1 (le_antisymm this (sq_nonneg _))
+  rw [norm_eq_zero, sub_eq_zero] at h0
+  rw [h0]; exact hν
 
 /-- Goodness gives the frame's normal control (radius `6`) around a boundary point `b₀` within
 distance `1` carrying the unit normal `n`.
@@ -159,7 +228,48 @@ theorem card_sep_box_le43 {P : Finset Pt} (hsep : ∀ a ∈ P, ∀ b ∈ P, a �
     (hbox : ∀ x ∈ P, c₀ ≤ inner ℝ x e ∧ inner ℝ x e ≤ c₀ + L ∧
       c₁ ≤ inner ℝ x (perp e) ∧ inner ℝ x (perp e) ≤ c₁ + W) :
     (P.card : ℝ) ≤ (2 * L + 1) * (2 * W + 1) := by
-  sorry
+  let f : Pt → ℕ × ℕ := fun a =>
+    (⌊2 * (inner ℝ a e - c₀)⌋₊, ⌊2 * (inner ℝ a (perp e) - c₁)⌋₊)
+  have hmaps : ∀ a ∈ P, f a ∈ (range (⌊2 * L⌋₊ + 1)) ×ˢ (range (⌊2 * W⌋₊ + 1)) := by
+    intro a ha
+    obtain ⟨h1, h2, h3, h4⟩ := hbox a ha
+    simp only [f, mem_product, mem_range, Nat.lt_succ_iff]
+    exact ⟨Nat.floor_mono (by linarith), Nat.floor_mono (by linarith)⟩
+  have hclose : ∀ u v : ℝ, 0 ≤ u → 0 ≤ v → ⌊u⌋₊ = ⌊v⌋₊ → |u - v| < 1 := by
+    intro u v hu hv huv
+    have a1 := Nat.floor_le hu
+    have a2 := Nat.lt_floor_add_one u
+    have b1 := Nat.floor_le hv
+    have b2 := Nat.lt_floor_add_one v
+    rw [huv] at a1 a2
+    rw [abs_lt]; constructor <;> linarith
+  have := card_le_card_of_injOn f hmaps (fun a ha b hb hfe => by
+    by_contra hab
+    have h1 := hsep a ha b hb hab
+    simp only [f, Prod.mk.injEq] at hfe
+    obtain ⟨a1, -, a3, -⟩ := hbox a ha
+    obtain ⟨b1, -, b3, -⟩ := hbox b hb
+    have d0 := hclose _ _ (by linarith) (by linarith) hfe.1
+    have d1 := hclose _ _ (by linarith) (by linarith) hfe.2
+    have e0 : 2 * (inner ℝ a e - c₀) - 2 * (inner ℝ b e - c₀) = 2 * inner ℝ (a - b) e := by
+      rw [inner_sub_left]; ring
+    have e1 : 2 * (inner ℝ a (perp e) - c₁) - 2 * (inner ℝ b (perp e) - c₁) =
+        2 * inner ℝ (a - b) (perp e) := by
+      rw [inner_sub_left]; ring
+    rw [e0, abs_mul, abs_two] at d0; rw [e1, abs_mul, abs_two] at d1
+    have hn := n1_norm_sq_frame he (a - b)
+    rw [← dist_eq_norm] at hn
+    have := sq_abs (inner ℝ (a - b) e); have := sq_abs (inner ℝ (a - b) (perp e))
+    have : dist a b ^ 2 < 1 := by
+      rw [hn]
+      nlinarith [abs_nonneg (inner ℝ (a - b) e), abs_nonneg (inner ℝ (a - b) (perp e))]
+    nlinarith [dist_nonneg (x := a) (y := b)])
+  rw [card_product, card_range, card_range] at this
+  have hc : (P.card : ℝ) ≤ ((⌊2 * L⌋₊ : ℝ) + 1) * ((⌊2 * W⌋₊ : ℝ) + 1) := by
+    exact_mod_cast this
+  have fL := Nat.floor_le (by linarith : (0 : ℝ) ≤ 2 * L)
+  have fW := Nat.floor_le (by linarith : (0 : ℝ) ≤ 2 * W)
+  refine hc.trans (mul_le_mul (by linarith) (by linarith) (by positivity) (by linarith))
 
 /-- **Lemma T at scale `Λ`** (fatness step, §1.1 Lemma T* with `|b₁b₂| ≤ 2Λ`): if two boundary
 points within `Λ = 464` of `y ∈ K` have nearly antipodal unit normals and `Δ₂ ≥ 10⁶`, then
