@@ -121,7 +121,32 @@ Difficulty S–M. -/
 theorem cap_disjoint (hX : Normal X) {y y' n n' : Pt} (hF : Frame43 X y n)
     (hF' : Frame43 X y' n') (hy : y ∈ Rset X) (hy' : y' ∈ Rset X) (hc : IsCap43 X y n)
     (hc' : IsCap43 X y' n') (hne : y ≠ y') : Disjoint (Low X y) (Low X y') := by
-  sorry
+  rw [Finset.disjoint_left]
+  intro b hb hb'
+  have h1 := hc.2 b hb
+  have h2 := hc'.2 b hb'
+  have hyX : y ∈ X := (mem_sdiff.1 hy).1
+  have hy'X : y' ∈ X := (mem_sdiff.1 hy').1
+  have d1 := dist_of_mem_nbδ hX (Low_subset X y hb)
+  have d2 := dist_of_mem_nbδ hX (Low_subset X y' hb')
+  have hd : dist y y' ≤ 2 := by
+    have := dist_triangle y b y'
+    have := dist_comm y b
+    have := dist_comm b y'
+    linarith
+  have hn := frame_normal_close hF hF' hd
+  have hsep := one_le_dist hX.minDist_eq hyX hy'X hne
+  have e : y' - y = (b - y + n) - (b - y' + n') + (n' - n) := by abel
+  have h3 : ‖y' - y‖ ≤ 1 / 20 + 1 / 20 + ε₀43 := by
+    rw [e]
+    calc ‖(b - y + n) - (b - y' + n') + (n' - n)‖
+        ≤ ‖(b - y + n) - (b - y' + n')‖ + ‖n' - n‖ := norm_add_le _ _
+      _ ≤ ‖b - y + n‖ + ‖b - y' + n'‖ + ‖n' - n‖ := by
+          gcongr; exact norm_sub_le _ _
+      _ ≤ _ := by linarith
+  rw [dist_comm, dist_eq_norm] at hsep
+  norm_num [ε₀43] at h3
+  linarith
 
 /-- **Owner uniqueness** (§1.4): distinct heavy good points have disjoint receiver sets.
 Fans and caps never coexist (`t ≥ 0.7` vs `t ≤ 0.6`).
