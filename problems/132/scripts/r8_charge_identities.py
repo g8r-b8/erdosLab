@@ -282,10 +282,54 @@ def check_step3() -> list[str]:
     return F
 
 
+def check_strata() -> list[str]:
+    """Boundary strata singled out in the referee section, evaluated exactly.
+
+    (a) s = 2t: c = d, so P1 = (0,0) is the midpoint of xp (P1 not extreme).
+    (b) regular pentagon s = 1/2, 2t = phi = Delta: P2 is the fifth vertex (|xP2| = |pP2| = Delta)
+        and S_xu(P2) = S_uP2(x) > 0, so the 'b beyond line uP2' condition fails.
+    (c) the Delta <= phi bound: 4st = Delta^2 - 1 with min(2s,2t) <= 1 <= ... gives Delta^2 <= 1+Delta.
+    """
+    F: list[str] = []
+    print('[boundary strata]')
+    P = trapezoid_points()
+    # (a)
+    ok = sp.simplify(reduce_rel((c**2 - d**2)).subs(s, 2*t)) == 0
+    print(('  ok   ' if ok else '  FAIL ') + 's = 2t  =>  c^2 = d^2  (P1 = midpoint of xp)')
+    if not ok:
+        F.append('stratum s=2t')
+    # (b)
+    phi = (1 + sp.sqrt(5))/2
+    sub = {s: sp.Rational(1, 2), t: phi/2}
+    dv = sp.sqrt(1 - (phi/2 - sp.Rational(1, 2))**2)
+    cv = sp.sqrt(1 - phi**2/4)
+    kv = sp.sqrt(1 - sp.Rational(1, 4))
+    val = lambda e: sp.nsimplify(sp.simplify(e.subs(sub).subs({d: dv, c: cv, k: kv})))
+    x, p, u, P2 = P['x'], P['p'], P['u'], P['P2']
+    D2 = val(1 + 4*s*t)
+    checks = [('pentagon: Delta^2 = phi^2', sp.simplify(D2 - phi**2) == 0),
+              ('pentagon: |xP2|^2 = Delta^2', sp.simplify(val(sq(P2 - x)) - D2) == 0),
+              ('pentagon: |pP2|^2 = Delta^2', sp.simplify(val(sq(P2 - p)) - D2) == 0),
+              ('pentagon: S_uP2(x) = td + c(t-s) > 0 (side condition fails)',
+               bool(val(cr(u, P2, x)) > 0))]
+    for nm, ok in checks:
+        print(('  ok   ' if ok else '  FAIL ') + nm)
+        if not ok:
+            F.append(nm)
+    # (c)
+    D = sp.symbols('D', positive=True)
+    ok = sp.solve(sp.Eq(D**2, 1 + D), D) == [phi]
+    print(('  ok   ' if ok else '  FAIL ') + 'Delta^2 = 1 + Delta has the unique positive root phi')
+    if not ok:
+        F.append('phi bound')
+    return F
+
+
 def main() -> int:
     """Run every check; print a summary; return 0 iff all pass."""
     fails: list[str] = []
-    for chk in (check_trapezoid, check_offline, check_lemma_D, check_step1, check_step2, check_step3):
+    for chk in (check_trapezoid, check_offline, check_lemma_D, check_step1, check_step2, check_step3,
+                check_strata):
         fails += chk()
     print('ALL OK' if not fails else f'FAILURES: {fails}')
     return 0 if not fails else 1
