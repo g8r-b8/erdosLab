@@ -329,3 +329,69 @@ min{μ(Δ₂), μ(δ)}/n > 9/7 anywhere, and the gap between 9/7 and 81/61 in th
 and hence φ = o(1) whenever r ≫ √Δ (and then 9/7 in the window, except for sets with r = O(√Δ), which would need separate
 treatment); or (b) a global construction of case (ii) with Θ(n) fans, which would show that Corollary 6.1's accounting cannot give 9/7
 and that the LP of §3 must be sharpened by a genuinely new inequality.
+
+## 5. Summary: the overall bound, status, confidence, referee flags
+
+### 5.1 The overall bound implied
+
+  **min{μ(Δ₂), μ(δ)} ≤ (81/61 + η)·n + C(η) for every finite planar X, and every η > 0 (81/61 = 1.327869 < 4/3).**
+
+Region by region:
+| regime | bound | source |
+|---|---|---|
+| outside the fan window (G ∉ (0, 2]; this includes Regions I, II, τ > 1 and Region III off an O(1/Δ₂) τ-interval) | 9/7 + η, **uniform** (C = C(η)) | Theorem G′ (§1.4) = D1r Cor. 6.1 + Lemma EW, with D1r §9's e(S) inputs |
+| fan window 0 < G ≤ 2, G ≠ 1 | 53/40 + η | Theorem E (§3) with REF_C's θ = ½ |
+| the curve G = 1 (A3's resonance strip) | 81/61 + η | Theorem E with Theorem W's θ = 2/3 |
+
+Lower bound: 9/7 (ienjoymath), attained in Region I. In the fan window no set with more than O(1) points of F* is known (§4).
+
+### 5.2 Proved / conditional / conjectured
+
+PROVED here (exact proofs, numerical confirmation in `r7_E_*.py`, unrefereed):
+- **Lemma EW**: any point with a neighbour on C(w, Δ₂) and two neighbours on C(w, Δ) inside D(w, Δ₂) forces
+  τ ∈ [cos(π/6 + arcsin(1/Δ₂)), √3/2), i.e. 0 < G ≤ 2. Every fan type (F6, F5, bare, HF1, HF2) satisfies the hypothesis
+  (§1.2). The window is sharp at both ends (locally realisable; R4's fan is the lower end).
+- **Theorem G′**: D1r's Theorem G holds with a κ-independent constant outside the window.
+- **Lemma U** (K-extremes have Δ₂-degree 1), **Lemma X1** (the K-side middle is a pendant of the diameter graph), **Lemma C2**
+  (≤ 2 fans per K-extreme and per centre), **Proposition F** (|F*₄| ≤ 2|Q|), **Lemma ORD** (partners lie between non-pendant ones).
+- **Theorem E** (the LP of §3, exact dual certificates in `r7_E_lp.py`).
+- The Reuleaux-with-pendants family has F* = ∅ (exact computation, `r7_E_reuleaux.py`).
+
+CONDITIONAL on inputs refereed once: Theorem E and the overall 81/61 use D1r's Corollary 6.1 (REF_D1: correct, cosmetic fixes; a
+second referee is queued), Theorem W (REF_C) with Q′ ⊆ Q, and, for 53/40, REF_C's θ = ½ off G = 1.
+
+NOT PROVED / CONJECTURED:
+- φ = |F*₄|/r ≤ φ₀ < 1 (not proved; §3.1 explains why no local argument can give it).
+- |F*| = O(1) or O(√Δ) (§4.3; needs the case-(ii) obstruction and the arc-span conjecture). This would give 9/7 in the window when
+  r ≫ √Δ₂.
+- Whether any X in the window has min{μ(Δ₂), μ(δ)} > 9/7·n: unknown.
+
+### 5.3 Confidence
+
+- Lemma EW, Lemma U, C2(a), Proposition F, the LP: **high** (each is a short exact argument; EW's monotonicity is symbolic; U is the
+  two-circle intersection; the LP has an exact certificate).
+- Theorem G′: **high**, given D1r/REF_D1 as refereed (it only replaces Corollary 6.1(2)'s window by Lemma EW).
+- The overall 81/61: **medium-high**; it inherits D1r (one referee) and Theorem W (one referee). It is the first bound below 4/3 in the
+  whole of Region III that uses only refereed-once inputs plus the new elementary lemmas above.
+- Lemma X1, C2(b), ORD: high (C2(b)'s O(1/R) estimate is checked numerically over the window, not written as a closed inequality).
+- §4.3 case analysis: medium (sketch); the arc-span statement is a conjecture.
+
+### 5.4 Flags for a referee
+
+1. §1.2: check that Lemma S(d) applies to **each** middle and to **every** Δ₂-partner of the K-extreme (it needs only
+   c(m) ≥ cos(30° + a₀), |Δx| ≤ 2, (S1), and G5 for all normals at k).
+2. §1.4: Corollary 6.1's constant C(η, a₀) must not depend on κ (D1r §6 drops 5/κ from Δ₂*; REF_D1 §5 agrees).
+3. §2.2 Lemma C2(a): two fans sharing a K-extreme on the same side would be < 60° apart as seen from k; uses frames of good points
+   within 2 differing by ≤ 2ε₀.
+4. §3: Q′ ⊆ Q in Theorem W (needed by Theorem W's own LP too).
+5. §3: F*₄ ⊆ F* ⊆ 𝓡 and every point of F* has a K-extreme (Lemma S(2)); F*₄ points own exactly 4, cost 2.
+6. §4.3 Lemma ORD: write the crossing-orientation fact once in general (it is X1's inequality sin β ≥ sin β₀).
+7. Consistency: ienjoymath's construction is in Region I (t → 0), outside the window; F* = ∅ there, and nothing below 9/7 is claimed.
+
+### 5.5 Scripts (all pass; run with `tools/memcap.sh 4000 .venv/bin/python problems/132/scripts/<name>`)
+- `r7_E_window.py` (1 s): Lemma EW symbolic + 60-digit windows, R4 = lower end, 200 local realisations.
+- `r7_E_structure.py` (22 s): Lemma X1 (179 996 admissible w′), the two-circle identity, C2(b)'s O(1/R) slot estimate.
+- `r7_E_lp.py` (1 s): exact LP values 81/61 and 53/40 with primal points and dual certificates, value vs φ.
+- `r7_E_reuleaux.py` (52 s): Reuleaux-with-pendants family, N = 101…1001, pendants have no Δ₂-partner.
+
+STATUS: FINAL
