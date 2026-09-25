@@ -584,3 +584,59 @@ had these gaps, only that the surviving design does.
 - For the arc-length variant, use L' := P/⌈P/L_s⌉ ∈ [L_s/2, L_s] and equally spaced cuts σ + jL', σ ∼ U[0, L'). The expected count is
   again exactly α/L' ≤ 2α/L_s.
 - In the deep direction the analogous count is Lemma 4.4 (T ∼ U[1, 1 + M], density 1/M). **Resolved.**
+
+## 9. LP consequences, regime by regime
+
+Notation (paper §3):
+- μ(δ) = e(S) + ½Σ_{𝓡} v (Lemma 3.3);
+- μ(Δ₂) ≤ (3/2)s (Lemma 3.1, VS), and ≤ (3/2)s − ½p (Lemma 3.2, VSQ; p = |Q|, Δ₂-degree-1 points).
+
+Suppose Σ_𝓡 v ≤ (6 + η)r + C_G (Theorem G), write c := 3 + η/2, and take the weights λ = 4/7 on μ(Δ₂) and 3/7 on μ(δ). In every
+regime below the q-term cancels or has a negative coefficient, and the value is
+
+  (4/7)(3/2)s + (3/7)(s + c·r) = (9/7)s + (9/7 + 3η/14)r ≤ (9/7 + 3η/14)n,
+
+up to additive constants.
+
+| regime (in τ, δ = 1) | bound on e(S) | status of that bound | q-coefficient at λ = 4/7 | value |
+|---|---|---|---|---|
+| **Region I**: τ ≤ √3/2 − 2β | e(S) ≤ s + C_bad (paper §5.1) | paper v3; part of the formalised Theorem 8.1 chain | none (use VS) | **9/7 + 3η/14** |
+| **τ > 1** | e(S) ≤ s + C_bad (paper §5.2: no rungs) | paper v3 | none | **9/7 + 3η/14** (paper Theorem 1(c) already gives 9/7 + O(n^{2/3}) here, independently) |
+| **Region II**: √3/2 + 3β ≤ τ ≤ 1 | e(S) ≤ s + ½p + C_bad + 87 (paper Theorem 11.3) | one referee pass (A2); A2's shadow lemma even gives e(S) ≤ s + C off the curve τ = τ*(R) | −(4/7)(½) + (3/7)(½) = −1/14 ≤ 0 | **9/7 + 3η/14** (Remark 3.6: max{5/4, 3c/(2c+1)}) |
+| **Region III off the fan zone**: √3/2 − 2β < τ < √3/2 + 3β, \|t − √3/2\| ≥ κ | e(S) ≤ s + (2/3)\|Q′\| + C (Theorem W, branch C) with μ(Δ₂) ≤ (3/2)s − ½\|Q′\| + C_V | refereed once (REF_C: correct with minor fixes); not yet in the paper | −(4/7)(½) + (3/7)(2/3) = 0 | **max{3c/(2c+1), 9/7} = 9/7 + 3η/14** |
+
+(The Region I and τ > 1 rows need |t − √3/2| ≥ κ, which is automatic:
+- Region I gives t ≤ τ + 1/(2Δ₂) ≤ √3/2 − 0.02 + 10⁻⁴;
+- τ > 1 gives t > 1;
+- Region II gives t ≥ τ ≥ √3/2 + 0.03 (paper §2: t ≥ τ when t ≤ 1).
+
+So for κ ≤ 0.019 these three regions are entirely off the fan zone, and Theorem G applies there with no condition on t beyond the region.)
+
+**Theorem 9.1 (assembled; conditional on the statuses in the table).** For every κ ∈ (0, 0.019] and η > 0 there is C(η, κ) with the
+following property. Every finite X ⊂ ℝ² with at least two distances and |t(X) − √3/2| ≥ κ satisfies
+
+  min{μ(Δ₂), μ(δ)} ≤ (9/7 + η)·n + C(η, κ).
+
+Here t(X) = (Δ − Δ₂)/δ. By Remark 5.2 the error term can also be taken as O_κ(n^{2/3}).
+
+*Proof.*
+- Degenerate regime: ≤ n + 1 (paper Proposition 7.1).
+- Nondegenerate regime with Δ₂ < Δ₂*: n is bounded.
+- Otherwise: Theorem G with η' := 14η/3, the table, and the certificate above.
+
+The constants C_bad, 87, C_V and C of the e(S) bounds are absolute. ∎
+
+**Consistency.** No bound below 9/7 is claimed. ienjoymath's construction (Region I, t → 0) has Σ_𝓡 v ≤ 6r, with max v = 6
+(`r7_D1_ring.py`, rerun: n = 60–400, min/n → 9/7 from below). So Theorem 9.1 **matches the lower bound 9/7**, and in Region I that bound
+is asymptotically attained. Theorem G is consistent with the local sharpness examples, which all average exactly 6 (Theorem F): B1's
+A-row stack E1 and the cap lattice E2.
+
+**What remains.** The only range not covered is the **fan zone** |t − √3/2| < κ, which lies inside Region III and contains the resonance
+window. There:
+- the bound is 4/3 (Theorem N3);
+- by Corollary 6.1 and Theorem W's LP it improves to max{3c/(2c+1), 9/7} with 2c = 6 + 2|F*₄|/r + η;
+- equivalently, value 3(3 + φ)/(7 + 2φ) with φ := |F*₄|/r ≤ 1, ignoring η: φ = 1 gives 4/3, φ = ½ gives 21/16, φ = 0 gives 9/7.
+
+So **everything off the fan zone is 9/7 + η, and inside it the question is exactly the density of F*₄** (branch E). Since κ may be taken
+arbitrarily small (at the cost of C), the statement "L ≤ 9/7" would follow from Theorem 9.1 together with any uniform bound of the form
+|F*₄| ≤ o(r) + C that holds for all t in a fixed neighbourhood of √3/2. This is not proved here.
