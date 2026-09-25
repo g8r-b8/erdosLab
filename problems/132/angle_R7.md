@@ -10,7 +10,7 @@ Starting point: angle_R6.md — L ≤ 4/3 overall (N3, refereed); 21/16 in Regio
 | A3 | referee Region III off-window e(S) ≤ s + 70/d + C, resonance strip, Lemma DP | **DONE: CORRECT WITH FIXES** (§2) |
 | B | average R-weight ≤ 7 in Region II (⇒ 21/16 there, given A2) | **DONE: PROVED, REFEREED (REF_B: correct with fixes)** (§3) |
 | C | break the Region III resonance window via diametral partners (Lemma DP) | **DONE: Theorem W PROVED, REFEREED (REF_C: correct with minor fixes)** (§4) |
-| D1 | Region I: average weight ≤ 6 (Conjecture C1) ⇒ 9/7 | pending |
+| D1 | Region I: average weight ≤ 6 (Conjecture C1) ⇒ 9/7 | **DONE: Theorem G PROVED, unrefereed** (§5); hostile referee REF_D1 running |
 | E | Region III off the fan pin (\|t − √3/2\| ≥ O(ε₀)): weight ≤ 7 and the \|Q\| term there | queued |
 | D2 | Region I: cross-edge e(D, X∖D) ≤ ½g_D + o(n) via E′ on conv X ⇒ 9/7 | pending |
 
@@ -185,3 +185,27 @@ Adversarial tests:
 
 **New (REF_C, exact).** A shadow obstruction rules out any unbroken inward arc gap (ℓ = +1, k ≥ 1), so C's case 2 is vacuous. Hence θ = ½ in all of Region III
 except on the curve G = 1, where 2/3 is sharp, and at d = 0, where 2/3 is proved and ½ holds numerically.
+
+## 5. Branch D1: average R-weight ≤ 6 away from the fan zone (report `scratchpad/R7/D1_weight6/D1_report.md`; UNREFEREED)
+
+**This is potentially the headline result. It is under hostile referee (REF_D1).** Orientation replaces discharging.
+- **Fact 1.2.** Σ_𝓡 v = 2E_𝓡 exactly, where E_𝓡 counts the unit edges with at least one end in 𝓡.
+- **Lemma O.** If y owns only edges pointing into a half-open half-circle, then y owns ≤ 3 edges.
+- **Fact 1.1.** 𝓡∖D ⊂ int K, and X ∩ ∂K∖D ⊂ S.
+- **Fact 1.3.** 𝓡∩D has degree ≤ 3.
+- **Theorem F (flat model).** Orienting by "height" gives Σv ≤ 6r exactly. This is tight on the A-row stack and the cap lattice, where radius-1 charging was stuck at 7.
+- **Lemma S (tilted frames, 60 digits).** A good point owns ≤ 3 edges unless |t − √3/2| ≤ κ₁ = 2.1·10⁻³.
+- **Theorem G.** For every η > 0: **Σ_𝓡 v ≤ 6|𝓡| + ηn + C_η for all X with |t − √3/2| ≥ κ₁.** The proof uses sector frames and averages over random cut positions.
+
+⇒ min ≤ (9/7 + η)n + C_η in **Region I (sharp; ienjoymath's construction), Region II, τ > 1, and Region III off the fan zone**. In Region III the
+bound uses Theorem W's value max{3c/(2c+1), 9/7} with c = 3.
+
+**Corollary 6.1.** For all t, Σv ≤ 6r + 2|F*| + ηn + C_η, where F* is the set of fans and half-fans with both ±30° neighbours in S∩D. Only the fan zone
+|t − √3/2| ≤ κ₁ remains, and there only |F*| matters (branch E).
+
+D1's referee flags:
+1. Lemma T* rescaled to |pb| ≤ 4D₁ + 1 is not rewritten line by line.
+2. The count of non-good points in B1 P0.1 is independent of v.
+3. The expected cut count ℓ/Λ_s for perimeters that are not multiples.
+
+Scripts (`scripts/`, all pass): `r7_D1_flat_orient.py`, `r7_D1_tilt.py`, `r7_D1_global_hex.py`, `r7_D1_ring.py`.
