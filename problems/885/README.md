@@ -69,12 +69,14 @@ difference sets share four elements:
 (x-form: x_i = N_i, d = 2988, 5052, 12108, 34812 = 12·{249, 421, 1009, 2901}.) Aleksanndr_NFA's search (forum,
 23 Sep 2026) reported *no* five numbers sharing four differences within their height bounds. In sumset-of-squares
 language this is a 6 × 4 array; Choudhry (arXiv 2508.07806) lists parametric (3,3), (5,3), (4,4) only.
-Novelty not yet audited. Rational 5th-column search for it (q ≤ 1e6): logs/ext54/.
+Novelty (2026-09-25): not in the forum thread (Aleksanndr_NFA: "no five numbers sharing four differences"),
+not in Choudhry's list; Bremner 2019 full text (paywalled) not read — must check before any public claim. Rational 5th-column search for it (q ≤ 1e6): logs/ext54/.
 
 **Rational extension of the 32 distinct 4×4 configurations (ext.c, q ≤ 1e5, all 32):** 6.9e9 divisor
 candidates, 223 filter survivors, **0 genuine** after exact gp verification (verify_ext.py).
 
 **Observation:** besides the one K₅,₄, none of the ~80 K₄,₄ configurations extends by a row or column.
 Height heuristic: #K_{m,n} of height ≤ H ≈ H^{m+n−1−mn/2}, i.e. H^{−3.5} for 5 × 5 (and H^{−1} already for 4 × 4,
-which nevertheless exist only sporadically, with no known parametric family). Blind search for K₅,₅ looks hopeless. A witness would need a structured family: curves with extra
+yet Bremner, IJNT 2019, proved infinitely many sets of four integers with four common differences — structure beats
+the heuristic, so a K₅,₅ would need a comparable algebraic family). Blind search for K₅,₅ looks hopeless. A witness would need a structured family: curves with extra
 automorphisms, or a parametric K₄,₄ family whose genus-5 extension curve has a rational point.
