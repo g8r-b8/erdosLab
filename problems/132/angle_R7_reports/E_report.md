@@ -112,3 +112,77 @@ So the fan zone is no longer "|t − √3/2| < κ for a small fixed κ", but the
 
 *Referee flag 1.1.* The derivation of Theorem G′ uses only statements of D1r/REF_D1 as refereed plus Lemma EW; the one point to check
 is that Corollary 6.1's constant C(η, a₀) indeed has no κ (D1r §6 says "The condition Δ₂ ≥ 5/κ is dropped from Δ₂*"; REF_D1 §5 confirms).
+
+## 2. Cost per fan, and the exact structure of a fan
+
+### 2.1 The cost table: confirmed
+
+Cost := contribution to Σ_𝓡 v − 6r, i.e. 2(own(y) − 3) at a non-exceptional point (D1r §6, REF_D1 §5). I re-derived every row
+against rules O1–O3 and paper Lemma 9.7 (at tolerance a₀):
+
+| type (deg, m) | v | owned by y | own | cost | remark (new, from §2.2) |
+|---|---|---|---|---|---|
+| F6 (6,4) | 10 | 4 S-neighbours (the ±150° interior neighbours have cos(ψ − α) < 0 and own their edges) | 4 | **2** | both K-extremes share one centre w and are in Q |
+| F5 (5,4) | 9 | 4 S-neighbours | 4 | **2** | as F6 |
+| bare fan (4,4) | 8 | 4 S-neighbours | 4 | **2** | as F6 |
+| HF2 (6,3), (5,3), (4,3) | 9, 8, 7 | 3 S-neighbours, plus the 𝓡∖D neighbour u near ∓90° iff u − y is n-upward | 3 or 4 | **0 or 2** | its one K-extreme is in Q |
+| HF1 (6,3) | 9 | 3 S-neighbours; the 𝓡∩D middle's edge belongs to the D-end (O2) | 3 | **0** | pinned by Lemma EW as well |
+| cap (6,3) | 9 | 3 S-neighbours | 3 | **0** | t = ½ + O(ε₀): never in the fan window, so caps and fans never coexist |
+
+**Verdict: the table is correct** (as REF_D1 found); no inequality depends on the type names, only on own(y) ≤ 3 + 1[y ∈ F*₄]
+(Lemma S(2)). The HF2 dichotomy cannot be removed locally: in the w-frame of an exact regular HF2 hexagon, u is at angle
+ψ_k − 180° with ψ_k ∈ [90°, 90° + arcsin(1/(2R))], so (u − y)·e_rad = −cos ψ_k ∈ [0, 1/(2ρ)]; whether u is upward in the
+sector frame n (within θ of n₀(y), which is within O(1/R)… O(ε₀) of e_rad) is decided at scale θ, not by the configuration. So
+"0 or 2" is the honest local cost; §3 does not need to resolve it.
+
+### 2.2 New exact facts about a fan (PROVED)
+
+Work in the frame of Lemma EW: w = 0, y = (0, ρ) with ρ ∈ [√(R²−1), R), a neighbour at angle ψ (from the outward radial
+direction) is y + (sin ψ, cos ψ); z₂, z₃ at ∓ψ_z on C(w, Δ), the K-extreme k at +ψ_k on C(w, R), 30° ≤ ψ_z ≤ ψ_k − 60°, 90° ≤ ψ_k.
+For y ∈ F*, w is any Δ₂-partner of its K-extreme k (§1.2).
+
+**Lemma U (unique partner).** Every Δ₂-partner of k is w. Hence **k ∈ Q** (Δ₂-degree 1). If y has two K-extremes (F6, F5,
+bare fan), both have the same unique partner w, and the fan is mirror-symmetric about the line wy.
+
+*Proof.* By §1.2 every Δ₂-partner w″ of k is diametral to both z₂ and z₃ (Lemma S(d) holds for every inward normal (w″ − k)/R at
+k, since G5 bounds all normals along γ^Λ_y). C(z₂, Δ) ∩ C(z₃, Δ) = {w, w*} with w* the reflection of w in the line z₂z₃, and
+|ww*|² = 4Δ² − |z₂z₃|² ≥ 3Δ² > Δ² (|z₂z₃| ≤ 2 sin(ψ_k − 60°) < Δ). As |ww″| ≤ Δ, w″ = w. For two K-extremes k₊, k₋ the same
+argument gives w₊ = w₋. Symmetry: C(y,1) ∩ C(w, R) is a pair of mirror points in the line wy. ∎ (`r7_E_structure.py` (B).)
+
+**Lemma X1 (pendant middle).** The middle z₃ on k's side has w as its **only** diametral partner.
+
+*Proof.* Let w′ ∈ X, w′ ≠ w, |w′ − z₃| = Δ; write w′ = z₃ − Δ(sin β, cos β), and let β₀ be the value for w (sin β₀ = sin ψ_z/Δ).
+- |w − w′| ≤ Δ, so |β − β₀| ≤ 60°.
+- |z₂ − w′|² = |z₂z₃|² + Δ² − 2Δ|z₂z₃| sin β ≤ Δ² forces sin β ≥ |z₂z₃|/(2Δ) = sin β₀, so β > β₀ (this is Hopf–Pannwitz:
+  [z₂, w] and [z₃, w′] must cross).
+- |k − w′|² − |k − w|² = 2Δ(k − z₃)·((sin β, cos β) − (sin β₀, cos β₀)) = 4Δ sin((ψ_k − ψ_z)/2)·[sin(β − m) − sin(β₀ − m)],
+  m := (ψ_k + ψ_z)/2 ∈ [60°, 60° + O(1/R)]. On β ∈ (β₀, β₀ + 60°], β − m ∈ (−61°, 0°] ⊂ (−90°, 90°), where sin is increasing,
+  so the difference is > 0: |k − w′| > R.
+- k ∉ D, so |k − w′| ≤ R. Contradiction. ∎
+
+`r7_E_structure.py` (A): 179 996 admissible w′ ≠ w (a 1200-step grid in β, 300 random window fans, R = 10⁴…10⁸, 60 digits) all
+give |k − w′| > R. X1 is not needed for §3's bound but it is the obstruction that shapes §4.
+
+**Lemma C2 (at most two fans per centre, and per K-extreme).**
+(a) A point k ∈ S∖D is the K-extreme of at most two points of F*. (b) A point w is the centre of at most two points of F*.
+
+*Proof.* (a) Seen from k, a fan y with K-extreme k lies within a₀ + ε₀ of the tangent direction ±u_k^⊥ (its ±90°, measured in y's
+frame, whose normal is within ε₀ of k's normals by G5). Two such fans on the same side would be < 60° apart as seen from k, so < 1
+apart; hence at most one per side.
+(b) The middles of a fan with centre w are two S-points of X ∩ C(w, Δ) at distance 2 sin ψ_z ∈ [1, 1 + O(1/R)], hence
+consecutive in the angular order z_1, …, z_N (a point strictly between would be < 1 from one of them). By Lemma AI only
+z_1, z_2, z_{N−1}, z_N can be in S, so the possible middle pairs are (z_1,z_2), (z_{N−1},z_N), and (z_2,z_3) only when N ≤ 4.
+If two fans with centre w share a middle (pairs (z_1,z_2), (z_2,z_3)), then the K-slot of one on the shared side lies within
+0.97/R (< 2/R, checked over the window in `r7_E_structure.py` (C)) of the other fan point, which is in 𝓡; so their K-extremes
+are on the outer sides. Three fans (1,2), (2,3), (3,4) (N = 4) would leave the middle one with both ±90° slots occupied by
+𝓡-points: impossible. So at most two fans per centre. ∎
+
+(Consequently |F*| ≤ 2·#centres and |F*| ≤ 2|Q_K| ≤ 2|Q|, where Q_K is the set of K-extremes of fans. §3 uses the second.)
+
+### 2.3 What the exact structure says about the D-side
+
+- Each fan has a K-side middle that is a **pendant** of the diameter graph (Lemma X1), attached to the centre w, which has
+  diametral degree ≥ 2 (z₂, z₃). The centre w is itself in S∩D (partner of k).
+- In a Reuleaux-type chain of D-points in which every D-point has two diametral partners (odd cycle, as for regular Reuleaux
+  polygons), no fan can occur: X1 needs a pendant. This is why R4's single-centre chain and the Reuleaux skeleton both fail to
+  give many fans in S (§4).
