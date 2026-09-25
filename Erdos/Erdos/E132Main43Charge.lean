@@ -32,7 +32,7 @@ variable {X : Finset Pt}
 
 /-- A receiver has at most one `S`-neighbour.
 
-TODO: prove.
+TODO: none — proved.
 What's missing (paper §1.4, "fan receiver"): `Z a ≤ −2/3` (`Low_Z`).  An `S`-neighbour `q` of
 `a` has `dist q y ≤ 2`, `q ∉ int K` (`Sset_not_interior`), so `Z q ≥ h − 2/49`
 (`frame_outside`, `|Xq| ≤ 2`) and `⟨q − a, n⟩ ≥ 2/3 − 2/49 > 1/2`; also
@@ -245,7 +245,7 @@ private theorem ch_num {c c' x x' : ℝ} (hc : 4 / 5 ≤ c) (hc' : 4 / 5 - 1 / 5
 /-- **Two fans sharing a receiver are horizontal neighbours**: `y′ − y` is within `7/20` of
 `±perp n`.
 
-TODO: prove.
+TODO: none — proved.
 What's missing (paper §1.4, "fan"): `e = y − a`, `e′ = y′ − a` are unit (`Low_subset`,
 `dist_of_mem_nbδ`), `‖e − e′‖ = dist y y′ ≥ 1` (`one_le_dist`), `⟨e, n⟩ ≥ 4/5` (`IsFan43`),
 `⟨e′, n′⟩ ≥ 4/5` and `‖n′ − n‖ ≤ 1/50` (`frame_normal_close`, `dist y y′ ≤ 2`), so
@@ -319,7 +319,7 @@ theorem fan_common_low_slot (hX : Normal X) {y y' n n' : Pt} (hF : Frame43 X y n
 
 /-- **Fans have private receivers.**
 
-TODO: prove.
+TODO: none — proved.
 What's missing (paper §1.4, "fan", with the HF2–HF2 argument): suppose `a ∈ Low y ∩ Low y′`.
 `fan_common_low_slot` gives `σ′`; the slot neighbour of `y` at `σ′·90°` (from `FanSlots`: `p` at
 `−σ·90°` or `q` at `σ·90°`, within `1/20`) is within `7/20 + 1/20 < 1` of `y′`, hence equals
@@ -439,7 +439,7 @@ theorem fan_disjoint (hX : Normal X) {y y' n n' : Pt} (hF : Frame43 X y n)
 /-- **Caps have private receivers**: two caps sharing a receiver `b` satisfy
 `‖y − y′‖ ≤ 1/20 + 1/20 + 1/50 < 1`.
 
-TODO: prove.
+TODO: none — proved.
 What's missing: `‖b − y + n‖ ≤ 1/20`, `‖b − y′ + n′‖ ≤ 1/20` (`IsCap43`), `dist y y′ ≤ 2`
 (both at distance `1` from `b`), `‖n′ − n‖ ≤ 1/50` (`frame_normal_close`); then
 `dist y y′ < 1` contradicts `one_le_dist`.

@@ -149,7 +149,7 @@ theorem vR_le_twelve (X : Finset Pt) (y : Pt) : vR X y ≤ 12 := by
 
 /-- A diametral point has `δ`-degree `≤ 3`.
 
-TODO: prove.
+TODO: none — proved.
 What's missing: as in `mS_le_four_of_D`: for a diametral partner `w` of `z`, every
 `δ`-neighbour `q` has `(q − z)·(w − z) ≥ |q − z|²/2 > 0` (`|q − w| ≤ Δ`), i.e. the unit vectors
 `q − z` lie in the *open* half-circle around `u = (w − z)/Δ`; pairwise `≥ 1` apart means
