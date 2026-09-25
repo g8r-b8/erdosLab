@@ -9,7 +9,7 @@ Starting point: angle_R6.md — L ≤ 4/3 overall (N3, refereed); 21/16 in Regio
 | A2 | referee Region II: e(S) ≤ s + ½\|Q′\| + C (B2) | **DONE: CORRECT WITH FIXES** (§1) |
 | A3 | referee Region III off-window e(S) ≤ s + 70/d + C, resonance strip, Lemma DP | **DONE: CORRECT WITH FIXES** (§2) |
 | B | average R-weight ≤ 7 in Region II (⇒ 21/16 there, given A2) | **DONE: PROVED, REFEREED (REF_B: correct with fixes)** (§3) |
-| C | break the Region III resonance window via diametral partners (Lemma DP) | **DONE: Theorem W PROVED, unrefereed** (§4); referee REF_C queued |
+| C | break the Region III resonance window via diametral partners (Lemma DP) | **DONE: Theorem W PROVED, REFEREED (REF_C: correct with minor fixes)** (§4) |
 | D1 | Region I: average weight ≤ 6 (Conjecture C1) ⇒ 9/7 | pending |
 | E | Region III off the fan pin (\|t − √3/2\| ≥ O(ε₀)): weight ≤ 7 and the \|Q\| term there | queued |
 | D2 | Region I: cross-edge e(D, X∖D) ≤ ½g_D + o(n) via E′ on conv X ⇒ 9/7 | pending |
@@ -22,7 +22,7 @@ Overall bound still **4/3** (refereed). After A2 and A3, the |Q| term is removed
 resonance window τ = √3/2 + O(1/R). Off that window, every regime has value max{5/4, 3c/(2c+1)}, so the bound drops below 4/3
 as soon as the average R-weight 2c is < 8 there (branch B). The window itself is branch C.
 Branch B, refereed by REF_B, gives 2c = 7 in Region II, so **21/16 is REFEREED in Regions I, II and τ > 1**.
-Branch C (unrefereed) removes the resonance obstruction: in all of Region III e(S) ≤ s + (2/3)|Q′| + C, so the Region III value is
+Branch C (refereed by REF_C) removes the resonance obstruction: in all of Region III e(S) ≤ s + (2/3)|Q′| + C, so the Region III value is
 max{3c/(2c+1), 9/7}. **Only the R-weight in Region III now stands between 4/3 and a better overall bound.** In Region III fans exist
 at |t − √3/2| = O(ε₀), and N3 gives only c = 4 there. That weight question is branch E.
 
@@ -171,3 +171,17 @@ Ingredients (exact checks). Write G := 2R sin(θ₀ − π/6); G = 1 is exactly 
 Confidence: high for AI, SG, NC, P4, Q and the LP. Medium-high for the run framework (A3's D1–D4 extended to the closed arcs of unbroken gaps) and the d = 0
 charging argument. Both need a referee. Consistency: ienjoymath's construction lies in Region I with Q = ∅, so AI holds there vacuously. AI also held on 11 991 interior arc points in
 random adversarial sets. Nothing below 9/7 is claimed. Open: whether θ ≤ ½ holds everywhere. This does not matter for the LP.
+
+**Referee REF_C (`scratchpad/R7/REF_C/REF_C_report.md`): CORRECT WITH MINOR FIXES.** The referee made independent checks at 80 digits in
+`r7_refC_{geom,adv,d0,shadow,res}.py`. Theorem W stands, and so does the LP value max{3c/(2c+1), 9/7}. Fixes:
+- F1: "each K-vertex is v_A of at most one gap" is false at d = 0. Count only unbroken gaps (v_A ≠ v_B) and restate ψ-injectivity.
+- F2: replace "D2/D3 apply verbatim" by the full five-case list for closed arcs. D3 applies to both K-ends of a singleton gap, and a run closing into a cycle
+  changes the count by ≤ 1.
+- Minor: P4 should read "a run of ≥ 3 gaps at G = 1".
+
+Adversarial tests:
+- The G = 1 two-gap run is locally realisable, so 2/3 is locally sharp there.
+- Double runs, double triangles and alternating G ≥ 2 runs are impossible.
+
+**New (REF_C, exact).** A shadow obstruction rules out any unbroken inward arc gap (ℓ = +1, k ≥ 1), so C's case 2 is vacuous. Hence θ = ½ in all of Region III
+except on the curve G = 1, where 2/3 is sharp, and at d = 0, where 2/3 is proved and ½ holds numerically.
