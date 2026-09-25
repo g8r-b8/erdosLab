@@ -234,13 +234,42 @@ def stress_step2_3(N: int) -> Counter:
 def stress_lemma_D(N: int) -> Counter:
     """Lemma D: two same-orientation hooks through one middle vertex w never coexist.
 
-    TODO: implement.
-    What's missing: in frame W sweep 0<th<th2<pi, build b' from |p'b'|=1, |xb'|=|pb'|=Delta
-      and confirm some pairwise distance lies in (1,Delta) u (Delta,inf).
-    Acceptance: Counter with zero 'FAIL ...' keys.
-    Depends on: nothing.
+    Frame W: w=0, x=e(0), p=e(th), p'=e(th2), 0<th<th2<pi, b' = rho e(th/2) with
+    rho = 2cos(th2 - th/2), Delta := |xb'|.  Checks: rho < 0 (else Delta <= 1), and some
+    pairwise distance among {w,x,p,p',b'} lies in (1,Delta) or exceeds Delta.  The equality
+    stratum Delta = |xp'| is sampled separately by bisection in th2.
     """
-    raise NotImplementedError("lemma D stress")
+    C: Counter = Counter()
+    E = lambda a: complex(math.cos(a), math.sin(a))
+
+    def verdict(th: float, th2: float) -> str:
+        rho = 2 * math.cos(th2 - th / 2)
+        if rho >= -1e-9:   # rho = 0 up to rounding when th2 - th/2 = pi/2 exactly
+            return 'rho >= 0 (Delta <= 1)'
+        pts = [0j, E(0), E(th), E(th2), rho * E(th / 2)]
+        Dl = abs(pts[4] - pts[1])
+        if Dl <= 1 + 1e-12:
+            return 'FAIL Delta <= 1 with rho < 0'
+        bad = any(1 + 1e-9 < abs(a - b) < Dl - 1e-9 or abs(a - b) > Dl + 1e-9
+                  for i, a in enumerate(pts) for b in pts[i + 1:])
+        return 'dead: a distance in (1,Delta) u (Delta,oo)' if bad else 'FAIL lemma D'
+
+    M = 40 * N
+    for i in range(1, M):
+        th = math.pi * i / M
+        for j in range(i + 1, M):
+            C[verdict(th, math.pi * j / M)] += 1
+        # stratum Delta = |xp'|: roots of f(th2) = |xb'|^2 - |xp'|^2 on (th, pi)
+        f = lambda th2: abs(2 * math.cos(th2 - th / 2) * E(th / 2) - 1) ** 2 - abs(E(th2) - 1) ** 2
+        grid = [th + (math.pi - th) * q / 400 for q in range(1, 400)]
+        for a_, b_ in zip(grid, grid[1:]):
+            if f(a_) * f(b_) < 0:
+                lo, hi = a_, b_
+                for _ in range(80):
+                    mid = (lo + hi) / 2
+                    lo, hi = (mid, hi) if f(lo) * f(mid) > 0 else (lo, mid)
+                C['stratum |xp\'| = Delta: ' + verdict(th, (lo + hi) / 2)] += 1
+    return C
 
 
 def main() -> int:
