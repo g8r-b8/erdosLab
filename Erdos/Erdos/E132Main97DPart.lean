@@ -184,18 +184,33 @@ theorem one_lt_dist_D_Y (ht : 1 < tgap X) {z y : Pt} (hz : z ∈ Dset X) (hy : y
 
 /-- `e(X) = e(D) + e(X ∖ D)` when `t > 1`.
 
-TODO: prove.
+TODO: none — proved.
 What's missing: every unit pair of `X` lies in `D` or in `Yset X` (by `one_lt_dist_D_Y`);
 `mult_eq_card` and a filter/disjoint-union count on `pairsS`.  (`≤` suffices downstream.)
 Acceptance: no `sorry`.
 Depends on: `one_lt_dist_D_Y`, `mult_eq_card`, `mem_pairsAt`. Difficulty M. -/
 theorem mult_split (ht : 1 < tgap X) :
     (mult X 1 : ℝ) ≤ mult (Dset X) 1 + mult (Yset X) 1 := by
-  sorry
+  have h : mult X 1 ≤ mult (Dset X) 1 + mult (Yset X) 1 := by
+    rw [Defs.mult_eq_card, Defs.mult_eq_card, Defs.mult_eq_card]
+    refine (card_le_card fun z hz => ?_).trans (card_union_le _ _)
+    induction z using Sym2.ind with
+    | h a b =>
+      obtain ⟨ha, hb, hab, hd⟩ := Defs.mem_pairsAt.1 hz
+      by_cases haD : a ∈ Dset X
+      · by_cases hbD : b ∈ Dset X
+        · exact mem_union_left _ (Defs.mem_pairsAt.2 ⟨haD, hbD, hab, hd⟩)
+        · have := one_lt_dist_D_Y ht haD (mem_sdiff.2 ⟨hb, hbD⟩); linarith
+      · by_cases hbD : b ∈ Dset X
+        · have := one_lt_dist_D_Y ht hbD (mem_sdiff.2 ⟨ha, haD⟩)
+          rw [dist_comm] at this; linarith
+        · exact mem_union_right _
+            (Defs.mem_pairsAt.2 ⟨mem_sdiff.2 ⟨ha, haD⟩, mem_sdiff.2 ⟨hb, hbD⟩, hab, hd⟩)
+  exact_mod_cast h
 
 /-- Unit edges inside `S ∩ D` number `≤ |S ∩ D| + cBad` for `τ > 1`.
 
-TODO: prove.
+TODO: none — proved.
 What's missing: unit pairs of `S ∩ D` are `edges X` whose both ends are in `D`; good ones are
 T-edges (`good_subset_T_union_rungs`, `rungs_eq_empty`); a T-edge `pq` with both ends in `S ∩ D`
 makes `q` the left or right T-neighbour of `p` (as in `card_tEdges_le`), each unique (`T1`), so
@@ -205,11 +220,77 @@ Depends on: `dirField_nonempty`, `good_subset_T_union_rungs`, `rungs_eq_empty`, 
 `card_bad_le`, `two_mul_card_le_of_deg_le`. Difficulty M. -/
 theorem mult_SD_le (hX : Normal X) (hτ : 1 < tau X) :
     (mult (Sset X ∩ Dset X) 1 : ℝ) ≤ (Sset X ∩ Dset X).card + cBad := by
-  sorry
+  obtain ⟨F⟩ := dirField_nonempty X
+  set V := Sset X ∩ Dset X with hV
+  set E' := (tEdges X F).filter (fun z => ∀ p ∈ z, p ∈ V) with hE'
+  have hsub : (pairsS V).filter (fun z => pairDist z = 1) ⊆ E' ∪ bad X F := by
+    intro z hz
+    induction z using Sym2.ind with
+    | h a b =>
+      obtain ⟨ha, hb, hab, hd⟩ := Defs.mem_pairsAt.1 hz
+      have hze : s(a, b) ∈ edges X := by
+        unfold edges
+        rw [hX.minDist_eq]
+        exact Defs.mem_pairsAt.2 ⟨(mem_inter.1 ha).1, (mem_inter.1 hb).1, hab, hd⟩
+      by_cases hg : IsGood F s(a, b)
+      · have hgood : s(a, b) ∈ good X F := mem_filter.2 ⟨hze, hg⟩
+        have := good_subset_T_union_rungs hX F (by unfold beta; linarith) hgood
+        rw [rungs_eq_empty F hτ, union_empty] at this
+        refine mem_union_left _ (mem_filter.2 ⟨this, fun p hp => ?_⟩)
+        rcases Sym2.mem_iff.1 hp with rfl | rfl
+        · exact ha
+        · exact hb
+      · exact mem_union_right _ (mem_filter.2 ⟨hze, hg⟩)
+  have h2 := two_mul_card_le_of_deg_le (V := V) (E := E') (k := 2) ?_ ?_
+  · have hc : mult V 1 ≤ E'.card + (bad X F).card := by
+      rw [Defs.mult_eq_card]; exact (card_le_card hsub).trans (card_union_le _ _)
+    have hb := card_bad_le hX F
+    have : (mult V 1 : ℝ) ≤ E'.card + (bad X F).card := by exact_mod_cast hc
+    have : (E'.card : ℝ) ≤ V.card := by exact_mod_cast (by omega : E'.card ≤ V.card)
+    linarith
+  · intro z hz
+    obtain ⟨hzT, hzV⟩ := mem_filter.1 hz
+    have hz' : z ∈ edges X := (mem_filter.1 (mem_filter.1 hzT).1).1
+    exact ⟨(mem_edges hz').1, hzV⟩
+  · intro p _
+    have hsub : E'.filter (fun z => p ∈ z) ⊆
+        ((Sset X).filter (IsSideT F 1 p) ∪ (Sset X).filter (IsSideT F (-1) p)).image
+          (fun q => s(p, q)) := by
+      intro z hz
+      obtain ⟨hzE, hpz⟩ := mem_filter.1 hz
+      have hzT := (mem_filter.1 hzE).1
+      obtain ⟨q, rfl⟩ := Sym2.mem_iff_exists.1 hpz
+      obtain ⟨hzg, hT⟩ := mem_filter.1 hzT
+      obtain ⟨hze, hg⟩ := mem_filter.1 hzg
+      obtain ⟨hzP, hzd⟩ := mem_filter.1 hze
+      simp only [pairsS, mem_filter, Finset.mk_mem_sym2_iff, Sym2.mk_isDiag_iff] at hzP
+      obtain ⟨⟨hp, hq⟩, -⟩ := hzP
+      have hd : dist p q = 1 := by rw [← hX.minDist_eq]; exact hzd
+      have hT' := hT p q rfl
+      have hg' := hg p q rfl
+      rw [mem_image]
+      refine ⟨q, ?_, rfl⟩
+      have hl := Curve.lagrange (q - p) (F.u p)
+      rw [F.norm_u' hp, ← dist_eq_norm, dist_comm q p, hd] at hl
+      have hβ : beta = 1 / 100 := rfl
+      have ha := hT'.2.1
+      have ha0 := hT'.1
+      rw [hβ] at ha
+      rcases lt_or_gt_of_ne (show det2 (F.u p) (q - p) ≠ 0 by
+        intro h0; rw [h0] at hl; nlinarith) with hb | hb
+      · exact mem_union_right _ (mem_filter.2 ⟨hq, hp, hq, hd, hg', hT', by linarith⟩)
+      · exact mem_union_left _ (mem_filter.2 ⟨hq, hp, hq, hd, hg', hT', by linarith⟩)
+    have c1 : ((Sset X).filter (IsSideT F 1 p)).card ≤ 1 :=
+      card_le_one.2 fun a ha b hb =>
+        T1 hX F (Or.inl rfl) (mem_filter.1 ha).2 (mem_filter.1 hb).2
+    have c2 : ((Sset X).filter (IsSideT F (-1) p)).card ≤ 1 :=
+      card_le_one.2 fun a ha b hb =>
+        T1 hX F (Or.inr rfl) (mem_filter.1 ha).2 (mem_filter.1 hb).2
+    exact (card_le_card hsub).trans (card_image_le.trans ((card_union_le _ _).trans (by omega)))
 
 /-- **The `D`-part** (§5.3 step 2): `Def(G[D]) ≥ 2|S ∩ D| − cBad`.
 
-TODO: prove.
+TODO: none — proved.
 What's missing: `mult_le_add_sum (S ∩ D) D 1`: `e(D) ≤ e(S ∩ D) + Σ_{z ∈ D ∖ S} deg z`;
 `deg ≤ 3` (`degδ_le_three_of_D97`; `partners (Dset X) 1 z ⊆ partners X (minDist X) z`);
 `|D| = |S ∩ D| + |D ∖ S|`; `mult_SD_le`.
@@ -217,7 +298,25 @@ Acceptance: no `sorry`.
 Depends on: `mult_le_add_sum`, `degδ_le_three_of_D97`, `mult_SD_le`. Difficulty M. -/
 theorem dpart (hX : Normal X) (hτ : 1 < tau X) :
     2 * ((Sset X ∩ Dset X).card : ℝ) - cBad ≤ defc (Dset X) := by
-  sorry
+  have hSD : Sset X ∩ Dset X ⊆ Dset X := inter_subset_right
+  have h := Defs.mult_le_add_sum (Sset X ∩ Dset X) (Dset X) 1
+  have hs : ∑ x ∈ Dset X \ (Sset X ∩ Dset X), (partners (Dset X) 1 x).card ≤
+      3 * (Dset X \ (Sset X ∩ Dset X)).card := by
+    calc ∑ x ∈ Dset X \ (Sset X ∩ Dset X), (partners (Dset X) 1 x).card
+        ≤ ∑ _x ∈ Dset X \ (Sset X ∩ Dset X), 3 := by
+          refine sum_le_sum fun x hx => le_trans (card_le_card fun q hq => ?_)
+            (degδ_le_three_of_D97 hX (mem_sdiff.1 hx).1)
+          obtain ⟨hqD, hqx, hd⟩ := Defs.mem_partners.1 hq
+          exact Defs.mem_partners.2 ⟨(mem_filter.1 hqD).1, hqx, by rw [hX.minDist_eq]; exact hd⟩
+      _ = 3 * (Dset X \ (Sset X ∩ Dset X)).card := by rw [sum_const, smul_eq_mul, mul_comm]
+  have hcard := card_sdiff_add_card_eq_card hSD
+  have hm := mult_SD_le hX hτ
+  have : (mult (Dset X) 1 : ℝ) ≤ mult (Sset X ∩ Dset X) 1 +
+      3 * (Dset X \ (Sset X ∩ Dset X)).card := by exact_mod_cast (by omega)
+  have hc' : ((Dset X \ (Sset X ∩ Dset X)).card : ℝ) + (Sset X ∩ Dset X).card = (Dset X).card := by
+    exact_mod_cast hcard
+  unfold defc
+  linarith
 
 end
 
