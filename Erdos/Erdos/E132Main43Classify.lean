@@ -72,7 +72,10 @@ theorem mS_le_four_of_frame (hX : Normal X) {y n : Pt} (hF : Frame43 X y n) : mS
 /-- **Lemma P, core identity**: two unit vectors at distance `≥ 1` (angle `≥ 60°`) satisfy
 `|X₁ + X₂| ≤ √3·|Z₁ − Z₂|` in any orthonormal frame `(perp n, n)`.
 (With `e_i = (sin ψ_i, cos ψ_i)`: `(X₁+X₂)²‖e₁−e₂‖² = (Z₁−Z₂)²‖e₁+e₂‖²`, and
-`‖e₁+e₂‖² = 4 − ‖e₁−e₂‖² ≤ 3 ≤ 3‖e₁−e₂‖²`.)
+`‖e₁+e₂‖² = 4 − ‖e₁−e₂‖² ≤ 3 ≤ 3‖e₁−e₂‖²`.)  Together with `|Z₁ − Z₂|` this is the paper's
+Lemma P: the distance from `e₂` to the mirror image `(−X₁, Z₁)` of `e₁` is
+`√((X₁+X₂)² + (Z₁−Z₂)²) = 2|sin((ψ₁+ψ₂)/2)| ≤ 2|Z₁ − Z₂|`.  (For a pair at `≈ ±90°`,
+`X₁ + X₂ ≈ 0` automatically and the mirror error is all in `Z₁ − Z₂`.)
 
 TODO: prove.
 What's missing: coordinates (`n1_inner_frame`/`inner_pt`, `unit_sq`); the identity above is a
@@ -84,8 +87,8 @@ theorem pair_sym {n e₁ e₂ : Pt} (hn : ‖n‖ = 1) (h₁ : ‖e₁‖ = 1) (
     |inner ℝ e₁ (perp n) + inner ℝ e₂ (perp n)| ≤ √3 * |inner ℝ e₁ n - inner ℝ e₂ n| := by
   sorry
 
-/-- **Lemma P (K)**: two distinct K-row neighbours are mirror-symmetric:
-`|X₁ + X₂| ≤ √3/49 < 1/25` (heights both in `[h − 1/49, h]`).
+/-- **Lemma P (K)**: two distinct K-row neighbours are mirror-symmetric: heights within
+`1/49` (both in `[h − 1/49, h]`) and `|X₁ + X₂| ≤ √3/49 < 1/25`.
 
 TODO: prove.
 What's missing: heights from `Frame43.top` (`ball_polygon_a`) and `frame_outside`
@@ -97,11 +100,12 @@ Difficulty M. -/
 theorem pair_K (hX : Normal X) {y n : Pt} (hF : Frame43 X y n) {q₁ q₂ : Pt}
     (h₁ : q₁ ∈ nbδ X y) (h₂ : q₂ ∈ nbδ X y) (hne : q₁ ≠ q₂)
     (hS₁ : q₁ ∈ Sset X) (hD₁ : q₁ ∉ Dset X) (hS₂ : q₂ ∈ Sset X) (hD₂ : q₂ ∉ Dset X) :
-    |inner ℝ (q₁ - y) (perp n) + inner ℝ (q₂ - y) (perp n)| ≤ 1 / 25 := by
+    |inner ℝ (q₁ - y) n - inner ℝ (q₂ - y) n| ≤ 1 / 49 ∧
+      |inner ℝ (q₁ - y) (perp n) + inner ℝ (q₂ - y) (perp n)| ≤ 1 / 25 := by
   sorry
 
-/-- **Lemma P (D)**: two distinct D-neighbours are mirror-symmetric:
-`|X₁ + X₂| ≤ √3·(9/200) < 2/25` (heights differ by `≤ (9/400)|X₁ − X₂| ≤ 9/200`).
+/-- **Lemma P (D)**: two distinct D-neighbours are mirror-symmetric: heights differ by
+`≤ (9/400)|X₁ − X₂| ≤ 9/200` and `|X₁ + X₂| ≤ √3·(9/200) < 2/25`.
 
 TODO: prove.
 What's missing: `dd_heights`, `|X₁ − X₂| ≤ 2`, `pair_sym`.
@@ -110,7 +114,8 @@ Depends on: `dd_heights`, `pair_sym`, `dist_of_mem_nbδ`, `one_le_dist`. Difficu
 theorem pair_D (hX : Normal X) {y n : Pt} (hF : Frame43 X y n) {q₁ q₂ : Pt}
     (h₁ : q₁ ∈ nbδ X y) (h₂ : q₂ ∈ nbδ X y) (hne : q₁ ≠ q₂)
     (hD₁ : q₁ ∈ Dset X) (hD₂ : q₂ ∈ Dset X) :
-    |inner ℝ (q₁ - y) (perp n) + inner ℝ (q₂ - y) (perp n)| ≤ 2 / 25 := by
+    |inner ℝ (q₁ - y) n - inner ℝ (q₂ - y) n| ≤ 9 / 200 ∧
+      |inner ℝ (q₁ - y) (perp n) + inner ℝ (q₂ - y) (perp n)| ≤ 2 / 25 := by
   sorry
 
 /-! ## The exact hexagon -/
@@ -176,12 +181,14 @@ What's missing (paper §1.3 enumeration): two of the three `S`-neighbours have t
 (`pair_K`/`pair_D`: mirror pair), which pins the hexagon offset (`hexagon_exact`) to `≈ 0°` or
 `≈ 30°`; only slots with height `> −1/49` can hold `S`-points; excluded cases (K pair at
 `±30°` + D at `±90°`; D pair at `±60°` + K at `0°`; D pair at `±90°` + K at `±30°`; three of
-one kind) by `Frame43.top`, `frame_outside`, `frame_D` as in the paper.  HF offsets: `≤ 0.6°`
-(K pair at `±90°`), `≤ 1.3°` (D pair at `±30°`, `|tan δ| ≤ 9/400`); cap offset `≤ 1.8°`.
+one kind) by `Frame43.top`, `frame_outside`, `frame_D` as in the paper.  Offsets from the
+mirror error `≤ 2|Z₁ − Z₂|` (`pair_sym`): `≤ 1.2°` for a K pair (HF1 at `±90°`, cap at `±60°`),
+`≤ 2.6°` for the D pair of HF2 (`≤ 1.3°` using `dd_heights` with `|X₁ − X₂| ≈ 1`); all
+chords `≤ 0.046 < 1/20`.
 Fan: slots with `σ` chosen so that the K-row point is at `−σ·90°` (HF2: `q` = hexagon vertex at
 `σ·90°`, `z₂` at `−σ·30°`, `dist z₁ z₂ = 1` from `hexagon_exact`); lower points at `≈ ±150°`
-(height `≤ −0.85`).  Cap: the point at `180°` has height `≤ −0.99`, those at `±120°` height
-`≥ −0.53 > −2/3`.
+(height `≤ −cos 32.6° < −0.84`).  Cap: the point at `180°` has height `≤ −0.99`, those at
+`±120°` height `≥ −0.53 > −2/3`.
 Acceptance: no `sorry`.
 Depends on: `hexagon_exact`, `pair_K`, `pair_D`, `frame_outside`, `frame_D`, `Frame43.top`,
 `Sset_not_interior`. Difficulty L. -/
