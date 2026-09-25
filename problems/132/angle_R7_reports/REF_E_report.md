@@ -137,3 +137,62 @@ E's dual certificates were re-checked independently: for θ = 2/3, weights (40/6
 
 So the improvement below 4/3 needs **both** Theorem W (θ < 1) and Proposition F; either alone gives exactly 4/3. With only C's fallback
 θ = 4/5, the bound is still below 4/3 (137/103).
+
+## 6. X1, C2(b), ORD (flag 6), the 53/40 scope, and §4 (lower bound)
+
+**Lemma X1 — correct** (not used by Theorem E). The step "β − m ∈ (−61°, 0°]" should read "(−61°, O(1/R)]" (β₀ ≈ 1/(2Δ) can exceed
+m − 60°); only β − m ∈ (−90°, 90°) is used, so nothing changes. Independent brute force (`r7_refE7_geom.py` (4)): 108 window fans ×
+4000 positions of w′ on C(z₃, Δ) with |w′ − w| ≥ 1; no w′ satisfies X1's three constraints |w′w| ≤ Δ, |w′z₂| ≤ Δ, |w′k| ≤ R.
+
+**Lemma C2(b) — plausible, not fully written** (not used by Theorem E): the O(1/R) slot estimate is numerical (as E says).
+
+**Lemma ORD — correct; replace the proof** (flag 6). Cleaner proof by cyclic order: diametral endpoints are vertices of P = conv X, and
+any two diametral segments intersect (Hopf–Pannwitz), so for points in convex position their endpoints interleave in the cyclic order of
+∂P or share an endpoint. *Replacement text:* "The partners of w lie on C(w, Δ) ∩ ∂P, and their cyclic order along ∂P is their angular
+order about w. Let z, c, c′ be partners of w in this order (z before c before c′, going around ∂P from w), and let w_c ≠ w be another
+partner of c. The chord cw_c meets wz, so w_c lies on the open arc of ∂P from w to z not containing c (it cannot be z: then [c, z] and
+[w, c′] would be disjoint); it also meets wc′, so w_c lies on the open arc from c′ to w not containing c. These arcs are disjoint:
+contradiction. Symmetrically on the other side, using c′'s second partner." This removes the left/right orientation bookkeeping.
+
+**The 53/40 scope.** 53/40 uses REF_C's remark (θ = ½ in Region III except on G = 1 and at d = 0), which had one pass and whose report
+is lost. The window includes its endpoint G = 2, where C's Lemma SG allows singleton gaps with distinct centres (|ww′| = |1 − G| = 1)
+and C's run table lists "G ≥ 2: ratio < 2/3". The reduction to ½ there presumably uses NC (no two consecutive singleton gaps at G ≥ 2)
+plus REF_C's shadow obstruction (no l = +1 arc gaps), leaving runs of one singleton gap. *Fix E4:* state 53/40 as conditional on REF_C's
+remark **including G = 2**, and note that if G = 2 is not covered, that single curve falls back to 81/61. The headline 81/61 is unaffected.
+
+**§4 (lower bound).** Claims are correctly hedged: no construction with more than O(1) points of F* is known; R4's single-centre chain
+gives ≤ 2 (via Lemma AI + C2(b)); the Reuleaux-with-pendants family has F* = ∅ (`r7_E_reuleaux.py` rerun: passes for N = 101, 301, 1001
+at G = 1 and N = 301 at G = 0.3, 1.9; the obstruction is robust to adding points, since supersets only add constraints and keep Δ).
+§4.3's case analysis is a sketch and the arc-span statement is labelled a conjecture. The lower bound in the window stays the global 9/7.
+
+## 7. Consistency
+
+- ienjoymath's construction (Region I, t → 0) lies outside the window, so F* = ∅ there by Corollary EW, consistent with its measured
+  Σ_𝓡 v ≤ 6r. No bound below 9/7 is claimed anywhere (81/61 > 53/40 > 9/7).
+- The local examples: R4's fan (paper rem:sharp) is exactly the lower end τ_lo (exact, §2 (2)); the two-fans-per-K-extreme
+  configuration is locally realisable across the window (§4), consistent with Proposition F's factor 2.
+- All earlier windows (N3 [0.751, 0.950], B's 5ε₀ + δ₀, D1r's κ(θ), REF_D1's κ′ ≤ 7ε₀ + 5/Δ₂) contain EW's window
+  t ∈ [√3/2 − 0.3751/Δ₂, √3/2 + 0.1251/Δ₂): consistent.
+
+## 8. Verdict
+
+**CORRECT WITH FIXES.** I found no error in any inequality used by Theorem E or Theorem G′. The fixes are expository, and none changes a
+statement:
+- E1: the Q-sets (Q′ ⊆ Q up to O(1); table label).
+- E2: list "Theorem W's C is absolute in Region III" among the inputs of the uniform claim.
+- E3: C2(a) must go through the first sentence of (G5) at k, not through "frames within 2" (unavailable at ρ = 1). Replacement text in §4.
+- E4: 53/40 must explicitly include G = 2 in REF_C's θ = ½ remark (otherwise that curve is 81/61).
+- Cosmetic: Lemma S(d)'s ingredient list (§2), X1's interval (§6), and the ORD proof replaced by cyclic interleaving (§6).
+
+**What stands (conditional on the inputs' statuses: D1r Corollary 6.1 refereed once; Theorem W refereed once, report lost):**
+- Lemma EW (exact window 0 < G ≤ 2, sharp at the lower end exactly, upper end not attained): proved.
+- Theorem G′: 9/7 + η with C = C(η) outside the window.
+- Lemma U, C2(a), Proposition F |F*₄| ≤ 2|Q|; the factor 2 is locally sharp.
+- **Theorem E and the overall bound min{μ(Δ₂), μ(δ)} ≤ (81/61 + η)n + C(η)**; 53/40 + η off G = 1 (conditional, E4).
+- Sensitivity: losing Proposition F or Theorem W returns exactly 4/3; with C's fallback θ = 4/5 the bound is 137/103 < 4/3.
+
+**Recommendation.** 81/61 now rests on D1r (one referee) and Theorem W (one referee; the C/REF_C reports were lost in the wipe). The
+most useful next step is a reconstruction and second referee of Theorem W (Q′ ⊆ Q, the d-independence of C, the G = 2 case), since the
+sub-4/3 bound fails without it.
+
+STATUS: FINAL
