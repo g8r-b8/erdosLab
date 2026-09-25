@@ -19,30 +19,67 @@ from __future__ import annotations
 import sys
 from collections import Counter
 
+from va1_common import qform, layers, two_core
+from va1_clique import maximal_cliques
+
 Pt = tuple[int, int]
 
 
 def cross(o: Pt, a: Pt, b: Pt) -> int:
-    """Exact signed area (a-o) x (b-o) in lattice coordinates (orientation-preserving basis).
+    """Exact signed area (a-o) x (b-o) in lattice coordinates (orientation-preserving basis)."""
+    return (a[0] - o[0]) * (b[1] - o[1]) - (a[1] - o[1]) * (b[0] - o[0])
 
-    TODO: implement.
-    What's missing: one-line formula.
-    Acceptance: cross((0,0),(1,0),(0,1)) == 1.
-    Depends on: nothing.
-    """
-    raise NotImplementedError("cross product")
+
+def sgn(v: int) -> int:
+    """Sign of an integer."""
+    return (v > 0) - (v < 0)
 
 
 def hooks(X: list[Pt], kind: str) -> tuple[list[tuple[int, int, int, int]], dict]:
     """All hooks (p, w, x, orientation) of X plus the exact invariants needed by check_set.
 
-    TODO: implement.
-    What's missing: Delta, Delta2, G, layers, 2-core, V_Delta; the hook enumeration.
-    Acceptance: on a regular-pentagon-free small set returns [] ; on the lattice runs every
-      hook's x satisfies |xb| = Delta for the far-side neighbour b.
-    Depends on: va1_common.qform, va1_common.layers, va1_common.two_core, cross.
+    A hook is (p, w, x): p a hull vertex, w a Delta2-neighbour of p with Delta2-neighbours of p
+    strictly on both sides of line pw, x != p a Delta2-neighbour of w.  The proof shows x is
+    never on line pw (counted as 'online' if it happens) and that every Delta2-neighbour b of
+    p strictly beyond line pw from x has |xb| = Delta (counted as 'noDelta' if not).
+    Orientation = sign of cross(x, w, p).
     """
-    raise NotImplementedError("hook enumeration")
+    n = len(X)
+    D = [[qform(kind, X[i][0] - X[j][0], X[i][1] - X[j][1]) for j in range(n)] for i in range(n)]
+    vals = sorted({D[i][j] for i in range(n) for j in range(i + 1, n)}, reverse=True)
+    info: dict = {'ok': len(vals) >= 2}
+    if not info['ok']:
+        return [], info
+    Dl, D2 = vals[0], vals[1]
+    adj = {i: [j for j in range(n) if j != i and D[i][j] == D2] for i in range(n)}
+    Ls = layers(X)
+    L1 = Ls[0]
+    L2 = Ls[1] if len(Ls) > 1 else set()
+    core = two_core(L1 | L2, adj)
+    VD = {i for i in range(n) if any(D[i][j] == Dl for j in range(n) if j != i)}
+    H: list[tuple[int, int, int, int]] = []
+    online = noDelta = 0
+    for p in L1:
+        W = adj[p]
+        for w in W:
+            sides = {sgn(cross(X[p], X[w], X[a])) for a in W}
+            if not (1 in sides and -1 in sides):
+                continue
+            for x in adj[w]:
+                if x == p:
+                    continue
+                sx = sgn(cross(X[p], X[w], X[x]))
+                if sx == 0:
+                    online += 1
+                    continue
+                far = [b for b in W if sgn(cross(X[p], X[w], X[b])) == -sx]
+                if any(D[x][b] != Dl for b in far):
+                    noDelta += 1
+                H.append((p, w, x, sgn(cross(X[x], X[w], X[p]))))
+    E = sum(sum(1 for v in adj[q] if v in core) - 2 for q in core & L1)
+    info.update(D=D, Dl=Dl, adj=adj, L1=L1, L2=L2, core=core, VD=VD, online=online,
+                noDelta=noDelta, mu2=sum(len(a) for a in adj.values()) // 2, E=E)
+    return H, info
 
 
 def check_set(X: list[Pt], kind: str, C: Counter) -> None:
