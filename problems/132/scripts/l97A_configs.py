@@ -116,6 +116,28 @@ def boundary_points(centers, R, step_lo=1.0, step_hi=1.4, rng=None, corners=True
     return out
 
 
+def boundary_points_exact(centers, R, rng, skip=0.0):
+    """A-points at EXACT unit chord spacing along each boundary arc (A-A unit edges), random
+    starting offsets, occasional skipped points (probability skip) to create A-paths."""
+    from l97A_common import circle_inter
+    out = []
+    dlt = 2 * math.asin(1 / (2 * R))
+    for w in centers:
+        t0 = rng.uniform(0, 2 * math.pi)
+        k = 0
+        while k * dlt < 2 * math.pi:
+            t = t0 + k * dlt
+            z = (w[0] + R * math.cos(t), w[1] + R * math.sin(t))
+            k += 1
+            if min(R - dist(z, v) for v in centers) < -1e-12:
+                continue
+            if rng.random() < skip:
+                continue
+            if all(dist(z, q) > 1 - 1e-9 for q in out):
+                out.append(z)
+    return out
+
+
 def cx(c):
     return sum(w[0] for w in c) / len(c)
 
@@ -126,7 +148,10 @@ def cy(c):
 
 def grow(centers, R, rho, seed, n_iter=4000, name='rand', gap=(1.0, 1.4), corners=True):
     rng = random.Random(seed)
-    A = boundary_points(centers, R, gap[0], gap[1], rng, corners)
+    if gap == 'exact':
+        A = boundary_points_exact(centers, R, rng, skip=0.15)
+    else:
+        A = boundary_points(centers, R, gap[0], gap[1], rng, corners)
     pts = list(A)
 
     def depth(z):
@@ -188,10 +213,11 @@ def all_configs(quick=False):
                         name='pent', gap=(1.0, 1.1)))
         # tight: A-points at unit arc spacing (many A-A edges, ring-like A-paths), dense shell
         out.append(grow(reuleaux(14.0), 14.0, 2, 300 + s, n_iter=2500 if quick else 6000,
-                        name='reulT', gap=(1.0, 1.0)))
+                        name='reulT', gap='exact'))
         out.append(grow(lens(14.0, 20.0), 14.0, 3, 400 + s, n_iter=2500 if quick else 6000,
-                        name='lensT', gap=(1.0, 1.0)))
+                        name='lensT', gap='exact'))
     if not quick:
         out.append(eis(7 * 13 * 19, 3))
         out.append(eis(7 * 13 * 19 * 31, 2))
+        out.append(grow([(0.0, 0.0)], 12.0, 3, 500, n_iter=6000, name='discT', gap='exact'))
     return out
