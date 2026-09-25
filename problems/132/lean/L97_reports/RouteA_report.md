@@ -1,7 +1,7 @@
 # Route A report — elementary (Euler-free) approach to `CoreE` (Theorem E′, Erdős #132)
 
 Agent: Route A research agent (2026-09-25). Scripts: `problems/132/scripts/l97A_*.py`.
-Status: sections 0–4 written; §5 (Lean DAG) and §6 (flags) follow.
+Status: complete (§§0–6). Proof on paper, exact local checks, float sanity checks, Lean DAG estimate.
 
 ## 0. Verdict
 
@@ -336,3 +336,124 @@ Both cases give `Def(H) ≥ 2|A| − 2(1200h + 2)²`. ∎
   - In the ring, Lemma 7 is tight for the two side chains, `(G5)` has multiplicity 1, and
     `∫|M₁| = 4π` equals the local slack.
   - The loss `18M` is an artefact of the counting, not of the ring.
+
+## 4. Adversarial tests
+
+**Exact tests (`l97A_local_exact.py`, Fractions, angles in rational degrees).** `3 20000` checks
+Lemma 5, Lemma 6 and (★) on 20 679 A-point configurations:
+- `d = 0..3`, pairwise separations `≥ 60°`;
+- normal cones of width `0°..89°`, with every neighbour strictly behind every normal;
+- 3° grid plus random rational angles.
+
+All pass. Minimum slack in (★): `0.0166π`. Runtime about 25 s.
+
+**Float sanity tests (`l97A_check.py` with `l97A_configs.py`; tolerance `1e-7`).**
+
+Assertions per configuration:
+- (I) the identity `Def = (3/2π)Σ|E_v|`;
+- (Pa) the per-A-point inequality `cost_a ≤ s_a`, computed by quadrature with the sup over the
+  actual normal cone;
+- (C3) Lemma 2 at every sampled `φ`;
+- (Cap) for every A-to-A chain: the core is strictly on one side, the cap normals form **one**
+  arc, its ends are support normals of `b` and `t`, and Lemma 7 holds;
+- (Sep) every chain whose cap contains `ν` meets `[z(ν), q(z(ν))]`, and the count obeys the
+  `1 + |z − q|/(√3/2)` bound;
+- (Sum) `Σ∠ ≤ 2π·mult`, and the sharp integrated form
+  `Def ≥ 2|A| + (3/2π)Σ(s_a − cost_a) − (9/2π²)∫Σ_t∠_t`.
+
+Configurations (45 in the full run, log `scratchpad/l97A_full.log`; all pass):
+
+| family | details | Def − 2A | loss term `(9/2π²)∫Σ∠` |
+|---|---|---|---|
+| ring24, ring60 | unit-chord rings (tight) | 0 | 6.0 (exact value `18/π·π/3·…`; sampled) |
+| ringpath60_k | rings cut into A-paths | 15, 30 | ≤ 3 |
+| Mpair (R = 50) | angle_R6 M pair-gap row, 24 chords + apex row | 14 | 0.23 |
+| L1..L4 (R = 50) | angle_R6 L family, 4 periods | 7..15 | ≤ 0.23 |
+| eis1729 ρ=2,3; eis53599 ρ=2 | Eisenstein lattice annuli, 48/96 lattice points exactly on ∂K, up to 3426 vertices | 462..3006 | ≤ 6.7 |
+| reul/lens/pent × 6 seeds | random unit-distance growth, A-points incl. corners | ≥ 99 | ≤ 1.2 |
+| reulT/lensT × 6, discT | exact unit A–A chords (A-paths), dense growth, corners | ≥ 68 | ≤ 4.1 |
+
+The largest observed cap multiplicity was 3 (Eisenstein, ρ = 3). No assertion ever failed.
+
+**On the L and M obstructions.**
+- These kill *first-layer* ledgers, which charge each A-point locally.
+- Here the charge of an A-point depends on whether its steep chain in direction `φ` ends at
+  another A-point. That is decided globally.
+- The L and M configurations satisfy every step (table), with `Def − 2|A| ≥ 7`.
+
+**What is not machine-tested exactly.** Lemma G (sides, cap arc, separation) involves irrational
+geometry (circular arcs). It is checked only in floats. Its proof is written out in §3.2 and uses
+only convexity, the IVT, and the monotone support-point parametrisation.
+
+## 5. Lean DAG and line estimate
+
+Route A needs **no plane topology**. The ingredients are:
+- finite combinatorics;
+- trigonometry on `S¹`;
+- integrals over `S¹` (the repo's `dirMeasure` / `sum_dirMeasure_le` / `le_dirMeasure_of_Icc`,
+  plus `intervalIntegral` for the ramps);
+- convexity of `KBall X` (`normalCone`, `dirVec`, `ang` already exist in `E132MainDefs`);
+- the IVT (`intermediate_value_Icc`);
+- compactness (support points, minimal width).
+
+```
+Dir ──► Chain ──┐
+Local ──────────┼──► Core (assembly, integrals) ──► CoreE (with new Eh)
+Sides ─► Support ─► Cap ─┘        ▲
+Fat ──────────────────────────────┘
+```
+
+| node (file) | content | Mathlib / repo infrastructure | est. lines |
+|---|---|---|---|
+| `Main97Dir` | cones `C(φ)`; Lemma 1 (angle ≥ π/3 between unit neighbours; cf. `card_partners_minDist_le`); `E_v`; `dirMeasure(E_v) = 2π − deg·π/3` (disjoint open arcs); `∫N = (2π/3)Def` | `dirMeasure`, `volume` on `AddCircle`/`Icc 0 2π`, measure of disjoint unions | 300 |
+| `Main97Chain` | up/down neighbours; `top` by iteration (`⟨·,φ⟩` strictly increasing, bounded by `|V|` steps); `bottom`; Lemma 2 as a `Finset.card` inequality (fibres of size ≤ 2) | `Finset.card_le_card_of_…`, `Function.iterate` | 350 |
+| `Main97Local` | support normals of `KBall`; strict separation (parallelogram); `deg ≤ 3`; outer gap `s_a`; Lemma 5 (two antipodal arcs); Lemma 6 (two ramps, sup over the normal cone, exact piecewise-linear integrals); (★) | `Real.Angle` or explicit angle arithmetic; `intervalIntegral` of piecewise-linear functions | 900–1200 |
+| `Main97Sides` | Lemma 7 (triangle inequality on `S¹`); chain as graph `x = c(y)`; horizontal chords `l, r`; S0; side function; S1 (IVT on segments); S2 (convex core on one side) | `intermediate_value_Icc`, `Convex.segment_subset` | 500 |
+| `Main97Support` | support point `z(ν)`: existence (compactness), uniqueness (strict convexity), continuity; left and right boundary parametrisation, monotonicity of heights | `IsCompact.exists_isMaxOn`, sequential continuity from uniqueness | 450 |
+| `Main97Cap` | G3 (cap arc with endpoints in `N(t)`, `N(b)`; case analysis left/right ends); G4 (P1 non-crossing + `√3/2` segment distance); G5 (points `√3/2`-separated on a segment; `sum_dirMeasure_le`) | repo `le_dirMeasure_of_Icc`, `sum_dirMeasure_le` | 800 |
+| `Main97Fat` | Lemma F (minimal width by compactness of `S¹`; the 9 elementary steps); triangle-centroid inradius; concavity of depth, `q(z) ∈ K′`; `r* ≥ diam K/600` | `IsCompact.exists_isMinOn`, `ConvexOn`/`ConcaveOn` for `min` of concave functions | 700 |
+| `Main97Core` | assembly: integrate the pointwise inequalities over `φ ∈ [0, 2π]` (finite sums of indicators of arc unions × continuous ramps); both cases; packing via `card_le_sq_diam` | `intervalIntegral.integral_finset_sum`, `integral_mono`, measurability of arcs | 600 |
+
+**Total ≈ 4 600–5 000 lines**, with no new axioms, compared with Route B (≥ 10 k lines for
+Euler/Jordan/winding numbers). Hardest nodes: `Main97Local` (angle bookkeeping) and `Main97Cap`
+(case analysis of G3).
+
+Cheaper variants:
+1. Replace support-point continuity by the explicit structure of `∂K` (finitely many circular
+   arcs). This is probably not shorter.
+2. Replace the ramp integrals by the cruder pointwise bound `m̂ ≤ π/3` on `J_a`. This **fails**:
+   it needs `|J_a| ≤ s_a·…`, which is false (ring points).
+3. Replace Lemma F by the kite bound of angle_R6 Step 3. This is not shorter.
+
+**Required change to the Lean statement.** `CoreE` is proved as stated **after** changing
+`Eh h := 3 * 10^6 * h^2`. Then in `eprime_arith`:
+- `Eh(h) ≤ 1.2·10⁷ n^{2/3}` (using `h < 2n^{1/3}`);
+- so `CE := 2·10⁷` suffices;
+- `C97 = 10¹¹` still satisfies `3/7·CE ≤ C97/2`.
+
+Alternatively state `CoreE` without the hypotheses `h < Δ₂/200` and `|A| > 1000h`, which Theorem A
+does not need.
+
+## 6. Open points / flags
+
+1. **Not refereed.** The steps most in need of a hostile check are:
+   - Lemma 6: the claim that the ramp's inner end is `ν`-independent, so the sup over the normal
+     cone is attained at an extreme normal;
+   - (G3): the case analysis of left/right ends and the attached regions above/below the strip;
+   - (S0): the degenerate horizontal chord.
+2. **Constants.** They are generous: the fatness constant 600 and the `√3/2` packing on a
+   segment.
+   - The main case has error `18 + 12471h`, i.e. **linear in h**.
+   - The quadratic `E_A(h) = 2(1200h + 2)²` comes only from the trivial case `r* < h`. With the
+     perimeter bound `|A| ≤ 4·diam K + 1` it becomes linear too: `E = 12471h + 18` overall.
+     That perimeter bound needs a polygon-perimeter lemma, which is not in the repo.
+   - Either way the result is `O(h²)`, as `CoreE` requires, once `Eh` is enlarged (§5).
+3. **Scope.** Theorem A needs only `Y ⊆ K`, `A ⊆ Y ∩ ∂K` and minimum distance 1. Fatness (Lemma F)
+   needs `Δ ≤ 1.94Δ₂`. So Route A also re-proves Theorem E′ for every `Y ⊂ X ∩ K`, with error
+   `O(h)` in the core step instead of `O(h²)`.
+4. **Downstream (for the paper, not needed for Lean).** With `E = O(h)`, the shell optimisation
+   in E′ Step 0 changes. The error is `O(h) + O(n/ρ₀)`, optimised at `ρ₀ ≈ √n`. That is only
+   useful if `Δ₂/400 ≥ √n`; otherwise the `Δ₂/400` cap binds. So the rate stays `O(n^{2/3})`
+   in general. This point is not examined further.
+5. **Compute used.** Single process, under 3 GB; float checks about 2 min; exact checks about
+   25 s. No Lean compiles.
