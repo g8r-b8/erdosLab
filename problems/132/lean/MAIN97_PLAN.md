@@ -99,3 +99,18 @@ Reused unchanged: `exists_normalize` pattern (`diam_smul`, `dist2_smul`, `minDis
 
 Check one file: `cd Erdos && /Users/wingatejones/Projects/erdosLab/tools/leanslot.sh lake env lean -o .lake/build/lib/lean/Erdos/<F>.olean -i .lake/build/lib/lean/Erdos/<F>.ilean Erdos/<F>.lean`
 (DAG order).  Not imported from `Erdos.lean` until sorry-free.
+
+## Status (2026-09-25, after Phase 2 of the non-core part)
+
+- Skeleton `d3d669f`: 5 files, 27 theorems, 20 sorry stubs (commit message said 26/19; recount).
+- **Proved**: every lemma outside `core` — Defs (`defc_nonneg`, `Aset_subset_Yout`,
+  `one_lt_dist_out_in`, `card_Yset_split`, `disjoint_Yshell`), DPart (`card_sep_arc_le_three`,
+  `degδ_le_three_of_D97`, `one_lt_dist_D_Y`, `mult_split`, `mult_SD_le`, `dpart`), Eprime
+  (`shell_removal`, `shell_pigeonhole`, `card_le_sq_diam`, `eprime_arith`, `eprime`), Main97
+  (`one_lt_tau_of`, `one_lt_tgap_of`, `tgap_nonneg`, `exists_normalize97`, `lp97`, assembly).
+- `#print axioms Erdos132Main.erdos132_main97_of_core = [propext, Classical.choice, Quot.sound]`
+  (**sorry-free, conditional on the hypothesis `CoreE`**).
+- `#print axioms Erdos132Main.erdos132_main97 = [propext, sorryAx, Classical.choice, Quot.sound]`;
+  the only `sorry` is `core : CoreE` (E132Main97Core.lean).
+- Deviation (D-part): the repo's `DirField` lives on `S`, so `Def(G[D]) ≥ 2|S∩D| − cBad` is proved
+  with `deg ≤ 3` on `D ∖ S` and T-edges/bad edges on `S ∩ D` (paper: T-edges on all of `D`).
