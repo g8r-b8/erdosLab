@@ -356,7 +356,10 @@ PROMPT.md rule 4: check all cross-referenced/sibling problems and their threads.
   branch; u≥1 ⇒ u'≥2 so no live branch dies ⇒ #inf non-cofinite reps = 2^{#{a: v_a=0}}. x=1: v_1=0,
   zeros at a=L−1 (to 2e10). Old e_L = min(v_{L−1}+1, L−v_{L−1}) (proved by case t=a−2v ≥/< 0).
   General dyadic m/2^k: several orbits (one per integer state at a=k). Post updated (dated) in blog
-  repo, committed locally; push awaits user OK. Open problem itself: still need ∞ zeros of v.
+  repo, pushed 2026-09-25 (7862f15). Open problem itself: still need ∞ zeros of v.
+  Next (cheap, 1 core, KB memory): extend v-search 2e10→1e12 (~17 min; expect ~3–4 zeros if rate
+  ≈0.7/a). Deferred 2026-09-25: machine just recovered from kernel panics (load 28); shared-box rule =
+  ≤2–3 heavy processes total, check `ps -Ao pid,rss,comm -m | head` first.
 - Drops (one line): 3/5/9/10/11/14/15/17/18/20/25/28/30/32/33/36/39–41/44/50–52/60–62/65/66/68/
   70/75/77/78/80–82/84–87/89/91/96–104/107/108/111/114/120/122/124/128–131/137/138/141–143/145/148/
   149/151/153/155/158/159/161/162/165/167–170/172–174/176/177/181/184/187/188/195–197/200/201/203/
