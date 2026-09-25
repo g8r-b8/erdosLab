@@ -225,13 +225,23 @@ def check_step1() -> list[str]:
 def check_step2() -> list[str]:
     """Step 2 (p' on the axis) identities in frame T.
 
-    TODO: implement.
-    What's missing: S_xu(P2) == S_{u P2}(x) == td + c(t-s); S_{u P2}(b) = 2ct;
-      c^2 - d^2 = s(s-2t).
-    Acceptance: returns [].
-    Depends on: reduce_rel, trapezoid_points.
+    With b' = b, p' in C(u,1) n C(b,1) = {P1, P2}.  For P2 the two hook-2 side conditions
+    read S_xu(P2) > 0 and S_{u P2}(x) < 0, and the two expressions coincide.
     """
-    raise NotImplementedError("step 2 identities")
+    F: list[str] = []
+    print('[Step 2: p\' on the axis]')
+    P = trapezoid_points()
+    x, p, u, b, P1, P2 = P['x'], P['p'], P['u'], P['b'], P['P1'], P['P2']
+    for nm, Q in (('P1', P1), ('P2', P2)):
+        expect_zero(f'|{nm} u|^2 = 1', sq(Q - u) - 1, F)
+        expect_zero(f'|{nm} b|^2 = 1', sq(Q - b) - 1, F)
+    expect_zero('S_xu(P2) := cross(x;u,P2) = td + c(t-s)', cr(x, u, P2) - (t*d + c*(t - s)), F)
+    expect_zero('S_uP2(x) := cross(u;P2,x) = td + c(t-s)', cr(u, P2, x) - (t*d + c*(t - s)), F)
+    expect_zero('S_uP2(b) := cross(u;P2,b) = 2ct', cr(u, P2, b) - 2*c*t, F)
+    expect_zero('S_xu(P1) = S_uP1(x) = td + c(s-t)', cr(x, u, P1) - cr(u, P1, x), F)
+    expect_zero('S_uP1(b) = -2ct', cr(u, P1, b) + 2*c*t, F)
+    expect_zero('c^2 - d^2 = s(s-2t)   (P1 above xp iff s > 2t)', c**2 - d**2 - s*(s - 2*t), F)
+    return F
 
 
 def check_step3() -> list[str]:
