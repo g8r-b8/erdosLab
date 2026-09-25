@@ -7,7 +7,7 @@ Lemma 2.5, identity μ(δ) = Lemma 3.3, structure of R = §6.1, big turning = Le
 Lemma 9.3, DN = Lemma 9.4, fewbad = Lemma 9.5, Region II e(S) = Theorem 11.3.
 My scripts: `scripts/r7_refD1_*.py` (all run under `tools/memcap.sh 4000`).
 
-STATUS: IN PROGRESS (sections are appended and committed one at a time)
+STATUS: FINAL (verdict: CORRECT WITH FIXES, all cosmetic; see §8)
 
 ## 1. Facts 1.1–1.4, Fact 1.2 (Σv = 2E_𝓡), Lemma O, Lemma E
 
@@ -304,3 +304,57 @@ In every row the coefficient of s is 9/7 and that of r is 9/7 + 3η/14. The p-co
   case requires (s = 6n/7, μ(Δ₂) ≈ (3/2)s, e(S) ≈ s).
 - (A first version of my Part C reported own = 4. That was a floating-point tie artefact, ±10⁻¹⁶ on horizontal edges, which made both
   horizontal neighbours "upward". A 10⁻⁹ tie tolerance removed it. It is not a mathematical issue.)
+
+## 8. Verdict
+
+**CORRECT WITH FIXES (all cosmetic; no statement changes).**
+
+Theorem G, Corollary 6.1 and Theorem 9.1 (conditional on Theorem W in Region III, exactly as D1r states) stand. I found no
+mathematical error. The fan-zone value 3(3+φ)/(7+2φ) is correct as a bound in terms of φ = |F*₄|/r.
+
+**Replacement text.**
+- **F1 (§4.2, rule O1).** Replace "(O1) *Spoke:* y ∈ 𝓡, q ∈ S. Owned by y, its only 𝓡-end." by "(O1) *Spoke:* y ∈ 𝓡∖D, q ∈ S. Owned by y."
+  Rule (O2) then covers every edge with an end in 𝓡∩D, including 𝓡∩D–S edges, and the four cases are disjoint as claimed.
+- **F2 (§4.1/§5, range of η).** Replace "For every η ∈ (0,1]" by "For every η > 0", with M := ⌈36/η⌉ ≥ 1 (nothing else uses η ≤ 1).
+  Alternatively, in §9 use η' := min(14η/3, 1).
+- **F3 (§0 and §6).** Replace "At every point of F*, own(y) ≤ 4; elsewhere off Exc, own ≤ 3" by "At every point of F*∖Exc, own(y) ≤ 4;
+  at every other point off Exc, own(y) ≤ 3."
+- **F4 (§4.6, wording).** After "The true toy excess Σv − 6r also grows like the perimeter (≍ √r)", add: "for K filled to depth ≍ √r.
+  For a band of fixed width w along ∂K, E_𝓡 − 3r ≈ 6·(number of rows) = O(w), independent of the perimeter (REF_D1 §4)."
+
+**Optional improvements (not needed).**
+- **R1.** The pinning window is θ-independent: κ' ≤ 7ε₀ + 5/Δ₂ on all samples (§2). So θ_s can be an absolute constant, and C(η, κ)
+  loses a factor 1/κ in the seam term.
+- **R2.** The toy identity E_𝓡 − 3r = ½(e(𝓡,S) − e(𝓡, absent)), together with "S touches 𝓡 only from outside K", explains the
+  corner/turning law directly (§4).
+
+**D1r's self-critique list (§10), item by item.**
+- Item 2 (Lemma S step (c)): checked, correct.
+- Item 3 (normal image, smooth feet): correct.
+- Item 4 (multiplicity): correct.
+- Item 5 (ℓ-thin): correct.
+- Item 6 (random T): correct and essential.
+- Item 7 (table): descriptive only; accounting rigorous.
+- Item 8 (Remark 5.2): correct.
+- Item 9 (inherited statuses): accurately stated.
+- Item 10 (non-uniformity in κ): true. R1 removes the θ part of it, but N_ng = O(1/ε₀) and Δ₂* ≥ 5/κ remain. Nothing uniform on the
+  fan zone follows.
+- Item 11 (tests): the tests are evidence; my additional tests are listed below.
+
+**What I did not re-referee.** I took these as given, in the form in which they are stated:
+- the paper lemmas cited, which are part of the refereed N3 chain: 2.1, 2.2, 2.5, 3.1–3.3, §6.1, 6.4, 9.2–9.5;
+- Theorem 11.3 (Region II, one referee pass);
+- Theorem W (Region III, REF_C).
+
+For the lemmas that carry the load, I re-checked the statements' hypotheses against their use (§2, §3).
+
+**Scripts** (all pass under `tools/memcap.sh 4000`):
+- `r7_refD1_lemmaS.py` (`.venv/bin/python`): 60-digit interval re-implementation of κ(θ), (S1)–(S4), Lemma 4.0, and the R1 window κ'.
+- `r7_refD1_global.py` (`python3`, numpy for Part C):
+  - A: exact hexagon/band counts;
+  - B: curved-band adversary, models U and P, R up to 6400, r up to 1.4·10⁵;
+  - C: D1r's rule with the real K on ienjoymath's construction.
+- `r7_refD1_lp.py` (`.venv/bin/python`): exact LP certificates, the fan-zone value and the η' scaling.
+- D1r's `r7_D1r_lemmaS.py`, `r7_D1r_global.py` and `r7_D1_ring.py` were rerun and pass.
+
+STATUS: FINAL
