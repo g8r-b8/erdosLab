@@ -41,6 +41,34 @@ the structure `Frame43 X y n` and the predicates `IsFan43`/`IsCap43` (all in `De
 Check one file: `cd Erdos && lake env lean -o .lake/build/lib/lean/Erdos/<F>.olean -i .lake/build/lib/lean/Erdos/<F>.ilean Erdos/<F>.lean`
 (in DAG order; `-o` lets downstream files import it).  Not imported from `Erdos.lean`.
 
+## ✅ COMPLETE (2026-09-25)
+
+`erdos132_main43` is proved with **no `sorry`**:
+`#print axioms Erdos132Main.erdos132_main43 = [propext, Classical.choice, Quot.sound]`.
+There is no `native_decide`/`bv_decide` and no new axiom. No skeleton statement was changed.
+The six `E132Main43*` modules are imported from `Erdos.lean`, and `lake build Erdos` succeeds (2730 jobs).
+`lake env leanchecker Erdos.<M>` exits 0 for each of the six modules (about 2.3 GB RSS each).
+
+Before filling, a statement referee checked all 28 stubs and found them TRUE as written
+(0 counterexamples; margins recorded in the table below).
+The fill reports are in `L43_reports/` (`classify.md`, `charge.md`).
+
+| file | theorems (incl. helpers) | lines | sorry |
+|---|---|---|---|
+| Defs | 8 | 414 | 0 |
+| Good | 16 | 895 | 0 |
+| Frame | 21 | 555 | 0 |
+| Classify | 85 | 1742 | 0 |
+| Charge | 21 | 497 | 0 |
+| Main43 | 5 | 174 | 0 |
+| **total** | **156** | **4277** | **0** |
+
+Notes from Phase 2:
+- `degδ_le_three_of_D` inlines the half-circle packing argument.
+- `lemmaH` works with an exact 60° rotation `g` about `y` (`g³x = 2y − x`). It bounds the HF2 D-pair offset with `dd_heights`.
+- `fanShape_of_m4` does not use its `5 ≤ deg` hypothesis.
+- `fan_disjoint` follows the refereed HF2–HF2 argument: the shared D-point gets `degδ ≥ 4`.
+
 ## Status at skeleton time (2026-09-25)
 
 `#print axioms Erdos132Main.erdos132_main43 = [propext, sorryAx, Classical.choice, Quot.sound]`;
