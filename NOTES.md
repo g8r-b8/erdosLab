@@ -369,6 +369,9 @@ PROMPT.md rule 4: check all cross-referenced/sibling problems and their threads.
   open` (≥2 infinite reps of some rational) — literally answered by Rafik's cofinite 7/4 pair (forum,
   27 Apr 2026); a Lean proof of that variant for x=1 via our orbit (a=1 split) is a possible small FC PR.
   Blog post corrected + updated (daa99d8).
+  2026-09-25: FC variant formalised: Erdos/Erdos/E261.lean (7/4, Rafik's pair; sorry-free, std axioms).
+  Public proof repo github.com/g8r-b8/erdos261-lean (976bddf). FC issue #6604, PR #6605 (retag solved,
+  answer(True), formal_proof link). PR blocked on Google CLA — user must sign at cla.developers.google.com.
 - Drops (one line): 3/5/9/10/11/14/15/17/18/20/25/28/30/32/33/36/39–41/44/50–52/60–62/65/66/68/
   70/75/77/78/80–82/84–87/89/91/96–104/107/108/111/114/120/122/124/128–131/137/138/141–143/145/148/
   149/151/153/155/158/159/161/162/165/167–170/172–174/176/177/181/184/187/188/195–197/200/201/203/
