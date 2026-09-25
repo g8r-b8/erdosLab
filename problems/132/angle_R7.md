@@ -8,9 +8,10 @@ Starting point: angle_R6.md — L ≤ 4/3 overall (N3, refereed); 21/16 in Regio
 |---|---|---|
 | A2 | referee Region II: e(S) ≤ s + ½\|Q′\| + C (B2) | **DONE: CORRECT WITH FIXES** (§1) |
 | A3 | referee Region III off-window e(S) ≤ s + 70/d + C, resonance strip, Lemma DP | **DONE: CORRECT WITH FIXES** (§2) |
-| B | average R-weight ≤ 7 in Region II (⇒ 21/16 there, given A2) | pending |
+| B | average R-weight ≤ 7 in Region II (⇒ 21/16 there, given A2) | **DONE: PROVED, unrefereed** (§3); referee REF_B pending |
 | C | break the Region III resonance window via diametral partners (Lemma DP) | pending |
 | D1 | Region I: average weight ≤ 6 (Conjecture C1) ⇒ 9/7 | pending |
+| E | Region III off the fan pin (\|t − √3/2\| ≥ O(ε₀)): weight ≤ 7 and the \|Q\| term there | queued |
 | D2 | Region I: cross-edge e(D, X∖D) ≤ ½g_D + o(n) via E′ on conv X ⇒ 9/7 | pending |
 
 Process: after a usage-limit outage killed all six first-launch agents (no output produced), branches run staggered,
@@ -20,6 +21,8 @@ at most two at a time; this file is checkpointed and committed after each branch
 Overall bound still **4/3** (refereed). After A2 and A3, the |Q| term is removed (refereed) everywhere except the Region III
 resonance window τ = √3/2 + O(1/R). Off that window, every regime has value max{5/4, 3c/(2c+1)}, so the bound drops below 4/3
 as soon as the average R-weight 2c is < 8 there (branch B). The window itself is branch C.
+Branch B (unrefereed) gives 2c = 7 in Region II, so **21/16 in Regions I, II and τ > 1** (Region II pending the referee).
+Only Region III (√3/2 − 2β < τ < √3/2 + 3β) remains at 4/3.
 
 ## 1. Branch A2: referee of B2's Region II theorem (report `scratchpad/R7/A2_ref/A2_report.md`)
 
@@ -88,3 +91,34 @@ The strip is local only. In X₀ = {w} ∪ V ∪ Z the z_j have no Δ₂-partner
 
 Scripts (in `scripts/`, all pass): `r7_A3_phi.py` (the identity and interval covers), `r7_A3_strip.py` (the strip, closed forms and
 60-digit check), `r7_A3_dp.py` (DP extremal test), `r7_A3_distinct.py` (distinctness D1–D4).
+
+## 3. Branch B: average R-weight ≤ 7 in Region II (report `scratchpad/R7/B_weight7/B_report.md`; UNREFEREED)
+
+**Claim (PROVED by B, not yet refereed).** In Region II, Σ_{y∈𝓡} v(y) ≤ 7|𝓡| + C. With Theorem II (A2) and the LP,
+**min{μ(Δ₂), μ(δ)} ≤ 21n/16 + C in Region II.**
+
+The key observation is that there are no fans in Region II. N3's fan window t ∈ [0.751, 0.950] is an artefact of ε₀ = 1/50. B1's refereed
+Lemma P1.2 works at ε₀ = 10⁻⁶, where every F6, F5 or HF point forces |t − √3/2| ≤ 5ε₀ + δ₀ < 2·10⁻⁴. But Region II has t ≥ τ ≥ √3/2 + 0.03.
+Caps need t = ½ ± δ₀. So the heavy good points are only A (6,2) and D_II (5,3), both with v = 8. B1's band-H radius-1
+discharging carries over:
+- the cone is [−36°, 36°], so each receiver has ≤ 2 senders at ½ each;
+- D_II receivers (v ≤ 7) forward one level deeper, to depth ≥ √3 where m = 0;
+- the final charge is ≤ 7.
+
+**Tests (all pass):**
+- `r7_B_margins.py`: rigorous 60-digit intervals for margins M1–M11.
+- `r7_B_classify.py`: a slot scan over t ∈ [0.896, 1]. Only A and D_II occur, and max v = 8.
+- `r7_B_rules.py`: a beam search over 1.8·10⁵ configurations. The max final charge is 7.000.
+- `r7_B_lattice_t1.py`: an exact Fraction model at t = 1, 2·10⁴ random dense configurations. The max final charge is exactly 7.
+- R4's exact fan chain has τ = 0.865975 < √3/2, so it lies in Region III, consistent with the claim.
+
+**Limit.** B1's A-row stack E1 is t-independent, so radius-1 charging stops at 7 here too. The true average is plausibly 6, which would give 9/7.
+
+**Referee flags:**
+1. P1.3 is stated for Region I; Region II uses the independent M2 step.
+2. Forwarders need not be good, so frame agreement goes through the sender (B1 P0.2).
+3. M7 safety factors.
+
+**Coordinator remark (new sub-question, Region III).** The fan pin |t − √3/2| < 2·10⁻⁴ (or O(ε₀) for any fixed ε₀) also
+applies inside Region III. So the part of Region III with |t − √3/2| ≥ 5ε₀ + δ₀ has no fans either, and plausibly also has
+weight ≤ 7. The genuinely hard zone is then |t − √3/2| = O(ε₀), which contains the resonance window. This is open and has been queued as branch E.
