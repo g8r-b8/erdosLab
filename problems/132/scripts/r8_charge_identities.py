@@ -65,15 +65,50 @@ def expect_zero(name: str, e: sp.Expr, fails: list[str], red: bool = True) -> No
 
 
 def check_trapezoid() -> list[str]:
-    """Trapezoid Lemma (R5 Thm 2) algebra: distances, Ptolemy, the w=(0,+k) exclusion.
-
-    TODO: implement.
-    What's missing: exact checks of |xb|^2=|pu|^2=1+4st, |wu|^2 for w=(0,+k), the side
-      cross products, the 2t=Delta sub-case bound, and cross(u-x,w-x)=sd-k(s-t) for w=(0,-k).
-    Acceptance: returns [] (no failures) and prints one line per identity.
-    Depends on: reduce_rel, trapezoid_points.
-    """
-    raise NotImplementedError("trapezoid lemma identities")
+    """Trapezoid Lemma (R5 Thm 2) algebra: distances, Ptolemy, the w=(0,+k) exclusion."""
+    F: list[str] = []
+    P = trapezoid_points()
+    x, p, u, b, w = P['x'], P['p'], P['u'], P['b'], P['w']
+    D2 = 1 + 4*s*t
+    print('[trapezoid]')
+    for a, q in (('x', 'u'), ('p', 'b'), ('x', 'w'), ('p', 'w')):
+        expect_zero(f'|{a}{q}|^2 = 1', sq(P[a] - P[q]) - 1, F)
+    expect_zero('|xb|^2 = 1+4st (Ptolemy: Delta^2 = 1 + |xp||ub|)', sq(b - x) - D2, F)
+    expect_zero('|pu|^2 = |xb|^2', sq(u - p) - sq(b - x), F)
+    expect_zero('|xb|^2 - |xu|^2 = 4st  (so s,t have the same sign)', sq(b - x) - sq(u - x) - 4*s*t, F)
+    # --- w above the axis is impossible
+    wp = sp.Matrix([0, k])
+    expect_zero('w=(0,+k): cross(x;w,u) = -sd - k(s-t)', cr(x, wp, u) - (-s*d - k*(s - t)), F)
+    expect_zero('w=(0,+k): cross(x;w,p) = -2ks', cr(x, wp, p) + 2*k*s, F)
+    expect_zero('w=(0,+k): cross(p;w,b) = sd + k(s-t) (<0 iff k(t-s) > sd)', cr(p, wp, b) - (s*d + k*(s - t)), F)
+    expect_zero('w=(0,+k): cross(p;w,x) = 2ks', cr(p, wp, x) - 2*k*s, F)
+    expect_zero('w=(0,+k): |wu|^2 = 2 + 2kd + 2s(t-s)', sq(u - wp) - (2 + 2*k*d + 2*s*(t - s)), F)
+    expect_zero('w=(0,+k): Delta^2 - |wu|^2 = 2s(s+t) - (1+2kd)',
+                D2 - sq(u - wp) - (2*s*(s + t) - (1 + 2*k*d)), F)
+    # sub-case 2t = Delta, 2s = Delta - 1/Delta
+    D = sp.symbols('D', positive=True)
+    sb, tb = (D - 1/D)/2, D/2
+    expect_zero('2t=Delta: 1+4st = Delta^2 when 2s = Delta-1/Delta', 1 + 4*sb*tb - D**2, F, red=False)
+    expect_zero('2t=Delta: t-s = 1/(2 Delta)', tb - sb - 1/(2*D), F, red=False)
+    rhs = sp.simplify(2*sb*(sb + tb))
+    expect_zero('2t=Delta: 2s(s+t) = (2D^2 - 3 + D^-2)/2', rhs - (2*D**2 - 3 + D**-2)/2, F, red=False)
+    phi = (1 + sp.sqrt(5))/2
+    expect_zero('2t=Delta: at Delta=phi, 2s(s+t) = phi^2/2 = (phi+1)/2',
+                rhs.subs(D, phi) - (phi + 1)/2, F, red=False)
+    expect_zero('d/dD (2D^2-3+D^-2)/2 = 2D - D^-3 (>0 for D>1)',
+                sp.diff((2*D**2 - 3 + D**-2)/2, D) - (2*D - D**-3), F, red=False)
+    ok = bool((phi + 1)/2 < sp.Rational(5, 2))
+    print(('  ok   ' if ok else '  FAIL ') + '(phi+1)/2 < 5/2 <= 1 + 2kd (k >= sqrt3/2, d > sqrt3/2)')
+    if not ok:
+        F.append('2t=Delta bound')
+    # --- w below the axis: side quantities used later
+    expect_zero('w=(0,-k): cross(x;u,w) = sd - k(s-t)  [= cross_w]', cr(x, u, w) - (s*d - k*(s - t)), F)
+    expect_zero('w=(0,-k): cross(x;w,u) = -cross_w', cr(x, w, u) + (s*d - k*(s - t)), F)
+    expect_zero('w=(0,-k): cross(x;w,p) = 2ks', cr(x, w, p) - 2*k*s, F)
+    expect_zero('cross(x;u,p) = 2sd', cr(x, u, p) - 2*s*d, F)
+    expect_zero('cross(x;u,b) = 2td', cr(x, u, b) - 2*t*d, F)
+    expect_zero('cross(x;b,p) = 2sd', cr(x, b, p) - 2*s*d, F)
+    return F
 
 
 def check_offline() -> list[str]:
