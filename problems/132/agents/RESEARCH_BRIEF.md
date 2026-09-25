@@ -23,7 +23,8 @@ files relevant to your task (angle_R1–R7.md, REFEREE2_R6.md). Proven Lean infr
   `ps -Ao pid,rss,comm -m | head` and `sysctl vm.swapusage`; wait if another heavy job is running.
 - macOS IGNORES `ulimit -v` and RLIMIT_AS. Cap memory with the RSS watchdog:
   `/Users/wingatejones/Projects/erdosLab/tools/memcap.sh 4000 <cmd...>` (kills the process tree above 4000 MB; exit 137).
-- Lean: ONE `lake env lean` at a time per workstream (≈3 GB each); never `lake exe cache get` / `lake update`;
+- Lean: EVERY compile goes through the machine-wide semaphore (max 2 at once, memory-capped):
+  `/Users/wingatejones/Projects/erdosLab/tools/leanslot.sh lake env lean <file>` (also for `lake build`); never `lake exe cache get` / `lake update`;
   no new axioms, no native_decide / bv_decide.
 - Disk: stop if `df -h /System/Volumes/Data` shows < 3 GB free. Nothing > 1 GB on disk.
 - Never run parallel batches (no N-way anything).
