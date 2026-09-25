@@ -73,6 +73,23 @@ theorem Low_interior {y a : Pt} (ha : a ∈ Low X y) : a ∈ interior (KBall X) 
 
 /-! ## Lemma F′ -/
 
+/-- Helper: `⟨n, perp n⟩ = 0`. -/
+private theorem inner_self_perp (n : Pt) : inner ℝ n (perp n) = 0 := by
+  rw [← det2_eq_inner_perp]; unfold det2; ring
+
+/-- Helper: a unit vector within `1/50` of the unit vector `n` has frame coefficients
+`⟨ν, n⟩ ≥ 4999/5000` and `|⟨ν, perp n⟩| ≤ 1/50`. -/
+private theorem near_coeffs {n ν : Pt} (hn : ‖n‖ = 1) (hν : ‖ν‖ = 1) (h : ‖ν - n‖ ≤ 1 / 50) :
+    4999 / 5000 ≤ inner ℝ ν n ∧ |inner ℝ ν (perp n)| ≤ 1 / 50 := by
+  have e := norm_sub_sq_real ν n
+  rw [hν, hn] at e
+  have h2 : ‖ν - n‖ ^ 2 ≤ (1 / 50) ^ 2 := pow_le_pow_left₀ (norm_nonneg _) h 2
+  have hα : 4999 / 5000 ≤ inner ℝ ν n := by nlinarith
+  have hf := n1_norm_sq_frame hn ν
+  rw [hν] at hf
+  have hα1 : inner ℝ ν n ≤ 1 := by nlinarith [sq_nonneg (inner ℝ ν (perp n))]
+  refine ⟨hα, abs_le.2 ⟨?_, ?_⟩⟩ <;> nlinarith [sq_nonneg (inner ℝ ν (perp n))]
+
 /-- **(F′1)** A point within `6` of `y` that is not interior to `K` is not below the frame's
 tangent cone: `Z q ≥ h − ε|Xq|`.
 
@@ -89,7 +106,34 @@ Depends on: `exists_frontier_seg`, `exists_unit_normal`, `KBall_convex`, `KBall_
 theorem frame_outside (hX : Normal X) {y n : Pt} (hF : Frame43 X y n) {q : Pt}
     (hq : dist q y ≤ 6) (hqi : q ∉ interior (KBall X)) :
     depth X y - ε43 * |inner ℝ (q - y) (perp n)| ≤ inner ℝ (q - y) n := by
-  sorry
+  obtain ⟨l, hl0, hl1, hb⟩ := exists_frontier_seg (KBall_isClosed X) hF.mem_int hqi
+  obtain ⟨ν, hν1, hν⟩ := exists_unit_normal (KBall_convex X) ⟨y, hF.mem_int⟩ hb
+  have hdb : dist y (y + l • (q - y)) ≤ 6 := by
+    rw [dist_eq_norm, show y - (y + l • (q - y)) = -(l • (q - y)) by abel, norm_neg, norm_smul,
+      Real.norm_eq_abs, abs_of_pos hl0, ← dist_eq_norm]
+    nlinarith [dist_nonneg (x := q) (y := y)]
+  have hνn := hF.normals _ hb hdb ν hν hν1
+  obtain ⟨hα, hβ⟩ := near_coeffs hF.unit hν1 hνn
+  have hν0 : ν ≠ 0 := by rintro rfl; simp at hν1
+  have hpos := inner_pos_of_seg hF.mem_int hl0 hν hν0
+  have hp0 : y + depth X y • n ∈ KBall X := (KBall_isClosed X).closure_eq ▸ hF.foot_mem.1
+  have h2 := hν _ hp0
+  have e : y + depth X y • n - (y + l • (q - y)) = depth X y • n - l • (q - y) := by abel
+  rw [e, inner_sub_left, real_inner_smul_left, real_inner_smul_left, real_inner_comm ν n] at h2
+  have hfr := n1_inner_frame hF.unit (q - y) ν
+  have hlI : l * inner ℝ (q - y) ν ≤ inner ℝ (q - y) ν := by nlinarith
+  have hXb : inner ℝ (q - y) (perp n) * inner ℝ ν (perp n) ≤
+      |inner ℝ (q - y) (perp n)| * (1 / 50) := by
+    calc _ ≤ |inner ℝ (q - y) (perp n) * inner ℝ ν (perp n)| := le_abs_self _
+      _ = |inner ℝ (q - y) (perp n)| * |inner ℝ ν (perp n)| := abs_mul _ _
+      _ ≤ _ := mul_le_mul_of_nonneg_left hβ (abs_nonneg _)
+  have hh0 : 0 ≤ depth X y := hF.depth_pos.le
+  unfold ε43
+  by_contra hc
+  push Not at hc
+  have hA := abs_nonneg (inner ℝ (q - y) (perp n))
+  have hD : 0 ≤ depth X y - inner ℝ (q - y) n := by linarith
+  nlinarith [mul_le_mul_of_nonneg_right hα hD]
 
 /-- **(F′0, `U′ ⊂ int K`)** A point within `6` of `y` strictly below the tangent cone is
 interior to `K`.
