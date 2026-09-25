@@ -1,0 +1,35 @@
+  1000 prefixes, 1s
+  2000 prefixes, 1s
+  3000 prefixes, 2s
+  4000 prefixes, 3s
+  5000 prefixes, 3s
+  6000 prefixes, 4s
+  7000 prefixes, 5s
+  8000 prefixes, 6s
+  9000 prefixes, 6s
+  10000 prefixes, 7s
+  11000 prefixes, 8s
+  12000 prefixes, 8s
+  13000 prefixes, 9s
+  14000 prefixes, 10s
+  15000 prefixes, 11s
+  16000 prefixes, 11s
+  17000 prefixes, 12s
+  18000 prefixes, 12s
+  19000 prefixes, 13s
+  20000 prefixes, 14s
+  21000 prefixes, 14s
+  22000 prefixes, 15s
+  23000 prefixes, 15s
+K: 7
+abundant_leaves: {6: 15810, 5: 121, 7: 33}
+prefixes: 23067
+new_prime_range_ints: 1411638587
+residual_primes: 328
+weird: []
+flagged: []
+t_max_used: 64
+max_residual_ints: 1
+max_p_hi: 271878144
+seconds: 15.517534971237183
+RESULT: every odd non-deficient n with Omega(n) <= 7 is pseudoperfect
