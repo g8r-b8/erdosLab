@@ -147,10 +147,10 @@ then ¬(almost-all o(N)) as in PR #4076's Erdos468MinimalPreimageLittleOAlmostAl
   R5.4: min(μ₂, μ₃, μ₄) ≤ n. Charge Lemma conjectured (0 violations in ~205k sets).
 - The paper and Lean proof still state 54/37. The upgrade to 15/11 awaits the user's decision.
 
-## ★ R6 result (2026-09-24): L ≤ 4/3 (refereed); 9/7 sharp for τ > 1
+## ★ R6 result (2026-09-24): L ≤ 4/3 (refereed twice); 9/7 for τ > 1 (matches the global lower bound; not "sharp" — the 9/7 constructions have t < 1)
 - Theorem N3: average weight (deg y + m_y) ≤ 8 ⇒ L ≤ 4/3 for all τ (refereed; six wording fixes applied).
 - 21/16 in Region I and for τ > 1 (refereed). Theorem E′ (global shell/Euler) ⇒ 9n/7 + O(n^{2/3}) for τ > 1, matching
-  the lower bound (refereed; three constant-level gaps fixed). Commits 9508181 and 8ed366d; see problems/132/angle_R6.md.
+  the global lower bound (refereed twice; the full corrected proof of E′ still needs to be written — REF2 G1–G6). Commits 9508181 and 8ed366d; see problems/132/angle_R6.md.
 - Unrefereed: Region II e(S) ≤ s + ½|Q′| + C; Region III outside the window. Conjectured: 9/7 in Region I (average ≤ 6).
 - Correction to R4: the deg+m = 10 fan does not occur throughout Region I (pinning ⇒ t ≈ √3/2).
 
