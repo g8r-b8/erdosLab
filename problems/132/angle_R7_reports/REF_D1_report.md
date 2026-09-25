@@ -175,3 +175,64 @@ w₀/Δ₂ ≤ 1.0001ℓ/Δ₂ ≤ 0.0101 < 0.011. D1 flag 1 is resolved.
 - small Δ₂ ⇒ n = O_κ(1) + O(r^{2/3}), so r = O_κ(1) there.
 
 **Verdict on §4–§5: CORRECT (fixes F1, F2 cosmetic).**
+
+## 4. The sanity check: can a curved K force E_𝓡 − 3r linear in r?
+
+**The coordinator's worry.** If X is thin (r ≍ R := Δ₂, e.g. 𝓡 is a band of bounded width along ∂K), then a boundary term of size
+Θ(perimeter) = Θ(R) would be Θ(r), not o(r). Lattice rows meet a curved ∂K at every angle, so one might expect a "staircase"
+excess per unit length.
+
+**Answer: no, and D1r's proof has no perimeter term.** The only geometry-dependent costs in Theorem G are:
+- N_ng, which uses only the total turning 2π;
+- the seams, which cost O(M²/θ_s) by the multiplicity lemma (again only the total turning 2π);
+- the interface, ≤ 3r/M, proportional to r and not to the perimeter.
+
+Nothing is charged per unit length of ∂K. A point near ∂K owns ≤ 3 edges in *its own* frame whatever the angle between the lattice
+and ∂K: Theorem F and Lemma S are local, and the staircase is invisible to them. The frames themselves change only at the O(1/θ_s)
+sector cuts.
+
+**Exact bookkeeping identity (toy).** Suppose 𝓡 ∪ S ∪ {absent sites} is a full triangular lattice near 𝓡. Then deg y = 6 − #absent
+neighbours, and so
+
+  E_𝓡 − 3r = ½·(e(𝓡, S) − e(𝓡, absent)),
+
+that is, half the difference between the "outer" and "inner" lattice boundary lengths of 𝓡. In a real X, S∖D ⊂ ∂K and D lies
+outside K, so **S only ever touches 𝓡 from the outer side**. A band of 𝓡 along ∂K therefore has absent sites on its inner side,
+whose count is the parallel curve's length. The difference is a *turning × depth* term (6 per row, the lattice analogue of
+"L(outer) − L(inner) = 2π·depth"), not a length term. The one way to put S on both sides of a thin band is a thin K, and that is
+the ℓ-thin case, where |X∖D| = O(ℓ²) (Lemma 9.2).
+
+**Tests** (`r7_refD1_global.py` Part B: K = disc of radius R, randomly rotated and shifted lattice with exact adjacency, 𝓡 = the
+lattice points at depth 0 < h < w, so r ≈ 7.26·R·w grows linearly in R).
+- **Model U** (deliberately unphysical: S = lattice points just outside ∂K at any height):
+
+  | w | R = 100 | 400 | 1600 | 6400 | r at R = 6400 |
+  |---|---|---|---|---|---|
+  | 1.0 | 7 | 8 | 6 | 6 | 46 344 |
+  | 2.5 | 18 | 17 | 17 | 18 | 116 069 |
+  | 12 | 81 | 84 | 84 | – | (138 789 at R = 1600) |
+
+  E_𝓡 − 3r ≈ 6 × (number of lattice rows in the band), **independent of R**. This is exactly the flat-hexagon band law "6j"
+  (Part A: E_𝓡 − 3r = 6j for a band of j rows, and 6k − 3 for the full hexagon, exact). So even with unphysical S the excess is
+  O(width), not O(R).
+
+  The rare own = 4 points (0–6 per configuration) all have an S-neighbour at a height in (0, t) above ∂K. No real X has such a
+  point: it is neither on ∂K (a K-point) nor at distance ≥ t from K (a D-point).
+- **Model P** (physical heights: S at height ≥ t above ∂K, the layer 0 < height < t emptied; t = 0.5 and 0.1): E_𝓡 − 3r is
+  *negative*, about −(0.1 to 1.3)·r. There are **no own = 4 points**, and E_𝓡 − 3r ≤ 3|Exc_cr| holds on every run.
+
+In both models, D1r's rule with 2° Gauss sectors gives, off Exc: exact-once ownership, own ≤ 3 at h > 1, and own ≤ 4 at h ≤ 1.
+When T > w (all points shallow), |Exc_cr| stays at 370–390 (w = 1) and about 970–1260 (w = 2.5), independent of R. This is the seam
+count, O(w/θ_s).
+
+**D1r's quantitative explanation (§4.5) is correct.**
+- The hexagon excess 6k − 3 = Θ(√r) is paid by the interface term 3r/M. The level hexagon has Θ(k) edges, and the random T spreads
+  them over r/M.
+- The corners cost O(M²/θ_s), since the turning is 2π in total.
+- I add the explicit reason why the thin-band case r ≍ R is harmless: the excess is (turning) × (depth), and the depth of a thin
+  band is O(1).
+
+One precision for D1r's §4.5 table: in the toy of §4.6, "the true toy excess grows like the perimeter (≍ √r)". That is for K filled
+to depth ≍ w ≍ √r. For thin bands the excess is O(w) = O(1) (above), which is the relevant case for r ≍ R.
+
+**Verdict on the sanity check: no counterexample. The coordinator's scenario (curved K, r ≍ R) costs O(1), not Θ(r).**
