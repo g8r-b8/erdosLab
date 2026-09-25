@@ -338,7 +338,103 @@ Depends on: `fan_common_low_slot`, `frame_normal_close`, `degδ_le_three_of_D`, 
 theorem fan_disjoint (hX : Normal X) {y y' n n' : Pt} (hF : Frame43 X y n)
     (hF' : Frame43 X y' n') (hy : y ∈ Rset X) (hy' : y' ∈ Rset X) (hf : IsFan43 X y n)
     (hf' : IsFan43 X y' n') (hne : y ≠ y') : Disjoint (Low X y) (Low X y') := by
-  sorry
+  rw [Finset.disjoint_left]
+  intro a ha ha'
+  have hyX : y ∈ X := (mem_sdiff.1 hy).1
+  have hy'X : y' ∈ X := (mem_sdiff.1 hy').1
+  have d1 : dist a y = 1 := dist_of_mem_nbδ hX (Low_subset X y ha)
+  have d2 : dist a y' = 1 := dist_of_mem_nbδ hX (Low_subset X y' ha')
+  have hd : dist y y' ≤ 2 := by
+    have := dist_triangle y a y'
+    have := dist_comm y a
+    linarith
+  have hnn := frame_normal_close hF hF' hd
+  unfold ε₀43 at hnn
+  have hn := hF.unit
+  obtain ⟨σ', hσ', h'⟩ := fan_common_low_slot hX hF hF' hy hy' hf hf' ha ha' hne
+  obtain ⟨σ, hσ, hy'sl, z₁, hz₁, hz₁D, hz₁sl, z₂, hz₂, hz₂D, hz₂sl, hd₁₂⟩ :=
+    ch_fan_hf2 hX hy' hf.2.2 hσ' h'
+  obtain ⟨σ₁, hσ₁, h₁⟩ := fan_common_low_slot hX hF' hF hy' hy hf' hf ha' ha (Ne.symm hne)
+  obtain ⟨τ, hτ, hysl, w₁, hw₁, hw₁D, hw₁sl, w₂, hw₂, hw₂D, hw₂sl, hdw⟩ :=
+    ch_fan_hf2 hX hy hf'.2.2 hσ₁ h₁
+  -- abscissae w.r.t. `(y, n)`
+  have Xy' := ch_slotX hn hy'sl
+  rw [sub_self, norm_zero, ch_sin2 hσ] at Xy'
+  have Xy := ch_slotX hn hysl
+  rw [ch_sin2 hτ] at Xy
+  have eyy : inner ℝ (y - y') (perp n) = -inner ℝ (y' - y) (perp n) := by
+    rw [← inner_neg_left, neg_sub]
+  rw [abs_le] at Xy Xy'
+  have hτσ : τ = -σ := by
+    rcases hσ with rfl | rfl <;> rcases hτ with rfl | rfl
+    all_goals first | (exfalso; linarith) | norm_num
+  subst hτσ
+  rw [neg_mul] at hw₁sl
+  rw [neg_mul, neg_neg] at hw₂sl
+  -- `y`'s and `y′`'s D-points at `σ·30°`, `−σ·30°` coincide
+  have hzw : z₁ = w₁ := by
+    by_contra hne'
+    have h1 := one_le_dist hX.minDist_eq (mem_nbδ.1 hz₁).1 (mem_nbδ.1 hw₁).1 hne'
+    rw [dist_eq_norm] at h1
+    have e : z₁ - w₁ = (z₁ - y - dirF n (σ * (π / 6))) - (w₁ - y' - dirF n' (-(σ * (π / 6))))
+        - (y' - y - dirF n (σ * (π / 2)))
+        + (dirF n (-(σ * (π / 6))) - dirF n' (-(σ * (π / 6)))) := by
+      rw [ch_hex n hσ]; abel
+    rw [e] at h1
+    have b1 := norm_add_le ((z₁ - y - dirF n (σ * (π / 6))) -
+      (w₁ - y' - dirF n' (-(σ * (π / 6)))) - (y' - y - dirF n (σ * (π / 2))))
+      (dirF n (-(σ * (π / 6))) - dirF n' (-(σ * (π / 6))))
+    have b2 := norm_sub_le ((z₁ - y - dirF n (σ * (π / 6))) -
+      (w₁ - y' - dirF n' (-(σ * (π / 6))))) (y' - y - dirF n (σ * (π / 2)))
+    have b3 := norm_sub_le (z₁ - y - dirF n (σ * (π / 6))) (w₁ - y' - dirF n' (-(σ * (π / 6))))
+    have b4 := ch_dirF_sub n' n (-(σ * (π / 6)))
+    rw [norm_sub_rev n n'] at b4
+    unfold Slot at hz₁sl hw₁sl hy'sl
+    linarith
+  subst hzw
+  -- four `δ`-neighbours of `z₁`
+  have hz₁' := mem_nbδ.1 hz₁
+  have hw₁' := mem_nbδ.1 hw₁
+  have hyN : y ∈ nbδ X z₁ :=
+    mem_nbδ.2 ⟨hyX, hz₁'.2.1.symm, by rw [dist_comm]; exact hz₁'.2.2⟩
+  have hy'N : y' ∈ nbδ X z₁ :=
+    mem_nbδ.2 ⟨hy'X, hw₁'.2.1.symm, by rw [dist_comm]; exact hw₁'.2.2⟩
+  have hz₂N : z₂ ∈ nbδ X z₁ := by
+    refine mem_nbδ.2 ⟨(mem_nbδ.1 hz₂).1, fun h => ?_, hd₁₂⟩
+    rw [h, dist_self, hX.minDist_eq] at hd₁₂; norm_num at hd₁₂
+  have hw₂N : w₂ ∈ nbδ X z₁ := by
+    refine mem_nbδ.2 ⟨(mem_nbδ.1 hw₂).1, fun h => ?_, hdw⟩
+    rw [h, dist_self, hX.minDist_eq] at hdw; norm_num at hdw
+  -- their abscissae: `0`, `σ`, `−σ/2`, `3σ/2`
+  have Xz₂ := ch_slotX hn hz₂sl
+  rw [Real.sin_neg, ch_sin6 hσ, sub_self, norm_zero] at Xz₂
+  have Xw₂ := ch_slotX hn hw₂sl
+  rw [ch_sin6 hσ] at Xw₂
+  rw [abs_le] at Xz₂ Xw₂
+  have ew : inner ℝ (w₂ - y) (perp n) =
+      inner ℝ (w₂ - y') (perp n) + inner ℝ (y' - y) (perp n) := by
+    rw [← inner_add_left]; congr 1; abel
+  have X0 : inner ℝ (y - y) (perp n) = 0 := by rw [sub_self, inner_zero_left]
+  have sep : ∀ r r' : Pt, r = r' → inner ℝ (r - y) (perp n) = inner ℝ (r' - y) (perp n) :=
+    fun r r' h => by rw [h]
+  have hsub : ({y, y', z₂, w₂} : Finset Pt) ⊆ nbδ X z₁ := by
+    intro r hr
+    simp only [mem_insert, mem_singleton] at hr
+    rcases hr with rfl | rfl | rfl | rfl <;> assumption
+  have hcard : ({y, y', z₂, w₂} : Finset Pt).card = 4 := by
+    rw [card_insert_of_notMem, card_insert_of_notMem, card_pair]
+    · intro h; have := sep _ _ h
+      rcases hσ with rfl | rfl <;> linarith
+    · simp only [mem_insert, mem_singleton, not_or]
+      refine ⟨fun h => ?_, fun h => ?_⟩ <;> have := sep _ _ h <;>
+        rcases hσ with rfl | rfl <;> linarith
+    · simp only [mem_insert, mem_singleton, not_or]
+      refine ⟨hne, fun h => ?_, fun h => ?_⟩ <;> have := sep _ _ h <;>
+        rcases hσ with rfl | rfl <;> linarith
+  have h4 := card_le_card hsub
+  rw [hcard] at h4
+  have h3 : (nbδ X z₁).card ≤ 3 := degδ_le_three_of_D hX hz₁D
+  omega
 
 /-- **Caps have private receivers**: two caps sharing a receiver `b` satisfy
 `‖y − y′‖ ≤ 1/20 + 1/20 + 1/50 < 1`.
