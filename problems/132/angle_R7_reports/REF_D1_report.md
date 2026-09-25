@@ -236,3 +236,71 @@ One precision for D1r's §4.5 table: in the toy of §4.6, "the true toy excess g
 to depth ≍ w ≍ √r. For thin bands the excess is O(w) = O(1) (above), which is the relevant case for r ≍ R.
 
 **Verdict on the sanity check: no counterexample. The coordinator's scenario (curved K, r ≍ R) costs O(1), not Θ(r).**
+
+## 5. Corollary 6.1 and the cost table (F6, F5, bare fan, HF1, HF2, cap)
+
+**Corollary 6.1(1).** Correct.
+- Off Exc, h > 1 gives own ≤ 3, 𝓡∩D gives own ≤ 3, and h ≤ 1 gives own ≤ 4.
+- own = 4 forces the Lemma S(2) pattern, with S∩D-neighbours within a₀ of ±30° and a K-neighbour within a₀ of ±90°. Such a y is good
+  and so lies in F*. Hence own ≤ 3 + 1[y ∈ F*₄], and Σv ≤ 6r + 2|F*₄| + 6|Exc|.
+- Exc is bounded exactly as in Theorem G, with Δ₂* not containing 5/κ.
+
+**Corollary 6.1(2).** Correct. Step (d) of Lemma S uses only one K-neighbour k within a₀ of ±90° (so c(k) ∈ (−ε, sin a₀]), one
+S∩D-neighbour z within a₀ of ±30°, and the goodness of y (so that k ∈ γ^Λ_y and G5 holds). Remark R1 applies here too: both S∩D-neighbours
+are pinned, so F* ≠ ∅ even forces |t − √3/2| ≤ κ'(a₀, Δ₂) = O(a₀ + 1/Δ₂).
+
+**Corollary 6.1(3).** Correct. Each y ∈ F* has two distinct S∩D-neighbours, and each z ∈ D has degree ≤ 3 (Fact 1.3).
+
+**Fix F3 (cosmetic, §0 and §6).** "At every point of F*, own(y) ≤ 4" should read "at every point of F*∖Exc". A point of F* ∩ Exc
+(for instance an endpoint of a crossing edge) can own up to deg y ≤ 6. It is charged through 6|Exc|, so no inequality changes.
+
+**Cost table.** I checked each row against paper Lemma 9.7 (at ε₀ = 1/50) and against rules O1–O3. The cost of a non-exceptional point
+is 2(own − 3), because Σv = 2Σ own.
+- **F6, F5, bare fan: cost 2.** Correct. The interior neighbours near ±150° (F6) or in (150° − ε₀, 210° + ε₀) (F5) have
+  cos(ψ − α) < 0 for |α| ≤ a, so they own their edges to y.
+- **HF2 and relatives: cost 0 or 2.** Correct. The neighbour u near −90° is not in S (m = 3), and it has c ≤ sin(a + 2.81°) < h + t − ε,
+  so it is in 𝓡∖D. It is owned by y iff it is n-upward. Both cases occur, and in an HF2–HF2 pair (paper Lemma 9.10(b)) exactly one
+  end owns yy'.
+- **HF1: cost 0.** Correct. The neighbour near −30° has c > h and is not in S, so it is in 𝓡∩D, and (O2) gives that edge to the D-end.
+- **Cap: cost 0.** Correct (own = the 3 S-neighbours). Caps pin t ≈ ½ anyway.
+
+D1r's own caveat (§10.7) is accurate. The type names transfer Lemma 9.7's classification to tolerance a descriptively. **No
+inequality depends on the table**, since Corollary 6.1(1) uses only Lemma S(2).
+
+**Fan-zone value.** 2c ≤ 6 + 2φ + η with φ = |F*₄|/r, and Theorem W's LP gives max{3(3+φ)/(7+2φ), 9/7} = 3(3+φ)/(7+2φ). This is
+exact in `r7_refD1_lp.py`: it is increasing in φ, with value 9/7 at φ = 0, 13/10 at ¼, 21/16 at ½ and 4/3 at 1. **Correct.**
+(This is a bound in terms of φ. Nothing is claimed about the size of φ, and D1r says so.)
+
+## 6. LP consequences (§9), regime by regime
+
+Exact check with Fractions (`r7_refD1_lp.py`). The weights are 4/7 on μ(Δ₂) ≤ (3/2)s − ½p and 3/7 on μ(δ) = e(S) + E_𝓡 ≤ e(S) + (3 + η/2)r + C.
+In every row the coefficient of s is 9/7 and that of r is 9/7 + 3η/14. The p-coefficients are:
+
+| regime | e(S) bound used | p-coefficient | value | status of the e(S) input |
+|---|---|---|---|---|
+| Region I (τ ≤ √3/2 − 2β) | s + C_bad (paper §5.1; I checked the 58.35° window argument) | −2/7 | 9/7 + 3η/14 | paper v3, formalised chain |
+| τ > 1 | s + C_bad (paper §5.2: no rungs, since t > 1; D1r writes "§5.2", correctly) | −2/7 | 9/7 + 3η/14 | paper v3 |
+| Region II | s + ½p + C_bad + 87 (paper Theorem 11.3) | −1/14 | 9/7 + 3η/14 | one referee pass (A2) |
+| Region III off the fan zone | s + (2/3)\|Q′\| + C (Theorem W) with μ(Δ₂) ≤ (3/2)s − ½\|Q′\| + C_V | 0 | 9/7 + 3η/14 | refereed once (REF_C), not in the paper |
+
+- The automatic fan-zone exclusion for κ ≤ 0.019 is correct.
+  - Region I: t ≤ τ + 1/(2Δ₂) ≤ √3/2 − 0.02 + 5·10⁻⁵.
+  - Region II: t ≥ τ ≥ √3/2 + 0.03 when t ≤ 1.
+  - τ > 1 ⇔ t > 1.
+  - The fan zone |t − √3/2| < 0.019 lies inside Region III, since τ = t + O(1/Δ₂).
+- Theorem 9.1's η' = 14η/3 scaling is exact. See fix F2 for η > 3/14.
+- **Verdict: CORRECT**, conditional exactly as D1r states. The Region III row inherits Theorem W's status. If W failed, only that row
+  would drop, to max{3c/(2c+1), 4/3} = 4/3.
+
+## 7. Consistency with ienjoymath's 9/7 construction
+
+- `r7_D1_ring.py` (rerun) gives Σ_𝓡 v ≤ 6r with max v = 6, min/n = 1.183, 1.200, 1.240, 1.248 for n = 60, 120, 250, 400, increasing
+  towards 9/7 from below, and t/δ = 0.131 → 0.019 (Region I).
+- My Part C applies D1r's rule **verbatim with the real K** (h(y) = min_w (Δ₂ − |y − w|), which is exact for a ball polygon; ν from the
+  minimising centre). For n = 120, 250, 400, 700 it gives Σv = 2E_𝓡, **own ≤ 3 at every 𝓡-point**, and |Exc_cr| = 0 (the patch is deep
+  and uses the single deep frame).
+- **Theorem 9.1 is consistent with the construction.** The bound 9/7 + η is ≥ 9/7 and is approached by the construction, so it is
+  tight and not violated. Theorem G's 6r is attained up to o(r) by the same construction: r ≈ n/7 and E_𝓡 ≈ 3r, as the LP equality
+  case requires (s = 6n/7, μ(Δ₂) ≈ (3/2)s, e(S) ≈ s).
+- (A first version of my Part C reported own = 4. That was a floating-point tie artefact, ±10⁻¹⁶ on horizontal edges, which made both
+  horizontal neighbours "upward". A 10⁻⁹ tie tolerance removed it. It is not a mathematical issue.)
