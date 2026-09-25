@@ -20,6 +20,7 @@ to `core` (the one topological statement, `E132Main97Core.lean`).
 
 open Finset Real
 open Erdos132Convex (Pt pairDist pairsS multS distSetS)
+open Erdos132Layer (dist_mem_distSetS pos_of_mem_distSetS)
 open scoped Classical
 
 namespace Erdos132Main
@@ -30,36 +31,46 @@ variable {X : Finset Pt}
 
 /-- `t > 1 ⇒ τ > 1` (for `Δ₂ > 0`): `τ − t = (t² − 1)/(2Δ₂)`.
 
-TODO: prove.
+TODO: none — proved.
 What's missing: unfold `tau`; `(1 − t²)/(2Δ₂) < 0`.
 Acceptance: no `sorry`.
 Depends on: nothing. Difficulty S. -/
 theorem one_lt_tau_of (hd : 0 < dist2 X) (ht : 1 < tgap X) : 1 < tau X := by
-  sorry
+  unfold tau
+  have : (1 - tgap X ^ 2) / (2 * dist2 X) < 0 :=
+    div_neg_of_neg_of_pos (by nlinarith) (by linarith)
+  linarith
 
 /-- `τ > 1 ⇒ t > 1` (for `Δ₂ ≥ 0`, `t ≥ 0`).
 
-TODO: prove.
+TODO: none — proved.
 What's missing: if `0 ≤ t ≤ 1` then `(1 − t²)/(2Δ₂) ≥ 0` (also for `Δ₂ = 0`, where Lean's
 division gives `0`), so `τ ≤ t ≤ 1`.
 Acceptance: no `sorry`.
 Depends on: nothing. Difficulty S. -/
 theorem one_lt_tgap_of (hd : 0 ≤ dist2 X) (ht0 : 0 ≤ tgap X) (hτ : 1 < tau X) : 1 < tgap X := by
-  sorry
+  by_contra hle
+  rw [not_lt] at hle
+  unfold tau at hτ
+  have : 0 ≤ (1 - tgap X ^ 2) / (2 * dist2 X) := div_nonneg (by nlinarith) (by linarith)
+  linarith
 
 /-- `Δ₂ ≤ Δ`.
 
-TODO: prove.
+TODO: none — proved.
 What's missing: unfold `dist2`; the max of `distSetS X` with `diam X` erased is `≤ diam X`
 (`le_diam`); the empty case gives `dist2 X = 0 ≤ diam X` (`diam_nonneg`).
 Acceptance: no `sorry`.
 Depends on: `Defs.le_diam`, `Defs.diam_nonneg`. Difficulty S. -/
 theorem tgap_nonneg (X : Finset Pt) : 0 ≤ tgap X := by
-  sorry
+  unfold tgap dist2
+  split_ifs with h
+  · have := Defs.le_diam (mem_of_mem_erase (max'_mem _ h)); linarith
+  · have := Defs.diam_nonneg X; linarith
 
 /-- Normalisation keeping the scale-invariant hypothesis `δ < t`.
 
-TODO: prove.
+TODO: none — proved.
 What's missing: as `exists_normalize` with `c = δ⁻¹`, plus `diam_smul`, `dist2_smul`
 (`tgap (cX) = c·tgap X > c·δ = 1`).
 Acceptance: no `sorry`.
@@ -67,7 +78,20 @@ Depends on: `minDist_smul`, `dist2_smul`, `diam_smul`, `mult_smul`. Difficulty S
 theorem exists_normalize97 (hX : 2 ≤ X.card) (ht : minDist X < tgap X) :
     ∃ Y : Finset Pt, Y.card = X.card ∧ minDist Y = 1 ∧ 1 < tgap Y ∧
       mult Y (dist2 Y) = mult X (dist2 X) ∧ mult Y (minDist Y) = mult X (minDist X) := by
-  sorry
+  obtain ⟨a, ha, b, hb, hab⟩ := one_lt_card.1 (by omega : 1 < X.card)
+  have hne : (distSetS X).Nonempty := ⟨_, dist_mem_distSetS ha hb hab⟩
+  have hδ : 0 < minDist X := by
+    rw [minDist, dite_eq_left hne]; exact pos_of_mem_distSetS (min'_mem _ _)
+  set c := (minDist X)⁻¹
+  have hc : 0 < c := inv_pos.2 hδ
+  refine ⟨X.image (c • ·), card_image_of_injective _ (smul_right_injective Pt hc.ne'), ?_, ?_, ?_, ?_⟩
+  · rw [Defs.minDist_smul hc, inv_mul_cancel₀ hδ.ne']
+  · unfold tgap at ht ⊢
+    rw [Defs.diam_smul hc, Defs.dist2_smul hc, ← mul_sub]
+    calc (1 : ℝ) = c * minDist X := (inv_mul_cancel₀ hδ.ne').symm
+      _ < c * (diam X - dist2 X) := mul_lt_mul_of_pos_left ht hc
+  · rw [Defs.dist2_smul hc, Defs.mult_smul hc]
+  · rw [Defs.minDist_smul hc, Defs.mult_smul hc]
 
 /-- **LP**: `min(μ₂, μ_δ) ≤ (4/7)μ₂ + (3/7)μ_δ ≤ 9n/7 + 3E/7`.
 
