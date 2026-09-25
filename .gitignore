@@ -3,3 +3,5 @@
 .lake/
 .claude/ralph-loop.pause
 .venv/
+__pycache__/
+*.pyc
