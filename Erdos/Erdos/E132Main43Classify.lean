@@ -394,7 +394,86 @@ Depends on: `n1_circle_normal`, `ball_polygon_b`, `ball_polygon_c`, `dist_le_dis
 `Frame43.normals`, `n1_inner_frame`. Difficulty M. -/
 theorem pin_fan (hX : Normal X) {y n : Pt} (hF : Frame43 X y n) (hs : FanSlots X y n) :
     7 / 10 ≤ tgap X := by
-  sorry
+  obtain ⟨σ, hσ, p, hp, -, -, z, hz, hpS, hpD, hzD, hsp, -, hsz, -⟩ := hs
+  have hn := hF.unit
+  have hpX := (mem_nbδ.1 hp).1
+  have hzX := (mem_nbδ.1 hz).1
+  have hpb : p ∈ frontier (KBall X) := ball_polygon_b hpS hpD
+  obtain ⟨w, hw, hpw, hnorm⟩ := n1_circle_normal hX hpb
+  have hΔ2 := hX.dist2_pos
+  set ν : Pt := (dist2 X)⁻¹ • (p - w) with hνdef
+  have hν1 : ‖ν‖ = 1 := by
+    rw [hνdef, norm_smul, Real.norm_eq_abs, abs_of_pos (inv_pos.2 hΔ2), ← dist_eq_norm, hpw,
+      inv_mul_cancel₀ hΔ2.ne']
+  have hνc : ν ∈ normalCone (KBall X) p := by
+    intro k hk
+    rw [hνdef, inner_smul_right]
+    exact mul_nonpos_of_nonneg_of_nonpos (inv_nonneg.2 hΔ2.le) (hnorm k hk)
+  have hνn : ‖ν - n‖ ≤ 1 / 50 := hF.normals p hpb
+    (by rw [dist_comm, dist_of_mem_nbδ hX hp]; norm_num) ν hνc hν1
+  obtain ⟨hpZ, -⟩ := c43_slot_coords hn hsp
+  obtain ⟨hzZ, -⟩ := c43_slot_coords hn hsz
+  have hc1 : Real.cos (-(σ * (π / 2))) = 0 := by
+    rw [Real.cos_neg]
+    rcases hσ with rfl | rfl
+    · rw [one_mul, Real.cos_pi_div_two]
+    · rw [neg_one_mul, Real.cos_neg, Real.cos_pi_div_two]
+  have hc2 : Real.cos (σ * (π / 6)) = √3 / 2 := by
+    rcases hσ with rfl | rfl
+    · rw [one_mul, Real.cos_pi_div_six]
+    · rw [neg_one_mul, Real.cos_neg, Real.cos_pi_div_six]
+  rw [hc1] at hpZ
+  rw [hc2] at hzZ
+  have hr := c43_r_lo
+  -- `z − p` in the frame
+  have hzp_eq : z - p = (z - y) - (p - y) := by abel
+  have hzp2 : ‖z - p‖ ≤ 2 := by
+    rw [hzp_eq]
+    have := norm_sub_le (z - y) (p - y)
+    rw [← dist_eq_norm z y, ← dist_eq_norm p y, dist_of_mem_nbδ hX hz,
+      dist_of_mem_nbδ hX hp] at this
+    linarith
+  have hzpn : inner ℝ (z - p) n = inner ℝ (z - y) n - inner ℝ (p - y) n := by
+    rw [hzp_eq, inner_sub_left]
+  have hS : 363 / 500 ≤ inner ℝ (z - p) ν := by
+    have e : inner ℝ (z - p) ν = inner ℝ (z - p) n + inner ℝ (z - p) (ν - n) := by
+      rw [inner_sub_right]; ring
+    have h1 := abs_real_inner_le_norm (z - p) (ν - n)
+    have h2 : ‖z - p‖ * ‖ν - n‖ ≤ 2 * (1 / 50) :=
+      mul_le_mul hzp2 hνn (norm_nonneg _) (by norm_num)
+    have h3 := (abs_le.1 h1).1
+    have h4 := (abs_le.1 hpZ).2
+    have h5 := (abs_le.1 hzZ).1
+    rw [e, hzpn]
+    linarith
+  -- `w − p = −Δ₂ ν`
+  have hwp : w - p = -(dist2 X) • ν := by
+    rw [hνdef, smul_smul, neg_mul, mul_inv_cancel₀ hΔ2.ne', neg_smul, one_smul, neg_sub]
+  have hinner : inner ℝ (z - p) (w - p) = -(dist2 X) * inner ℝ (z - p) ν := by
+    rw [hwp, inner_smul_right]
+  have hwpn : ‖w - p‖ = dist2 X := by rw [← dist_eq_norm, dist_comm, hpw]
+  have hcos : ‖z - w‖ ^ 2 = ‖z - p‖ ^ 2 - 2 * inner ℝ (z - p) (w - p) + ‖w - p‖ ^ 2 := by
+    rw [← norm_sub_sq_real, sub_sub_sub_cancel_right]
+  have hzw : dist z w = diam X := by
+    by_contra hne
+    have hle := dist_le_dist2 hzX hw hne
+    rw [dist_eq_norm] at hle
+    have : ‖z - w‖ ^ 2 ≤ dist2 X ^ 2 := pow_le_pow_left₀ (norm_nonneg _) hle 2
+    rw [hcos, hinner, hwpn] at this
+    nlinarith [sq_nonneg ‖z - p‖, mul_pos hΔ2 (show (0 : ℝ) < inner ℝ (z - p) ν by linarith)]
+  have hd1 : 1 ≤ ‖z - p‖ := by
+    rw [← dist_eq_norm]
+    exact one_le_dist hX.minDist_eq hzX hpX (fun h => hpD (h ▸ hzD))
+  have ht0 := c43_tgap_pos hX
+  rw [dist_eq_norm] at hzw
+  have hdiam : diam X = dist2 X + tgap X := by unfold tgap; ring
+  have hkey := hcos
+  rw [hinner, hwpn, hzw, hdiam] at hkey
+  by_contra hlt
+  push Not at hlt
+  have hd1' : 1 ≤ ‖z - p‖ ^ 2 := by nlinarith
+  nlinarith [mul_le_mul_of_nonneg_left hS hΔ2.le, mul_lt_mul_of_pos_left hlt hΔ2,
+    mul_lt_mul_of_pos_left hlt ht0]
 
 /-- **Lemma Pin (cap)**: cap shape forces `t ≤ 0.6` (paper: `[0.43, 0.57]`, referee
 `[0.442, 0.558]`).
