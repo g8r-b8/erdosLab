@@ -11,7 +11,7 @@ Starting point: angle_R6.md — L ≤ 4/3 overall (N3, refereed); 21/16 in Regio
 | B | average R-weight ≤ 7 in Region II (⇒ 21/16 there, given A2) | **DONE: PROVED, REFEREED (REF_B: correct with fixes)** (§3) |
 | C | break the Region III resonance window via diametral partners (Lemma DP) | **DONE: Theorem W PROVED, REFEREED (REF_C: correct with minor fixes)** (§4) |
 | D1 | Region I: average weight ≤ 6 (Conjecture C1) ⇒ 9/7 | **DONE: Theorem G PROVED, unrefereed** (§5). Reconstructed by D1r (`angle_R7_reports/D1_report.md`); **REFEREED ONCE (REF_D1: correct with cosmetic fixes)**; a second independent referee is queued |
-| E | Region III fan zone \|t − √3/2\| ≤ κ₁: bound \|F*\| or the average weight (off the fan zone, D1 covers it) | running (relaunched after the panics) |
+| E | Region III fan zone: quantify fans in both directions | **DONE: overall 81/61 + η PROVED, unrefereed** (§6); hostile REF_E next |
 | D2 | Region I: cross-edge e(D, X∖D) ≤ ½g_D + o(n) via E′ on conv X ⇒ 9/7 | pending |
 
 **Data loss (2026-09-25).** Two kernel panics caused by memory exhaustion in another session wiped the scratchpad, including all R6/R7 scratch reports.
@@ -22,7 +22,7 @@ Process: after a usage-limit outage killed all six first-launch agents (no outpu
 at most two at a time; this file is checkpointed and committed after each branch reports.
 
 ## Established so far
-Overall bound still **4/3** (refereed). **Off the fan zone: 9/7 + η, refereed once (D1r + REF_D1).** After A2 and A3, the |Q| term is removed (refereed) everywhere except the Region III
+Overall bound still **4/3** (refereed). **Off the fan zone: 9/7 + η, refereed once (D1r + REF_D1).** **Candidate new overall bound: 81/61 + η ≈ 1.3279 (branch E, UNREFEREED).** After A2 and A3, the |Q| term is removed (refereed) everywhere except the Region III
 resonance window τ = √3/2 + O(1/R). Off that window, every regime has value max{5/4, 3c/(2c+1)}, so the bound drops below 4/3
 as soon as the average R-weight 2c is < 8 there (branch B). The window itself is branch C.
 Branch B, refereed by REF_B, gives 2c = 7 in Region II, so **21/16 is REFEREED in Regions I, II and τ > 1**.
@@ -261,3 +261,42 @@ Scripts: `r7_refD1_{lemmaS,global,lp}.py`.
 
 **Status of the headline.** min ≤ (9/7 + η)n + C(η,κ) holds off the fan zone |t − √3/2| < κ, refereed once. It is sharp (ienjoymath). The overall rigorous bound stays 4/3
 until the fan-zone density φ = |F*₄|/r is bounded (branch E). A second independent referee of D1r is required before this goes in the paper.
+
+## 6. Branch E: the fan window quantified (`angle_R7_reports/E_report.md`, FINAL; UNREFEREED)
+
+Write G := 2R sin(θ₀ − π/6), as in C.
+
+1. **Lemma EW (exact fan window).** Suppose a point has a neighbour on C(w,Δ₂) and two neighbours on C(w,Δ) inside D(w,Δ₂). Then
+   τ ∈ [cos(π/6 + arcsin(1/Δ₂)), √3/2), i.e. **0 < G ≤ 2**. The window has width O(1/Δ₂), does not depend on ε₀, and is sharp at both ends (R4's fan is the
+   lower end). Every fan type satisfies the hypothesis. This reconciles N3's window (ε₀ = 1/50), B's window (ε₀ = 10⁻⁶), D1r's κ₁ and REF_D1's R1: all of them are
+   ε₀-dependent enclosures of this O(1/R) window.
+   **Theorem G′:** 9/7 + η **uniformly** (C = C(η)) outside the window. The window is Region III restricted to an O(1/Δ₂) τ-interval.
+2. **Cost per fan.** F*₄ points own exactly 4 edges, so each costs 2. This confirms D1r's cost table.
+3. **Upper bound.**
+   - Lemma U: K-extremes have Δ₂-degree 1, so they lie in Q.
+   - Lemma X1: the K-side middle is a pendant of the diameter graph.
+   - Lemma C2: at most 2 fans per K-extreme and per centre.
+   - Together these give **Proposition F: |F*₄| ≤ 2|Q|**.
+   - The LP then combines μ(Δ₂) ≤ 1.5s − ½|Q|, μ(δ) ≤ e(S) + 3r + |F*₄| and e(S) ≤ s + θ|Q′|, with exact dual certificates in `r7_E_lp.py`:
+     - **θ = 2/3 (Theorem W, all G): 81/61 + η ≈ 1.32787.**
+     - θ = ½ (REF_C, G ≠ 1): 53/40 + η = 1.325.
+
+   E explains why no local argument gives φ < 1 by itself; the bound above goes through Q instead.
+4. **Lower bound.** No construction with more than O(1) fans is known.
+   - The R4 chain and the Reuleaux-with-pendants family are killed: pendant middles have no Δ₂-partner (`r7_E_reuleaux.py`).
+   - Lemma ORD: partners lie between non-pendant ones. It splits the problem into cases, and one case is open: a pendant middle at an arc end.
+   - Conjecture: |F*| = O(1) or O(√Δ). This would give 9/7 in the window when r ≫ √Δ₂. It needs the open ORD case plus an arc-span / angle-sum ≤ π conjecture.
+
+**Overall (candidate):** min{μ(Δ₂), μ(δ)} ≤ (81/61 + η)n + C(η) for every finite planar X.
+- Inputs: D1r (refereed once), Theorem W (refereed once), plus E's new lemmas (unrefereed).
+- Lower bound: 9/7.
+
+Referee flags from E:
+1. Lemma S(d) must apply to each middle and to every Δ₂-partner of the K-extreme.
+2. The constant in Corollary 6.1 must be κ-independent.
+3. The frame argument in C2(a).
+4. Q′ ⊆ Q in Theorem W.
+5. F*₄ ⊆ 𝓡, with a K-extreme for each point.
+6. The orientation step in ORD.
+
+Scripts (all pass under memcap): `r7_E_window.py`, `r7_E_structure.py`, `r7_E_lp.py`, `r7_E_reuleaux.py`.
