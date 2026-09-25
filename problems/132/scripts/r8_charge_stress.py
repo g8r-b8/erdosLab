@@ -93,18 +93,90 @@ def st_grid(N: int) -> list[tuple[float, float]]:
     return out
 
 
+def to_frame_F(P: dict[str, Pt]) -> dict[str, complex]:
+    """Frame F: x = 0, u on the positive real axis, w in the upper half-plane."""
+    x = complex(*P['x'])
+    Z = {k_: complex(*v) - x for k_, v in P.items()}
+    rot = abs(Z['u']) / Z['u']
+    Z = {k_: v * rot for k_, v in Z.items()}
+    if Z['w'].imag < 0:
+        Z = {k_: v.conjugate() for k_, v in Z.items()}
+    return Z
+
+
+def in_closed_triangle(q: complex, a: complex, b: complex, c: complex, eps: float = 1e-12) -> bool:
+    """q in the closed triangle abc (orientation-free)."""
+    cr_ = lambda o, a_, b_: ((a_ - o).conjugate() * (b_ - o)).imag
+    s1, s2, s3 = cr_(a, b, q), cr_(b, c, q), cr_(c, a, q)
+    return (s1 >= -eps and s2 >= -eps and s3 >= -eps) or (s1 <= eps and s2 <= eps and s3 <= eps)
+
+
 def stress_step1(N: int) -> Counter:
     """Step 1: every admissible (p', b') has b' = b; each other case dies for the stated reason.
 
-    TODO: implement.
-    What's missing: enumerate p' on C(u,1) (grid + special angles), b' in C(p',1) n C(x,Delta);
-      classify by case (alpha, beta, gamma1, gamma2, gamma3+/-) and assert the proof's reason:
-      alpha/beta/gamma3+ -> p' not extreme or side condition fails; gamma1 -> |p'b| in (1,Delta);
-      gamma3- -> |pp'| > Delta; also the crossing-lemma claim A in [0, theta_p].
-    Acceptance: Counter with zero 'FAIL ...' keys.
-    Depends on: trapezoid, circle_pts, is_extreme, st_grid.
+    b' is swept over C(x, Delta) (N*40 angles plus the special points b, p, and the point
+    b'_ii of C(x,Delta) n C(p,Delta) on the u-side); p' ranges over C(u,1) n C(b',1).  Only
+    the hypotheses used in the proof are imposed on (p', b'): p' strictly on w's side of xu,
+    p' != x, b' strictly beyond line up' from x.
     """
-    raise NotImplementedError("step 1 stress")
+    C: Counter = Counter()
+    ang = lambda z: math.atan2(z.imag, z.real)
+    cr_ = lambda o, a_, b_: ((a_ - o).conjugate() * (b_ - o)).imag
+    for (s, t) in st_grid(N):
+        T = trapezoid(s, t)
+        if T is None:
+            continue
+        Dl, P = T
+        Z = to_frame_F(P)
+        U, Pp, B = Z['u'], Z['p'], Z['b']
+        thp, Ab = ang(Pp), ang(B)
+        if not (0 < Ab < thp < math.pi):
+            C['FAIL frame order'] += 1
+            continue
+        C['trapezoids'] += 1
+        Asp = [2 * math.pi * a / (40 * N) - math.pi for a in range(40 * N)] + [Ab, thp]
+        # b'_ii: |xb'| = |pb'| = Delta, on the u-side of line xp
+        for q in circle_pts((0.0, 0.0), (Pp.real, Pp.imag), Dl, Dl):
+            if cr_(0, Pp, complex(*q)) * cr_(0, Pp, U) > 0:
+                Asp.append(ang(complex(*q)))
+        for A in Asp:
+            bp = Dl * complex(math.cos(A), math.sin(A))
+            for q in circle_pts((U.real, U.imag), (bp.real, bp.imag), 1.0, 1.0):
+                pp = complex(*q)
+                if pp.imag <= 1e-12 or abs(pp) < 1e-12:
+                    continue
+                if cr_(U, pp, 0) * cr_(U, pp, bp) >= -1e-12:
+                    continue
+                C['admissible (p\',b\')'] += 1
+                g = ang(pp)
+                if not (-1e-12 <= A <= thp + 1e-12):
+                    pts = [0, bp, Pp, U]
+                    mx = max(abs(a_ - b_) for a_ in pts for b_ in pts)
+                    C['out of cone: some distance > Delta' if mx > Dl + 1e-12 else 'FAIL crossing'] += 1
+                elif A > g + 1e-12:
+                    C['alpha: p\' in triangle x u b\'' if in_closed_triangle(pp, 0, U, bp)
+                      else 'FAIL alpha'] += 1
+                elif abs(A - g) <= 1e-12:
+                    C['beta'] += 1
+                elif A > Ab + 1e-12:
+                    dpb = abs(pp - B)
+                    C['gamma1: 1 < |p\'b| < Delta' if 1 + 1e-12 < dpb < Dl - 1e-12 else 'FAIL gamma1'] += 1
+                elif abs(A - Ab) <= 1e-12:
+                    C['gamma2: b\' = b'] += 1
+                else:
+                    dpb2 = abs(Pp - bp)
+                    lub = abs(U - bp)
+                    if not (dpb2 > 1 + 1e-12 and lub < 2 * t - 1e-12):
+                        C['FAIL gamma3 monotone'] += 1
+                    elif abs(dpb2 - Dl) > 1e-9:
+                        C['gamma3: |pb\'| in (1,Delta) u (Delta,oo)'] += 1
+                    elif in_closed_triangle(pp, U, bp, Pp):
+                        C['gamma3+: p\' in triangle u b\' p'] += 1
+                    elif abs(Pp - pp) > Dl + 1e-9 and lub <= 1 + 1e-9:
+                        C['gamma3-: |pp\'| > Delta'] += 1
+                    else:
+                        C['FAIL gamma3 apex'] += 1
+    return C
 
 
 def stress_step2_3(N: int) -> Counter:
