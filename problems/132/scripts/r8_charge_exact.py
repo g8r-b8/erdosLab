@@ -124,25 +124,41 @@ def check_set(X: list[Pt], kind: str, C: Counter) -> None:
 
 
 def run(kind: str, r2max: int, cap: int) -> Counter:
-    """Enumerate the lattice pools exactly as r5_b_exact.run and test every maximal clique.
-
-    TODO: implement.
-    What's missing: pool construction + va1_clique.maximal_cliques loop.
-    Acceptance: returns a Counter; 'VIOL *' keys absent.
-    Depends on: check_set, va1_clique.maximal_cliques.
-    """
-    raise NotImplementedError("lattice driver")
+    """Enumerate the lattice pools exactly as r5_b_exact.run and test every maximal clique."""
+    R = 40
+    P = [(a, b) for a in range(-R, R + 1) for b in range(-R, R + 1)]
+    norms = sorted({qform(kind, *q) for q in P} - {0})
+    halfp = lambda v: v[1] > 0 or (v[1] == 0 and v[0] > 0)
+    C: Counter = Counter()
+    for r2 in [z for z in norms if z <= r2max]:
+        if sum(1 for q in P if qform(kind, *q) == r2 and halfp(q)) < 3:
+            continue
+        for d2 in [z for z in norms if r2 < z <= 4 * r2]:
+            pool = [q for q in P if 0 < qform(kind, *q) <= d2 and halfp(q)
+                    and (qform(kind, *q) <= r2 or qform(kind, *q) == d2)]
+            m = len(pool)
+            nb = [0] * m
+            for i in range(m):
+                for j in range(i + 1, m):
+                    z = qform(kind, pool[i][0] - pool[j][0], pool[i][1] - pool[j][1])
+                    if z <= r2 or z == d2:
+                        nb[i] |= 1 << j
+                        nb[j] |= 1 << i
+            cl = maximal_cliques(nb, m, cap)
+            if len(cl) >= cap:
+                C['CAP hit'] += 1
+            for cq in cl:
+                check_set([(0, 0)] + [pool[i] for i in range(m) if cq >> i & 1], kind, C)
+    return C
 
 
 def main() -> int:
-    """CLI entry: parse args, run, print, return 0 iff no violations.
-
-    TODO: implement.
-    What's missing: argument parsing.
-    Acceptance: `python3 r8_charge_exact.py tri 13` prints a Counter and exits 0.
-    Depends on: run.
-    """
-    raise NotImplementedError("CLI")
+    """CLI entry: parse args, run, print, return 0 iff no violations."""
+    kind, r2max = sys.argv[1], int(sys.argv[2])
+    cap = int(sys.argv[3]) if len(sys.argv) > 3 else 20000
+    C = run(kind, r2max, cap)
+    print(kind, r2max, dict(sorted(C.items())))
+    return 1 if any(k_.startswith('VIOL') for k_ in C) else 0
 
 
 if __name__ == '__main__':
