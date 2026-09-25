@@ -159,7 +159,125 @@ Acceptance: no `sorry`.
 Depends on: `dist_le_diam`, `one_le_dist`, `card_le_of_sep_real`, `exists_angle` (as in
 `card_sep_arc_le_four`). Difficulty M. -/
 theorem degδ_le_three_of_D (hX : Normal X) {z : Pt} (hz : z ∈ Dset X) : degδ X z ≤ 3 := by
-  sorry
+  have key : ∀ {y n : Pt}, ‖n‖ = 1 → ∀ (P : Finset Pt), (∀ q ∈ P, dist q y = 1) →
+      (∀ q ∈ P, ∀ q' ∈ P, q ≠ q' → 1 ≤ dist q q') → ∀ {ε : ℝ}, 0 < ε → ε ≤ 1 →
+      (∀ q ∈ P, ε ≤ inner ℝ (q - y) n) → P.card ≤ 3 := by
+    intro y n hn P h1 hsep ε hε hε1 hcone
+    have hπ := Real.pi_pos
+    obtain ⟨θn, hθn⟩ := exists_dirVec hn
+    have hu : ∀ q ∈ P, ‖q - y‖ = 1 := fun q hq => by rw [← dist_eq_norm, h1 q hq]
+    have hp : (0 : ℝ) < 2 * π := by linarith
+    have hang : ∀ q ∈ P, ∃ ψ : ℝ, ψ ∈ Set.Ioc (-π) π ∧ dirVec (θn + ψ) = q - y := by
+      intro q hq
+      obtain ⟨φ, -, hφ⟩ := exists_angle (hu q hq)
+      refine ⟨toIocMod hp (-π) (φ - θn), ?_, ?_⟩
+      · have := toIocMod_mem_Ioc hp (-π) (φ - θn)
+        refine ⟨this.1, ?_⟩
+        linarith [this.2]
+      · have e := toIocMod_add_toIocDiv_zsmul hp (-π) (φ - θn)
+        rw [← hφ]
+        have : θn + toIocMod hp (-π) (φ - θn) =
+            φ + ((-(toIocDiv hp (-π) (φ - θn)) : ℤ) : ℝ) * (2 * π) := by
+          rw [zsmul_eq_mul] at e; push_cast; linarith
+        rw [this, dirVec_add_int]
+    choose! ψ hψ hψd using hang
+    set A := Real.arccos ε with hAdef
+    have hA0 : 0 ≤ A := Real.arccos_nonneg _
+    have hA : A < π / 2 := by
+      rw [hAdef, ← Real.arccos_zero]
+      exact Real.arccos_lt_arccos (by norm_num) hε hε1
+    have hbound : ∀ q ∈ P, |ψ q| ≤ A := by
+      intro q hq
+      have hc : Real.cos (ψ q) = inner ℝ (q - y) n := by
+        rw [← hψd q hq, ← hθn, Curve.inner_dirVec]; congr 1; ring
+      have hcos : ε ≤ Real.cos |ψ q| := by rw [Real.cos_abs, hc]; exact hcone q hq
+      have hm0 : 0 ≤ |ψ q| := abs_nonneg _
+      have hm1 : |ψ q| ≤ π := abs_le.2 ⟨by linarith [(hψ q hq).1], (hψ q hq).2⟩
+      rw [← Real.arccos_cos hm0 hm1]
+      exact Real.arccos_le_arccos hcos
+    have hsep' : ∀ q ∈ P, ∀ q' ∈ P, q ≠ q' → π / 3 ≤ |ψ q - ψ q'| := by
+      intro q hq q' hq' hne
+      by_contra hlt
+      push Not at hlt
+      have hlt' := Defs.sqd_lt_of_arg one_pos (a := θn + ψ q) (b := θn + ψ q')
+        (by rwa [add_sub_add_left_eq_sub])
+      have hd := hsep q hq q' hq' hne
+      have e : dist q q' ^ 2 = (1 * Real.cos (θn + ψ q) - 1 * Real.cos (θn + ψ q')) ^ 2 +
+          (1 * Real.sin (θn + ψ q) - 1 * Real.sin (θn + ψ q')) ^ 2 := by
+        have e0 : dist q q' = dist (q - y) (q' - y) := by
+          rw [dist_eq_norm, dist_eq_norm, sub_sub_sub_cancel_right]
+        rw [e0, dist_sq_pt, ← hψd q hq, ← hψd q' hq']
+        simp only [dirVec_apply0, dirVec_apply1, one_mul]
+      nlinarith [dist_nonneg (x := q) (y := q')]
+    have hc3 : 0 < π / 3 := by positivity
+    have hinj : Set.InjOn (fun q => ψ q / (π / 3)) P := by
+      intro q hq q' hq' h
+      by_contra hne
+      have h3 := hsep' q hq q' hq' hne
+      simp only at h
+      have : ψ q = ψ q' := by
+        have := congrArg (· * (π / 3)) h
+        simpa [div_mul_cancel₀ _ hc3.ne'] using this
+      rw [this, sub_self, abs_zero] at h3
+      linarith
+    have hcard := card_le_of_sep_real (a := -(A / (π / 3))) (P.image fun q => ψ q / (π / 3))
+      (A / (π / 3)) (by have : 0 ≤ A / (π / 3) := by positivity
+                        linarith)
+      (by
+        intro x hx
+        obtain ⟨q, hq, rfl⟩ := mem_image.1 hx
+        have hb := abs_le.1 (hbound q hq)
+        constructor
+        · rw [← neg_div]; exact div_le_div_of_nonneg_right hb.1 hc3.le
+        · exact div_le_div_of_nonneg_right hb.2 hc3.le)
+      (by
+        intro x hx x' hx' hne
+        obtain ⟨q, hq, rfl⟩ := mem_image.1 hx
+        obtain ⟨q', hq', rfl⟩ := mem_image.1 hx'
+        have hqq : q ≠ q' := by rintro rfl; exact hne rfl
+        have h3 := hsep' q hq q' hq' hqq
+        rw [← sub_div, abs_div, abs_of_pos hc3, le_div_iff₀ hc3, one_mul]
+        exact h3)
+    rw [card_image_of_injOn hinj] at hcard
+    have : A / (π / 3) < 3 / 2 := by rw [div_lt_iff₀ hc3]; linarith
+    have h5 : (P.card : ℝ) < 4 := by linarith
+    have : P.card < 4 := by exact_mod_cast h5
+    omega
+  obtain ⟨w, hw⟩ := (mem_filter.1 hz).2
+  obtain ⟨hwX, hwy, hdw⟩ := mem_partners.1 hw
+  have hΔ : 0 < diam X := by rw [← hdw]; exact dist_pos.2 (Ne.symm hwy)
+  set n : Pt := (diam X)⁻¹ • (w - z) with hndef
+  have hn : ‖n‖ = 1 := by
+    rw [hndef, norm_smul, Real.norm_eq_abs, abs_of_pos (inv_pos.2 hΔ), ← dist_eq_norm,
+      dist_comm, hdw, inv_mul_cancel₀ hΔ.ne']
+  have hzX : z ∈ X := (mem_filter.1 hz).1
+  have hΔ1 : 1 ≤ diam X := by
+    rw [← hdw]; exact one_le_dist hX.minDist_eq hzX hwX (Ne.symm hwy)
+  unfold degδ
+  apply key (y := z) hn (ε := (2 * diam X)⁻¹)
+  · intro q hq
+    obtain ⟨-, -, hd⟩ := mem_partners.1 hq
+    rw [dist_comm, hd, hX.minDist_eq]
+  · intro q hq q' hq' hne
+    exact one_le_dist hX.minDist_eq (mem_partners.1 hq).1 (mem_partners.1 hq').1 hne
+  · positivity
+  · rw [inv_le_one₀ (by positivity)]; linarith
+  · intro q hq
+    obtain ⟨hqX, -, hd⟩ := mem_partners.1 hq
+    rw [hX.minDist_eq] at hd
+    have hqw := dist_le_diam hqX hwX
+    have e1 := dist_sq_pt q w
+    have e2 := dist_sq_pt z q
+    have e3 := dist_sq_pt z w
+    rw [hd] at e2; rw [hdw] at e3
+    have hsq : dist q w ^ 2 ≤ diam X ^ 2 := pow_le_pow_left₀ dist_nonneg hqw 2
+    rw [hndef, inner_smul_right, inner_pt]
+    simp only [PiLp.sub_apply]
+    have : 1 / 2 ≤ (q 0 - z 0) * (w 0 - z 0) + (q 1 - z 1) * (w 1 - z 1) := by nlinarith
+    rw [mul_inv, ← div_eq_inv_mul (diam X)⁻¹ 2]
+    calc (diam X)⁻¹ / 2 = (diam X)⁻¹ * (1 / 2) := by ring
+      _ ≤ (diam X)⁻¹ * ((q 0 - z 0) * (w 0 - z 0) + (q 1 - z 1) * (w 1 - z 1)) :=
+        mul_le_mul_of_nonneg_left this (by positivity)
 
 /-- Points of `D` have `v ≤ 6` (paper §1.1: "Points of `R ∩ D` have `v ≤ 6`").
 
