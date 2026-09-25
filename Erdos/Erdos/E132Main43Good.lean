@@ -192,7 +192,131 @@ theorem far_points (hX : Normal X) {y n : Pt} (hg : IsGood43 X y) (hyK : y ∈ K
     (hnorm : n ∈ normalCone (KBall X) (y + depth X y • n)) :
     ∀ σ : ℝ, (σ = 1 ∨ σ = -1) → ∃ g ∈ KBall X,
       inner ℝ (g - y) (perp n) = σ * 463 ∧ depth X y - 931 / 100 ≤ inner ℝ (g - y) n := by
-  sorry
+  intro σ hσ
+  have hne : X.Nonempty := card_pos.1 (by have := hX.four_le; omega)
+  have hKc := KBall_isCompact hne
+  set h := depth X y with hhdef
+  set p₀ := y + h • n with hp₀
+  have hp₀K : p₀ ∈ KBall X := (KBall_isClosed X).closure_eq ▸ hfoot.1
+  have hσ2 : σ * σ = 1 := by rcases hσ with rfl | rfl <;> norm_num
+  have hnn : inner ℝ n n = 1 := by rw [real_inner_self_eq_norm_sq, hn]; norm_num
+  have hnp : inner ℝ n (perp n) = 0 := by rw [inner_pt]; simp; ring
+  have hpn : inner ℝ (perp n) n = 0 := by rw [real_inner_comm]; exact hnp
+  have hpp : inner ℝ (perp n) (perp n) = 1 := by
+    rw [real_inner_self_eq_norm_sq, norm_perp, hn]; norm_num
+  set κ : ℝ := 201 / 10000 with hκ
+  set d₀ : Pt := n + (σ * κ) • perp n with hd₀
+  have hd₀n : inner ℝ d₀ n = 1 := by
+    rw [hd₀, inner_add_left, real_inner_smul_left, hnn, hpn]; ring
+  have hd₀p : inner ℝ d₀ (perp n) = σ * κ := by
+    rw [hd₀, inner_add_left, real_inner_smul_left, hnp, hpp]; ring
+  have hN2 : ‖d₀‖ ^ 2 = 1 + κ ^ 2 := by
+    rw [n1_norm_sq_frame hn d₀, hd₀n, hd₀p]
+    have : (σ * κ) ^ 2 = (σ * σ) * κ ^ 2 := by ring
+    rw [this, hσ2]; ring
+  set N := ‖d₀‖ with hNdef
+  have hNpos : 0 < N := by
+    by_contra hc
+    push Not at hc
+    have h0 : N = 0 := le_antisymm hc (norm_nonneg _)
+    rw [h0] at hN2
+    nlinarith [sq_nonneg κ]
+  set d : Pt := N⁻¹ • d₀ with hddef
+  have hd1 : ‖d‖ = 1 := by
+    rw [hddef, norm_smul, norm_inv, Real.norm_eq_abs, abs_of_pos hNpos, inv_mul_cancel₀ hNpos.ne']
+  have hdn : inner ℝ d n = N⁻¹ := by rw [hddef, real_inner_smul_left, hd₀n, mul_one]
+  have hu : N⁻¹ < 4999 / 5000 := by
+    rw [inv_lt_comm₀ hNpos (by norm_num)]
+    by_contra hc
+    push Not at hc
+    norm_num at hc
+    have : N ^ 2 ≤ (5000 / 4999) ^ 2 := pow_le_pow_left₀ hNpos.le hc 2
+    rw [hN2, hκ] at this
+    norm_num at this
+  have hfard : 1 / 50 < ‖d - n‖ := by
+    have hs := norm_sub_sq_real d n
+    rw [hd1, hn, hdn] at hs
+    by_contra hc
+    push Not at hc
+    have : ‖d - n‖ ^ 2 ≤ (1 / 50) ^ 2 := pow_le_pow_left₀ (norm_nonneg _) hc 2
+    nlinarith
+  -- the support point in direction `d`
+  obtain ⟨x, hxK, hxmax⟩ := hKc.exists_isMaxOn ⟨p₀, hp₀K⟩
+    (continuous_id.inner continuous_const : Continuous fun z : Pt => inner ℝ z d).continuousOn
+  have hmax : ∀ z ∈ KBall X, inner ℝ z d ≤ inner ℝ x d := fun z hz => hxmax hz
+  have hxF : x ∈ frontier (KBall X) := mem_frontier_of_max hxK hd1 hmax
+  have hxN : d ∈ normalCone (KBall X) x := fun z hz => by
+    rw [inner_sub_left]; linarith [hmax z hz]
+  have hdp₀ : dist y p₀ = h := by
+    rw [hp₀, dist_eq_norm, show y - (y + h • n) = -(h • n) by abel, norm_neg, norm_smul, hn,
+      mul_one, Real.norm_eq_abs, abs_of_nonneg hh0]
+  have hfarx : 464 < dist y x := by
+    by_contra hc
+    push Not at hc
+    have := hg x hxF p₀ hfoot (by unfold Lam43; exact hc) (by unfold Lam43; linarith)
+      d hxN n hnorm hd1 hn
+    unfold ε₀43 at this
+    linarith
+  -- coordinates of `x`
+  set C := inner ℝ (x - y) n with hC
+  set P := inner ℝ (x - y) (perp n) with hP
+  have hxp : x - p₀ = (x - y) - h • n := by rw [hp₀]; abel
+  have h1 : 0 ≤ C + κ * (σ * P) - h := by
+    have hm := hmax p₀ hp₀K
+    have e : inner ℝ x d - inner ℝ p₀ d = N⁻¹ * inner ℝ (x - p₀) d₀ := by
+      rw [← inner_sub_left, hddef, inner_smul_right]
+    have hge : 0 ≤ inner ℝ (x - p₀) d₀ := by
+      have : 0 ≤ N⁻¹ * inner ℝ (x - p₀) d₀ := by linarith
+      exact (mul_nonneg_iff_of_pos_left (inv_pos.2 hNpos)).1 this
+    rw [hxp, hd₀, inner_sub_left, inner_add_right, inner_add_right, inner_smul_right,
+      real_inner_smul_left, real_inner_smul_left, inner_smul_right, hnn, hnp, ← hC,
+      ← hP] at hge
+    linarith
+  have h2 : C - h ≤ 0 := by
+    have := hnorm x hxK
+    rw [hxp, inner_sub_left, real_inner_smul_left, hnn, ← hC] at this
+    linarith
+  set A := σ * P with hA
+  have hA0 : 0 ≤ A := by
+    by_contra hc; push Not at hc
+    have : κ * A < 0 := mul_neg_of_pos_of_neg (by norm_num [hκ]) hc
+    linarith
+  have hPA : P = σ * A := by rw [hA, ← mul_assoc, hσ2, one_mul]
+  have hnx : ‖x - y‖ ^ 2 = C ^ 2 + A ^ 2 := by
+    rw [n1_norm_sq_frame hn, ← hC, ← hP, hPA]
+    have : (σ * A) ^ 2 = (σ * σ) * A ^ 2 := by ring
+    rw [this, hσ2, one_mul]
+  have hA463 : 463 < A := by
+    by_contra hc
+    push Not at hc
+    have hCl : -(κ * 463) ≤ C := by
+      have : κ * A ≤ κ * 463 := mul_le_mul_of_nonneg_left hc (by norm_num [hκ])
+      linarith
+    have hCu : C ≤ 1 := by linarith
+    have hC2 : C ^ 2 ≤ 87 := by norm_num [hκ] at hCl; nlinarith
+    have hA2 : A ^ 2 ≤ 463 ^ 2 := pow_le_pow_left₀ hA0 hc 2
+    have hd2 : 464 ^ 2 < ‖x - y‖ ^ 2 := by
+      rw [← dist_eq_norm, dist_comm]
+      exact pow_lt_pow_left₀ hfarx (by norm_num) two_ne_zero
+    linarith
+  have hApos : 0 < A := by linarith
+  set t := 463 / A with ht
+  have ht0 : 0 ≤ t := by positivity
+  have ht1 : t ≤ 1 := by rw [ht, div_le_one hApos]; linarith
+  have htA : t * A = 463 := by rw [ht]; field_simp
+  refine ⟨p₀ + t • (x - p₀), (KBall_convex X).add_smul_sub_mem hp₀K hxK ⟨ht0, ht1⟩, ?_, ?_⟩
+  · have e : p₀ + t • (x - p₀) - y = h • n + t • ((x - y) - h • n) := by rw [hxp, hp₀]; abel
+    rw [e, inner_add_left, real_inner_smul_left, real_inner_smul_left, inner_sub_left,
+      real_inner_smul_left, hnp, ← hP, hPA]
+    have : t * (σ * A - h * 0) = σ * (t * A) := by ring
+    rw [this, htA]; ring
+  · have e : p₀ + t • (x - p₀) - y = h • n + t • ((x - y) - h • n) := by rw [hxp, hp₀]; abel
+    rw [e, inner_add_left, real_inner_smul_left, real_inner_smul_left, inner_sub_left,
+      real_inner_smul_left, hnn, ← hC]
+    have hm := mul_le_mul_of_nonneg_left (by linarith : -(κ * A) ≤ C - h) ht0
+    have hk : t * -(κ * A) = -(κ * (t * A)) := by ring
+    rw [hk, htA, hκ] at hm
+    linarith
 
 /-- **The frame at a good heavy point** (§1.2).
 
