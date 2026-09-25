@@ -182,14 +182,44 @@ def check_lemma_D() -> list[str]:
 def check_step1() -> list[str]:
     """Step 1 (b' = b) identities in frame F.
 
-    TODO: implement.
-    What's missing: 1+e(2g) = 2cos(g) e(g); |p'b|^2-|p'b'|^2 = 2 p'.(b'-b) when |b|=|b'|;
-      the plus-branch cross products (lambda,mu form); |pb'|^2 law of cosines; the gamma3
-      apex identity (h1+h2)^2 - Delta^2 = 1 - l^2/2 + 2 h1 h2.
-    Acceptance: returns [].
-    Depends on: nothing.
+    Frame F: x=0, u=e(0), w-side = upper half-plane, p = rp e(thp), b = Delta e(Ab),
+    b' = Delta e(A), p' = u + e(2g) = 2cos(g) e(g), 0<g<pi/2.
     """
-    raise NotImplementedError("step 1 identities")
+    F: list[str] = []
+    print('[Step 1: b\' = b]')
+    g, A, Ab, thp, rp, D, lam, mu, l = sp.symbols('g A A_b theta_p r_p Delta lambda mu ell', real=True)
+    u = e_(0)
+    pp = e_(0) + e_(2*g)
+    trig_zero("p' = u + e(2g) = 2cos(g) e(g)", sq(pp - 2*sp.cos(g)*e_(g)), F)
+    b, bp = D*e_(Ab), D*e_(A)
+    P = sp.Matrix(sp.symbols('P0 P1', real=True))
+    trig_zero("|P-b|^2 - |P-b'|^2 = 2 P.(b'-b)   (|b| = |b'| = Delta)",
+              sq(P - b) - sq(P - bp) - 2*(P.dot(bp - b)), F)
+    r = sp.symbols('r', positive=True)
+    Pr = r*e_(g)
+    trig_zero("p'.(b'-b) = r Delta (cos(g-A) - cos(g-A_b))",
+              Pr.dot(bp - b) - r*D*(sp.cos(g - A) - sp.cos(g - Ab)), F)
+    trig_zero("|p'b|^2 - Delta^2 = r (r - 2 Delta cos(g - A_b))",
+              sq(Pr - b) - D**2 - r*(r - 2*D*sp.cos(g - Ab)), F)
+    # plus branch: p' = lam u + mu b'
+    Q = lam*u + mu*bp
+    x = sp.Matrix([0, 0])
+    crs = lambda o, a_, q: (a_[0]-o[0])*(q[1]-o[1]) - (a_[1]-o[1])*(q[0]-o[0])
+    cub = crs(x, u, bp)
+    trig_zero("plus branch: cross(u; p', x) = mu cross(0; u, b')", crs(u, Q, x) - mu*cub, F)
+    trig_zero("plus branch: cross(u; p', b') = (lam+mu-1) cross(0; u, b')",
+              crs(u, Q, bp) - (lam + mu - 1)*cub, F)
+    trig_zero("cross(0; u, b') = Delta sin A", cub - D*sp.sin(A), F)
+    # gamma3: monotonicity inputs (law of cosines)
+    p = rp*e_(thp)
+    trig_zero("|pb'|^2 = rp^2 + Delta^2 - 2 rp Delta cos(thp - A)",
+              sq(p - bp) - (rp**2 + D**2 - 2*rp*D*sp.cos(thp - A)), F)
+    trig_zero("|ub'|^2 = 1 + Delta^2 - 2 Delta cos A", sq(u - bp) - (1 + D**2 - 2*D*sp.cos(A)), F)
+    # gamma3 apex identity
+    h1, h2 = sp.sqrt(1 - l**2/4), sp.sqrt(D**2 - l**2/4)
+    expect_zero("gamma3: (h1+h2)^2 - Delta^2 = 1 - l^2/2 + 2 h1 h2",
+                (h1 + h2)**2 - D**2 - (1 - l**2/2 + 2*h1*h2), F, red=False)
+    return F
 
 
 def check_step2() -> list[str]:
