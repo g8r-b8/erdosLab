@@ -93,7 +93,7 @@ private theorem near_coeffs {n ν : Pt} (hn : ‖n‖ = 1) (hν : ‖ν‖ = 1) 
 /-- **(F′1)** A point within `6` of `y` that is not interior to `K` is not below the frame's
 tangent cone: `Z q ≥ h − ε|Xq|`.
 
-TODO: prove.
+TODO: none — proved.
 What's missing: `exists_frontier_seg` (from `y ∈ int K` to `q`) gives `b = y + l(q − y)`,
 `l ∈ (0, 1]`, on `∂K` with `dist y b ≤ 6`; a unit normal `ν` at `b` (`exists_unit_normal`) has
 `‖ν − n‖ ≤ 1/50` (`hF.normals`).  `⟨q − b, ν⟩ = ((1−l)/l)⟨b − y, ν⟩ ≥ 0` (`y ∈ K`) and
@@ -152,7 +152,7 @@ theorem frame_mem_interior (hX : Normal X) {y n : Pt} (hF : Frame43 X y n) {q : 
 /-- **(F′3)** Diametral points near `y` are `t` above the tangent cone:
 `Z z ≥ h + t − ε|Xz|`.
 
-TODO: prove.
+TODO: none — proved.
 What's missing: `t ≤ dist z y ≤ 3` (`ball_polygon_c`, `y ∈ K`).  For `0 ≤ s < t` the point
 `w = z − s n` has `dist w z = s < t ≤ dist(z, K)` (`ball_polygon_c`), so `w ∉ K`, and
 `dist w y ≤ 3 + t ≤ 6`; `frame_outside` at `w` (same abscissa, height `Z z − s`) gives
@@ -312,7 +312,7 @@ private theorem dn_core (hX : Normal X) {y n : Pt} (hF : Frame43 X y n) {z w : P
 partner `w`, `u = w − z` points downwards and `|⟨u, perp n⟩| ≤ (3/100)·(−⟨u, n⟩)`
 (paper: `τ₃ = (463ε + 3)/460 < 0.0267`).
 
-TODO: prove.
+TODO: none — proved.
 What's missing: every `k ∈ K` has `⟨k − z, u⟩ > 0` (`|k − w| ≤ Δ₂ < Δ`; `dist2 < diam`).
 (i) `⟨u, n⟩ < 0`: the point `G = z − s n` with `s = Z z − h + ε|Xz| + 1/100 > 0` (`frame_D`)
 has height `< h − ε|XG|` and `dist G y ≤ 6`, so `G ∈ int K` (`frame_mem_interior`) and
@@ -333,7 +333,7 @@ theorem frame_dn (hX : Normal X) {y n : Pt} (hF : Frame43 X y n) {z w : Pt} (hz 
 /-- **Lemma DN for D-neighbours** (`dist z y ≤ 1`): `|⟨u, perp n⟩| ≤ (9/400)·(−⟨u, n⟩)`
 (paper: `τ* = (463ε + 1)/462 < 0.0224`; here `(9.31 + 1)/462 < 0.02232 ≤ 9/400`).
 
-TODO: prove.
+TODO: none — proved.
 What's missing: as `frame_dn` with `|Xz| ≤ 1`, `Z z ≤ 1`: `|a₁| ≤ 10.31 c/462`.
 Acceptance: no `sorry`.
 Depends on: as `frame_dn` (or share a helper). Difficulty M. -/
@@ -378,7 +378,7 @@ private theorem dd_side (hX : Normal X) {y n : Pt} (hF : Frame43 X y n) {z₁ z�
 /-- **Corollary (D–D heights)**: two diametral points within `1` of `y` have
 `|Z z₁ − Z z₂| ≤ (9/400)|Xz₁ − Xz₂|`.
 
-TODO: prove.
+TODO: none — proved.
 What's missing: Lemma 3.2(a) both ways (`D_inner` with `k = z₂` and the partner `w₁` of `z₁`,
 and vice versa): `⟨z₂ − z₁, w₁ − z₁⟩ ≥ 0` with `w₁ − z₁ = a₁ perp n − c₁ n`, `c₁ > 0`,
 `|a₁| ≤ (9/400) c₁` (`frame_dn1`) gives `(Z z₂ − Z z₁) c₁ ≤ (Xz₂ − Xz₁) a₁`; symmetric.
@@ -399,7 +399,7 @@ theorem dd_heights (hX : Normal X) {y n : Pt} (hF : Frame43 X y n) {z₁ z₂ : 
 /-- Depth is at most the vertical distance to the support line: `depth a ≤ h − Z a` for
 `a ∈ K`.
 
-TODO: prove.
+TODO: none — proved.
 What's missing: if `a ∈ ∂K` the depth is `0 ≤ h − Z a` (`Frame43.top`).  Otherwise the ray
 `a + s n` leaves `K` for `s > h − Z a` (`Frame43.top`), so `exists_frontier_seg` from `a` to
 `a + (h − Z a + η) n` gives a frontier point at distance `≤ h − Z a + η`; let `η → 0`
@@ -447,7 +447,7 @@ theorem Low_Z (hX : Normal X) {y n : Pt} (hF : Frame43 X y n) {a : Pt} (ha : a �
 
 /-- A neighbour of height `≤ −4/5` is a receiver.
 
-TODO: prove.
+TODO: none — proved.
 What's missing: `a ∈ int K` by `frame_mem_interior` (`Z a ≤ −0.8 < h − |Xa|/49`, `h > 0`).
 Depth: for `b ∈ ∂K`, either `dist a b > 2 ≥ h + 2/3` (`h ≤ 1`), or `dist b y ≤ 3`, `b ∉ int K`,
 so `Z b ≥ h − 3/49` (`frame_outside`) and `dist a b ≥ Z b − Z a ≥ h + 0.8 − 0.0613 ≥ h + 2/3`;
@@ -486,7 +486,7 @@ theorem lower_mem_Low (hX : Normal X) {y n : Pt} (hF : Frame43 X y n) {a : Pt}
 /-- **Window packing**: unit vectors `q − a`, pairwise `≥ 1` apart (i.e. `≥ 60°`), all strictly
 within `60°` of `n` (`⟨q − a, n⟩ > 1/2`), number at most `2`.
 
-TODO: prove.
+TODO: none — proved.
 What's missing: as `card_sep_arc_le_four` with the cone `1/2 < ⟨·, n⟩` (open arc of length
 `2π/3`): three points pairwise `≥ π/3` apart span `≥ 2π/3`.  Or directly: angles `ψ_i ∈
 (−π/3, π/3)`, sorted, `ψ₃ − ψ₁ ≥ 2π/3` impossible.

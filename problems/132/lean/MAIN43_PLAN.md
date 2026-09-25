@@ -39,7 +39,7 @@ E132Main15N1 → Main43Defs → Main43Good ────────────�
 `Good ∥ Frame`; `Classify ∥ Charge` (both only need `Frame`'s statements).  The interfaces are
 the structure `Frame43 X y n` and the predicates `IsFan43`/`IsCap43` (all in `Defs`).
 Check one file: `cd Erdos && lake env lean -o .lake/build/lib/lean/Erdos/<F>.olean -i .lake/build/lib/lean/Erdos/<F>.ilean Erdos/<F>.lean`
-(in DAG order; `-o` lets downstream files import it).  Not imported from `Erdos.lean`.
+(in DAG order; `-o` lets downstream files import it).  Imported from `Erdos.lean` (since 89d3fe6).
 
 ## ✅ COMPLETE (2026-09-25)
 

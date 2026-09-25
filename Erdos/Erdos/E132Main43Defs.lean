@@ -50,8 +50,8 @@ def depth (X : Finset Pt) (y : Pt) : ℝ := Metric.infDist y (frontier (KBall X)
 /-- **Receivers** of `y` (§1.4): `δ`-neighbours `a ∈ K` at least `2/3` deeper than `y`.
 Intrinsic (no frame).  For a good heavy `y` these are exactly the "lower points" of the paper
 (fan: `a±` at `≈ ±150°`, F5's `a`; cap: `b` at `≈ 180°`), whose height is `≤ −0.8`; the cap's
-points at `±120°` (height `≈ −1/2`) are *not* receivers.  (Threshold `2/3`, not the `3/4`
-suggested in the brief: F5's lower point is only known to have height `≤ −0.85`, and the
+points at `±120°` (height `≈ −1/2`) are *not* receivers.  (Threshold `2/3` rather than `3/4`:
+F5's lower point is only known to have height `≤ −0.85`, and the
 depth estimate loses `3ε ≈ 0.061`.) -/
 def Low (X : Finset Pt) (y : Pt) : Finset Pt :=
   (nbδ X y).filter (fun a => a ∈ KBall X ∧ depth X y + 2 / 3 ≤ depth X a)
