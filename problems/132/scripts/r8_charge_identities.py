@@ -114,12 +114,32 @@ def check_trapezoid() -> list[str]:
 def check_offline() -> list[str]:
     """x on the line pw is impossible: Delta=2, neighbours at cos=1/4, |ac|^2=15/4 in (1,4).
 
-    TODO: implement.
-    What's missing: solve |a|=1, |a-(2,0)|=2 exactly and evaluate |ac|^2.
-    Acceptance: returns [] and |ac|^2 == 15/4.
-    Depends on: nothing.
+    Also verifies the Lemma M identity (VERIFY_A1c.md), used throughout:
+    p=0, b=(1,0), a=(cos A,-sin A), r=b+(cos F, sin F):
+        |r-a|^2 - 1 = 2(1+cos F)(1-cos A) + 2 sin F sin A.
     """
-    raise NotImplementedError("collinear-x exclusion")
+    F: list[str] = []
+    print('[Lemma M identity and collinear-x exclusion]')
+    A, Fa = sp.symbols('A F', real=True)
+    a = sp.Matrix([sp.cos(A), -sp.sin(A)])
+    r = sp.Matrix([1 + sp.cos(Fa), sp.sin(Fa)])
+    expect_zero('Lemma M: |r-a|^2 - 1 = 2(1+cosF)(1-cosA) + 2 sinF sinA',
+                sp.trigsimp(sp.expand(sq(r - a) - 1 - 2*(1 + sp.cos(Fa))*(1 - sp.cos(A))
+                                      - 2*sp.sin(Fa)*sp.sin(A))), F, red=False)
+    a0, a1 = sp.symbols('a0 a1', real=True)
+    sols = sp.solve([a0**2 + a1**2 - 1, (a0 - 2)**2 + a1**2 - 4], [a0, a1], dict=True)
+    xs = sorted({sp.nsimplify(z[a0]) for z in sols})
+    ok = xs == [sp.Rational(1, 4)]
+    print(('  ok   ' if ok else '  FAIL ') + f'|a|=1, |a-x|=2 with x=(2,0) forces a0 = 1/4  (got {xs})')
+    if not ok:
+        F.append('offline a0')
+    ys = sorted(z[a1] for z in sols)
+    ac2 = sp.simplify((ys[1] - ys[0])**2)
+    ok = ac2 == sp.Rational(15, 4) and 1 < ac2 < 4
+    print(('  ok   ' if ok else '  FAIL ') + f'|ac|^2 = {ac2} lies strictly in (1, Delta^2) = (1, 4)')
+    if not ok:
+        F.append('offline ac')
+    return F
 
 
 def check_lemma_D() -> list[str]:
