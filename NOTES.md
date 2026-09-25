@@ -376,3 +376,11 @@ PROMPT.md rule 4: check all cross-referenced/sibling problems and their threads.
   274/276/278/279/282/287–289/291/293/295/301/304/306/307/311–313/317/319/322–327/329/332/334–336/
   338/340/342/345/349/352/359/364–368/371/373–377/382/383/385/386/388/390/394/396/398: deep
   (asymptotic/conjecture-level), heavily worked in 2026, or need abc/Chebotarev-type input.
+
+## #470 odd weird numbers (2026-09-25) — see problems/470/README.md
+- OPEN (site, forum, formal-conjectures, Tao wiki, OEIS, arXiv checked 2026-09-25). Frontier: none < 10^21
+  (Fang, ~80 core-years), none < 10^28 with abundance < 10^14; odd weird ⇒ ω ≥ 6 (Liddy–Riedl thesis).
+  Sibling #825 solved by Larsen (Jan 2026), explicit C=633 (Hisamoto, Jul 2026).
+- Angle: bound Ω instead of size. Odd PANs with Ω ≤ 7 are ~1.03e8 (Amato et al. counted, never
+  tested for weirdness). Handle the last new prime p uniformly via Lemma LP (problems/470/scripts/lastprime.py):
+  only ~23k Ω=6 prefixes. Target theorem: odd weird ⇒ Ω(n) ≥ 8 (then try Ω ≥ 9).
