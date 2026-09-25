@@ -512,3 +512,75 @@ In the orientation accounting every fan type costs at most 2 over 6, because its
 - φ ≤ ½ gives 21/16.
 
 By (3), |F*| ≤ 1.5|S∩D|, so the fan term is controlled by the number of diametral points in S.
+
+## 7. The three repairs, relative to D1 as recoverable
+
+D1's own write-up is lost. What survives is the summary in angle_R7.md §5, the excerpt D1_excerpt.md and the scripts `r7_D1_*.py`. The
+repairs below are measured against those. Each one closes a gap that is visible in what survives. I cannot certify that D1's lost text
+had these gaps, only that the surviving design does.
+
+**Repair 1: edges at 𝓡∩D points are owned by the 𝓡∩D end (rule O2).**
+- *Gap.* D1's rule ("an edge between two 𝓡-points is owned by the lower end in the zone frame") needs both ends to have a zone and a
+  frame. A point z ∈ 𝓡∩D lies outside K, at distance ≥ t (Fact 1.1). It has no foot, no depth and no sector, so the rule is undefined
+  for edges at z. `r7_D1_global_hex.py` has no D-row, and `r7_D1_tilt.py` simply counts 𝓡∩D-neighbours (kind 'd') as owned by y when
+  they are upward.
+- *Repair.* z owns all its edges. This is harmless, because own(z) ≤ deg z ≤ 3 by Fact 1.3, so z is never exceptional.
+- *Side benefit.* O_n(y) contains no 𝓡∩D-neighbours. So the middle neighbours of a 4-point in Lemma S are in **S**∩D, and the fan set
+  F* of Corollary 6.1 shrinks accordingly: HF1 costs 0. The tilt screen counts a superset of O_n(y), so its passing still covers the
+  new rule.
+
+**Repair 2: the deep zone gets one global frame, with a random depth threshold T (Lemma 4.4).**
+- *Gap.* `r7_D1_global_hex.py` uses a deep zone with a fixed direction, but its threshold D_int is a fixed parameter of each run. The
+  surviving summary says "averaging over random cut positions", which refers to the sector cuts.
+- For a **fixed** threshold, the edges crossing the level curve {h = D_int} are not o(r) in general: a configuration may put almost all of
+  𝓡 in a band of width 2 around that depth.
+- *Repair.* Take T uniform in [1, 1 + M]. Since h is 1-Lipschitz, each edge crosses with probability ≤ 1/M, so the interface costs
+  ≤ 3r/M.
+- Also, the deep zone has **one** frame, not sector frames continued inwards. Continued sectors would have foot maps that are
+  discontinuous across the medial axis of K at every depth, and so an unbounded number of seams.
+
+**Repair 3: Lemma S is proved directly from the frame lemma, (G5), Lemma DN and Lemma 2.2(b), without paper §10's δ₀-flat model.**
+- *Gap.* D1's κ₁ = a + a₀ + ε + δ₀ (see `r7_D1_tilt.py`, Part 1) uses the flat model of paper Lemma 10.3, with δ₀ = 10⁻⁴ and the
+  parameters of §10 (Λ = 10⁹, ρ = 6, good′ points).
+- Paper §10 is stated under "τ ≤ √3/2 − 2β or τ > 1, and Δ₂ ≥ 2·10¹⁵". The flat model's proof does not visibly use the τ-hypothesis, but
+  as written it is not available in Regions II and III. Theorem G is applied in Region III off the fan zone.
+- *Repair.* §3 proves Lemma S from paper Lemmas 9.3 and 9.4 (stated with no τ-hypothesis and Δ₂ ≥ 10⁴) and Lemma 2.2(b). The constant
+  improves to κ(10⁻³) < 1.553·10⁻³ at D1's parameters, and κ(θ) ≤ 1.51a + 3.01ε₀ + 2/Δ₂ in general (Lemma 4.0).
+
+**A further change (a simplification, not a repair).**
+- *Change.* The sectors are cut in the **Gauss map**, by the normal direction ν(y), instead of by arc length along ∂K.
+- *What arc-length sectors needed.* Their frames are the normal at the start of the sector. Sectors containing turning > θ ("bad
+  sectors", e.g. at the corners of K) then have to be exceptional, and the cut crossings cost O(r·T/L_s). That also works, with one more
+  ηr term.
+- *What Gauss-map sectors give.* Every shallow point is automatically within θ of its sector frame, so there are no bad sectors. The seam
+  cost is O(1) by the multiplicity lemma (Lemma 4.5).
+
+## 8. D1's three referee flags, resolved
+
+**Flag 1: "Lemma T* rescaled to |pb| ≤ 4D₁ + 1 is not rewritten line by line."**
+- *Resolution.* No rescaling is needed. Paper Lemma 9.2 (packing in thin K) is stated and proved for every 1 ≤ ℓ ≤ Δ₂/100 and
+  Λ > 115ℓ.
+- *Where it is used.*
+  - Lemma 4.3(iii): ℓ = 2, Λ = 231.
+  - Lemma 4.6: ℓ = 2M + 3 ≥ 2T + 1 (the analogue of D1's "4D₁ + 1"), Λ₁ = 116ℓ. The hypothesis ℓ ≤ Δ₂/100 is part of Δ₂ ≥ Δ₂*.
+- *Checks on the proof.* The lemma's proof uses:
+  - the nondegenerate regime, through |w_bot − w_top| ≤ Δ ≤ 1.94Δ₂;
+  - the numerical bound 1.998 − 0.035 − 0.011 > 1.94, in which ℓ enters only through w₀/Δ₂ ≤ 1.0001ℓ/Δ₂ ≤ 0.0101 (the "0.011").
+
+  Both hold uniformly in ℓ ≤ Δ₂/100. **Resolved.**
+
+**Flag 2: "the count of non-good points in B1 P0.1 is independent of v".**
+- *Resolution.* Correct, and this is exactly what is needed. Paper Lemma 9.5 is stated for points with v ≥ 7, but that restriction is
+  used only to discard 𝓡∩D and h > 1.
+- The three cases of its proof bound **all** non-good h ≤ 1 points of 𝓡∖D: perimeter ≤ 2Λ, turning > ε₀ (the multiplicity count), and
+  thin K. None of them uses v. Lemma 4.3 restates the count in this form: N_ng = 463² + 2π·465²/ε₀ + 7600 at Λ = 231, ρ = 1.
+- Theorem G needs all non-good points to be exceptional, whatever their weight, because a non-good point of weight ≤ 6 can still own 4
+  or more edges. **Resolved.**
+
+**Flag 3: "the expected cut count ℓ/Λ_s for perimeters that are not multiples of Λ_s".**
+- *Resolution.* Gauss-map sectors have width θ_s = 2π/N_s, so 2π is an exact multiple. The cut set is a uniformly random translate of
+  θ_sℤ/2πℤ, and the expected number of cuts in an arc of length α is exactly α/θ_s (Lemma 4.5(3); Markov turns this into a probability
+  bound).
+- For the arc-length variant, use L' := P/⌈P/L_s⌉ ∈ [L_s/2, L_s] and equally spaced cuts σ + jL', σ ∼ U[0, L'). The expected count is
+  again exactly α/L' ≤ 2α/L_s.
+- In the deep direction the analogous count is Lemma 4.4 (T ∼ U[1, 1 + M], density 1/M). **Resolved.**
