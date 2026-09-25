@@ -273,14 +273,18 @@ def stress_lemma_D(N: int) -> Counter:
 
 
 def main() -> int:
-    """Run all stress tests; return 0 iff no FAIL key appears.
-
-    TODO: implement.
-    What's missing: driver + printing.
-    Acceptance: prints the three Counters and 'ALL OK'.
-    Depends on: stress_step1, stress_step2_3, stress_lemma_D.
-    """
-    raise NotImplementedError("driver")
+    """Run all stress tests; return 0 iff no FAIL key appears."""
+    N = int(sys.argv[1]) if len(sys.argv) > 1 else 30
+    nfail = 0
+    for name, fn, arg in (('step 1', stress_step1, N), ('steps 2-3', stress_step2_3, N),
+                          ('Lemma D', stress_lemma_D, max(N // 3, 5))):
+        C = fn(arg)
+        print(f'[{name}]')
+        for k_, v in sorted(C.items()):
+            print(f'  {k_}: {v}')
+        nfail += sum(v for k_, v in C.items() if k_.startswith('FAIL'))
+    print('ALL OK' if nfail == 0 else f'FAILURES: {nfail}')
+    return 0 if nfail == 0 else 1
 
 
 if __name__ == '__main__':
