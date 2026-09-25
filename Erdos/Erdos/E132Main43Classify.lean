@@ -52,6 +52,114 @@ def CapShape (X : Finset Pt) (y n : Pt) : Prop :=
     (∀ a ∈ nbδ X y, inner ℝ (a - y) n ≤ -(2 / 3) → ‖a - y + n‖ ≤ 1 / 20) ∧
     vR X y ≤ 8 + ((nbδ X y).filter (fun a => inner ℝ (a - y) n ≤ -(4 / 5))).card
 
+/-! ## Frame toolkit (private helpers) -/
+
+private theorem c43_np (n : Pt) : inner ℝ n (perp n) = 0 := by
+  rw [← det2_eq_inner_perp]; unfold det2; ring
+
+private theorem c43_pn (n : Pt) : inner ℝ (perp n) n = 0 := by
+  rw [real_inner_comm]; exact c43_np n
+
+/-- Squared norm in the frame `(n, perp n)`. -/
+private theorem c43_sq {n : Pt} (hn : ‖n‖ = 1) (v : Pt) :
+    ‖v‖ ^ 2 = inner ℝ v n ^ 2 + inner ℝ v (perp n) ^ 2 := by
+  rw [← real_inner_self_eq_norm_sq, n1_inner_frame hn v v]; ring
+
+private theorem c43_dirF_n {n : Pt} (hn : ‖n‖ = 1) (ψ : ℝ) :
+    inner ℝ (dirF n ψ) n = Real.cos ψ := by
+  unfold dirF
+  rw [inner_add_left, real_inner_smul_left, real_inner_smul_left, c43_pn,
+    real_inner_self_eq_norm_sq, hn]; ring
+
+private theorem c43_dirF_p {n : Pt} (hn : ‖n‖ = 1) (ψ : ℝ) :
+    inner ℝ (dirF n ψ) (perp n) = Real.sin ψ := by
+  unfold dirF
+  rw [inner_add_left, real_inner_smul_left, real_inner_smul_left, c43_np,
+    real_inner_self_eq_norm_sq, norm_perp, hn]; ring
+
+private theorem c43_abs_n {n : Pt} (hn : ‖n‖ = 1) (v : Pt) : |inner ℝ v n| ≤ ‖v‖ := by
+  have := abs_real_inner_le_norm v n; rwa [hn, mul_one] at this
+
+private theorem c43_abs_p {n : Pt} (hn : ‖n‖ = 1) (v : Pt) : |inner ℝ v (perp n)| ≤ ‖v‖ := by
+  have := abs_real_inner_le_norm v (perp n); rwa [norm_perp, hn, mul_one] at this
+
+/-- A slot gives both coordinates within `η`. -/
+private theorem c43_slot_coords {y n q : Pt} (hn : ‖n‖ = 1) {ψ η : ℝ} (h : Slot y n ψ η q) :
+    |inner ℝ (q - y) n - Real.cos ψ| ≤ η ∧
+      |inner ℝ (q - y) (perp n) - Real.sin ψ| ≤ η := by
+  unfold Slot at h
+  constructor
+  · have := c43_abs_n hn (q - y - dirF n ψ)
+    rw [inner_sub_left, c43_dirF_n hn] at this; linarith
+  · have := c43_abs_p hn (q - y - dirF n ψ)
+    rw [inner_sub_left, c43_dirF_p hn] at this; linarith
+
+/-- A slot from the coordinates. -/
+private theorem c43_slot_of {y n q : Pt} (hn : ‖n‖ = 1) {ψ η : ℝ} (hη : 0 ≤ η)
+    (h : (inner ℝ (q - y) n - Real.cos ψ) ^ 2 + (inner ℝ (q - y) (perp n) - Real.sin ψ) ^ 2 ≤
+      η ^ 2) : Slot y n ψ η q := by
+  unfold Slot
+  have e := c43_sq hn (q - y - dirF n ψ)
+  rw [inner_sub_left (q - y) (dirF n ψ), inner_sub_left (q - y) (dirF n ψ) (perp n),
+    c43_dirF_n hn, c43_dirF_p hn] at e
+  nlinarith [norm_nonneg (q - y - dirF n ψ)]
+
+private theorem c43_slot_mono {y n q : Pt} {ψ η η' : ℝ} (h : Slot y n ψ η q) (hle : η ≤ η') :
+    Slot y n ψ η' q := le_trans h hle
+
+/-- Neighbours are unit vectors: `Z² + X² = 1`. -/
+private theorem c43_unit (hX : Normal X) {y n q : Pt} (hn : ‖n‖ = 1) (hq : q ∈ nbδ X y) :
+    inner ℝ (q - y) n ^ 2 + inner ℝ (q - y) (perp n) ^ 2 = 1 := by
+  rw [← c43_sq hn, ← dist_eq_norm, dist_of_mem_nbδ hX hq]; norm_num
+
+/-- Distinct neighbours are `≥ 1` apart, in coordinates. -/
+private theorem c43_sep (hX : Normal X) {y n q q' : Pt} (hn : ‖n‖ = 1) (hq : q ∈ nbδ X y)
+    (hq' : q' ∈ nbδ X y) (hne : q ≠ q') :
+    1 ≤ (inner ℝ (q - y) n - inner ℝ (q' - y) n) ^ 2 +
+      (inner ℝ (q - y) (perp n) - inner ℝ (q' - y) (perp n)) ^ 2 := by
+  have h1 := one_le_dist hX.minDist_eq (mem_nbδ.1 hq).1 (mem_nbδ.1 hq').1 hne
+  have e := c43_sq hn ((q - y) - (q' - y))
+  rw [inner_sub_left (q - y) (q' - y), inner_sub_left (q - y) (q' - y) (perp n),
+    sub_sub_sub_cancel_right] at e
+  rw [dist_eq_norm] at h1
+  nlinarith
+
+private theorem c43_abs_le_one {a b : ℝ} (h : a ^ 2 + b ^ 2 = 1) : |b| ≤ 1 := by
+  rw [abs_le]; constructor <;> nlinarith [sq_nonneg a, sq_nonneg (b - 1), sq_nonneg (b + 1)]
+
+private theorem c43_r_lo : (1732 / 1000 : ℝ) < √3 := by
+  have h := Real.sq_sqrt (show (0 : ℝ) ≤ 3 by norm_num)
+  nlinarith [Real.sqrt_nonneg 3]
+
+private theorem c43_r_hi : √3 < (17321 / 10000 : ℝ) := by
+  have h := Real.sq_sqrt (show (0 : ℝ) ≤ 3 by norm_num)
+  nlinarith [Real.sqrt_nonneg 3]
+
+private theorem c43_r_sq : √3 ^ 2 = 3 := Real.sq_sqrt (by norm_num)
+
+/-- Height lower bound for `S`-neighbours (`frame_outside`). -/
+private theorem c43_S_low (hX : Normal X) {y n q : Pt} (hF : Frame43 X y n) (hq : q ∈ nbδ X y)
+    (hS : q ∈ Sset X) :
+    depth X y - 1 / 49 * |inner ℝ (q - y) (perp n)| ≤ inner ℝ (q - y) n := by
+  have := frame_outside hX hF (by rw [dist_of_mem_nbδ hX hq]; norm_num) (Sset_not_interior hX hS)
+  unfold ε43 at this; exact this
+
+/-- Height upper bound for K-row neighbours (`Frame43.top`). -/
+private theorem c43_K_top {y n q : Pt} (hF : Frame43 X y n) (hq : q ∈ nbδ X y)
+    (hD : q ∉ Dset X) : inner ℝ (q - y) n ≤ depth X y :=
+  hF.top (ball_polygon_a (mem_nbδ.1 hq).1 hD)
+
+/-- Height lower bound for D-neighbours (`frame_D`). -/
+private theorem c43_D_low (hX : Normal X) {y n q : Pt} (hF : Frame43 X y n) (hq : q ∈ nbδ X y)
+    (hD : q ∈ Dset X) :
+    depth X y + tgap X - 1 / 49 * |inner ℝ (q - y) (perp n)| ≤ inner ℝ (q - y) n := by
+  have := frame_D hX hF hD (by rw [dist_of_mem_nbδ hX hq]; norm_num)
+  unfold ε43 at this; exact this
+
+private theorem c43_tgap_pos (hX : Normal X) : 0 < tgap X := by
+  have hT := two_of_pos hX.dist2_pos
+  unfold tgap; linarith [hT.lt]
+
 /-! ## Counting `S`-neighbours -/
 
 /-- At a framed point `m_y ≤ 4`: `S`-neighbours are not interior, so their height is
@@ -65,7 +173,19 @@ Acceptance: no `sorry`.
 Depends on: `card_sep_arc_le_four`, `frame_outside`, `Sset_not_interior`, `one_le_dist`,
 `norm_perp`. Difficulty S–M. -/
 theorem mS_le_four_of_frame (hX : Normal X) {y n : Pt} (hF : Frame43 X y n) : mS X y ≤ 4 := by
-  sorry
+  have hn := hF.unit
+  unfold mS
+  apply card_sep_arc_le_four (y := y) hn
+  · intro q hq; exact dist_of_mem_nbδ hX (mem_filter.1 hq).1
+  · intro q hq q' hq' hne
+    exact one_le_dist hX.minDist_eq (mem_nbδ.1 (mem_filter.1 hq).1).1
+      (mem_nbδ.1 (mem_filter.1 hq').1).1 hne
+  · intro q hq
+    have h1 := mem_filter.1 hq
+    have hlow := c43_S_low hX hF h1.1 h1.2
+    have hu := c43_abs_le_one (c43_unit hX hn h1.1)
+    have := hF.depth_pos
+    nlinarith
 
 /-! ## Lemma P (pairs) -/
 
@@ -85,7 +205,35 @@ Depends on: `n1_inner_frame`, `norm_perp`, `inner_pt`. Difficulty M. -/
 theorem pair_sym {n e₁ e₂ : Pt} (hn : ‖n‖ = 1) (h₁ : ‖e₁‖ = 1) (h₂ : ‖e₂‖ = 1)
     (hsep : 1 ≤ ‖e₁ - e₂‖) :
     |inner ℝ e₁ (perp n) + inner ℝ e₂ (perp n)| ≤ √3 * |inner ℝ e₁ n - inner ℝ e₂ n| := by
-  sorry
+  have e1 := c43_sq hn e₁
+  have e2 := c43_sq hn e₂
+  have e3 := c43_sq hn (e₁ - e₂)
+  rw [h₁] at e1
+  rw [h₂] at e2
+  rw [inner_sub_left, inner_sub_left] at e3
+  set X1 := inner ℝ e₁ (perp n)
+  set X2 := inner ℝ e₂ (perp n)
+  set Z1 := inner ℝ e₁ n
+  set Z2 := inner ℝ e₂ n
+  have hs : 1 ≤ ‖e₁ - e₂‖ ^ 2 := by nlinarith [norm_nonneg (e₁ - e₂)]
+  have hid : (X1 + X2) ^ 2 * ((X1 - X2) ^ 2 + (Z1 - Z2) ^ 2) =
+      (Z1 - Z2) ^ 2 * ((X1 + X2) ^ 2 + (Z1 + Z2) ^ 2) := by
+    have hab : (X1 + X2) * (X1 - X2) + (Z1 - Z2) * (Z1 + Z2) = 0 := by nlinarith
+    linear_combination ((X1 + X2) * (X1 - X2) - (Z1 - Z2) * (Z1 + Z2)) * hab
+  have hsum : (X1 + X2) ^ 2 + (Z1 + Z2) ^ 2 ≤ 3 := by nlinarith
+  have hB : 1 ≤ (X1 - X2) ^ 2 + (Z1 - Z2) ^ 2 := by nlinarith
+  have key : (X1 + X2) ^ 2 ≤ 3 * (Z1 - Z2) ^ 2 := by
+    by_contra hc
+    push Not at hc
+    have h1 : (Z1 - Z2) ^ 2 * ((X1 + X2) ^ 2 + (Z1 + Z2) ^ 2) ≤ 3 * (Z1 - Z2) ^ 2 :=
+      by nlinarith [sq_nonneg (Z1 - Z2)]
+    have h2 : 3 * (Z1 - Z2) ^ 2 * ((X1 - X2) ^ 2 + (Z1 - Z2) ^ 2) <
+        (X1 + X2) ^ 2 * ((X1 - X2) ^ 2 + (Z1 - Z2) ^ 2) :=
+      mul_lt_mul_of_pos_right hc (by linarith)
+    nlinarith [sq_nonneg (Z1 - Z2)]
+  have h3 : |X1 + X2| ≤ |√3 * (Z1 - Z2)| := by
+    rw [← sq_le_sq, mul_pow, c43_r_sq]; exact key
+  rwa [abs_mul, abs_of_pos (Real.sqrt_pos.2 (by norm_num : (0 : ℝ) < 3))] at h3
 
 /-- **Lemma P (K)**: two distinct K-row neighbours are mirror-symmetric: heights within
 `1/49` (both in `[h − 1/49, h]`) and `|X₁ + X₂| ≤ √3/49 < 1/25`.
@@ -102,7 +250,24 @@ theorem pair_K (hX : Normal X) {y n : Pt} (hF : Frame43 X y n) {q₁ q₂ : Pt}
     (hS₁ : q₁ ∈ Sset X) (hD₁ : q₁ ∉ Dset X) (hS₂ : q₂ ∈ Sset X) (hD₂ : q₂ ∉ Dset X) :
     |inner ℝ (q₁ - y) n - inner ℝ (q₂ - y) n| ≤ 1 / 49 ∧
       |inner ℝ (q₁ - y) (perp n) + inner ℝ (q₂ - y) (perp n)| ≤ 1 / 25 := by
-  sorry
+  have hn := hF.unit
+  have l1 := c43_S_low hX hF h₁ hS₁
+  have l2 := c43_S_low hX hF h₂ hS₂
+  have t1 := c43_K_top hF h₁ hD₁
+  have t2 := c43_K_top hF h₂ hD₂
+  have a1 := c43_abs_le_one (c43_unit hX hn h₁)
+  have a2 := c43_abs_le_one (c43_unit hX hn h₂)
+  have hZ : |inner ℝ (q₁ - y) n - inner ℝ (q₂ - y) n| ≤ 1 / 49 := by
+    rw [abs_le]; constructor <;> nlinarith
+  refine ⟨hZ, ?_⟩
+  have hu1 : ‖q₁ - y‖ = 1 := by rw [← dist_eq_norm, dist_of_mem_nbδ hX h₁]
+  have hu2 : ‖q₂ - y‖ = 1 := by rw [← dist_eq_norm, dist_of_mem_nbδ hX h₂]
+  have hsep : 1 ≤ ‖(q₁ - y) - (q₂ - y)‖ := by
+    rw [sub_sub_sub_cancel_right, ← dist_eq_norm]
+    exact one_le_dist hX.minDist_eq (mem_nbδ.1 h₁).1 (mem_nbδ.1 h₂).1 hne
+  have hs := pair_sym hn hu1 hu2 hsep
+  have := c43_r_hi
+  nlinarith [abs_nonneg (inner ℝ (q₁ - y) n - inner ℝ (q₂ - y) n)]
 
 /-- **Lemma P (D)**: two distinct D-neighbours are mirror-symmetric: heights differ by
 `≤ (9/400)|X₁ − X₂| ≤ 9/200` and `|X₁ + X₂| ≤ √3·(9/200) < 2/25`.
@@ -116,7 +281,22 @@ theorem pair_D (hX : Normal X) {y n : Pt} (hF : Frame43 X y n) {q₁ q₂ : Pt}
     (hD₁ : q₁ ∈ Dset X) (hD₂ : q₂ ∈ Dset X) :
     |inner ℝ (q₁ - y) n - inner ℝ (q₂ - y) n| ≤ 9 / 200 ∧
       |inner ℝ (q₁ - y) (perp n) + inner ℝ (q₂ - y) (perp n)| ≤ 2 / 25 := by
-  sorry
+  have hn := hF.unit
+  have hdd := dd_heights hX hF hD₁ hD₂ (dist_of_mem_nbδ hX h₁).le (dist_of_mem_nbδ hX h₂).le
+  have a1 := c43_abs_le_one (c43_unit hX hn h₁)
+  have a2 := c43_abs_le_one (c43_unit hX hn h₂)
+  have hd2 : |inner ℝ (q₁ - y) (perp n) - inner ℝ (q₂ - y) (perp n)| ≤ 2 := by
+    have := abs_sub (inner ℝ (q₁ - y) (perp n)) (inner ℝ (q₂ - y) (perp n)); linarith
+  have hZ : |inner ℝ (q₁ - y) n - inner ℝ (q₂ - y) n| ≤ 9 / 200 := by nlinarith
+  refine ⟨hZ, ?_⟩
+  have hu1 : ‖q₁ - y‖ = 1 := by rw [← dist_eq_norm, dist_of_mem_nbδ hX h₁]
+  have hu2 : ‖q₂ - y‖ = 1 := by rw [← dist_eq_norm, dist_of_mem_nbδ hX h₂]
+  have hsep : 1 ≤ ‖(q₁ - y) - (q₂ - y)‖ := by
+    rw [sub_sub_sub_cancel_right, ← dist_eq_norm]
+    exact one_le_dist hX.minDist_eq (mem_nbδ.1 h₁).1 (mem_nbδ.1 h₂).1 hne
+  have hs := pair_sym hn hu1 hu2 hsep
+  have := c43_r_hi
+  nlinarith [abs_nonneg (inner ℝ (q₁ - y) n - inner ℝ (q₂ - y) n)]
 
 /-! ## The exact hexagon -/
 
@@ -226,7 +406,22 @@ Acceptance: no `sorry`.
 Depends on: `frame_D`, `Frame43.top`, `ball_polygon_a`, `n1_inner_frame`. Difficulty S–M. -/
 theorem pin_cap (hX : Normal X) {y n : Pt} (hF : Frame43 X y n) (hc : CapShape X y n) :
     tgap X ≤ 3 / 5 := by
-  sorry
+  obtain ⟨⟨σ, hσ, p, hp, z, hz, -, hpD, hzD, hsp, hsz⟩, -, -⟩ := hc
+  have hn := hF.unit
+  have htop := c43_K_top hF hp hpD
+  have hfD := c43_D_low hX hF hz hzD
+  obtain ⟨hpZ, -⟩ := c43_slot_coords hn hsp
+  obtain ⟨-, hzX⟩ := c43_slot_coords hn hsz
+  have hcos : Real.cos (σ * (π / 3)) = 1 / 2 := by
+    rcases hσ with rfl | rfl
+    · rw [one_mul, Real.cos_pi_div_three]
+    · rw [neg_one_mul, Real.cos_neg, Real.cos_pi_div_three]
+  rw [hcos] at hpZ
+  rw [Real.sin_zero, sub_zero] at hzX
+  have hz1 := c43_unit hX hn hz
+  have hzZ : inner ℝ (z - y) n ≤ 1 := by nlinarith [sq_nonneg (inner ℝ (z - y) (perp n))]
+  have h1 := (abs_le.1 hpZ).1
+  nlinarith [abs_nonneg (inner ℝ (z - y) (perp n))]
 
 /-! ## Outputs -/
 
