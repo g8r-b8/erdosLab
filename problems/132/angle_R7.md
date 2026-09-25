@@ -8,8 +8,8 @@ Starting point: angle_R6.md — L ≤ 4/3 overall (N3, refereed); 21/16 in Regio
 |---|---|---|
 | A2 | referee Region II: e(S) ≤ s + ½\|Q′\| + C (B2) | **DONE: CORRECT WITH FIXES** (§1) |
 | A3 | referee Region III off-window e(S) ≤ s + 70/d + C, resonance strip, Lemma DP | **DONE: CORRECT WITH FIXES** (§2) |
-| B | average R-weight ≤ 7 in Region II (⇒ 21/16 there, given A2) | **DONE: PROVED, unrefereed** (§3); referee REF_B pending |
-| C | break the Region III resonance window via diametral partners (Lemma DP) | pending |
+| B | average R-weight ≤ 7 in Region II (⇒ 21/16 there, given A2) | **DONE: PROVED, REFEREED (REF_B: correct with fixes)** (§3) |
+| C | break the Region III resonance window via diametral partners (Lemma DP) | **DONE: Theorem W PROVED, unrefereed** (§4); referee REF_C queued |
 | D1 | Region I: average weight ≤ 6 (Conjecture C1) ⇒ 9/7 | pending |
 | E | Region III off the fan pin (\|t − √3/2\| ≥ O(ε₀)): weight ≤ 7 and the \|Q\| term there | queued |
 | D2 | Region I: cross-edge e(D, X∖D) ≤ ½g_D + o(n) via E′ on conv X ⇒ 9/7 | pending |
@@ -21,8 +21,10 @@ at most two at a time; this file is checkpointed and committed after each branch
 Overall bound still **4/3** (refereed). After A2 and A3, the |Q| term is removed (refereed) everywhere except the Region III
 resonance window τ = √3/2 + O(1/R). Off that window, every regime has value max{5/4, 3c/(2c+1)}, so the bound drops below 4/3
 as soon as the average R-weight 2c is < 8 there (branch B). The window itself is branch C.
-Branch B (unrefereed) gives 2c = 7 in Region II, so **21/16 in Regions I, II and τ > 1** (Region II pending the referee).
-Only Region III (√3/2 − 2β < τ < √3/2 + 3β) remains at 4/3.
+Branch B, refereed by REF_B, gives 2c = 7 in Region II, so **21/16 is REFEREED in Regions I, II and τ > 1**.
+Branch C (unrefereed) removes the resonance obstruction: in all of Region III e(S) ≤ s + (2/3)|Q′| + C, so the Region III value is
+max{3c/(2c+1), 9/7}. **Only the R-weight in Region III now stands between 4/3 and a better overall bound.** In Region III fans exist
+at |t − √3/2| = O(ε₀), and N3 gives only c = 4 there. That weight question is branch E.
 
 ## 1. Branch A2: referee of B2's Region II theorem (report `scratchpad/R7/A2_ref/A2_report.md`)
 
@@ -119,6 +121,53 @@ discharging carries over:
 2. Forwarders need not be good, so frame agreement goes through the sender (B1 P0.2).
 3. M7 safety factors.
 
+**Referee REF_B (`scratchpad/R7/REF_B/REF_B_report.md`): CORRECT WITH FIXES.** No counterexample was found, and every margin
+M1–M11 was re-verified rigorously (`r7_refB_margins.py`). The referee also:
+- confirmed the classification is complete with their own slot classifier (`r7_refB_classify.py`);
+- ran an exact Q(√3) search with up to 11 heavy points (`r7_refB_exact.py`, `r7_refB_search.py`). The final charge is ≤ 7, with 0 anomalies.
+
+Fixes (expository; replacement text in REF_B §7):
+- F1: replace Theorem 1 step 1 by a direct argument. D-type neighbours lie within 26.36° of vertical, which with Lemma P gives m ≤ 3 and the kinds {K,K,D}. The fan exclusion via P1.2 is not needed.
+- F2: an optional shorter M7, with about 30° of slack.
+- F3: ψ_K ≈ 90° occurs for every t in Region II (fix the attribution).
+- F4: the frame-agreement distance is ≤ 4, since two forwarders are possible. Use P0.2 with ρ = 6.
+- F5: 𝓡∩D points never receive.
+- F6: the evidence gap is closed.
+
+**So Region II: min ≤ 21n/16 + C, REFEREED.**
+
 **Coordinator remark (new sub-question, Region III).** The fan pin |t − √3/2| < 2·10⁻⁴ (or O(ε₀) for any fixed ε₀) also
 applies inside Region III. So the part of Region III with |t − √3/2| ≥ 5ε₀ + δ₀ has no fans either, and plausibly also has
 weight ≤ 7. The genuinely hard zone is then |t − √3/2| = O(ε₀), which contains the resonance window. This is open and has been queued as branch E.
+
+## 4. Branch C: the resonance window (report `scratchpad/R7/C_window/C_report.md`; UNREFEREED)
+
+**Theorem W.** In all of Region III, e(S) ≤ s + (2/3)|Q′| + C. For R|d| > 4 this improves to s + ½|Q′| + C, and for Rd < −4 to s + C.
+With κ = ½ the LP value is max{3c/(2c+1), 1 + (2/3)/(2·(7/6))} = **max{3c/(2c+1), 9/7}**. Hence:
+- c = 4 gives 4/3;
+- c = 4 − η gives < 4/3;
+- c = 7/2 gives 21/16.
+
+There is also a fallback that uses only AI, SG and NC: θ = 4/5 with value max{3c/(2c+1), 17/13}. It gives the same conclusions for c ≤ 7/2.
+
+Ingredients (exact checks). Write G := 2R sin(θ₀ − π/6); G = 1 is exactly B2's strip.
+1. **Cone lemma and Lemma AI** (`r7_C_cone.py`, `r7_C_cone_ring.py`). Take z_i strictly between z_k and z_l on C(w,Δ). Then any Δ₂-partner of z_i would be
+   diametral to z_k or z_l. So only the two end points at each end of an arc of D-points can be in S. A rung-carrying D-component has ≤ 4
+   S-points, and arc gaps need R|d| ≤ 4. **This kills B2's single-centre strip**: at most 4 of its D-points are in S.
+2. **Lemma SG** (`r7_C_sg.py`). A singleton gap forces |ww′| = |1 − G|. Singleton gaps therefore exist only at G = 1 (same centre) or G ≥ 2, and never for τ ≥ √3/2.
+3. **Lemma NC** (`r7_C_nc.py`). Two consecutive singleton gaps with G ≥ 2 are impossible. This uses the identity |z₀w₂|² = Δ² − 4br sin ψ sin(ψ/2) ∈ (R², Δ²).
+4. **Lemma P4** (`r7_C_p4.py`). At G = 1, same-centre runs of ≥ 3 gaps are impossible. The eliminant polynomials have no real root ≥ 10⁴, and a 60-digit
+   interval evaluation at R = 10⁴ fixes the sign.
+5. **Lemma Q** (`r7_C_q.py`). A K-point with two points of X outward of its whole normal cone has Δ₂-degree 1. This handles d = 0.
+6. The run ratios (gaps per Q′-point) are:
+   - d < 0: ≤ ½;
+   - d > 0 with G ∉ {1} ∪ [2,∞): ≤ 4/9;
+   - G = 1: ≤ 2/3;
+   - G ≥ 2: < 2/3;
+   - d = 0: ≤ 2/3 (charging).
+
+   The LP is checked in `r7_C_lp.py`.
+
+Confidence: high for AI, SG, NC, P4, Q and the LP. Medium-high for the run framework (A3's D1–D4 extended to the closed arcs of unbroken gaps) and the d = 0
+charging argument. Both need a referee. Consistency: ienjoymath's construction lies in Region I with Q = ∅, so AI holds there vacuously. AI also held on 11 991 interior arc points in
+random adversarial sets. Nothing below 9/7 is claimed. Open: whether θ ≤ ½ holds everywhere. This does not matter for the LP.
