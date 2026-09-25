@@ -33,6 +33,12 @@ With g > 1 it searches rational x with denominator dividing g².
 Validation: g = 168, M = 1000 recovers Bremner's k = 4 example (d/168 = 30, 165, 410, 982;
 x = 4·65984625, …) in 17 s.
 
+**⚠ 2026-09-25 incident:** the first M = 50000 launch (8 parallel `dpair` jobs) crashed the Mac twice (kernel
+panics 11:02 and 11:07, 17–22 GB RSS on 16 GB). Cause: `dpair` enumerated every 4-subset of each row's partners
+(C(c,4) keys; rows with c ~ 100+ at M = 50000). Fix: `dpair2.c` finds row-sets by inverted-index intersection
+(memory O(pairs); measured 48 MB peak at the heaviest pivots of M = 50000), in-process cap DPAIR_MEMCAP_MB,
+`watchdog.sh` RSS kill, `run_g1.sh` runs ≤ 2 jobs at once. **Never run old `dpair` with large M.**
+
 ## Results
 Near-miss counters (added 2026-09-25): K₅,₄ = 5 N's sharing a k=4 difference set; K₄,₅ = 4 N's sharing 5 differences.
 

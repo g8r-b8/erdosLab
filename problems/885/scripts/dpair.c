@@ -11,7 +11,7 @@
 // partners give k=5 candidates (4-subsets shared by >= 5 rows).  Every hit is re-verified.
 // Output x-values: any integer x works as N = x with differences 2d (4x + (2d)^2 = (2s)^2).
 //
-// usage: dpair g M part nparts [print_k4]
+// usage: dpair g M part nparts [print_k4] [mstart]   (stderr logs 'pivot m' progress; resume with mstart)
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdint.h>
@@ -66,6 +66,8 @@ int main(int argc, char **argv) {
   if (argc < 5) { fprintf(stderr, "usage: dpair g M part nparts [print_k4]\n"); return 1; }
   uint64_t g = strtoull(argv[1], 0, 10); uint64_t M = strtoull(argv[2], 0, 10);
   int part = atoi(argv[3]), nparts = atoi(argv[4]); int pk4 = argc > 5 ? atoi(argv[5]) : 0;
+  uint64_t mstart = argc > 6 ? strtoull(argv[6], 0, 10) : 1;   // resume: skip pivots < mstart
+  setvbuf(stdout, NULL, _IOLBF, 0);
   uint64_t L = 2 * M + 2;
   spf = calloc(L + 1, sizeof(uint32_t));
   for (uint64_t i = 2; i <= L; i++) if (!spf[i]) for (uint64_t j = i; j <= L; j += i) if (!spf[j]) spf[j] = (uint32_t)i;
@@ -79,6 +81,8 @@ int main(int argc, char **argv) {
   uint64_t divs[1 << 16];
 
   for (uint64_t ma = 1 + part; ma <= M; ma += nparts) {
+    if (ma < mstart) continue;
+    if ((ma - 1 - part) % (50 * nparts) == 0) { fprintf(stderr, "pivot %llu\n", (unsigned long long)ma); fflush(stderr); }
     u128 da = (u128)g * ma;
     size_t np = 0;
     for (uint64_t mb = ma + 1; mb <= M; mb++) {
@@ -110,7 +114,7 @@ int main(int argc, char **argv) {
       size_t j = i; while (j < np && pairs[j].x == pairs[i].x) j++;
       size_t c = j - i;
       if (c >= 3) {
-        uint32_t *B = malloc(c * sizeof(uint32_t)); for (size_t t = 0; t < c; t++) B[t] = pairs[i + t].b;
+        uint32_t Bs[64]; uint32_t *B = c <= 64 ? Bs : malloc(c * sizeof(uint32_t)); for (size_t t = 0; t < c; t++) B[t] = pairs[i + t].b;
         for (size_t q1 = 0; q1 < c; q1++) for (size_t q2 = q1 + 1; q2 < c; q2++) for (size_t q3 = q2 + 1; q3 < c; q3++) {
           if (n3 == capK) { capK *= 2; keys3 = realloc(keys3, capK * sizeof(K)); keys4 = realloc(keys4, capK * sizeof(K)); }
           keys3[n3].key = ((u128)B[q1] << 64) | ((u128)B[q2] << 32) | B[q3]; keys3[n3].x = pairs[i].x; n3++;
@@ -119,7 +123,7 @@ int main(int argc, char **argv) {
             keys4[n4].key = ((u128)B[q1] << 96) | ((u128)B[q2] << 64) | ((u128)B[q3] << 32) | B[q4]; keys4[n4].x = pairs[i].x; n4++;
           }
         }
-        free(B);
+        if (B != Bs) free(B);
       }
       i = j;
     }
