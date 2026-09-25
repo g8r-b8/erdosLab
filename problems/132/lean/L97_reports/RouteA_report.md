@@ -365,7 +365,7 @@ Configurations (45 in the full run, log `scratchpad/l97A_full.log`; all pass):
 
 | family | details | Def − 2A | loss term `(9/2π²)∫Σ∠` |
 |---|---|---|---|
-| ring24, ring60 | unit-chord rings (tight) | 0 | 6.0 (exact value `18/π·π/3·…`; sampled) |
+| ring24, ring60 | unit-chord rings (tight) | 0 | 6 (exact: two side chains per `φ`, each `∠ = π/3`, so `(9/2π²)·2π·(2π/3) = 6`; it is cancelled by `(3/2π)Σ(s_a − cost_a) = 6`) |
 | ringpath60_k | rings cut into A-paths | 15, 30 | ≤ 3 |
 | Mpair (R = 50) | angle_R6 M pair-gap row, 24 chords + apex row | 14 | 0.23 |
 | L1..L4 (R = 50) | angle_R6 L family, 4 periods | 7..15 | ≤ 0.23 |
@@ -451,9 +451,12 @@ does not need.
 3. **Scope.** Theorem A needs only `Y ⊆ K`, `A ⊆ Y ∩ ∂K` and minimum distance 1. Fatness (Lemma F)
    needs `Δ ≤ 1.94Δ₂`. So Route A also re-proves Theorem E′ for every `Y ⊂ X ∩ K`, with error
    `O(h)` in the core step instead of `O(h²)`.
-4. **Downstream (for the paper, not needed for Lean).** With `E = O(h)`, the shell optimisation
-   in E′ Step 0 changes. The error is `O(h) + O(n/ρ₀)`, optimised at `ρ₀ ≈ √n`. That is only
-   useful if `Δ₂/400 ≥ √n`; otherwise the `Δ₂/400` cap binds. So the rate stays `O(n^{2/3})`
-   in general. This point is not examined further.
+4. **Downstream (for the paper, not needed for Lean; NOT checked in detail).** With a core error
+   `E = O(h)`, E′ Step 0 can take `ρ₀ := ⌊min(√n, Δ₂/400)⌋` instead of `n^{1/3}`.
+   - The shell cost `3n/ρ₀` is `O(√n)` in both branches. The `Δ₂/400` branch uses
+     `Δ₂ ≥ √n/7.76` (E′ Step 7).
+   - The core error is `O(ρ₀) = O(√n)`, and the fallbacks F2/F3 cost `O(h)`.
+   - This suggests **Theorem E′ with error `O(√n)`**, hence `9n/7 + O(√n)` for `τ > 1`.
+   - This is a suggestion only; it must be re-derived with care.
 5. **Compute used.** Single process, under 3 GB; float checks about 2 min; exact checks about
    25 s. No Lean compiles.
