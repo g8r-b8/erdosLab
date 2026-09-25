@@ -4,26 +4,52 @@ Branch D1r of angle R7 (Erdős #132 / CDL Problem 1.6), 2026-09-25. It reconstru
 scratchpad wipe. Sources: angle_R7.md §5, D1_excerpt.md (§0–§1), the scripts `r7_D1_*.py` and paper v3 (`paper/paper.tex`).
 New scripts: `scripts/r7_D1r_lemmaS.py` and `scripts/r7_D1r_global.py`.
 
-STATUS: IN PROGRESS (written incrementally)
+STATUS: FINAL (sections 0–10; committed incrementally)
 
 ## 0. Summary of what is proved here
 
-- **Theorem G (proved below, unrefereed).** Work in the nondegenerate regime. For every η > 0 and every κ > 0 there are
-  constants Δ₀(η,κ) and C(η,κ) with the following property. If |t − √3/2| ≥ κ, then Σ_{y∈𝓡} v(y) ≤ (6 + η)|𝓡| + C(η,κ)
-  (and trivially ≤ 6r + ηn + C). D1's statement with κ = κ₁ = 2.1·10⁻³ is the special case θ_s = 10⁻³, ε₀ = 10⁻⁶.
-  The rigorous value at those parameters (Δ₂ ≥ 10⁴) is κ₁ < 1.56·10⁻³ (`r7_D1r_lemmaS.py`).
-- **Corollary 6.1 (proved).** For all t: Σ_𝓡 v ≤ 6r + 2|F*| + ηr + C_η. Here F* is the set of good points y (depth ≤ 1) that have
-  S∩D-neighbours near both ±30° and a K-neighbour near +90° or −90°. At such a point own(y) = 4 exactly.
-- The proof below is new in its details. It follows D1's design: orientation, Lemma O, sector frames and random cuts. It differs from
-  D1's scripts in three repairs, listed in §7:
+- **Theorem G (proved in §3–§5, unrefereed).** Work in the nondegenerate regime. For every η ∈ (0,1] and κ > 0 there is an explicit
+  C(η,κ) such that:
+
+  |t − √3/2| ≥ κ  ⇒  Σ_{y∈𝓡} v(y) ≤ (6 + η)|𝓡| + C(η,κ).
+
+  - The proof needs no hypothesis on τ or Δ₂ beyond the nondegenerate regime; small Δ₂ is absorbed into C.
+  - For fixed κ the error can be taken to be O_κ(r^{2/3}) (Remark 5.2).
+  - D1's κ₁ = 2.1·10⁻³ corresponds to angular tolerance θ = 10⁻³ and ε₀ = 10⁻⁶. At those parameters the rigorous value is κ(10⁻³) < 1.553·10⁻³
+    (`r7_D1r_lemmaS.py`). In general κ(θ) ≤ 1.51·max(θ, ε₀) + 3.01ε₀ + 2/Δ₂ (Lemma 4.0).
+- **Corollary 6.1 (proved, §6).** For all t: Σ_𝓡 v ≤ 6r + 2|F*₄| + ηr + C ≤ 6r + 2|F*| + ηr + C. Here:
+  - F* is the set of good points y (depth ≤ 1) with S∩D-neighbours near both ±30° and a K-neighbour near +90° or −90°;
+  - F*₄ ⊆ F* is the set where own(y) = 4. At every point of F*, own(y) ≤ 4; elsewhere off Exc, own ≤ 3;
+  - F* ≠ ∅ forces |t − √3/2| ≤ κ(θ), and 2|F*| ≤ 3|S∩D|.
+
+  Costs per fan type: F6, F5 and the bare (4,4) fan cost exactly 2; HF2-type points cost 0 or 2; HF1 and caps cost 0.
+- **Theorem 9.1 (assembled, §9).** For κ ≤ 0.019, min{μ(Δ₂), μ(δ)} ≤ (9/7 + η)n + C(η,κ) whenever |t − √3/2| ≥ κ. This covers
+  Regions I, II, τ > 1 and Region III off the fan zone. It matches the lower bound 9/7 (attained in Region I by ienjoymath's
+  construction), and it rests on the statuses of the e(S) bounds listed in §9 (Region III uses Theorem W).
+- **Method.** Orientation (Σv = 2E_𝓡) plus Lemma O locally. Globally:
+  - frames are cut in the **Gauss map** of ∂K (random offset);
+  - the deep zone has **one** frame, with a **random depth threshold**;
+  - corners and curvature cost O(1) by the multiplicity lemma, since the total turning is 2π, and the deep interface costs ≤ 3r/M (§4).
+
+  The flat-hexagon excess 6k − 3 (exact) is Θ(√r), and it is paid by that interface (§4.5).
+- **Changes from D1.** Three repairs (§7):
   1. Edges at 𝓡∩D points are owned by the 𝓡∩D end.
-  2. The deep zone gets its own global frame, with a random depth threshold.
-  3. Lemma S is proved directly from the frame lemma, (G5) and Lemma DN, without P4's δ₀-flat model.
-- All three D1 referee flags are resolved (§8).
+  2. The deep zone gets one global frame with a random threshold.
+  3. Lemma S is proved directly from the frame lemma, (G5), Lemma DN and Lemma 2.2(b), without paper §10's δ₀-flat model.
+
+  There is also one simplification: Gauss-map sectors instead of arc-length sectors.
+- **D1's flags.** All three are resolved (§8).
+- **Scripts.** `r7_D1r_lemmaS.py` (Lemma S constants, 60-digit intervals) and `r7_D1r_global.py`:
+  - A: exact hexagon excess;
+  - B: rigorous constants;
+  - C: global random test of the ownership rule on curved ball polygons.
+
+  All pass.
+- **Self-critique.** §10 lists every step I am less than fully sure of.
 
 ## 1. Set-up, exact facts, and the bookkeeping lemma
 
-Notation follows paper v3 §2 and §7:
+Notation follows paper v3 §2 and §6:
 - δ = 1, R = Δ₂, Δ = Δ₂ + t, K = ∩_{w∈X} D(w, Δ₂);
 - D = endpoints of diametral pairs, S = points with a Δ₂-partner, 𝓡 = X∖S, r = |𝓡|;
 - v(y) = deg y + m_y, where m_y = #neighbours in S;
@@ -640,3 +666,55 @@ window. There:
 So **everything off the fan zone is 9/7 + η, and inside it the question is exactly the density of F*₄** (branch E). Since κ may be taken
 arbitrarily small (at the cost of C), the statement "L ≤ 9/7" would follow from Theorem 9.1 together with any uniform bound of the form
 |F*₄| ≤ o(r) + C that holds for all t in a fixed neighbourhood of √3/2. This is not proved here.
+
+## 10. Self-critical list: every step I am less than fully sure of
+
+Confidence scale: **high** = I checked every inequality and see no gap; **medium-high** = the argument is complete but uses a fact I did not
+write out in full, or it has not been independently checked.
+
+1. **Overall status.** Theorem G, Corollary 6.1 and Theorem 9.1 are **unrefereed**. D1r is a reconstruction. D1's lost text may have
+   differed, and nothing here certifies it. A hostile referee (REF_D1) should check §3–§6.
+2. **Lemma S (§3). High.** The numerical side conditions are certified at 60 digits (`r7_D1r_lemmaS.py`, `r7_D1r_global.py` B1–B2). The
+   logical steps (a)–(d) were rechecked for this report. The one place I would ask a referee to look twice is step (c): D-neighbour
+   levels are compared through Lemma DN with ξ = ζ = 1. That lemma needs z ∈ D ∩ D(y, ρ) with ρ = 1, |z_x| ≤ 1 and z_z ≤ 1. Neighbours
+   satisfy all three, since z_z = c − h ≤ 1.
+3. **∠(ν(y), ν(u)) ≤ turn(γ_{yu}) (Lemma 4.5(1)). High.** This uses two standard convexity facts that are not in the paper: the normal
+   image of a connected boundary arc is a connected arc of S¹, and a nearest boundary point of an interior point is a smooth point. The
+   second is proved in §4.2 (the inscribed disc D(y, h)). If turn(γ) ≥ π the inequality is trivial.
+4. **Multiplicity count (Lemma 4.5(2)). High.** Every edge yu with b ∈ γ_{yu} has y within Λ₁ + T of b, so the number of such edges is
+   ≤ 6·#{points within Λ₁ + T of b}. Paper Lemma 2.5 then applies verbatim, including to degenerate one-point arcs.
+5. **ℓ-thin alternative (Lemma 4.6). High.** Paper Lemma 9.2 is applied with p, b the two feet, which lie on ∂K, and with ℓ = 2M + 3 ≥ 1.
+   If the chord is < 1, the hypothesis |pb| ≤ ℓ still holds.
+6. **Random T (Lemma 4.4). High.** h = dist(·, ℝ²∖int K) is 1-Lipschitz, and e(𝓡∖D) ≤ 3r.
+7. **Corollary 6.1 cost table (§6). Medium-high for the type descriptions, high for the accounting.** The inequality own(y) ≤ 3 + 1[y ∈ F*₄]
+   follows rigorously from Lemma S(2) and rules O1–O3. The table's type names (F6, F5, HF1, HF2, cap) and the angular estimates in its
+   notes transfer paper Lemma 9.7's classification (proved at ε₀ = 1/50) to tolerance a. They are descriptive and not needed for any
+   inequality.
+8. **Remark 5.2 (O(r^{2/3})). Medium-high.** I checked the dependence of each constant on M: M_seam = O(M²), N_thin = O(M²), and
+   Δ₂* = O(M) forces r = O(1) in the small-Δ₂ case. I did not write out the explicit constant.
+9. **Theorem 9.1 inherits the status of its e(S) inputs.**
+   - Region I and τ > 1: paper v3, refereed.
+   - Region II: paper Theorem 11.3, one referee pass.
+   - Region III off the fan zone: Theorem W of branch C, one referee pass (REF_C), not yet in the paper, and relying on μ(Δ₂) ≤ (3/2)s − ½|Q′| + C_V
+     for its Q′.
+
+   An error in Theorem W would lower only the Region III row, to max{3c/(2c+1), 4/3}.
+10. **Non-uniformity.** C(η, κ) → ∞ as κ → 0 (N_ng = O(1/κ), seams O(η⁻²κ⁻¹)). Theorem G says nothing uniform on the fan zone, and
+    Corollary 6.1 moves the whole difficulty into |F*₄|.
+11. **The test scripts are evidence, not proof.**
+    - Part C of `r7_D1r_global.py` is a floating-point test on toy configurations (no D, toy S outside int K, no pinning of t). It tests the
+      bookkeeping (one owner per edge, Lemma O, the fan pattern of Lemma S(1)–(2), and the scaling of the three costs), not Lemma S(3).
+    - Parts A and B are exact or rigorous.
+    - `r7_D1_ring.py` (ienjoymath consistency) is a float screen, and needs numpy (`python3`, not `.venv`).
+12. **Numbering.** References to paper v3 use the numbering of `paper/paper.aux`: frame = Lemma 9.3, DN = 9.4, packing = 9.2,
+    fewbad = 9.5, multiplicity = 2.5, big turning = 6.4, structure of R = §6.1. §3 originally cited frame/DN as 9.2/9.3; that has been
+    corrected.
+
+**What is proved, precisely.** In the nondegenerate regime, for every η > 0 and κ > 0:
+- Σ_𝓡 v ≤ (6 + η)r + C(η, κ) whenever |t − √3/2| ≥ κ (Theorem G);
+- for all t, Σ_𝓡 v ≤ 6r + 2|F*₄| + ηr + C (Corollary 6.1), with F* ≠ ∅ only if |t − √3/2| ≤ κ(θ).
+
+With the e(S) bounds of the table in §9, these give min{μ(Δ₂), μ(δ)} ≤ (9/7 + η)n + C(η, κ) off the fan zone. I found no gap I could
+not close.
+
+STATUS: FINAL
