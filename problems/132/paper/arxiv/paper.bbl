@@ -99,6 +99,10 @@ Martin Kneser, \emph{Absch{\"a}tzung der asymptotischen {D}ichte von
   rare distances for point sets with coordinates in restricted fields; accessed
   23 September 2026.
 
+\bibitem{MoharThomassen}
+Bojan Mohar and Carsten Thomassen, \emph{Graphs on surfaces}, Johns Hopkins
+  University Press, Baltimore, 2001.
+
 \bibitem{MomiharaShinohara}
 Koji Momihara and Masashi Shinohara, \emph{Distance sets on circles}, Amer.
   Math. Monthly \textbf{124} (2017), no.~3, 241--254.
@@ -106,6 +110,15 @@ Koji Momihara and Masashi Shinohara, \emph{Distance sets on circles}, Amer.
 \bibitem{MP11}
 Filip Mori\'c and David Pritchard, \emph{Counting large distances in convex
   polygons: a computational approach}, arXiv:1103.0412, 2011.
+
+\bibitem{Schneider}
+Rolf Schneider, \emph{Convex bodies: The {B}runn--{M}inkowski theory}, second
+  expanded ed., Encyclopedia of Mathematics and its Applications, vol. 151,
+  Cambridge University Press, Cambridge, 2014.
+
+\bibitem{Steinhagen}
+Paul Steinhagen, \emph{{\"U}ber die gr{\"o}{\ss}te {K}ugel in einer konvexen
+  {P}unktmenge}, Abh. Math. Sem. Univ. Hamburg \textbf{1} (1922), 15--26.
 
 \bibitem{TV06}
 Terence Tao and Van~H. Vu, \emph{Additive combinatorics}, Cambridge Studies in

@@ -1,0 +1,308 @@
+% ======================================================================
+% paper_v3_regionII_fragment.tex
+% Branch "Region II": extends Theorem 1(b) (21/16) to Region II,
+% sqrt3/2 + 3 beta <= tau <= 1 (nondegenerate regime).
+% To be inserted after \cref{sec:P4} (i.e. just before \section{A layer bound ...}).
+% Uses only labels defined in paper.tex (v3 draft of 25 Sep 2026) or defined here
+% (prefix sec:II, thm:II, lem:II, rem:II, eq:II).
+%
+% Proposed consequential edits elsewhere in paper.tex (NOT made here):
+%  * Intro, Theorem 1(b): replace the hypothesis by
+%      "If $\tau(X)\le\sqrt3/2-1/50$ or $\tau(X)\ge\sqrt3/2+3/100$, then ..."
+%    (the constant C_1 = 2*10^32 is unchanged; see the proof of thm:IIone).
+%  * Abstract: "When tau(X) <= sqrt3/2 - 0.02 or tau(X) > 1" -> "... or tau(X) >= sqrt3/2 + 0.03".
+%  * Status paragraph of the intro, rem:bottleneck(b), rem:N3(b), and the
+%    opening sentence of sec:P4 mention that Regions II/III are stuck at 4/3 because
+%    of the p-term; after this section only Region III is.
+%  * app:verification: add the scripts listed in \cref{sec:IIchecks}.
+% ======================================================================
+
+\section{Region II: Theorem 1(b) for \texorpdfstring{$\sqrt3/2+3\beta\le\tau\le1$}{sqrt3/2 + 3 beta <= tau <= 1}}\label{sec:II}
+
+In Region~II the bound $e(S)\le s+p+C$ of \cref{sec:regionII} carries the full $p$-term, and by \cref{rem:lpvalues} this caps the method at $\frac43$ whatever the average weight on $R$. In this section we show that in Region~II with $\tau\le1$ the $p$-term can be halved, $e(S)\le s+\frac12p+C$ (\cref{thm:IIe}), and that the average weight on $R$ is at most $7$ there as well (\cref{thm:IIw}). Halving the $p$-term is exactly what the weights $\frac58,\frac38$ of \cref{lem:lpavg}(b) can absorb (\cref{lem:IIlp}). Together with \cref{sec:P4} this gives Theorem~1(b) on both sides of Region~III.
+
+\begin{theorem}[Theorem 1(b), extended]\label{thm:IIone}
+Let $X\subset\R^2$ be a set of $n$ points. If $\tau(X)\le\sqrt3/2-1/50$ or $\tau(X)\ge\sqrt3/2+3/100$, then
+\[
+\min\{\mult(\Dt),\mult(\delta)\}\ \le\ \tfrac{21}{16}\,n+C_1,\qquad C_1=2\cdot10^{32}.
+\]
+\end{theorem}
+So the only range of $\tau$ in which the bound is still $\frac43n+C_0$ is Region~III, $\sqrt3/2-1/50<\tau(X)<\sqrt3/2+3/100$.
+
+\emph{Status.} The two new inputs, \cref{thm:IIe} and \cref{thm:IIw}, have each been through one independent referee pass. Both passes found the results correct and found no counterexample; they asked for a missing step in the disjointness of the arcs below (\cref{lem:IIdisj}, the case of two components with the same centre), a corrected justification of the count of shared endpoints (proof of \cref{thm:IIe}), a justification of the crossing argument (\cref{lem:IIord}), explicit constants (\cref{lem:IIcons}), a direct proof of $m_y\le3$ that does not go through fans (\cref{lem:IIS}), a shorter proof that receivers have $m\le1$ (\cref{lem:IIrecv}), and a correct statement of how the frames of different senders are compared (\cref{lem:IIloads}). These corrections are incorporated below. \Cref{thm:IIe,thm:IIw} are not formalised. Computer checks (\cref{sec:IIchecks}) are exact checks of constants and of special configurations, and floating-point screenings; they are evidence, not part of the proof.
+
+\begin{lemma}[linear combination with half the $p$-term]\label{lem:IIlp}
+If $e(S)\le s+\frac12p+C$ and $\sum_{y\in R}v(y)\le7r+C''$, then $\min\{\mult(\Dt),\mult(\delta)\}\le\frac{21}{16}n+\frac38\bigl(C+\frac12C''\bigr)$.
+\end{lemma}
+\begin{proof}
+By \cref{lem:identity}, $\mult(\delta)\le s+\frac12p+\frac72r+C+\frac12C''$. By \cref{lem:VSQ}, $\mult(\Dt)\le\frac32s-\frac12p$; here $Q$ is, by definition, the set of \emph{all} points of $S$ of $\Dt$-degree exactly $1$, which is what the proof of \cref{lem:VSQ} uses, and $p=|Q|$ is the same quantity as in the bound on $e(S)$. Hence
+\[
+\tfrac58\bigl(\tfrac32s-\tfrac12p\bigr)+\tfrac38\bigl(s+\tfrac12p+\tfrac72r+C+\tfrac12C''\bigr)=\tfrac{21}{16}(s+r)-\tfrac18p+\tfrac38\bigl(C+\tfrac12C''\bigr),
+\]
+and $-\frac18p\le0$.\chk{LP}
+\end{proof}
+(In the terms of \cref{rem:lpvalues}: with $e(S)\le s+\frac12p+O(1)$ the weight on $\mult(\Dt)$ must be at least $\frac12$ to cancel the $p$-term, and the value is $\max\{\frac54,\frac{3c}{2c+1}\}$ for average weight $2c$. For $2c=8,7,6$ this is $\frac43,\frac{21}{16},\frac97$.\chk{LP})
+
+\begin{proof}[Proof of \cref{thm:IIone} from \cref{thm:IIe,thm:IIw}]
+If $n\le3$ or $X$ has only one distance there is nothing to prove. In the degenerate regime $\min\{\mult(\Dt),\mult(\delta)\}\le n+1\le\frac{21}{16}n+1$ (\cref{prop:degenerate}). In the nondegenerate regime with $\Dt<2\cdot10^{15}$ the bound $3n<1.9\cdot10^{32}$ of the proof of Theorem~1(b) in \cref{sec:P4} applies. So let $\Dt\ge2\cdot10^{15}$. If $\tau\le\sqrt3/2-1/50$ or $\tau>1$, Theorem~1(b) is proved in \cref{sec:P4}. Otherwise $\sqrt3/2+3\beta\le\tau\le1$ (recall $3\beta=3/100$), and \cref{thm:IIe}, \cref{thm:IIw} and \cref{lem:IIlp} give
+\[
+\min\{\mult(\Dt),\mult(\delta)\}\le\tfrac{21}{16}n+\tfrac38\bigl(C_{\mathrm{bad}}+87+\tfrac12C_4\bigr)<\tfrac{21}{16}n+2.5\cdot10^{25}.
+\]
+So $C_1=2\cdot10^{32}$ still suffices.
+\end{proof}
+
+\subsection{Rungs in Region II: \texorpdfstring{$e(S)\le s+\frac12p+C$}{e(S) <= s + p/2 + C}}\label{sec:IIe}
+
+\begin{theorem}\label{thm:IIe}
+In the nondegenerate regime with $\Dt\ge10^4$ and $\sqrt3/2+3\beta\le\tau\le1$,
+\[
+e(S)\ \le\ s+\tfrac12p+C_{\mathrm{bad}}+87 .
+\]
+\end{theorem}
+
+Throughout this subsection we assume the hypotheses of \cref{thm:IIe}. We use the notation of \cref{sec:common,sec:regionII}: $\theta_0=\arccos\tau<26.4^\circ$, $\sigma=\sqrt{1-\tau^2}\le\sigma_{\max}<0.4441$,\chk{C5} $t\le1$ and $t\ge\tau$. All rungs below are good rungs; $\rho$ is their number, and by (R1) of \cref{sec:regionII} every vertex is an end of at most one of them. We put
+\[
+\alpha_1:=2\arcsin\frac1{2\Delta},\qquad \alpha_2:=2\arcsin\frac1{2\Dt},\qquad \varphi_\tau:=\arcsin\frac{\sigma}{\Delta}\in[0,\pi/2).
+\]
+So two points of $\Cc(w,\Delta)$ (resp.\ $\Cc(w,\Dt)$) at distance $1$ are at angle $\alpha_1$ (resp.\ $\alpha_2$) about $w$, and $\alpha_2>\alpha_1$. For a point $w$ we write $\vartheta(x)$ for the polar angle of $x$ about $w$; it will only be used on arcs of angular width less than $\pi$, on which we fix a continuous branch. ``Counterclockwise'' refers to this angle. Recall from \cref{sec:regionIII} (the paragraph on the rotational sense and \cref{lem:cyclic}) that in both rows ``right'' means counterclockwise along the boundary, and that a right T-step between two points of $\Cc(w,\Delta)$ is counterclockwise about $w$; the same holds, with the same proof, for a right T-step between two points of $\Cc(w,\Dt)\cap\partial K$.
+
+\begin{lemma}[rung geometry]\label{lem:IIrung}
+Let $(v,z)$ be a rung with $v\in S\setminus D$, and let $w:=w_v$, $u:=u_v$.
+\begin{enumerate}[label=\textup{(\alph*)}]
+\item $z-w=-(\Dt+\tau)u\pm\sigma u^\perp$ and $|z-w|=\Delta$. Hence $\vartheta(z)=\vartheta(v)+\varsigma\varphi_\tau$ for a sign $\varsigma=\varsigma_{(v,z)}\in\{\pm1\}$, the \emph{sign} of the rung \textup{(}if $\sigma=0$ we put $\varsigma:=+1$\textup{)}.
+\item $2\varphi_\tau<\alpha_1$.
+\item Along the segment from $v$ to $z$ the distance to $w$ increases strictly from $\Dt$ to $\Delta$, and $\vartheta$ is monotone. So the segment is the graph $\{\vartheta=g(\varrho)\}$ of a continuous monotone function $g$ of $\varrho=|x-w|\in[\Dt,\Delta]$.
+\end{enumerate}
+\end{lemma}
+\begin{proof}
+(a) By \cref{lem:identities}(c), $z-v=-\tau u\pm\sigma u^\perp$, and $v-w=-\Dt u$. So $|z-w|^2=(\Dt+\tau)^2+\sigma^2=\Dt^2+2\Dt\tau+1=\Delta^2$, by the definition $\tau=(\Delta^2-\Dt^2-1)/(2\Dt)$ (\cref{sec:setup}). The component of $z-w$ along $(v-w)/\Dt=-u$ is $\Dt+\tau>0$ and the orthogonal component has length $\sigma$, so the angle at $w$ between $v$ and $z$ is $\arcsin(\sigma/\Delta)=\varphi_\tau$.\chk{IIh}
+(b) $\sin\varphi_\tau=\sigma/\Delta<1/(2\Delta)=\sin(\alpha_1/2)$, since $\sigma<\frac12$ in Region~II. (In fact $2\varphi_\tau/\alpha_1\le2\sigma<0.8881$.)\chk{IIh}
+(c) For $x=v+\lambda(z-v)$, $\lambda\in[0,1]$, we have $x-w=-(\Dt+\lambda\tau)u\pm\lambda\sigma u^\perp$, so $|x-w|^2=(\Dt+\lambda\tau)^2+\lambda^2\sigma^2$ is strictly increasing in $\lambda$ (as $\tau>0$), and the angle between $x-w$ and $-u$ is $\arctan(\lambda\sigma/(\Dt+\lambda\tau))$, which is nondecreasing in $\lambda$.
+\end{proof}
+
+\begin{lemma}[a rung-carrying D-row component lies on one circle]\label{lem:IIZ}
+Let $(v,z)$ be a rung, $w:=w_v$, and let $Z$ be the component of $z$ in the graph of pure D-row T-edges.
+\begin{enumerate}[label=\textup{(\alph*)}]
+\item $Z\subseteq\Cc(w,\Delta)$; consecutive points of $Z$ are at angle exactly $\alpha_1$ about $w$, all in the counterclockwise sense; $Z$ spans an angle at most $\pi/3$ about $w$; and $Z$ is a path.
+\item If $|Z|\ge2$ and $(v',z')$ is any rung with $z'\in Z$, then $w_{v'}=w$.
+\end{enumerate}
+We call $w$ the \emph{centre} of $Z$; by \textup{(b)} it does not depend on the rung when $|Z|\ge2$.
+\end{lemma}
+\begin{proof}
+(a) By \cref{lem:IIrung}(a), $|zw|=\Delta$, so $w$ is a diametral partner of $z$ and $\hat w:=(w-z)/\Delta$ is an inward normal of $P$ at $z$ (\cref{lem:identities}(a) and the remark after it). The angle between $\hat w$ and $u_v=(w-v)/\Dt$ is the angle at $w$ of the triangle $vzw$; it is opposite the side $vz$ of length $1$, hence acute, and by the law of sines it is at most $\arcsin(1/\Delta)$. Also $\angle(u_v,u_z)\le\beta$ because the rung is good. Let $z_1$ be a T-neighbour of $z$ in $Z$ (on either side). Then $(z_1-z)\cdot u_z\in(0,\beta)$, so $\angle(z_1-z,u_z)\ge\pi/2-\arcsin\beta$ and
+\[
+\eta:=(z_1-z)\cdot\hat w\le\sin\bigl(\arcsin\beta+\beta+\arcsin(1/\Delta)\bigr)<0.0201<t .\chk{IIh}
+\]
+By \cref{lem:B} (whose threshold is at least $t$ since $t\le1$), $|z_1w|=\Delta$. From here on the proof of \cref{lem:Bprime} applies verbatim: a vertex $z_k\in Z\cap\Cc(w,\Delta)$ that has both a left and a right T-neighbour has a normal cone within $\arcsin\beta$ of $u_{z_k}$, and its other T-neighbour is again on $\Cc(w,\Delta)$; inducting outwards from $z$ (every vertex reached after the first step has the vertex it was reached from as a T-neighbour, so it is an interior vertex whenever it has a further T-neighbour) puts every vertex of $Z$ on $\Cc(w,\Delta)$. The induction never starts at an end vertex of $Z$ other than $z$ itself, and at $z$ the direction $\hat w$ is controlled by the rung triangle as above. The statements about angles, the counterclockwise sense, the span and the path structure follow as in \cref{lem:Bprime}.
+
+(b) As $|Z|\ge2$ and $Z$ is connected, $z'$ has a T-neighbour $z_1'\in Z$. By (a) applied to $(v',z')$, $z',z_1'\in\Cc(w_{v'},\Delta)$, and by (a) applied to $(v,z)$, $z',z_1'\in\Cc(w,\Delta)$. If $w\neq w_{v'}$, these are two circles of radius $\Delta$ whose centres are points of $X$, at distance $d\le\Delta$; they meet in two points at distance $2\sqrt{\Delta^2-d^2/4}\ge\sqrt3\,\Delta>1$, which contradicts $|z'z_1'|=1$. So $w_{v'}=w$.
+\end{proof}
+
+By (R1) at D-vertices, a component $Z$ with $|Z|=1$ carries at most one rung. For a component $Z$ let $m_Z$ be the number of rungs whose D-end lies in $Z$; so $\sum_Zm_Z=\rho$, and $m_Z\ge2$ implies $|Z|\ge2$. For such $Z$, with centre $w$, all these rungs have K-ends on $\Cc(w,\Dt)$ (\cref{lem:IIZ}(b)), and by \cref{lem:IIrung}(a) all their endpoints lie in an arc of angular width at most $\pi/3+2\varphi_\tau<\pi$ about $w$.
+
+\begin{lemma}[order]\label{lem:IIord}
+Let $Z$ have centre $w$ and let $(v_A,z_A)\neq(v_B,z_B)$ be rungs with $z_A,z_B\in Z$ and $\vartheta(z_A)<\vartheta(z_B)$. Then $\vartheta(v_A)<\vartheta(v_B)$.
+\end{lemma}
+\begin{proof}
+By (R1) the four points are distinct, and $v_A,v_B\in\Cc(w,\Dt)$, so $\vartheta(v_A)\neq\vartheta(v_B)$. Suppose $\vartheta(v_A)>\vartheta(v_B)$. By \cref{lem:IIrung}(c), each rung is the graph of a continuous function $g_A$, $g_B$ of $\varrho\in[\Dt,\Delta]$, inside an annular sector of opening less than $\pi$. Now $g_A-g_B$ is positive at $\varrho=\Dt$ and negative at $\varrho=\Delta$, so it vanishes at some $\varrho^*\in(\Dt,\Delta)$: the two segments cross at a point $x$ that is interior to both. If the four points are not collinear, the triangle inequality gives $|v_Av_B|+|z_Az_B|<|v_Ax|+|xv_B|+|z_Ax|+|xz_B|=|v_Az_A|+|v_Bz_B|=2$, so one of $|v_Av_B|,|z_Az_B|$ is less than $1$, a contradiction. If they are collinear, both segments lie on one line through $x$, along which $|\cdot-w|$ increases from the $v$-end to the $z$-end on both segments (\cref{lem:IIrung}(c)); at the interior point $x$ this is the same direction of the line, so both $v_A$ and $v_B$ are the point of that line at distance $\Dt$ from $w$ on the same side of $x$, i.e.\ $v_A=v_B$, a contradiction.
+\end{proof}
+
+\subsubsection*{Gaps}
+Let $Z$ be a component with $m_Z\ge2$ and centre $w$. Order its rungs $A_1,\dots,A_{m_Z}$ by $\vartheta$ of their D-ends (distinct by (R1)). A \emph{gap} is a pair $(A,B)=(A_i,A_{i+1})$ of consecutive rungs; $Z$ has $m_Z-1$ gaps. Write $A=(v_A,z_A)$, $B=(v_B,z_B)$ and $\varsigma_A,\varsigma_B$ for their signs. By \cref{lem:IIZ}(a), $\vartheta(z_B)-\vartheta(z_A)=k\alpha_1$ with an integer $1\le k$, $k\alpha_1\le\pi/3$; by \cref{lem:IIrung}(a) and \cref{lem:IIord},
+\begin{equation}\label{eq:IIgapangle}
+0<\vartheta(v_B)-\vartheta(v_A)=k\alpha_1-(\varsigma_B-\varsigma_A)\varphi_\tau<\pi .
+\end{equation}
+Let $\gamma_{AB}$ be the arc of $\Cc(w,\Dt)$ from $v_A$ counterclockwise to $v_B$.
+
+\begin{lemma}[the arc of a gap]\label{lem:IIarc}
+Let $(A,B)$ be a gap.
+\begin{enumerate}[label=\textup{(\alph*)}]
+\item $\gamma_{AB}\subseteq\partial K$.
+\item Follow pure right T-edges in the K-row from $v_0:=v_A$: $v_0,v_1,\dots$. As long as $v_i\in\gamma_{AB}\setminus\{v_B\}$ and $v_i$ has a pure right T-neighbour, that neighbour is the point of $\gamma_{AB}$ at angle $\alpha_2$ counterclockwise from $v_i$. Consequently either the walk reaches $v_B$, which happens only if $\vartheta(v_B)-\vartheta(v_A)=j\alpha_2$ with an integer $j\ge1$, and then $v_1,\dots,v_{j-1}$ are K-row points in the relative interior of $\gamma_{AB}$; or it stops at a K-row point $b\in\gamma_{AB}\setminus\{v_B\}$ that has no pure right T-neighbour.
+\end{enumerate}
+\end{lemma}
+\begin{proof}
+(a) This is the paragraph ``The arc between consecutive apexes'' in \cref{sec:regionIII}, which uses only that $v_A,v_B\in K\cap\Cc(w,\Dt)$ are less than $\pi$ apart about $w$ \eqref{eq:IIgapangle}. (b) The proof of \cref{lem:rigid} uses only (a), the fact that $w_{v_A}=w$ (here \cref{lem:IIZ}(b)), and $v_B\in X$; it applies verbatim. The walk cannot pass $v_B$, since a point of $\gamma_{AB}$ at angle in $(0,\alpha_2)$ from $v_B$ is at distance less than $1$ from it.
+\end{proof}
+
+We call the gap \emph{unbroken} if the walk of \cref{lem:IIarc}(b) reaches $v_B$, and \emph{broken} otherwise; $U$ denotes the number of unbroken gaps, and $U_Z$ the number in $Z$. For an unbroken gap, $j\ge1$ is its number of K-steps and $k\ge1$ its number of D-steps, and \eqref{eq:IIgapangle} reads
+\begin{equation}\label{eq:IIstar}
+j\alpha_2=k\alpha_1-(\varsigma_B-\varsigma_A)\varphi_\tau .
+\end{equation}
+
+\begin{lemma}[disjointness of gap arcs]\label{lem:IIdisj}
+Two closed arcs $\gamma_{AB}\neq\gamma_{A'B'}$ of gaps are disjoint, except when the gaps are consecutive gaps $(A,B)$, $(B,B')$ of the same component, which share exactly the point $v_B$. In particular the half-open arcs $[v_A,v_B):=\gamma_{AB}\setminus\{v_B\}$ of all gaps are pairwise disjoint.
+\end{lemma}
+\begin{proof}
+\emph{Same component $Z$.} By \cref{lem:IIord} the K-ends of the rungs of $Z$ are in the same order about $w$ as their D-ends, so the arcs of the gaps of $Z$ are consecutive intervals of angles, $[\vartheta(v_{A_i}),\vartheta(v_{A_{i+1}})]$; two of them meet only if they are consecutive, in the common endpoint.
+
+\emph{Different components $Z\neq Z'$ with the same centre $w$.} Both lie on $\Cc(w,\Delta)$, and all points of $X$ on this circle lie in an arc of width at most $\pi/3$ (they are pairwise at most $\Delta$ apart). A point of $Z'$ at angle less than $\alpha_1$ from a point of $Z$ would be at distance less than $1$ from it, and it cannot coincide with it. Since consecutive points of $Z$ are exactly $\alpha_1$ apart, every angle in $[\min\vartheta(Z),\max\vartheta(Z)]$ is within $\alpha_1/2$ of a point of $Z$; so no point of $Z'$ has its angle in this range, and every point of $Z'$ is at angle at least $\alpha_1$ from $\min\vartheta(Z)$ and from $\max\vartheta(Z)$. As consecutive points of $Z'$ are also exactly $\alpha_1$ apart, $Z'$ cannot have points on both sides of the range of $Z$. Hence the angular ranges $[\min\vartheta(Z),\max\vartheta(Z)]$ and $[\min\vartheta(Z'),\max\vartheta(Z')]$ are disjoint and at least $\alpha_1$ apart. By \cref{lem:IIrung}(a) the K-ends of the rungs of $Z$ lie in $[\min\vartheta(Z)-\varphi_\tau,\max\vartheta(Z)+\varphi_\tau]$, and likewise for $Z'$. Since $2\varphi_\tau<\alpha_1$ (\cref{lem:IIrung}(b)), these two closed intervals are disjoint. The arcs of the gaps of $Z$ lie in the first, those of $Z'$ in the second.
+
+\emph{Different centres $w\neq w'$.} Let $x$ be a common point of $\gamma_{AB}\subseteq\Cc(w,\Dt)$ and $\gamma_{A'B'}\subseteq\Cc(w',\Dt)$, both nondegenerate arcs of $\partial K$ (\cref{lem:IIarc}(a)). If $x$ were in the relative interior of $\gamma_{AB}$, then near $x$ the boundary $\partial K$ coincides with $\gamma_{AB}$ on both sides of $x$, and $\gamma_{A'B'}$ would contain a nondegenerate arc of $\partial K$ lying on both circles, forcing $w=w'$. So $x$ is an endpoint of both arcs, i.e.\ the K-end of a rung $A$ or $B$ and of a rung $A'$ or $B'$. By (R1), $x$ is the K-end of only one rung; the D-end of that rung lies in one component, and the centre of that component is $w_x$ (\cref{lem:IIZ}(b)). So both gaps have centre $w_x$, a contradiction.
+
+For the last statement: the only common point of two closed gap arcs is $v_B$ for consecutive gaps $(A,B),(B,B')$, and $v_B\notin[v_A,v_B)$.
+\end{proof}
+
+\begin{theorem}[break count]\label{thm:IIBC}
+$e(S)\le s+U+70+C_{\mathrm{bad}}$.
+\end{theorem}
+\begin{proof}
+If the K-row or the D-row has at most $2$ points, then $\rho\le2$ by (R1), and $e(S)\le e_T+\rho+C_{\mathrm{bad}}\le s+2+C_{\mathrm{bad}}$ by (T1). Otherwise define $B_K,B_D$ as in \cref{sec:regionIII}; by \cref{lem:cyclic} and \cref{lem:mixedT} (fewer than $71$ mixed T-edges in Region~II), as in~\eqref{eq:eTbreaks},
+\[
+e_T\le s-B_K-B_D+70,
+\]
+and a row point with no pure right T-neighbour is the left element of a pair counted in $B_K$ or $B_D$.
+
+\emph{K-breaks.} By \cref{lem:IIarc}(b) every broken gap $(A,B)$ has a K-row point $b_{AB}\in[v_A,v_B)$ with no pure right T-neighbour. By \cref{lem:IIdisj} these points are distinct for distinct gaps, so they give distinct pairs in $B_K$, and $B_K\ge\sum_Z(m_Z-1-U_Z)$, the sum over components with $m_Z\ge1$.
+
+\emph{D-breaks.} Every component $Z$ with $m_Z\ge1$ is a path (\cref{lem:IIZ}(a); this includes $|Z|=1$), and its counterclockwise last vertex has no pure right T-neighbour; distinct components give distinct such vertices. So $B_D\ge\#\{Z:m_Z\ge1\}$.
+
+Adding, $B_K+B_D\ge\sum_Z(1+m_Z-1-U_Z)=\rho-U$, and
+\[
+e(S)\le e_T+\rho+C_{\mathrm{bad}}\le s-(\rho-U)+70+\rho+C_{\mathrm{bad}}=s+U+70+C_{\mathrm{bad}}.\qedhere
+\]
+\end{proof}
+
+\begin{lemma}[signs of unbroken gaps]\label{lem:IIcons}
+\begin{enumerate}[label=\textup{(\alph*)}]
+\item At most $6$ unbroken gaps have $\varsigma_A=\varsigma_B$.
+\item At most $24$ rungs $B$ are shared by two unbroken gaps $(A,B)$ and $(B,C)$.
+\end{enumerate}
+\end{lemma}
+\begin{proof}
+\emph{Arithmetic.} Suppose $J\alpha_2=K\alpha_1$ with integers $J\ge1$, $K\ge1$. Since $\alpha_2>\alpha_1$, $K>J$, so $J(\alpha_2-\alpha_1)=(K-J)\alpha_1\ge\alpha_1$ and $K\alpha_1\ge1/(1/\alpha_1-1/\alpha_2)$. As in the paragraph ``The path cannot land on $v_B$'' of \cref{sec:regionIII}, $1/\alpha_1-1/\alpha_2\le t+1/(23\Dt)$, and $t\le1$, $\Dt\ge10^4$ give $J\alpha_2=K\alpha_1>0.99999$.\chk{IIh}
+
+(a) If $\varsigma_A=\varsigma_B$, \eqref{eq:IIstar} reads $j\alpha_2=k\alpha_1$, so $\gamma_{AB}$ has angle greater than $0.99999$ and length greater than $0.99999\,\Dt$. By \cref{lem:IIdisj} the half-open arcs are disjoint, and the perimeter of $K\subseteq\Dd(w,\Dt)$ is at most $2\pi\Dt$; as $2\pi/0.99999<6.3$, there are at most $6$ such gaps.\chk{IIh}
+
+(b) Let $(A,B)$ and $(B,C)$ be unbroken gaps of one component. If one of them has equal signs, $B$ is one of the at most $2\cdot6$ rungs of the gaps in (a). Otherwise $\varsigma_A=-\varsigma_B=\varsigma_C$, and adding~\eqref{eq:IIstar} for the two gaps gives $(j+j')\alpha_2=(k+k')\alpha_1$; the walk from $v_A$ reaches $v_C$ along $\gamma_{AB}\cup\gamma_{BC}$, and by the arithmetic above this arc has length greater than $0.99999\,\Dt$. Each point of $\partial K$ lies in at most one half-open gap arc, hence in at most two of the half-open arcs $[v_A,v_C)$, so there are at most $4\pi/0.99999<12.6$ such rungs $B$. In total at most $12+12=24$.\chk{IIh}
+\end{proof}
+(By the same arithmetic, same-sign unbroken gaps are impossible when $t<3/\pi-1/(23\Dt)$, since then $k\alpha_1>\pi/3$; we do not need this.)
+
+\begin{proof}[Proof of \cref{thm:IIe}]
+We show $2U\le p+34$; with \cref{thm:IIBC} this gives $e(S)\le s+\frac12p+17+70+C_{\mathrm{bad}}$.
+
+\emph{Endpoints.} Let $(A,B)$ be a gap. Its K-ends $v_A,v_B$ are rung K-ends. A rung K-end of $\Dt$-degree at least $2$ is of type (i) or of type (ii) (\cref{lem:corner} and \cref{sec:regionII}). There are at most $5$ vertices of type (i), each the K-end of at most one rung, which is an end rung of at most two gaps; so at most $10$ pairs (gap, endpoint) involve a vertex of type~(i). If $v$ is of type (ii), its rung partner $z$ has no T-neighbour (\cref{lem:C}), so its component is $\{z\}$, $m_{\{z\}}=1$, and the rung is in no gap. All other gap endpoints have $\Dt$-degree $1$, i.e.\ lie in $Q$.
+
+\emph{Interior walk points.} Let $(A,B)$ be unbroken, with walk $v_A=v_0,v_1,\dots,v_j=v_B$. For $0<i<j$, $v_i$ is a K-row point in the relative interior of $\gamma_{AB}\subseteq\Cc(w,\Dt)\cap\partial K$, and $|v_iw|=\Dt$. Suppose $|v_iw'|=\Dt$ for some $w'\in X\setminus\{w\}$. Since $K\subseteq\Dd(w',\Dt)$, $\gamma_{AB}$ is contained in $\Cc(w,\Dt)\cap\Dd(w',\Dt)$, which is a closed arc whose endpoints are the points of $\Cc(w,\Dt)\cap\Cc(w',\Dt)$. So $v_i$ is an endpoint of that arc, and cannot be a relative interior point of $\gamma_{AB}$. Hence $v_i\in Q$.
+
+So the closed arc $\gamma_{AB}$ of an unbroken gap contains the $j+1\ge2$ distinct K-row points $v_0,\dots,v_j$, all in $Q$ except for the type-(i) endpoints counted above.
+
+\emph{Counting.} By \cref{lem:IIdisj} two closed arcs of distinct gaps share a point only if they are consecutive gaps $(A,B),(B,C)$, and then they share only $v_B$. (A shared endpoint $v_B=v_{A'}$ means, by (R1), $B=A'$; equal left ends, or equal right ends, give the same gap.) By \cref{lem:IIcons}(b) this happens for at most $24$ rungs $B$ with both gaps unbroken. Hence
+\[
+2U-10\le\sum_{(A,B)\text{ unbroken}}\#\bigl(Q\cap\gamma_{AB}\bigr)\le p+24,
+\]
+and $2U\le p+34$.
+\end{proof}
+
+\begin{remark}\label{rem:IIsharp}
+\begin{enumerate}[leftmargin=2em,label=(\alph*)]
+\item The factor $\frac12$ cannot be improved by an argument of this local kind. Take $w=0$, K-row points on $\Cc(0,\Dt)$ and D-row points on $\Cc(0,\Delta)$, with rungs of alternating signs and one K-step and one D-step per gap, at the value of $\tau$ (with $1-\tau=1/(8\Dt^2)+O(\Dt^{-4})$) at which~\eqref{eq:IIstar} holds with $j=k=1$. In $60$-digit arithmetic at $\Dt=10^4$ (script \texttt{r7\_A2\_configs.py}, configuration A) all distances in a window of $8$ gaps are at least $1$, the unit pairs are exactly the expected T-edges and rungs, and the window has $e-s=U-1$ and $2U$ points of $\Dt$-degree $1$. This is a local configuration; whether it extends to a set with $\Theta(n)$ unbroken gaps is not known.
+\item Conversely, a short argument (the radial ``shadow'' of a K-row point contains no point of the D-row) suggests that $U=O(1)$ in Region~II except on a single curve $\alpha_2-\alpha_1=2\varphi_\tau$; this has not been refereed and is not used here.
+\end{enumerate}
+\end{remark}
+
+\subsection{Average weight at most 7 in Region II}\label{sec:IIw}
+
+\begin{theorem}\label{thm:IIw}
+Assume the nondegenerate regime with $\Dt\ge2\cdot10^{15}$ and $\sqrt3/2+3\beta\le\tau\le1$. Then
+\[
+\sum_{y\in R}v(y)\ \le\ 7r+C_4,\qquad C_4=1.3\cdot10^{26}.
+\]
+\end{theorem}
+
+Throughout this subsection we assume the hypotheses of \cref{thm:IIw}. Then $\tau\le1$ gives $t\le1$ and $t\ge\tau\ge t_{\mathrm{II}}:=\sqrt3/2+3\beta>0.89602$ (\cref{sec:setup}).\chk{IIh}
+
+\emph{What is used from \cref{sec:N3,sec:P4}.} We use the parameters $\eps_0=10^{-6}$, $\Lambda=10^9$, $\rho=6$, $\delta_0=10^{-4}$ and the notion of a good$'$ point of \cref{sec:P4}. The following statements are proved in \cref{sec:N3,sec:P4} without using any hypothesis on $\tau$ (the standing assumption of \cref{sec:P4} that $\tau\le\sqrt3/2-2\beta$ or $\tau>1$ is not used in their proofs), and we use them verbatim: \cref{sec:structR}, \cref{lem:frame} (in particular (G5)), \cref{lem:DN}, \cref{lem:fewbad2}, \cref{lem:flatmodel}, and the consequences stated after \cref{tab:margins}: for a good$'$ point $y$ and a neighbour $q$ of $y$ at angle $\psi$ with height $c(q)=\cos\psi$, a K-neighbour has $c\in[h-\delta_0,h]$ and $|\psi|<90^\circ+\eps_0$, a D-neighbour (in $S$ or in $R$) has $c\in[h+H-\delta_0,h+H+\delta_0]$ with $H\ge t-\delta_0/2$, an interior neighbour has $c<h$, and so \emph{a neighbour with $c>h$ is a D-neighbour}; two K-neighbours, or two D-neighbours, form a mirror pair up to $0.012^\circ$, and there are at most two of each kind; and for an interior point $x\in\Dd(y,5)$ at depth $d$ and a neighbour $q$ of $x$ in direction $\theta$ from the upward vertical, $\cos\theta\in[d-\delta_0,d]$ if $q\in S\setminus D$ and $\cos\theta\ge d+H-\delta_0$ if $q\in D$; in particular an interior point of depth greater than $1+\delta_0$ has no neighbour in $S$. By \cref{sec:structR}(b) every neighbour of $y$ is a K-neighbour, a D-neighbour or an interior neighbour, and the neighbours in $S$ are the K-neighbours and the D-neighbours in $S$; there are no points of $R$ on $\partial K$, and $h>0$. The Region-dependent results \cref{lem:S3,lem:classP4,lem:recv2,lem:cone,lem:Th,lem:loads} are \emph{not} used; they are replaced by \cref{lem:IIS,lem:IIclass,lem:IIrecv,lem:IIloads}. We do not use pinning (\cref{lem:flatmodel}(c)) either: only the lower bound $H\ge t-\delta_0/2$ on the level of diametral points enters.
+
+\begin{lemma}\label{lem:IIS}
+Let $y$ be good$'$. Then $y$ has at most one D-neighbour, and every D-neighbour has $|\psi|<26.38^\circ$. Consequently $m_y\le3$, and if $m_y=3$ the neighbours of $y$ in $S$ are two K-neighbours and one D-neighbour.
+\end{lemma}
+\begin{proof}
+A D-neighbour has $c\ge h+H-\delta_0\ge t-\frac32\delta_0\ge t_{\mathrm{II}}-\frac32\delta_0>0.89587>\cos26.38^\circ$, since $h>0$.\chk{IIh} Two neighbours are at least $60^\circ$ apart as seen from $y$, so they cannot both lie in the open cone $|\psi|<26.38^\circ$. There are at most two K-neighbours, and every neighbour in $S$ is a K-neighbour or a D-neighbour.
+\end{proof}
+This replaces the fan analysis of \cref{sec:N3,sec:P4}: in particular there are no fans (F6, F5, HF) and no caps among good$'$ points in Region~II.
+
+\begin{lemma}[classification]\label{lem:IIclass}
+Let $y$ be good$'$ with $v(y)\ge8$. Then $v(y)=8$ and $y$ is of one of the following types.
+\begin{enumerate}[leftmargin=4.6em]
+\item[\textup{(A)}] $(\deg y,m_y)=(6,2)$: the neighbours form a regular hexagon within $0.012^\circ$ of $\{\pm30^\circ,\pm90^\circ,\pm150^\circ\}$; the two near $\pm30^\circ$ are K-neighbours and the other four are interior; $h\ge\sqrt3/2$; the neighbours near $\pm150^\circ$ have depth greater than $1.73$.
+\item[\textup{(Dt$_{\mathrm{II}}$)}] $(\deg y,m_y)=(5,3)$: K-neighbours at $\psi_-<0<\psi_+$ with $|\psi_\pm|\in[84.02^\circ,90.006^\circ]$, one D-neighbour in $S$ at $\psi_D$ with $|\psi_D|<26.38^\circ$, and two interior neighbours with angles in the arc $I_y:=[\psi_++60^\circ,\ \psi_-+300^\circ]$; moreover $h\le1-t+\frac32\delta_0<0.10413$.
+\end{enumerate}
+\end{lemma}
+\begin{proof}
+By \cref{lem:IIS}, $m_y\le3$, and $\deg y\le6$; so $v(y)\ge8$ leaves $(\deg y,m_y)\in\{(6,2),(6,3),(5,3)\}$.
+
+\emph{$\deg y=6$.} Six neighbours pairwise at least $60^\circ$ apart form a regular hexagon $\{\varphi+60^\circ k\}$ with $\varphi\in[-30^\circ,30^\circ]$. The slot at $\varphi$ has $c\ge\cos30^\circ$, and one of the slots $\varphi\pm60^\circ$ has $|\psi|\le60^\circ$, hence $c\ge\frac12$. If $h<\frac12$, both of these slots have $c>h$ and are D-neighbours, contradicting \cref{lem:IIS}. So $h\ge\frac12$; then a D-neighbour would need $c\ge h+H-\delta_0\ge\frac12+t_{\mathrm{II}}-\frac32\delta_0>1.39$, which is impossible, so $y$ has no D-neighbour and every slot has $c\le h$. The slot at $\varphi$ gives $h\ge\sqrt3/2$. A K-neighbour then has $c\ge h-\delta_0\ge\sqrt3/2-\delta_0$, i.e.\ $|\psi|\le30.012^\circ$.\chk{IIh} Two slots of the hexagon are $60^\circ$ apart, so at most two slots qualify, and two only if they lie within $0.012^\circ$ of $\pm30^\circ$. Hence $m_y\le2$, $(6,3)$ is impossible, and $(6,2)$ is type A: the other four neighbours are not in $S$ and are not D-neighbours, so they are interior (\cref{sec:structR}(b)). The neighbours near $\pm150^\circ$ have depth $h-\cos\psi\ge\sqrt3/2+\cos30.012^\circ>1.7319$.\chk{IIh}
+
+\emph{$(\deg y,m_y)=(5,3)$.} By \cref{lem:IIS} the neighbours in $S$ are two K-neighbours, a mirror pair at $\psi_-<0<\psi_+$, and a D-neighbour in $S$ at $|\psi_D|<26.38^\circ$. Since $c(\text{D-neighbour})\le1$, we get $h\le1-H+\delta_0\le1-t+\frac32\delta_0\le1-t_{\mathrm{II}}+\frac32\delta_0<0.10413$. Each K-neighbour has $\cos\psi_\pm\in[h-\delta_0,h]\subseteq[-\delta_0,0.10413]$, so $|\psi_\pm|\in[84.02^\circ,90.006^\circ]$.\chk{IIh} The two remaining neighbours are not in $S$, and are not D-neighbours by \cref{lem:IIS}; so they are interior. Each is at least $60^\circ$ from $\psi_-$, $\psi_D$ and $\psi_+$. It cannot lie in the upper arc $(\psi_-,\psi_+)$: there it would lie between $\psi_D$ and $\psi_+$ (or $\psi_-$) at least $60^\circ$ from both, which needs $\psi_+-\psi_D\ge120^\circ$, i.e.\ $\psi_+>93.6^\circ$. So both lie in $I_y$.
+\end{proof}
+
+So in Region~II every good$'$ point has weight at most $8$. We move the excess over $7$.
+
+\subsubsection*{Discharging}
+Every good$'$ point $y$ with $v(y)=8$ sends charge to two of its interior neighbours, its \emph{receivers}:
+\begin{itemize}[leftmargin=2em]
+\item type A: $\frac12$ to each of the neighbours near $\pm150^\circ$;
+\item type Dt$_{\mathrm{II}}$: $\frac12$ to each of its two interior neighbours.
+\end{itemize}
+Then every receiver $x$ with $v(x)=7$ (a \emph{forwarder}) passes all the charge it has received to the neighbour $g$ of $x$ with $g-x=x-k$, where $k$ is the unique neighbour of $x$ in $S$ (\cref{lem:IIrecv}(c) shows that $k$ is unique and $g$ exists). The point $g$ is the \emph{target} of $x$.
+
+\begin{lemma}[receivers]\label{lem:IIrecv}
+Let $x$ be a receiver of a good$'$ point $y$; depths and directions at $x$ are measured in the frame of $y$.
+\begin{enumerate}[label=\textup{(\alph*)}]
+\item If $y$ is of type A, then $x$ has depth greater than $1.73$, so $m_x=0$ and $v(x)\le6$.
+\item If $y$ is of type Dt$_{\mathrm{II}}$, then $x$ has depth $d_x\in[0.86597,1.10413]$; $x$ has no D-neighbour; every K-neighbour of $x$ is in a direction $\beta$ with $|\beta|\le30.02^\circ$; $y$ is seen from $x$ in a direction $\theta_y$ with $|\theta_y|\le35.98^\circ$; and $m_x\le1$, so $v(x)\le7$.
+\item If $v(x)=7$, then $y$ is of type Dt$_{\mathrm{II}}$, $\deg x=6$, $x$ has exactly one neighbour $k$ in $S$, a K-row point in a direction $\beta$ with $|\beta|\le30.02^\circ$, and the target $g=2x-k$ is a neighbour of $x$ of depth greater than $1.73$; so $m_g=0$ and $v(g)\le6$.
+\end{enumerate}
+In particular every receiver and every target lies in $R\setminus D$ and has $m\le1$, so it is not a sender.
+\end{lemma}
+\begin{proof}
+Receivers are interior neighbours of $y$, so they lie in $\operatorname{int}K$ and hence in $R\setminus D$. The depth of the neighbour of $y$ at angle $\psi$ is $h-\cos\psi$.
+
+(a) By \cref{lem:IIclass}. An interior point of depth greater than $1+\delta_0$ has no neighbour in $S$.
+
+(b) Let $x$ be at angle $\psi_x\in I_y$. If $\psi_x\le180^\circ$, then $\cos\psi_x\le\cos(\psi_++60^\circ)$ and $h\ge\cos\psi_+$, so $d_x\ge\cos\psi_+-\cos(\psi_++60^\circ)=\sin(\psi_++30^\circ)\ge\sin120.006^\circ>0.86597$, as $\sin$ is decreasing on $[114^\circ,120.006^\circ]$; the case $\psi_x\ge180^\circ$ is symmetric with $\psi_-$.\chk{IIh} Also $d_x\le h+1<1.10413$. A D-neighbour of $x$ would need $\cos\theta\ge d_x+H-\delta_0>0.86597+0.8958>1$; so there is none. A K-neighbour has $\cos\beta\ge d_x-\delta_0>0.86587$, i.e.\ $|\beta|\le30.02^\circ$.\chk{IIh} As seen from $x$, $y$ is in the direction $\theta_y=\psi_x-180^\circ\in[\psi_+-120^\circ,\psi_-+120^\circ]\subseteq[-35.98^\circ,35.98^\circ]$.\chk{IIh}
+
+Suppose $x$ had two K-neighbours, at $\beta_1<\beta_2$. They are at least $60^\circ$ apart and $|\beta_i|\le30.02^\circ$, so $\beta_1\le-29.98^\circ$ and $\beta_2\ge29.98^\circ$. The point $y\in R$ is a third neighbour of $x$, at least $60^\circ$ from both. If $\theta_y\le\beta_1$, then $\beta_1-\theta_y\le-29.98^\circ+35.98^\circ<60^\circ$; if $\theta_y\ge\beta_2$, then likewise $\theta_y-\beta_2<60^\circ$. So $\beta_1<\theta_y<\beta_2$, and then $\beta_2-\beta_1\ge120^\circ>60.04^\circ$. This contradiction gives $m_x\le1$. (This argument does not depend on $t$; in particular it covers the case $|\psi_\pm|\approx90^\circ$, $h\approx0$, which occurs for every $t\in[t_{\mathrm{II}},1]$.)
+
+(c) By (a), $y$ is of type Dt$_{\mathrm{II}}$, and by (b) $m_x=1$ and $\deg x=6$, with $k$ a K-row point at $|\beta|\le30.02^\circ$. Six neighbours pairwise at least $60^\circ$ apart form a regular hexagon, so $g=x-(k-x)$ is a neighbour of $x$. Its depth is $d_x+\cos\beta\ge2d_x-\delta_0>1.7318$.\chk{IIh} As $g\in\Dd(y,2)$, it has no neighbour in $S$.
+\end{proof}
+
+\begin{lemma}[loads]\label{lem:IIloads}
+A forwarder receives exactly $\frac12$. Every point of $R$ receives at most $1$ in total, directly or by forwarding.
+\end{lemma}
+\begin{proof}
+\emph{Frames.} Let $x$ receive charge. Its \emph{senders} are good$'$ points of type A or Dt$_{\mathrm{II}}$ of which $x$ is a receiver, and forwarders of which $x$ is the target; a forwarder need not be good$'$, and all statements about it are made in the frame of its own (good$'$, type Dt$_{\mathrm{II}}$) sender. Every direct sender of $x$ is at distance $1$ from $x$, and the sender of a forwarder of $x$ is at distance at most $2$ from $x$. So all good$'$ points involved lie within distance $4\le\rho-1$ of each other, and by (G5) their frames differ by rotations of at most $\eps_0$. Directions of unit vectors between points of $X$ therefore agree in all these frames up to $\eps_0<10^{-4}$ degrees, which is negligible against the margins below (at least $24^\circ$). The quantities $m$ and $v$ do not depend on a frame.
+
+\emph{Forwarders.} A forwarder has $v=7$, hence $m=1$; by \cref{lem:IIrecv}(a),(c) it is not a receiver of a type-A point and not a target. So all its senders are of type Dt$_{\mathrm{II}}$, at directions in $[-35.98^\circ,35.98^\circ]$, and its neighbour $k\in S$ is at $|\beta|\le30.02^\circ$. Suppose it had two senders, at $\delta_1<\delta_2$. Then $\delta_2-\delta_1\ge60^\circ$ gives $\delta_1\le-24.02^\circ$ and $\delta_2\ge24.02^\circ$. The neighbour $k$ is at least $60^\circ$ from both: if $\beta$ lies between them this needs $\delta_2-\delta_1\ge120^\circ>71.96^\circ$, and otherwise $|\beta|\ge84^\circ$. Both are impossible. So a forwarder has exactly one sender and passes on exactly $\frac12$.
+
+\emph{Loads.} As seen from $x$, a type-A sender is within $0.012^\circ$ of $\pm30^\circ$ (its receivers are near $\pm150^\circ$), a type-Dt$_{\mathrm{II}}$ sender is in $[-35.98^\circ,35.98^\circ]$ (\cref{lem:IIrecv}(b)), and a forwarder $x'$ with target $x$ is in the direction of its neighbour $k$ as seen from $x'$, i.e.\ at $|\beta|\le30.02^\circ$ (\cref{lem:IIrecv}(c)). Senders of $x$ are distinct neighbours of $x$, pairwise at least $60^\circ$ apart, in a window of width less than $72^\circ<120^\circ$; so $x$ has at most two senders. Each gives $\frac12$. Hence the load of $x$ is at most $1$.
+\end{proof}
+
+\begin{proof}[Proof of \cref{thm:IIw}]
+Give each $y\in R$ the charge $v(y)$ and apply the rules; charge moves only between points of $R$, so the total is unchanged. A good$'$ point of weight $8$ (type A or Dt$_{\mathrm{II}}$) sends $1$ and receives nothing (receivers and targets have $m\le1$, hence weight at most $7$), so it ends at $7$. A forwarder has weight $7$, receives $\frac12$ and passes it on, so it ends at $7$. Every other receiver or target has weight at most $6$ (\cref{lem:IIrecv}) and receives at most $1$ (\cref{lem:IIloads}), so it ends at most at $7$. Points of $R\cap D$ are never receivers (receivers are interior points of $K$). Every other point keeps its weight; this is at most $7$ unless the point has weight at least $8$ and is not good$'$ (\cref{lem:IIclass}). By \cref{lem:fewbad2} there are fewer than $N'_{\mathrm g}=2.6\cdot10^{25}$ such points; they never receive, and they end at most at $12$ (\cref{lem:identity}). Hence $\sum_{y\in R}v(y)\le7r+5N'_{\mathrm g}<7r+1.3\cdot10^{26}$.
+\end{proof}
+
+\begin{remark}\label{rem:IIw}
+\begin{enumerate}[leftmargin=2em,label=(\alph*)]
+\item The fan windows of \cref{lem:pin} ($t\in[0.75,0.95]$) come from the coarse parameter $\eps_0=1/50$ of \cref{sec:N3}. With the parameters of \cref{sec:P4}, \cref{lem:IIS} shows directly that in Region~II ($t\ge0.896$) no good$'$ point has two D-neighbours, so fans and caps do not occur there.
+\item As in \cref{rem:P4}(a), the exact stack of hexagonal rows below a straight K-row has average weight $6$ on $R$ but per-period weights $8,6,\dots,6,4$, independently of $t$; so radius-one discharging stops at $7$ in Region~II as well. An average weight $6+o(1)$ in Region~II would give $\frac97$ there by \cref{lem:IIlp} and \cref{rem:lpvalues}.
+\end{enumerate}
+\end{remark}
+
+\subsection{Computations for this section}\label{sec:IIchecks}
+The checks marked \chk{IIh} (and \chk{LP} in \cref{lem:IIlp}) are elementary numerical inequalities; they were recomputed with $40$-digit arithmetic. The following scripts (in \texttt{problems/132/scripts}) were run with the repository's Python environment; none of them is part of the proof.
+\begin{itemize}[leftmargin=2em]
+\item \texttt{r7\_A2\_constants.py}: the identity $|z-w|=\Delta$ of \cref{lem:IIrung}(a) (symbolically), the bound $2\varphi_\tau/\alpha_1<0.8881$, the counts $6$ and $24$ of \cref{lem:IIcons}, and the values of the linear combination. All checks pass.
+\item \texttt{r7\_A2\_configs.py}: exact ($60$-digit) configurations in the single-centre model near $\tau=1$ and near $\tau=\sqrt3/2+3\beta$, including configuration A of \cref{rem:IIsharp}(a), and two candidate configurations that turn out not to be realisable. No configuration violates \cref{thm:IIBC}, \cref{lem:IIcons} or \cref{thm:IIe}.
+\item \texttt{r7\_A2\_shadow.py}: the computations behind \cref{rem:IIsharp}(b) (not used).
+\item \texttt{r7\_B\_margins.py}: $60$-digit interval checks of the angular and depth margins of \cref{sec:IIw} (with slightly more conservative constants than in the text). All pass.
+\item \texttt{r7\_B\_lattice\_t1.py}: an exact rational model at $t=1$; in $2\cdot10^4$ random dense configurations the heavy points are of types A and Dt$_{\mathrm{II}}$ only, and the final charge is at most $7$.
+\item \texttt{r7\_B\_classify.py} and \texttt{r7\_B\_rules.py}: a slot-model scan over $t\in[0.896,1]$ (only types A and Dt$_{\mathrm{II}}$ occur, maximal weight $8$), and a floating-point beam search over $1.8\cdot10^5$ configurations of the discharging (maximal final charge $7$).
+% NOTE for the coordinator: r7_B_classify.py and r7_B_rules.py import helper files
+% r6_below_classify_B1copy.py and r6_below_rule_check_B1copy.py, which are NOT in
+% problems/132/scripts (they are in scratchpad/R7/B_weight7/). In the repository these two
+% scripts currently fail with FileNotFoundError; they pass when run next to the helpers.
+% The referee's own scripts r7_refB_{margins,classify,search,exact}.py (scratchpad/R7/REF_B/)
+% also pass and should be copied into problems/132/scripts if this branch is adopted.
+\end{itemize}
