@@ -183,12 +183,52 @@ def stress_step2_3(N: int) -> Counter:
     """Steps 2-3: with b'=b, P2 fails a side condition, P1 extreme iff s>2t, and then every
     unit neighbour c' of p' in the extremality range has |c'p| > Delta.
 
-    TODO: implement.
-    What's missing: evaluate the two apexes and a dense gamma sweep.
-    Acceptance: Counter with zero 'FAIL ...' keys; reports min(|c'p| - Delta) > 0.
-    Depends on: trapezoid, is_extreme, st_grid.
+    Also checks the extremality-range claim: a unit neighbour c' of p' strictly on x's side of
+    line p'u but outside (pi/2+phi, 3pi/2-phi) makes p' non-extreme in {u, b, c'}.
     """
-    raise NotImplementedError("steps 2-3 stress")
+    C: Counter = Counter()
+    worst = math.inf
+    for (s, t) in st_grid(N):
+        T = trapezoid(s, t)
+        if T is None:
+            continue
+        Dl, P = T
+        x, p, u, b, w = P['x'], P['p'], P['u'], P['b'], P['w']
+        if t >= 1:
+            continue
+        d, c = -u[1], math.sqrt(1 - t * t)
+        P1, P2 = (0.0, c - d), (0.0, -d - c)
+        # P2: the two side conditions of hook 2 are incompatible
+        sw = cross(x, u, P2) * cross(x, u, w) > 0
+        sb = cross(u, P2, b) * cross(u, P2, x) < 0
+        C['P2: side conditions incompatible' if not (sw and sb) else 'FAIL P2'] += 1
+        # P1: extreme iff s > 2t
+        ext = is_extreme(P1, [x, p, u, b, w, P1])
+        if s <= 2 * t + 1e-12:
+            C['P1, s<=2t: not extreme' if not ext else 'FAIL P1 extreme with s<=2t'] += 1
+            continue
+        C['P1, s>2t'] += 1
+        phi = math.asin(t)
+        for a in range(1, 2000):
+            gam = math.pi / 2 - phi + (math.pi) * a / 2000        # whole open x-side of line p'u
+            cp = (math.cos(gam), P1[1] + math.sin(gam))
+            if cross(P1, u, cp) * cross(P1, u, x) <= 0:
+                C['FAIL side param'] += 1
+                continue
+            inrange = math.pi / 2 + phi < gam < 3 * math.pi / 2 - phi
+            if not inrange:
+                C['c\' outside range: p\' not extreme' if not is_extreme(P1, [u, b, cp, P1])
+                  else 'FAIL range'] += 1
+                continue
+            gap = math.dist(cp, p) - Dl
+            if gap <= 0:
+                C['FAIL step3'] += 1
+            else:
+                C['c\' in range: |c\'p| > Delta'] += 1
+                # normalised margin: gap / (distance of gamma to the endpoint c'=u)
+                worst = min(worst, gap / (3 * math.pi / 2 - phi - gam))
+    C['min normalised margin x1e6'] = int(worst * 1e6)
+    return C
 
 
 def stress_lemma_D(N: int) -> Counter:
