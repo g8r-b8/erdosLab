@@ -1,8 +1,21 @@
 # REF_core — hostile referee of `CoreE` and of the visible-path proof (RouteA_visiblepath_report.md)
 
-Referee agent, 2026-09-25. Scripts: `problems/132/scripts/l97R_*.py`. Status: in progress.
+Referee agent, 2026-09-25. Scripts: `problems/132/scripts/l97R_*.py`. Status: complete.
 
-## 0. Verdicts (filled at the end)
+## 0. Verdicts
+
+- **Task 1 (`CoreE`): TRUE as stated**, given §5.2 (and independently given the visible-path proof). The Lean
+  encodings (`Yout`, `Yset`, `Aset`, `defc`, `Normal`) match the paper exactly. One documentation error: the
+  docstring's chain "per K > 100h ⇒ r_in ≥ per K/(300π) > h" is false as written (it gives h/(3π)); the correct
+  chain is per K ≥ |A| > 1000h > 300πh.
+- **Task 2 (visible-path proof): CORRECT WITH GAPS.** Four minor gaps, all fixable in a few lines: G1 a vertex
+  can be a corner twice (the "dip"; the report says "at most once", and the author's harness asserts it) — fix
+  by counting corner occurrences; G2 missing justification that ν(a)·n_a > 0 at A-points in collapse zones
+  (true since D(c, h) ⊆ K; |α_a| ≤ ψ_c alone does not give it, ψ_c can be ≈ 2.69); G3 (N4) monotonicity is
+  asserted without proof (easy injectivity proof supplied); G4 a compactness sentence in V3.1. No
+  counterexample (304 new exact-construction and sharp-corner stress configurations). The conclusion
+  Def(G[Yout]) ≥ 2|A| − (71h + 7) implies `CoreE` with the current `Eh`. The proof is formalisable without
+  plane topology: no Jordan-, face- or winding-type fact is used, secretly or openly.
 
 ## 1. Task 1 — the reduction behind `CoreE`
 
@@ -200,7 +213,18 @@ No winding number, no lifting beyond ψ ∈ [0, π]. Then Σ_{vertex occ} κ ≤
 - `l97R_stress.py 300 2`: SHARP corners, which the author's tests did not reach (their lenses had
   |w₁ − w₂| ≤ 1.2Δ₂, i.e. ψ_c ≲ 1.3; here lenses with |w₁ − w₂| ∈ [1.5, 1.94]Δ₂, ψ_c up to ≈ 2.69, and
   three-disc bodies), Δ₂ ≥ 200h (the CoreE regime), ρ ∈ {1..5}, A-chains concentrated on the collapse zones,
-  A-points exactly at K-corners, dense apex growth and pendants. RESULTS_PLACEHOLDER
+  A-points exactly at K-corners, dense apex growth and pendants. **300/300 pass** every check (wedge, ψ, feet,
+  turning identity to 1e-20, A-neighbours inner, per-occurrence per-vertex claims, the overlap bound
+  |W_a ∩ H⁺_a| ≤ π/2 + |α_a|, MI, and Def ≥ 2|A| − (35h + 4)). Extremes: min Def − 2|A| = 5 (ρ = 1, three
+  discs), min MI slack 2.86, max |α_a| = 1.164 rad (< π/2, as G2 predicts; the author's tests only reached
+  overlap excess 0.476, here 1.158), max |A| − (n + J) = **+4** (lens, |w₁ − w₂| = 1.88Δ₂, ρ = 3). The last
+  number shows that the collapse term of the counting lemma CL is genuinely needed: at sharp corners several
+  A-points of Z_c sit over one visible piece. (The author's runs always had |A| − (n + J) ≤ 0.) Both are
+  within the proved allowances (34.7h, 36.3h).
+- Scope: floats at 40 digits with 1e-25 tolerances (angles are transcendental, so exact rational checks of
+  the geometric lemmas are impossible); the constants are checked exactly (`l97A_vp_constants.py`, re-run).
+  No counterexample was found, and none is expected: every failure mode I could construct is excluded by a
+  proof, not only by the tests.
 
 ### 2.10 Verdict, fixes, formalisability
 
