@@ -283,14 +283,12 @@ def check_step3() -> list[str]:
 
 
 def main() -> int:
-    """Run every check; print a summary; return 0 iff all pass.
-
-    TODO: implement.
-    What's missing: the driver.
-    Acceptance: exit code 0 and 'ALL OK' printed.
-    Depends on: all check_* functions.
-    """
-    raise NotImplementedError("driver")
+    """Run every check; print a summary; return 0 iff all pass."""
+    fails: list[str] = []
+    for chk in (check_trapezoid, check_offline, check_lemma_D, check_step1, check_step2, check_step3):
+        fails += chk()
+    print('ALL OK' if not fails else f'FAILURES: {fails}')
+    return 0 if not fails else 1
 
 
 if __name__ == '__main__':
