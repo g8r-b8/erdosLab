@@ -104,6 +104,142 @@ theorem low_receiver (hX : Normal X) {y n : Pt} (hF : Frame43 X y n) (hy : y ∈
   have := mS_le_one_of_Low hX hF hy ha
   omega
 
+/-! ## Private frame helpers -/
+
+private theorem ch_np (n : Pt) : inner ℝ n (perp n) = 0 := by
+  rw [← det2_eq_inner_perp]; unfold det2; ring
+
+private theorem ch_pn (n : Pt) : inner ℝ (perp n) n = 0 := by
+  rw [real_inner_comm]; exact ch_np n
+
+private theorem ch_sq {n : Pt} (hn : ‖n‖ = 1) (v : Pt) :
+    ‖v‖ ^ 2 = inner ℝ v n ^ 2 + inner ℝ v (perp n) ^ 2 := by
+  rw [← real_inner_self_eq_norm_sq, n1_inner_frame hn v v]; ring
+
+private theorem ch_dirF_n {n : Pt} (hn : ‖n‖ = 1) (ψ : ℝ) :
+    inner ℝ (dirF n ψ) n = Real.cos ψ := by
+  unfold dirF
+  rw [inner_add_left, real_inner_smul_left, real_inner_smul_left, ch_pn,
+    real_inner_self_eq_norm_sq, hn]; ring
+
+private theorem ch_dirF_p {n : Pt} (hn : ‖n‖ = 1) (ψ : ℝ) :
+    inner ℝ (dirF n ψ) (perp n) = Real.sin ψ := by
+  unfold dirF
+  rw [inner_add_left, real_inner_smul_left, real_inner_smul_left, ch_np,
+    real_inner_self_eq_norm_sq, norm_perp, hn]; ring
+
+private theorem ch_abs {u : Pt} (hu : ‖u‖ = 1) (v : Pt) : |inner ℝ v u| ≤ ‖v‖ := by
+  have := abs_real_inner_le_norm v u
+  rwa [hu, mul_one] at this
+
+private theorem ch_dirF_sub (n n' : Pt) (ψ : ℝ) :
+    ‖dirF n' ψ - dirF n ψ‖ ≤ 2 * ‖n' - n‖ := by
+  have e : dirF n' ψ - dirF n ψ = Real.sin ψ • perp (n' - n) + Real.cos ψ • (n' - n) := by
+    unfold dirF; rw [perp_sub, smul_sub, smul_sub]; abel
+  rw [e]
+  calc ‖Real.sin ψ • perp (n' - n) + Real.cos ψ • (n' - n)‖
+      ≤ ‖Real.sin ψ • perp (n' - n)‖ + ‖Real.cos ψ • (n' - n)‖ := norm_add_le _ _
+    _ = |Real.sin ψ| * ‖n' - n‖ + |Real.cos ψ| * ‖n' - n‖ := by
+        rw [norm_smul, norm_smul, norm_perp, Real.norm_eq_abs, Real.norm_eq_abs]
+    _ ≤ 1 * ‖n' - n‖ + 1 * ‖n' - n‖ := by
+        gcongr
+        · exact Real.abs_sin_le_one ψ
+        · exact Real.abs_cos_le_one ψ
+    _ = 2 * ‖n' - n‖ := by ring
+
+/-- Abscissa (w.r.t. `n`) of a point in a slot of a (possibly different) frame `n'`. -/
+private theorem ch_slotX {y q n n' : Pt} (hn : ‖n‖ = 1) {ψ η : ℝ} (h : Slot y n' ψ η q) :
+    |inner ℝ (q - y) (perp n) - Real.sin ψ| ≤ η + 2 * ‖n' - n‖ := by
+  have hp : ‖perp n‖ = 1 := by rw [norm_perp, hn]
+  have e : inner ℝ (q - y) (perp n) - Real.sin ψ =
+      inner ℝ (q - y - dirF n' ψ) (perp n) + inner ℝ (dirF n' ψ - dirF n ψ) (perp n) := by
+    rw [inner_sub_left (q - y), inner_sub_left (dirF n' ψ), ch_dirF_p hn]; ring
+  rw [e]
+  have h1 := ch_abs hp (q - y - dirF n' ψ)
+  have h2 := ch_abs hp (dirF n' ψ - dirF n ψ)
+  have h3 := ch_dirF_sub n n' ψ
+  unfold Slot at h
+  calc _ ≤ |inner ℝ (q - y - dirF n' ψ) (perp n)| + |inner ℝ (dirF n' ψ - dirF n ψ) (perp n)| :=
+        abs_add_le _ _
+    _ ≤ _ := by linarith
+
+private theorem ch_sin2 {σ : ℝ} (hσ : σ = 1 ∨ σ = -1) : Real.sin (σ * (π / 2)) = σ := by
+  rcases hσ with rfl | rfl <;> simp [neg_mul, Real.sin_neg]
+
+private theorem ch_cos2 {σ : ℝ} (hσ : σ = 1 ∨ σ = -1) : Real.cos (σ * (π / 2)) = 0 := by
+  rcases hσ with rfl | rfl <;> simp [neg_mul, Real.cos_neg]
+
+private theorem ch_sin6 {σ : ℝ} (hσ : σ = 1 ∨ σ = -1) : Real.sin (σ * (π / 6)) = σ / 2 := by
+  rcases hσ with rfl | rfl <;> norm_num [neg_mul, Real.sin_neg, Real.sin_pi_div_six]
+
+/-- Hexagon identity: `dirF(σ·30°) = dirF(σ·90°) + dirF(−σ·30°)`. -/
+private theorem ch_hex (n : Pt) {σ : ℝ} (hσ : σ = 1 ∨ σ = -1) :
+    dirF n (σ * (π / 6)) = dirF n (σ * (π / 2)) + dirF n (-(σ * (π / 6))) := by
+  unfold dirF
+  rw [Real.sin_neg, Real.cos_neg, ch_sin6 hσ, ch_sin2 hσ, ch_cos2 hσ]
+  module
+
+/-- The slot argument of owner uniqueness: if `y′ ∈ R` lies within `7/20` of `y`'s `σ′·90°`
+direction, then `y′` is `y`'s slot neighbour `q` and `y` is of type HF2. -/
+private theorem ch_fan_hf2 (hX : Normal X) {y y' n : Pt} (hy' : y' ∈ Rset X)
+    (hs : FanSlots X y n) {σ' : ℝ} (hσ' : σ' = 1 ∨ σ' = -1)
+    (h' : ‖y' - y - dirF n (σ' * (π / 2))‖ ≤ 7 / 20) :
+    ∃ σ : ℝ, (σ = 1 ∨ σ = -1) ∧ Slot y n (σ * (π / 2)) (1 / 20) y' ∧
+      ∃ z₁ ∈ nbδ X y, z₁ ∈ Dset X ∧ Slot y n (σ * (π / 6)) (1 / 20) z₁ ∧
+      ∃ z₂ ∈ nbδ X y, z₂ ∈ Dset X ∧ Slot y n (-(σ * (π / 6))) (1 / 20) z₂ ∧
+        dist z₁ z₂ = minDist X := by
+  obtain ⟨σ, hσ, p, hp, q, hq, z₁, hz₁, hpS, -, hz₁D, hpsl, hqsl, hz₁sl, hrest⟩ := hs
+  have hy'X : y' ∈ X := (mem_sdiff.1 hy').1
+  have hy'S : y' ∉ Sset X := (mem_sdiff.1 hy').2
+  have close : ∀ r ∈ nbδ X y, ‖r - y - dirF n (σ' * (π / 2))‖ ≤ 1 / 20 → r = y' := by
+    intro r hr hrs
+    by_contra hne
+    have h1 := one_le_dist hX.minDist_eq (mem_nbδ.1 hr).1 hy'X hne
+    have e : r - y' = (r - y - dirF n (σ' * (π / 2))) - (y' - y - dirF n (σ' * (π / 2))) := by
+      abel
+    rw [dist_eq_norm, e] at h1
+    have := norm_sub_le (r - y - dirF n (σ' * (π / 2))) (y' - y - dirF n (σ' * (π / 2)))
+    linarith
+  have hcase : σ' = σ ∨ σ' = -σ := by
+    rcases hσ with rfl | rfl <;> rcases hσ' with rfl | rfl <;> norm_num
+  rcases hcase with rfl | rfl
+  · have hqy := close q hq hqsl
+    subst hqy
+    rcases hrest with hqS | ⟨z₂, hz₂, hz₂D, hz₂sl, hd⟩
+    · exact absurd hqS hy'S
+    · exact ⟨_, hσ', hqsl, z₁, hz₁, hz₁D, hz₁sl, z₂, hz₂, hz₂D, hz₂sl, hd⟩
+  · exfalso
+    have hpy := close p hp (by unfold Slot at hpsl; rw [neg_mul]; exact hpsl)
+    exact hy'S (hpy ▸ hpS)
+
+private theorem ch_num_d {d e : ℝ} (hd0 : 0 ≤ d) (hdd : 1 - 121 / 2500 ≤ d ^ 2)
+    (hd2 : d ≤ 123 / 100) (he : e ^ 2 ≤ 121 / 2500) : e ^ 2 + (d - 1) ^ 2 ≤ (7 / 20) ^ 2 := by
+  have l1 : 97 / 100 ≤ d := by nlinarith
+  nlinarith [mul_nonneg (sub_nonneg.2 l1) (sub_nonneg.2 hd2)]
+
+/-- Numerics of `fan_common_low_slot` (worst case `≈ 0.2267 ≤ 7/20`). -/
+private theorem ch_num {c c' x x' : ℝ} (hc : 4 / 5 ≤ c) (hc' : 4 / 5 - 1 / 50 ≤ c')
+    (s1 : (1 : ℝ) ^ 2 = c ^ 2 + x ^ 2) (s2 : (1 : ℝ) ^ 2 = c' ^ 2 + x' ^ 2)
+    (hsq : 1 ≤ (c' - c) ^ 2 + (x' - x) ^ 2) :
+    ∃ σ : ℝ, (σ = 1 ∨ σ = -1) ∧ (c' - c) ^ 2 + (x' - x - σ) ^ 2 ≤ (7 / 20) ^ 2 := by
+  have cle : c ≤ 1 := by nlinarith
+  have c'le : c' ≤ 1 := by nlinarith
+  have hcc : (c' - c) ^ 2 ≤ 121 / 2500 := by
+    nlinarith [mul_nonneg (by linarith : (0 : ℝ) ≤ c' - c + 11 / 50)
+      (by linarith : (0 : ℝ) ≤ 11 / 50 - (c' - c))]
+  have hx1 : x ≤ 3 / 5 := by nlinarith
+  have hx2 : -(3 / 5) ≤ x := by nlinarith
+  have hx3 : x' ≤ 63 / 100 := by nlinarith
+  have hx4 : -(63 / 100) ≤ x' := by nlinarith
+  have hdd : 1 - 121 / 2500 ≤ (x' - x) ^ 2 := by linarith
+  rcases le_total 0 (x' - x) with h0 | h0
+  · refine ⟨1, Or.inl rfl, ?_⟩
+    exact ch_num_d h0 hdd (by linarith) hcc
+  · refine ⟨-1, Or.inr rfl, ?_⟩
+    have := ch_num_d (d := -(x' - x)) (by linarith) (by rw [neg_sq]; exact hdd) (by linarith) hcc
+    have e : (x' - x - -1) ^ 2 = (-(x' - x) - 1) ^ 2 := by ring
+    rw [e]; exact this
+
 /-! ## Owner uniqueness -/
 
 /-- **Two fans sharing a receiver are horizontal neighbours**: `y′ − y` is within `7/20` of
@@ -125,7 +261,61 @@ theorem fan_common_low_slot (hX : Normal X) {y y' n n' : Pt} (hF : Frame43 X y n
     (hf' : IsFan43 X y' n') {a : Pt} (ha : a ∈ Low X y) (ha' : a ∈ Low X y')
     (hne : y ≠ y') :
     ∃ σ : ℝ, (σ = 1 ∨ σ = -1) ∧ ‖y' - y - dirF n (σ * (π / 2))‖ ≤ 7 / 20 := by
-  sorry
+  have hn := hF.unit
+  have d1 : dist a y = 1 := dist_of_mem_nbδ hX (Low_subset X y ha)
+  have d2 : dist a y' = 1 := dist_of_mem_nbδ hX (Low_subset X y' ha')
+  have hyX : y ∈ X := (mem_sdiff.1 hy).1
+  have hy'X : y' ∈ X := (mem_sdiff.1 hy').1
+  have hd : dist y y' ≤ 2 := by
+    have := dist_triangle y a y'
+    have := dist_comm y a
+    linarith
+  have hnn := frame_normal_close hF hF' hd
+  unfold ε₀43 at hnn
+  have hsep := one_le_dist hX.minDist_eq hyX hy'X hne
+  have n1 : ‖y - a‖ = 1 := by rw [← dist_eq_norm, dist_comm]; exact d1
+  have n2 : ‖y' - a‖ = 1 := by rw [← dist_eq_norm, dist_comm]; exact d2
+  have hc := hf.2.1 a ha
+  have hc'' := hf'.2.1 a ha'
+  have hc' : 4 / 5 - 1 / 50 ≤ inner ℝ (y' - a) n := by
+    have e : inner ℝ (y' - a) n = inner ℝ (y' - a) n' - inner ℝ (y' - a) (n' - n) := by
+      rw [inner_sub_right]; ring
+    have hb : |inner ℝ (y' - a) (n' - n)| ≤ 1 / 50 := by
+      calc _ ≤ ‖y' - a‖ * ‖n' - n‖ := abs_real_inner_le_norm _ _
+        _ ≤ 1 / 50 := by rw [n2, one_mul]; exact hnn
+    rw [e]; linarith [(abs_le.1 hb).2]
+  have s1 := ch_sq hn (y - a)
+  have s2 := ch_sq hn (y' - a)
+  have s3 := ch_sq hn (y' - y)
+  rw [n1] at s1
+  rw [n2] at s2
+  have ey : y' - y = (y' - a) - (y - a) := by abel
+  have i1 : inner ℝ (y' - y) n = inner ℝ (y' - a) n - inner ℝ (y - a) n := by
+    rw [ey, inner_sub_left]
+  have i2 : inner ℝ (y' - y) (perp n) =
+      inner ℝ (y' - a) (perp n) - inner ℝ (y - a) (perp n) := by
+    rw [ey, inner_sub_left]
+  have hsep' : 1 ≤ ‖y' - y‖ := by rw [← dist_eq_norm, dist_comm]; exact hsep
+  rw [i1, i2] at s3
+  have hsq : 1 ≤ (inner ℝ (y' - a) n - inner ℝ (y - a) n) ^ 2 +
+      (inner ℝ (y' - a) (perp n) - inner ℝ (y - a) (perp n)) ^ 2 := by
+    rw [← s3]; nlinarith
+  have key : ∀ σ : ℝ, (σ = 1 ∨ σ = -1) →
+      (inner ℝ (y' - a) n - inner ℝ (y - a) n) ^ 2 +
+        (inner ℝ (y' - a) (perp n) - inner ℝ (y - a) (perp n) - σ) ^ 2 ≤ (7 / 20) ^ 2 →
+      ‖y' - y - dirF n (σ * (π / 2))‖ ≤ 7 / 20 := by
+    intro σ hσ h
+    have s := ch_sq hn (y' - y - dirF n (σ * (π / 2)))
+    have e1 : inner ℝ (y' - y - dirF n (σ * (π / 2))) n =
+        inner ℝ (y' - a) n - inner ℝ (y - a) n := by
+      rw [inner_sub_left (y' - y), ch_dirF_n hn, ch_cos2 hσ, i1]; ring
+    have e2 : inner ℝ (y' - y - dirF n (σ * (π / 2))) (perp n) =
+        inner ℝ (y' - a) (perp n) - inner ℝ (y - a) (perp n) - σ := by
+      rw [inner_sub_left (y' - y), ch_dirF_p hn, ch_sin2 hσ, i2]
+    rw [e1, e2] at s
+    nlinarith [norm_nonneg (y' - y - dirF n (σ * (π / 2)))]
+  obtain ⟨σ, hσ, h⟩ := ch_num hc hc' s1 s2 hsq
+  exact ⟨σ, hσ, key σ hσ h⟩
 
 /-- **Fans have private receivers.**
 
