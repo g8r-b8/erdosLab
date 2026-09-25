@@ -540,3 +540,403 @@ and the conditional theorem (X ⇒ Λ(k,3) < ∞ for all odd k) both survive.**
 - Theorem 7.5: holds, with (⇐) credited to Chebotarev.
 - Conditional theorem for all odd k: holds.
 - Lemma 7.4 typo: 2t+1 → 3t+1.
+
+## 9. The weakly stable subclass (2026-09-25)
+
+Scope: settle G_5 (§7.5) for the class that contains our empirical near-counterexample. Fix c ∈ Z/5
+and a set E of primes, and let
+
+  **Γ(E,c)** := {g: N → μ_5 completely multiplicative : g(p) = ζ^c for every prime p ∉ E},
+
+with the values on E arbitrary. Write λ_c(n) := ζ^{cΩ(n)} ∈ Γ(∅,c). Three sizes of E:
+(F) E finite; (S) Σ_{p∈E} 1/p < ∞; (D) E has relative density 0 in the primes.
+A zero run is n with g(n) = g(n+1) = g(n+2) = 1. Labels as in §7. Sources were read as PDFs
+(pypdf, session scratchpad) unless marked "abstract only".
+
+**Bottom line.**
+- c = 0 is closed for all three sizes (Lemma 9.0: such g weakly pretend to 1, so §7 cases A/B apply).
+- c ≠ 0 puts g in case C for all three sizes. **No published result gives a zero run (or the
+  Ω mod 5 pattern (0,0,0) on three consecutive integers) with positive density, for any m ≥ 4.**
+  The three-point results stop at m = 3 (Tao–Teräväinen).
+- (F) is closed for every **explicitly given** E by a certified computation. One witness,
+  n = m^5 − 1 with m = 13,909,368, is a zero run of **every** g ∈ Γ(E,c), for every c and every
+  E ⊆ {p ≤ 10^4} (Theorem 9.2). Uniformity over all finite E reduces to a statement about Ω on
+  the polynomial values m^5 ± 1 (Conjecture 9.3). That statement is open, and it is of parity-problem
+  type.
+- (S) reduces exactly to a uniform-density statement for Ω mod 5 on consecutive integers inside
+  residue classes (Proposition 9.4). That statement is open even for the trivial class (L = 1).
+- (D): no reduction to Ω. The union bound fails when Σ_E 1/p = ∞.
+- New structural facts (PROOF):
+  - Proposition 9.5: in case C, the zero-run density equals (1/25)(P_1+P_2+P_3 − 2/5), where the
+    P_i are the densities of the three "second-difference" events.
+  - Proposition 9.6 (barrier): an explicit stationary μ_5-process with no constant triples. It
+    satisfies every conclusion of the Tao–Teräväinen correspondence principle, all known
+    correlation asymptotics, the exact prime-dilation identity for every p ≠ 5, and the
+    Frantzikinakis–Host structure theorem. So TT's method (the proof of their Ω mod 3 theorem)
+    cannot give Ω mod 5. The model is excluded only by the exact identity g(5n+5h) = ζ g(n+h),
+    which none of those tools retains.
+
+### 9.0 Where Γ(E,c) sits in the case split [PROOF]
+
+**Lemma 9.0.** Let E have relative density 0 in the primes (this covers (F), (S) and (D)).
+(i) If c = 0, then g ∈ Γ(E,0) weakly pretends to 1, so g is in case A or B. **Hence g has zero runs
+    (§7.2, §7.3).**
+(ii) If c ≠ 0, g is in case C. In fact liminf_x D(g,χ;x)^2/log log x > 0 for every χ.
+
+*Proof.* π_E(t) = o(π(t)) gives Σ_{p∈E, p≤x} 1/p = o(log log x), by partial summation.
+(i) D(g,1;x)^2 ≤ 2Σ_{p∈E,p≤x} 1/p = o(log log x).
+(ii) Off E, g(p)\bar χ(p) = ζ^c \bar χ(p), so
+  D(g,χ;x)^2 = Σ_{p≤x}(1 − Re ζ^c \bar χ(p))/p + o(log log x).
+- If χ is non-principal, Σ_{p≤x} \bar χ(p)/p = O_χ(1), so D^2 = (1 − o(1)) log log x.
+- If χ is principal, D^2 = (1 − cos(2πc/5) − o(1)) log log x.
+∎
+
+So everything below concerns c ≠ 0. We may take c = 1, because g ↦ g^{c^{-1}} maps Γ(E,c) onto
+Γ(E,1) and preserves zero runs. All of Γ(E,1) is case C, so §7.4 applies: 112 of the 124 terms
+vanish, and the 12 terms in T are open.
+
+### 9.1 Literature [CITED]
+
+| source | what it proves | reach for us |
+|---|---|---|
+| Tao–Teräväinen, arXiv 1904.05096 (Forum Math. Sigma 2019), **Thm 1.3** | (ω(n+1), ω(n+2), ω(n+3)) mod 3 takes all 27 patterns with positive lower density; the same for Ω. | m = 3 only |
+| same, §6 (proof of Thm 1.3) | The 1-point and 2-point terms vanish (Tao 1509.05422 Thm 1.3), and so do the 3-point terms with j_1+j_2+j_3 ≢ 0 (TT 1708.02610 Cor 1.6). For m = 3 the T-set is the line spanned by (1,1,1), so the pattern density is (1/27)·3·δ_{3−a}, where δ_c is the density of {ω(n+1)+ω(n+2)+ω(n+3) ≡ c}. Positivity of δ_c comes from **Thm 1.9** (critical case δ_1+δ_2+δ_3 = 1). | Needs density sum ≥ 1. For mod m, three level sets have density sum 3/m < 1. |
+| same, Thms 1.8, 1.9; discussion after Remark 1.11; Remark 2.5 | Thm 1.8 needs δ-sum > 1; Thm 1.9 needs δ-sum = 1. Below 1, "local Bohr sets" may avoid the pattern: "(A_1+A_3) ∩ 2A_2 = ∅ when δ_1+δ_2+δ_3 < 1". No remark on general m. | Proposition 9.6 shows the Bohr obstruction is compatible with the *same* set in all three places, plus all the multiplicative structure the method uses. |
+| same, **Thm 2.2** (correspondence principle), eq. (1.11)–(1.14) | If a pattern has lower density 0, there is a system (X,μ,T) with sets B_j satisfying (2.3) (equidistribution along T^{qh}) and lim E^log_{p≤P} ∫ Π 1_{B}(T^{p h_i}x) dμ = 0. | Our Prop 9.6 model satisfies this conclusion. |
+| TT arXiv 1708.02610 (Duke 2019), **Cor 1.13** | (Ω(n+h_j) mod q_j) patterns have log density 1/(q_0⋯q_k) **if the q_j are pairwise coprime**. | Moduli (5,5,5) are not coprime. |
+| Charamaras–Richter, arXiv 2412.17583 (v3, 2026), **Thm A** | E^log a(Ω(n)) b(Ω(n+1)) = E a(Ω) · E b(Ω) + O((log log log N)^2/√(log log N)) for all bounded a, b. So (Ω(n), Ω(n+1)) mod m is log-equidistributed for **every** m. **Conjecture 1.4** (k points, Cesàro) is open. | Two points only. For λ_1 it gives our 48 two-point terms, including the 12 with trivial product. |
+| Richter (cited as [Ric21], CR Thm 1.3); Bergelson–Richter | E a(Ω(n)) = E a(Ω(n)+1) + o(1). | One point. |
+| McNamara, arXiv 2312.08544, **Thms 1.6, 1.7, 1.8** | A *stable* set S of density 1/2 (Thm 1.6), and for prime q one of density 1 − 1/(q−1) (Thm 1.7), with S ∩ (S+1) ∩ ⋯ empty. Thm 1.8: an f: N → {±1} with f(pn) = −f(n) off density-0 sets, yet (1/x)Σ f(n)f(n+1) < −ε. The constructions use p^{iT} ≈ χ(p) (mod-3 character times Archimedean character, with T growing). | Weak stability alone does not force patterns. Our g(pn) = ζ g(n) holds for **every** n, so these examples are not in Γ; Prop 9.6 is the analogue that keeps exact multiplicativity. |
+| Frantzikinakis–Host, arXiv 1804.08556, **Thm 1.5**, **Cor 1.4** | A joint log-Furstenberg system of multiplicative functions is a factor of a system with (i) no irrational spectrum, whose (ii) ergodic components are products of infinite-step nilsystems and Bernoulli systems. Cor 1.4: E^log e(nα) Π f_j(n+h_j) → 0 for irrational α. | The Prop 9.6 model satisfies (i) and (ii). |
+| Frantzikinakis, arXiv 1611.09338 (abstract only) | Ergodicity of the Liouville log-Furstenberg system implies Chowla. The abstract mentions variants for Elliott with unit-circle values. | Ergodicity would exclude the Prop 9.6 model, which is non-ergodic. Not checked in the PDF. |
+| Tao–Teräväinen arXiv 2512.01739; Lau arXiv 2604.15042 | Sieve results: ω(n+k) ≤ Ck, resp. ≪ log k, for all k; asymptotics for P(Ω(n) = Ω(n+1)) (TT Thm 1.7). | No mod-m patterns. |
+| Mangerel arXiv 2306.09929 (abstract only) | f(n) = f(n+h) ≠ 0 has log density 0 when Σ_{\|f(p)\|≠1} 1/p = ∞. | Not our situation (\|g\| = 1). |
+
+Search coverage:
+- web searches on "Ω(n) mod m / value patterns / consecutive" together with Teräväinen, Pilatte,
+  Mangerel, Klurman, Charamaras, Richter;
+- the Semantic Scholar citation list of 1904.05096 (7 entries, clearly incomplete).
+
+Two leads were read and turned out irrelevant: 2512.01739 and 2604.15042. **Verdict:** we found
+no result, for any m ≥ 4, that the three-point pattern (0,0,0) of Ω mod m (or of ω mod m) on
+consecutive integers has positive upper density. CR Conjecture 1.4 with k = 3 would imply it
+(Cesàro density 1/m^3).
+Data point [computation]: Ω(n) ≡ Ω(n+1) ≡ Ω(n+2) ≡ 0 mod 5 holds for 162,522 values n ≤ 10^8
+(first n = 15470). That is about 1/615, still far from 1/125 because Ω ≈ log log n is small.
+
+### 9.2 Finite E
+
+**Lemma 9.1 (fifth-power centre) [PROOF].** For any m ≥ 2, n = m^5 − 1 is a zero run of every
+g: N → μ_5 (completely multiplicative) such that
+(a) g is constant, say ≡ u, on the set Q(m) of primes dividing (m^5−1)(m^5+1), and
+(b) Ω(m^5−1) ≡ Ω(m^5+1) ≡ 0 mod 5.
+
+*Proof.*
+- g(n+1) = g(m)^5 = 1, for **every** μ_5-valued g.
+- g(m^5 ± 1) = u^{Ω(m^5±1)} = 1.
+∎
+
+**Theorem 9.2 [PROOF + certified computation].** Let m* = 13,909,368 = 2^3·3·11·19·47·59. Then
+m*^5 − 1 = 14221 · 20411 · 12285541 · 13909367 · 10496413135931 and
+m*^5 + 1 = 25841 · 26171 · 13909369 · 1968608261 · 28115164031.
+All ten factors are proven primes (PARI `isprime`), and all are > 10^4.
+**Hence for every c ∈ Z/5 and every E ⊆ {p ≤ 10^4}, every g ∈ Γ(E,c) has a zero run at
+n = m*^5 − 1 ≈ 5.2·10^35.** More generally, every g that is constant on these ten primes has one.
+
+(Aside: m*−1 and m*+1 are twin primes.)
+
+Smaller witnesses, found by searching m ≡ 0 mod 66 with gcd(m^10−1, P#) = 1 (all factors certified):
+- m = 112,068 for E ⊆ {p ≤ 97};
+- m = 184,338 for E ⊆ {p ≤ 293};
+- m = 1,340,328 for E ⊆ {p ≤ 3000}.
+
+Multiples of the primorial also work: m = P#·t for all P ≤ 43, with t ≤ 105. The condition m ≡ 0 mod 66 is forced:
+gcd(m^10−1, p) = 1 needs m ≡ 0 mod p for p = 2, 3, 11, since x^10 ≡ 1 has p−1 roots mod those p.
+
+What this does and does not say:
+- A single E (or a finite list of E's) is a finite check, as expected.
+- The check is *uniform* in c and in all 5^{|E|} choices of values on E, because the witness uses
+  only primes outside E and a fifth power.
+- It says nothing about Λ(5,3) directly. A run-free g (which exists iff Λ(5,3) = ∞) is adversarial
+  on *all* primes, and Theorem 9.2 only says that such a g is non-constant on Q(m*). The same holds
+  for every m satisfying (b).
+
+**Conjecture 9.3 (W) [OPEN].** For every P there is m with gcd(m^10 − 1, P#) = 1 and
+Ω(m^5−1) ≡ Ω(m^5+1) ≡ 0 mod 5.
+- W implies that every g in every Γ(E,c) with E finite has a zero run (Lemma 9.1).
+- [HEURISTIC] Admissible m (m^10 − 1 free of primes ≤ P) have density ≍ (log P)^{−4}. The mean
+  of gcd(10, p−1) over primes is τ(10) = 4. Each Ω-condition should hold with probability ≍ 1/5,
+  so W should hold with plenty of room; the search above confirms this up to P = 10^4.
+- Unconditionally, W asks for Ω mod 5 on the values of the irreducible quartics Φ_5, Φ_10 (times
+  m ∓ 1). Even the parity of Ω(m^2+1) is open, and sieve weights cannot see Ω mod 5 (parity-type
+  barrier). **We see no route to W.**
+- Replacing m^5 by a general centre does not help. The general sufficient condition is:
+  n ∈ Z ∩ A_L, where Z = {Ω(n+i) ≡ 0 ∀i} and A_L = {n : v_p(n+i) ≡ 0 mod 5 for all p | L,
+  i = 0,1,2}. By Prop 9.6, even Z ≠ ∅ with positive density is beyond current methods.
+
+### 9.3 Summable E
+
+**Proposition 9.4 (reduction for Σ_E 1/p < ∞) [PROOF].** For squarefree L let C_L = {n ≡ L^5 − 1
+mod L^6}, and let Z = {n : Ω(n) ≡ Ω(n+1) ≡ Ω(n+2) ≡ 0 mod 5}. Assume
+
+  **H(κ):** there is κ > 0 such that for every squarefree L the set Z ∩ C_L has upper logarithmic
+  density ≥ κ/L^6.
+
+Then for every c and every E with Σ_{p∈E} 1/p < ∞, every g ∈ Γ(E,c) has infinitely many zero runs.
+
+*Proof.* Choose y with 3Σ_{p∈E, p>y} 1/p < κ/2. Put S = E ∩ [1,y] and L = Π_S p.
+
+1. **Values on C_L.** Let n ∈ C_L. Then n ≡ −1 and n+2 ≡ 1 mod p for each p | L, and
+   n+1 = L^5(1 + Lt) with 1 + Lt coprime to L. Suppose further that no prime of E ∖ S divides
+   n(n+1)(n+2). Then
+   - g(n) = ζ^{cΩ(n)} and g(n+2) = ζ^{cΩ(n+2)}, since all their primes lie outside E;
+   - g(n+1) = g(L)^5 ζ^{cΩ(1+Lt)} = ζ^{cΩ(n+1)}, since Ω(n+1) = 5|S| + Ω(1+Lt).
+   So every such n in Z is a zero run.
+2. **Bad n.** Primes p ∈ E, p > y are coprime to L^6. So
+   #{n ≤ x, n ∈ C_L : p | n+i} ≤ x/(L^6 p) + 1, and the log-weighted count is
+   ≤ (log x)/(L^6 p) + O(1/p).
+   Summing over i = 0, 1, 2 and over y < p ≤ x+2, the bad set has log density
+   ≤ (3/L^6)Σ_{p∈E,p>y} 1/p + O(log log x / log x) < κ/(2L^6) + o(1), at every scale.
+3. **Conclusion.** Along the scales that realise H(κ), the good part of Z ∩ C_L has log density
+   ≥ κ/(2L^6) − o(1) > 0.
+∎
+
+Remarks.
+- [HEURISTIC] The log Elliott conjecture in progressions would give H(1/125). The relative
+  density of Z in C_L would tend to 1/125 for every L.
+- H(κ) for L = 1 alone is "Z has positive upper log density". That is G_5 for λ_1 in density form,
+  and **it is open** (§9.1 and Prop 9.6).
+- The polynomial centre of §9.2 does **not** extend to (S). The prime factors of m^5 ± 1 reach
+  m^5, and Σ_E 1/p < ∞ gives no control on #{m ≤ X : some p ∈ E ∩ (X, X^10] divides m^10 − 1}.
+  Consecutive integers keep all primes ≤ X + 2, and this is why Case A (§7.2) and Prop 9.4 work.
+
+### 9.4 Density-zero E [OPEN, HEURISTIC remarks]
+
+If Σ_E 1/p = ∞, then almost every n has a prime factor in E (density 1 − Π_{p∈E}(1 − 1/p) = 1), so
+g and λ_c need not agree on any positive-density set, and no union bound is available. For every prime p ∉ E, g still satisfies the exact identity g(pn) = ζ^c g(n).
+E has log-density 0 among primes, so the p-averaged dilation identities (TT 1904.05096 (1.11);
+FH 1804.08556 Thm 3.1 / Cor 3.7, which average over p with weights 1/p) should hold with
+constant weight ζ^c.
+[HEURISTIC: we did not re-check that those proofs tolerate a density-0 exceptional set of primes.
+TT Def. 1.6 asks for (1.8) at *every* p.]
+So for every method we know, class (D) behaves exactly like λ_c. Nothing is gained, and nothing
+beyond λ_c is lost.
+
+### 9.5 The case-C zero-run density in terms of three second-difference events [PROOF]
+
+**Proposition 9.5.** Let g be in case C, and write g = ζ^f. Define
+- P_1(x) := E^log_{n≤x} 1[f(n) + f(n+2) ≡ 2f(n+1)],
+- P_2(x) := E^log 1[f(n) + f(n+1) ≡ 2f(n+2)],
+- P_3(x) := E^log 1[f(n+1) + f(n+2) ≡ 2f(n)]   (congruences mod 5).
+Then
+
+  E^log_{n≤x} 1[zero run at n] = (1/25)·(P_1(x) + P_2(x) + P_3(x) − 2/5) + o(1).
+
+*Proof.* T (§7.0) is the union of three lines through 0 minus {0}. They are spanned by
+v_1 = (1,3,1), v_2 = (1,1,3) and v_3 = (3,1,1).
+- Check: (2,1,2) = 2v_1, (2,2,1) = 2v_2, (1,2,2) = 2v_3. The 12 elements are k·v_i, k = 1..4.
+- For each i, Σ_{k=0}^{4} E^log ζ^{k⟨v_i, (f(n),f(n+1),f(n+2))⟩} = 5P_i. So Σ_{k=1}^{4} C(k v_i) = 5P_i − 1.
+- ⟨v_1,·⟩ ≡ 0 ⟺ f(n) + 3f(n+1) + f(n+2) ≡ 0 ⟺ f(n) + f(n+2) ≡ 2f(n+1). Similarly for v_2, v_3.
+- By §7.4 (TT Cor 1.6, Tao Cor 1.5 with Lemma 7.2), the other 112 nontrivial C vanish.
+- So the zero-run density is (1/125)(1 + Σ_i(5P_i − 1)) + o(1) = (1/25)(ΣP_i − 2/5) + o(1).
+∎
+
+Consequences.
+- **G_5 for a case-C g ⟸ limsup_x (P_1+P_2+P_3) > 2/5.** Each P_i is a *single* "second-difference"
+  statistic. Conjecturally P_i → 1/5, which gives density 1/125.
+- Unconditionally liminf (P_1+P_2+P_3) ≥ 2/5, since densities are ≥ 0.
+- In the difference coordinates d_1 = f(n+1) − f(n), d_2 = f(n+2) − f(n+1), the law of (d_1,d_2)
+  on F_5^2 is known to be uniform along the three directions d_1, d_2, d_1+d_2 (two-point
+  results). The P_i are its masses on the other three lines through 0: d_1 = d_2, d_1 + 2d_2 = 0
+  and d_1 + 3d_2 = 0. The identity is the discrete Radon formula
+  Σ_{6 lines ℓ} ν(ℓ) = 1 + 5ν(0,0).
+- For m = 3 there is a single line (1,1,1), and TT's δ_c > 0 is exactly the analogue. For m = 5
+  the three P_i must together exceed 2/5, which is a *quantitative* requirement, not a positivity
+  one.
+
+### 9.6 A barrier: the TT method cannot give Ω mod 5 patterns [PROOF]
+
+**The model.** Let Ω_0 = T × T × Z/5 × {1/5, 4/5}, with product Haar/uniform measure.
+Points are (y, θ, s, κ). Set
+
+  u_h := y + hθ − κ(s+h)^2 ∈ T,    X_h := ⌊5u_h⌋ ∈ Z/5  (u_h taken in [0,1)),   h ∈ Z.
+
+- u_h is well defined for s ∈ Z/5: κ((s+5)^2 − s^2) = κ(10s + 25) ∈ Z when 5κ ∈ Z.
+- (X_h) is stationary: u_{h+1}(y,θ,s,κ) = u_h(y+θ, θ, s+1, κ).
+- Think of X_h as Ω(n+h) mod 5 near a random n. Locally it is a Bohr sequence with a rational
+  quadratic twist −κh^2.
+
+**Proposition 9.6.** The process X has the following properties.
+(a) **No constant triples.** For every h and every d ≢ 0 mod 5, P(X_h = X_{h+d} = X_{h+2d}) = 0.
+    In particular there are no zero runs, and P(X_0 = X_1 = X_2) = 0.
+(b) One-point law uniform. For h_1 ≠ h_2, (X_{h_1}, X_{h_2}) is uniform on (Z/5)^2.
+    This agrees with Tao Cor 1.5, CR Thm A, and Lemma 7.3's diagonal invariance.
+(c) E ζ^{aX_0+bX_1+cX_2} = 0 unless (a,b,c) ∈ {0} ∪ {k(1,3,1)}. So all 112 correlations that
+    §7.4 proves vanish do vanish, and P_2 = P_3 = 1/5, P_1 = 0 (consistent with Prop 9.5).
+(d) **Exact dilation identity.** For every prime p ≠ 5, the process (X_{ph} − 1)_{h∈Z} has the same
+    law as (X_h)_{h∈Z}. This is the model analogue of λ_1(pn) = ζλ_1(n), in the averaged form that
+    enters TT (1.11) and FH Thm 3.1.
+(e) **TT correspondence conclusions.** Take X on (Z/5)^Z with this law and the shift, and let
+    B_a = {x_0 = a}. Then:
+    - the B_a partition the space (TT Thm 2.2 (ii), (iii));
+    - each B_a satisfies (2.3) with δ = 1/5 for every q;
+    - μ(T^{-p}B_a ∩ T^{-2p}B_a ∩ T^{-3p}B_a) = 0 for every prime p ≠ 5, so
+      lim_P E^log_{p≤P}(…) = 0.
+    Hence the system is a legitimate output of TT Thm 2.2 for the pattern (a,a,a). The same holds
+    for the union pattern {f(n)+f(n+2) ≡ 2f(n+1)}.
+(f) **FH structure.** The ergodic components (θ irrational fixed, κ fixed) are the rotation
+    (y,s) ↦ (y+θ, s+1) on T × Z/5, a 1-step nilsystem, and X_0 is a Riemann-integrable function of
+    the state. The whole system has no irrational spectrum, and E e(hα)X-correlations → 0 for
+    irrational α. So FH Thm 1.5 (i), (ii) and Cor 1.4 hold.
+(g) **What excludes it: 5-adic self-similarity.** Every completely multiplicative g satisfies
+    g(5n + 5h) = g(5)g(n+h), with g(5) = ζ for λ_1. So in any log-Furstenberg system of λ_1 jointly
+    with n mod 5, the law of (X_{5h})_h given 5 | n equals the law of (X_h + 1)_h. That law has no
+    constant triples.
+    In the model, (X_{5h})_h = ⌊5(y' + 5hθ)⌋, with y' = y − κs^2. This is a *pure* Bohr sequence,
+    because 25κh^2 and 10κsh are integers.
+    In any stationary joining with a residue process r ↦ r+1 mod 5:
+    - the measure 5μ(· ∩ {5|r}) projects to a T^5-invariant measure, absolutely continuous with
+      respect to the model's law;
+    - (θ, s, κ) are T^5-invariant, and on each fibre T^5 is the irrational rotation y ↦ y + 5θ,
+      so that measure is Lebesgue in y on almost every fibre;
+    - therefore P(X_0 = X_5 = X_10 | 5 | r) = E_θ Leb{y : y, y+5θ, y+10θ lie in one arc of
+      length 1/5} > 0.
+    So the model **violates** the exact 5-adic self-similarity. For p ≠ 5 it satisfies the
+    p-analogue, by (d) with an independent residue coordinate.
+
+*Proof.*
+(a) The second difference of u over step d is u_h − 2u_{h+d} + u_{h+2d} = −2κd^2 mod 1. For
+    5 ∤ d, d^2 ≡ ±1 mod 5, so this is 2/5 or 3/5 mod 1. If X_h = X_{h+d} = X_{h+2d} = a, all three
+    real representatives lie in [a/5, (a+1)/5). Then u_h + u_{h+2d} − 2u_{h+d} ∈ (−2/5, 2/5), and no
+    number in that interval is ≡ 2/5 or 3/5 mod 1.
+(b) Given (s,κ), (u_{h_1}, u_{h_2}) = (y + h_1θ, y + h_2θ) + const. The map
+    (y,θ) ↦ (y + h_1θ, y + h_2θ) is a surjective endomorphism of T^2 (determinant h_2 − h_1 ≠ 0),
+    so it preserves Haar measure.
+(c) Two measure-preserving symmetries act on the model:
+    - y ↦ y + 1/5 adds 1 to every X_h, and multiplies the correlation by ζ^{a+b+c};
+    - θ ↦ θ + 1/5 adds h to X_h, and multiplies it by ζ^{b+2c}.
+    So a nonzero correlation needs a+b+c ≡ 0 and b ≡ −2c, that is (a,b,c) = c(1,3,1).
+    Then P_2 = P_3 = 1/5 (their lines carry no Fourier mass), and P_1 = 0 by Prop 9.5 and (a).
+    Directly: X_0 + X_2 − 2X_1 ≡ −2j − (φ_0 + φ_2 − 2φ_1) with κ = j/5, φ_h = {5u_h}, and the
+    φ-combination lies in {−1, 0, 1}. So X_0 + X_2 − 2X_1 lies in {2,3,4} (j = 1) or {1,2,3}
+    (j = 4), never 0.
+(d) Expand −κ(s+ph)^2 = −κs^2 − 2κsph − κp^2h^2 and put
+    - κ'' = p^2κ,
+    - θ'' = pθ − 2κsp + 2κ''s,
+    - y'' = y − 1/5 − κs^2 + κ''s^2.
+    Then u_{ph} − 1/5 = y'' + hθ'' − κ''(s+h)^2 as elements of T, for every h ∈ Z. Now:
+    - p^2 ≡ ±1 mod 5, so κ'' is uniform on {1/5, 4/5};
+    - given (s, κ), θ'' = pθ + const is Haar (×p preserves Haar on T), and y'' is Haar and
+      independent of it.
+    So (y'', θ'', s, κ'') has the law of (y, θ, s, κ).
+(e) Partition: clear. (2.3): on a component with θ irrational,
+    - if 5 ∤ q, T^q is the rotation by (qθ, q), which is uniquely ergodic on T × Z/5;
+    - if 5 | q, T^q fixes s and rotates y by qθ.
+    In both cases E_{h≤H} 1_{B_a}(T^{qh}x) → 1/5 for every x; then integrate. The vanishing
+    for p ≠ 5 is (a) with d = p.
+(f) Unique ergodicity as in (e) gives the components. An eigenfunction with irrational eigenvalue
+    λ restricts, on almost every component, to an eigenfunction of the (θ,1)-rotation, which
+    forces λ ∈ Zθ + (1/5)Z. Only countably many θ satisfy this, so the eigenfunction vanishes a.e.
+(g) As stated.
+∎
+
+**Checks.** A Monte Carlo run of 2·10^6 samples reproduced (a)–(d):
+- constant-triple mass 0;
+- two-point deviation from 1/25 at most 3·10^{−4};
+- P_1 = 0, P_2 ≈ P_3 ≈ 0.1999;
+- law(X_0,X_p,X_{2p}) − 1 matches law(X_0,X_1,X_2) to 3·10^{−4} for p = 2, 3;
+- along 5-steps the constant-triple mass is 0.0997.
+
+The same construction with m = 3 (arcs of length 1/3, κ ∈ {1/3, 2/3}) **fails**: constant-triple
+mass 0.084. This is consistent with TT Thm 1.3. The reason: for m = 3, 2κd^2 ≡ ±1/3 mod 1, and
+the interval (−2/3, 2/3) contains it.
+
+**Generalisation [PROOF, same argument].** The model works for Z/m with m prime, m ≡ 1 mod 4:
+take κ uniform on {j r^2/m : r ∈ (Z/m)^*} with 2j a quadratic non-residue. Then 2jr^2 ≢ 0, ±1
+mod m, because −1 is a square. For m ≡ 3 mod 4 this family fails, since ±1 covers both square
+classes. We do not claim anything for those m.
+
+**What the barrier means.** The machinery behind TT Thm 1.3 is: vanishing of the non-T
+correlations, TT's correspondence principle, Gowers uniformity of the primes to pass to d coprime
+to W, and the Kronecker-factor reduction. That machinery, plus everything else listed in (b)–(f),
+is consistent with λ_1 having no zero runs at all. Any proof of G_5, even for λ_1 alone, must use
+an input that sees the difference between λ_1 and this model. Candidates:
+1. **Exact self-similarity** at the primes dividing the rational part of the spectrum: (g) above.
+   TT's Thm 2.2 discards it, because the entropy-decrement step replaces pn by a generic m.
+2. **Ergodicity** of the log-Furstenberg system. The model is non-ergodic (θ is random).
+   Frantzikinakis 1611.09338 derives Chowla/Elliott-type conclusions from ergodicity; that is
+   open.
+3. **Local Fourier uniformity** for H → ∞ slowly. The model's components are irrational rotations,
+   i.e. local Bohr structure. TT 1904.05096 (1.9) note that this is open, even for λ.
+
+[HEURISTIC] Route 1 looks the least hopeless. Within the family "rotation × rational quadratic
+twist with coefficient κ", self-similarity at p forces the law of κ to be invariant under
+κ ↦ p^2κ, restricted to the class p | n. This kills every prime from the denominator of κ, so
+κ = 0, and then constant triples have positive mass.
+- If κ is allowed to be irrational, invariance under ×4 and ×9 plus Furstenberg's theorem on
+  ×p,×q-invariant closed sets forces the support of κ to be all of T. Then constant triples again
+  have positive mass.
+- **Open:** whether every system satisfying TT (2.2)–(2.3), FH Thm 1.5, the constant-weight
+  dilation identity and exact p-adic self-similarity for all p must have positive constant-triple
+  mass. A "yes" would prove G_5 for λ_c. It would also cover class (S) through the progression
+  version, Prop 9.4, if uniform.
+- **Referee warning:** this is a research programme, not a sketch of a known argument. Higher-step
+  nilsystem components (for example cubic or generalized-polynomial twists) are not covered by the
+  family computation above.
+
+### 9.7 The precise remaining gap for the subclass
+
+| size of E | status | exact missing statement |
+|---|---|---|
+| c = 0, any density-0 E | **closed** [PROOF, Lemma 9.0 + §7] | none |
+| c ≠ 0, E ⊆ {p ≤ 10^4} (or any explicitly listed finite E, by rerunning the search) | **closed** [PROOF + certified computation, Thm 9.2] | none |
+| c ≠ 0, all finite E uniformly | OPEN | Conjecture W (Ω mod 5 on m^5 ± 1), or n ∈ Z ∩ A_L for every L |
+| c ≠ 0, Σ_E 1/p < ∞ | OPEN | H(κ): Ω mod 5 zero runs with relative upper log density ≥ κ in every class L^5 − 1 mod L^6 (Prop 9.4) |
+| c ≠ 0, E of density 0, Σ_E 1/p = ∞ | OPEN | no reduction; behaves like λ_c for all known methods (§9.4) |
+| λ_c itself (E = ∅) | OPEN in density form. Existence of one run is trivial (n = 15470). | limsup (P_1+P_2+P_3) > 2/5 (Prop 9.5). TT's method is provably insufficient (Prop 9.6). |
+
+**Λ-form of what is proved.** A run-free completely additive f: N → Z/5 (one exists iff
+Λ(5,3) = ∞, §7.5) cannot be constant on Q(m) for any m with Ω(m^5−1) ≡ Ω(m^5+1) ≡ 0 mod 5
+(Lemma 9.1). In particular it cannot equal a constant c on all primes > 10^4 (Theorem 9.2). Under
+H(κ), its exception set {p : f(p) ≠ c} has Σ 1/p = ∞ for every c (Prop 9.4).
+Chebotarev direction: a prime p ≡ 1 mod 5 whose quintic character is constant on Q(m*) has
+r(5,3,p) ≤ m*^5 − 1. This holds for a positive proportion 5^{−9} of such p, but the bound
+≈ 5·10^35 is useless next to Λ(5,3) ≥ 10^9. These are not new constraints on Λ in any practical
+sense.
+
+### 9.8 Steps a referee should attack
+
+1. **Prop 9.6 (a).** The open-interval argument: three points in one half-open arc of length 1/5
+   have second difference in (−2/5, 2/5) *as reals*. Also check that −2κd^2 is exactly 2/5 or
+   3/5 mod 1 for κ ∈ {1/5, 4/5}, 5 ∤ d.
+2. **Prop 9.6 (d).** The change of variables must hold for all h ∈ Z at once, as an identity in T,
+   so that the law of the whole process is preserved and not only 3-point marginals. Also check
+   that κ'' stays uniform on {1/5, 4/5} (it uses p^2 ≡ ±1 mod 5).
+3. **Prop 9.6 (e).** Does TT Thm 2.2 produce *only* (2.2)–(2.3) plus (ii)–(iii)? Our claim "TT's
+   method cannot give (0,0,0)" is about that theorem and the steps (1.11)–(1.14) built on it. A
+   stronger correspondence (for example one with self-similarity) is not excluded; see (g).
+4. **Prop 9.6 (g).** In the joining argument, the conditional measure on {5 | r} is T^5-invariant
+   and absolutely continuous. On fibres with θ irrational the only such measure is Lebesgue in y.
+   Is (θ, s, κ) really T^5-invariant? s ↦ s + 5 = s, yes.
+5. **Prop 9.5.** It relies on the §7.4 citations for the 112 vanishing terms (re-checked in §8,
+   items 5 and 6) and on the enumeration of T into three lines (checked: 12 = 3 × 4).
+6. **Prop 9.4.** The log-density union bound, including primes p ∈ (y, x+2] with the "+1" error
+   terms: Σ_{p≤x} 1/p = O(log log x) = o(log x). Also check that y > every prime of S so that
+   p ∤ L^6.
+7. **Thm 9.2.** Recompute with the gp one-liner below. PARI's isprime gives proven primality, and
+   the factors are < 1.1·10^13 anyway, so trial division suffices.
+8. **Novelty.** The barrier is in the spirit of TT's own local-Bohr remark (Remark 2.5) and
+   McNamara's constructions. What we have not seen stated is that the obstruction survives for a
+   single level set together with the exact dilation identity, the FH structure and all known
+   correlations, and that it breaks exactly at the modulus. Present it as an observation, not a
+   theorem of independent weight.
+
+### 9.9 Reproducibility
+
+- Theorem 9.2:
+  `echo 'm=13909368; print(factor(m^5-1)); print(factor(m^5+1)); print(apply(isprime, concat(factor(m^5-1)[,1]~, factor(m^5+1)[,1]~)))' | gp -q`
+- Search for witnesses (≈ 1 s up to P = 10^4):
+  `forstep(m=66*ceil(P/66),10^15,66, if(gcd(m^10-1,prod(i=1,primepi(P),prime(i)))!=1,next); if((bigomega(m-1)+bigomega(polcyclo(5,m)))%5,next); if((bigomega(m+1)+bigomega(polcyclo(10,m)))%5==0, print(m); break))`
+- Zero runs of Ω mod 5 up to 10^8: a numpy Ω-sieve, 8 s, about 200 MB peak. The Prop 9.6 Monte
+  Carlo uses 2·10^6 samples. Both scripts are in the session scratchpad (`witness.py`, `model.py`),
+  not in the repo.
