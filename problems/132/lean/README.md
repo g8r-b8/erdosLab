@@ -1,3 +1,13 @@
+# ✅ 4/3 theorem fully formalised (2026-09-25)
+
+`Erdos132Main.erdos132_main43 : ∃ C₀ : ℝ, ∀ X : Finset Pt, 2 ≤ X.card → (min (mult X (dist2 X)) (mult X (minDist X)) : ℝ) ≤ 4/3 * X.card + C₀`
+
+- No `sorry`; `#print axioms` = `[propext, Classical.choice, Quot.sound]` (no native_decide / bv_decide); `leanchecker` passes on all six modules.
+- Files: E132Main43Defs, E132Main43Good, E132Main43Frame, E132Main43Classify, E132Main43Charge, E132Main43 (Theorem N3 of angle_R6 §1 and its corollary `L ≤ 4/3`).
+  They import the 54/37 and 15/11 files unchanged, and `Erdos.lean` now imports them.
+- Build one module at a time: `tools/leanslot.sh lake build Erdos.E132Main43Defs`, then `Good`, `Frame`, `Classify`, `Charge`, `E132Main43` (never a whole-target parallel build; see `agents/RESEARCH_BRIEF.md`).
+- See MAIN43_PLAN.md for the deviations from the paper (goodness without arc length, frame without the graph `f`, intrinsic receivers, Euclidean Lemma Pin, constants) and `L43_reports/` for the proof routes of Classify and Charge.
+
 # ✅ 15/11 theorem fully formalised (2026-09-24)
 
 `Erdos132Main.erdos132_main15 : ∃ C₀ : ℝ, ∀ X : Finset Pt, 2 ≤ X.card → (min (mult X (dist2 X)) (mult X (minDist X)) : ℝ) ≤ 15/11 * X.card + C₀`
