@@ -496,7 +496,59 @@ Difficulty M. -/
 theorem card_cone_le_two {a n : Pt} (hn : ‖n‖ = 1) (P : Finset Pt)
     (h1 : ∀ q ∈ P, dist q a = 1) (hsep : ∀ q ∈ P, ∀ q' ∈ P, q ≠ q' → 1 ≤ dist q q')
     (hcone : ∀ q ∈ P, 1 / 2 < inner ℝ (q - a) n) : P.card ≤ 2 := by
-  sorry
+  have hπ := Real.pi_pos
+  obtain ⟨θn, hθn⟩ := exists_dirVec hn
+  have hu : ∀ q ∈ P, ‖q - a‖ = 1 := fun q hq => by rw [← dist_eq_norm, h1 q hq]
+  have hp : (0 : ℝ) < 2 * π := by linarith
+  have hang : ∀ q ∈ P, ∃ ψ : ℝ, ψ ∈ Set.Ioc (-π) π ∧ dirVec (θn + ψ) = q - a := by
+    intro q hq
+    obtain ⟨φ, -, hφ⟩ := exists_angle (hu q hq)
+    refine ⟨toIocMod hp (-π) (φ - θn), ?_, ?_⟩
+    · have := toIocMod_mem_Ioc hp (-π) (φ - θn)
+      refine ⟨this.1, ?_⟩
+      linarith [this.2]
+    · have e := toIocMod_add_toIocDiv_zsmul hp (-π) (φ - θn)
+      rw [← hφ]
+      have : θn + toIocMod hp (-π) (φ - θn) =
+          φ + ((-(toIocDiv hp (-π) (φ - θn)) : ℤ) : ℝ) * (2 * π) := by
+        rw [zsmul_eq_mul] at e; push_cast; linarith
+      rw [this, dirVec_add_int]
+  choose! ψ hψ hψd using hang
+  have hbound : ∀ q ∈ P, |ψ q| < π / 3 := by
+    intro q hq
+    have hc : Real.cos (ψ q) = inner ℝ (q - a) n := by
+      rw [← hψd q hq, ← hθn, Curve.inner_dirVec]; congr 1; ring
+    have hcos : 1 / 2 < Real.cos |ψ q| := by rw [Real.cos_abs, hc]; exact hcone q hq
+    have hm1 : |ψ q| ≤ π := abs_le.2 ⟨by linarith [(hψ q hq).1], (hψ q hq).2⟩
+    by_contra h
+    push Not at h
+    have h2 := Real.cos_le_cos_of_nonneg_of_le_pi (by positivity) hm1 h
+    rw [Real.cos_pi_div_three] at h2
+    linarith
+  have hsep' : ∀ q ∈ P, ∀ q' ∈ P, q ≠ q' → π / 3 ≤ |ψ q - ψ q'| := by
+    intro q hq q' hq' hne
+    by_contra hlt
+    push Not at hlt
+    have hlt' := Defs.sqd_lt_of_arg one_pos (a := θn + ψ q) (b := θn + ψ q')
+      (by rwa [add_sub_add_left_eq_sub])
+    have hd := hsep q hq q' hq' hne
+    have e : dist q q' ^ 2 = (1 * Real.cos (θn + ψ q) - 1 * Real.cos (θn + ψ q')) ^ 2 +
+        (1 * Real.sin (θn + ψ q) - 1 * Real.sin (θn + ψ q')) ^ 2 := by
+      have e0 : dist q q' = dist (q - a) (q' - a) := by
+        rw [dist_eq_norm, dist_eq_norm, sub_sub_sub_cancel_right]
+      rw [e0, dist_sq_pt, ← hψd q hq, ← hψd q' hq']
+      simp only [dirVec_apply0, dirVec_apply1, one_mul]
+    nlinarith [dist_nonneg (x := q) (y := q')]
+  by_contra hc
+  push Not at hc
+  obtain ⟨q₁, q₂, q₃, hq₁, hq₂, hq₃, h12, h13, h23⟩ := Finset.two_lt_card_iff.1 hc
+  have b1 := abs_lt.1 (hbound q₁ hq₁)
+  have b2 := abs_lt.1 (hbound q₂ hq₂)
+  have b3 := abs_lt.1 (hbound q₃ hq₃)
+  rcases le_abs'.1 (hsep' q₁ hq₁ q₂ hq₂ h12) with s12 | s12 <;>
+  rcases le_abs'.1 (hsep' q₁ hq₁ q₃ hq₃ h13) with s13 | s13 <;>
+  rcases le_abs'.1 (hsep' q₂ hq₂ q₃ hq₃ h23) with s23 | s23 <;>
+  linarith
 
 end
 
