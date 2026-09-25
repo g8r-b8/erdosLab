@@ -318,8 +318,8 @@ for λ and for ζ^{ω(n)}.)
 
 ### 7.1 The case split
 
-Every g falls in exactly one of three classes. Lemma 7.1(i) rules out weak pretension to χ n^{it}
-with t ≠ 0 for μ_5-valued g.
+Every g falls in exactly one of three classes. Weak pretension to χ n^{it} with t ≠ 0 is impossible
+for μ_5-valued g (the weak analogue of Lemma 7.1(i), proved in §8 item 1b).
 
 | case | definition | status | reference |
 |---|---|---|---|
@@ -344,15 +344,16 @@ Step 1: g' has a zero run at n_0. Let g' be completely multiplicative with g' = 
 - (This is the README's CRT observation. It is where "k odd" enters: for even k, χ(−1) = −1 is
   possible.)
 
-Step 2: transfer to g. Let M = L^{5j+1}. Take any n ≡ n_0 mod M such that none of n, n+1, n+2 has a
+Step 2: transfer to g. Let M = q·L^{5j+1} (the factor q is needed when q is not squarefree; §8 item 4). Take any n ≡ n_0 mod M such that none of n, n+1, n+2 has a
 prime factor in E ∖ S.
 - The S-parts of n+i are the same as for n_0 + i: they are 1, L^{5j}, 1.
-- The S-free parts are ≡ n_0 + i mod q, and all their primes lie outside E.
+- The S-free parts are ≡ −1, 1, 1 mod q (for i = 1: n+1 = L^{5j}(1 + qL·t')), and all their primes
+  lie outside E.
 - So g(n+i) = g'(n+i) = g'(n_0+i) = 1.
 
 Step 3: count. For X large, the number of bad n ≤ X in the class is
 ≤ Σ_{p∈E, y<p≤X+2} 3(X/(Mp) + 1) ≤ X/(2M) + 3π(X+2).
-Here p > y is coprime to M. So the zero runs of g have lower natural density ≥ 1/(2M) > 0.
+Here p > y > q is coprime to M. So the zero runs of g have lower natural density ≥ 1/(2M) > 0.
 The same proof works verbatim for μ_k-valued g with k odd. ∎
 
 Remarks.
@@ -376,7 +377,8 @@ Deduction. Let g be in case B.
    D(f_i, χ_i n^{it_i}; x^ε, x) ≤ 4η(x) ≤ ε for x ∈ S large.
 3. D(f_1, χ_1 n^{it_1}; x) → ∞, because g^{e_1} is NP (Lemma 7.1(ii)).
 4. **KMT Theorem 4.1** (1, 2 or 3 functions, a_j = 1, distinct h_j) then gives
-   limsup_{x∈S} |(1/x) Σ_{n≤x} f_1(n+h_1)⋯| ≪ (log 1/ε)^{1/2} ε, for every ε.
+   limsup_{x∈S} |(1/x) Σ_{n≤x} f_1(n+h_1)⋯| ≪ (log 1/ε)^{1/2} ε, for every ε. (KMT need h_j ∈ N:
+   use shifts (1,2,3); this changes the averages by O(1/x).)
 
 So all 124 nontrivial Cesàro correlations → 0 along the single set S. Hence
 (1/x)#{n ≤ x : zero run} → 1/125 along S, and g has infinitely many zero runs.
@@ -428,7 +430,7 @@ results).
 25 triples (x, x+t, x+3t+1), for x, t ∈ Z/5.
 - ν̂(a,b,c) ≠ 0 only for (a,b,c) = (2c,2c,c) with c ≠ 0. These four points are in T. So ν meets
   every constraint known in case C (all 112 vanishing terms).
-- ν(0,0,0) = 0, since that would need t = 0 and 2t+1 = 0.
+- ν(0,0,0) = 0, since that would need t = 0 and 3t+1 = 0.
 
 So any proof for case C must use arithmetic input beyond the vanishing of the 112 correlations.
 This is the same "local Bohr set" obstruction that Tao–Teräväinen 1904.05096 describe:
@@ -450,7 +452,8 @@ Dirichlet character (Σ_{p≤x}(1 − Re g(p)\bar χ(p))/p ≠ o(log log x) for 
 g(n) = g(n+1) = g(n+2) = 1.
 
 **Theorem 7.5 [PROOF modulo the cited theorems].** G_5 ⟺ Λ(5,3) < ∞.
-- (⇐) is trivial.
+- (⇐) is the Chebotarev lower bound of the README (Λ = Λ_comb for odd k): a g with no zero run
+  is realised on primes ≤ R+2 by arbitrarily large p (§8 item 9).
 - (⇒) holds because cases A and B are closed (§7.2, §7.3) and G_5 is case C.
 
 Sufficient analytic forms of G_5, each implying the next:
@@ -466,7 +469,7 @@ conjecture for consecutive shifts, in Tao's corrected form:
 > 1509.05422 (inf_{|t|≤Ax} D(f_i, χ n^{it}; x) → ∞ for all χ and all A), then
 > E^log_{n≤x} f_0(n) f_1(n+1) f_2(n+2) → 0.
 
-Then X ⇒ Λ(k,3) < ∞ for every odd k.
+Then X ⇒ Λ(k,3) < ∞ for every odd k. (A routine combination, presumably folklore; §8 item 12.)
 *Proof.* Let g: N → μ_k.
 1. H = {j ∈ Z/k : g^j pretentious} is a subgroup, H = mZ/k with m | k.
 2. For j ∉ H, g^j is NP and μ_k-valued, so it satisfies (1.8) by Lemma 7.2. By X, every term (a,b,c)
@@ -498,6 +501,8 @@ Even the 4-point log Chowla for λ is open.
 PDFs and text extracts are in the session scratchpad, not in the repo.
 
 ## 8. Referee report on §7 (2026-09-25)
+
+*(2026-09-25, later: the fixes in items 1b, 4, 5a, 8, 9 and 12 have been folded into §7.)*
 
 Adversarial referee pass on §7 as of commit 190b03d. §7 itself is left unchanged; fixes are given here.
 Sources re-extracted with pypdf in the session scratchpad: KMT 2304.05344 (Def 1.1, 1.5, Thm 1.6,
