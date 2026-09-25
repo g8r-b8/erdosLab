@@ -58,6 +58,8 @@ def cr(o: sp.Matrix, a: sp.Matrix, q: sp.Matrix) -> sp.Expr:
 def expect_zero(name: str, e: sp.Expr, fails: list[str], red: bool = True) -> None:
     """Print and record whether e is identically 0 (after reduce_rel if red)."""
     r = reduce_rel(e) if red else sp.simplify(sp.expand(e))
+    if r != 0 and r.has(sp.sin, sp.cos):
+        r = sp.simplify(sp.trigsimp(r))
     ok = (r == 0)
     print(('  ok   ' if ok else '  FAIL ') + name + ('' if ok else f'   remainder = {r}'))
     if not ok:
@@ -245,16 +247,39 @@ def check_step2() -> list[str]:
 
 
 def check_step3() -> list[str]:
-    """Step 3 (no third neighbour c') identities in frame T with p' = P1.
+    """Step 3 (no third neighbour c') identities in frame T with p' = P1 = (0, y), y = c - d.
 
-    TODO: implement.
-    What's missing: u-p' = (-t,-c), b-p' = (t,-c) (unit); S(x) = t y - c s;
-      |c'-p|^2 = 1 + R^2 - 2(s cos gam - y sin gam); value at c'=u equals Delta^2;
-      cos(a)-sum identity sin(z-f)+sin(z+f) = 2 sin z cos f.
-    Acceptance: returns [].
-    Depends on: reduce_rel, trapezoid_points.
+    Writing t = sin(phi), c = cos(phi): u = p' + e(3pi/2 - phi), b = p' + e(3pi/2 + phi);
+    p - p' = (s, -y) = R e(-zeta).
     """
-    raise NotImplementedError("step 3 identities")
+    F: list[str] = []
+    print('[Step 3: no admissible c\']')
+    P = trapezoid_points()
+    x, p, u, b, P1 = P['x'], P['p'], P['u'], P['b'], P['P1']
+    y = c - d
+    expect_zero("u - p' = (-t, -c)", sq(u - P1 - sp.Matrix([-t, -c])), F)
+    expect_zero("b - p' = ( t, -c)", sq(b - P1 - sp.Matrix([t, -c])), F)
+    expect_zero("S(x) := cross(p'; u, x) = t y - c s = -(td + c(s-t))",
+                cr(P1, u, x) - (t*y - c*s), F)
+    expect_zero("t y - c s + (td + c(s-t)) = 0", t*y - c*s + t*d + c*(s - t), F)
+    gam, ph, ze, R = sp.symbols('gamma phi zeta R', real=True)
+    cp = P1 + e_(gam)
+    expect_zero("|c'p|^2 = 1 + (s^2+y^2) - 2(s cos(gam) - y sin(gam))",
+                sq(cp - p) - (1 + s**2 + y**2 - 2*(s*sp.cos(gam) - y*sp.sin(gam))), F)
+    val_u = 1 + s**2 + y**2 - 2*(s*(-t) - y*(-c))
+    expect_zero("value at e(gam) = (-t,-c) (i.e. c' = u) equals Delta^2 = 1+4st", val_u - (1 + 4*s*t), F)
+    # trig facts, with t = sin(phi), c = cos(phi), s = R cos(zeta), y = R sin(zeta)
+    trig_zero("cross(e(3pi/2-phi), e(gam)) = cos(gam+phi) = c cos(gam) - t sin(gam)",
+              (-sp.sin(ph))*sp.sin(gam) - (-sp.cos(ph))*sp.cos(gam) - sp.cos(gam + ph), F)
+    trig_zero("e(3pi/2 - phi) = (-sin phi, -cos phi)", sq(e_(3*sp.pi/2 - ph) - sp.Matrix([-sp.sin(ph), -sp.cos(ph)])), F)
+    trig_zero("e(3pi/2 + phi) = ( sin phi, -cos phi)", sq(e_(3*sp.pi/2 + ph) - sp.Matrix([sp.sin(ph), -sp.cos(ph)])), F)
+    trig_zero("s cos(gam) - y sin(gam) = R cos(gam + zeta)",
+              R*sp.cos(ze)*sp.cos(gam) - R*sp.sin(ze)*sp.sin(gam) - R*sp.cos(gam + ze), F)
+    trig_zero("cos(3pi/2 - phi + zeta) = sin(zeta - phi)", sp.cos(3*sp.pi/2 - ph + ze) - sp.sin(ze - ph), F)
+    trig_zero("cos(pi/2 + phi + zeta) = -sin(zeta + phi)", sp.cos(sp.pi/2 + ph + ze) + sp.sin(ze + ph), F)
+    trig_zero("sin(zeta - phi) + sin(zeta + phi) = 2 sin(zeta) cos(phi)",
+              sp.sin(ze - ph) + sp.sin(ze + ph) - 2*sp.sin(ze)*sp.cos(ph), F)
+    return F
 
 
 def main() -> int:
