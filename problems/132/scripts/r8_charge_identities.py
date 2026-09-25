@@ -18,29 +18,50 @@ from __future__ import annotations
 import sympy as sp
 
 s, t, d, k, c = sp.symbols('s t d k c', positive=True)
-RELS: dict[sp.Expr, sp.Expr] = {}
 
 
 def reduce_rel(e: sp.Expr) -> sp.Expr:
     """Reduce a polynomial expression modulo d^2=1-(t-s)^2, k^2=1-s^2, c^2=1-t^2.
 
-    TODO: implement.
-    What's missing: the reduction (polynomial remainder w.r.t. the three quadratic relations).
-    Acceptance: reduce_rel(d**2 - 1 + (t-s)**2) == 0, and reduce_rel is idempotent.
-    Depends on: nothing.
+    The three relations have pairwise coprime leading monomials d^2, k^2, c^2 in lex order
+    d > k > c > s > t, so they form a Groebner basis and the remainder is a canonical form
+    (linear in each of d, k, c).  An identity holds on the variety iff its remainder is 0.
     """
-    raise NotImplementedError("modular reduction by the defining relations of d, k, c")
+    G = [d**2 - 1 + (t - s)**2, k**2 - 1 + s**2, c**2 - 1 + t**2]
+    num, den = sp.fraction(sp.together(sp.expand(e)))
+    _, r = sp.reduced(sp.expand(num), G, d, k, c, s, t, order='lex')
+    return sp.simplify(r / den) if den != 1 else sp.expand(r)
 
 
 def trapezoid_points() -> dict[str, sp.Matrix]:
     """The five hook-1/trapezoid points in frame T plus the two axis apexes P1, P2.
 
-    TODO: implement.
-    What's missing: the dictionary {x,p,u,b,w,P1,P2} of 2-vectors.
-    Acceptance: |xu|^2, |pb|^2, |xw|^2, |pw|^2 reduce to 1; P1=(0,c-d), P2=(0,-d-c).
-    Depends on: nothing.
+    P1, P2 are the two points of C(u,1) n C(b,1); both lie on the axis X=0.
     """
-    raise NotImplementedError("coordinates of the trapezoid frame")
+    return {
+        'x': sp.Matrix([-s, 0]), 'p': sp.Matrix([s, 0]),
+        'u': sp.Matrix([-t, -d]), 'b': sp.Matrix([t, -d]), 'w': sp.Matrix([0, -k]),
+        'P1': sp.Matrix([0, c - d]), 'P2': sp.Matrix([0, -d - c]),
+    }
+
+
+def sq(v: sp.Matrix) -> sp.Expr:
+    """Squared Euclidean norm."""
+    return sp.expand(v[0]**2 + v[1]**2)
+
+
+def cr(o: sp.Matrix, a: sp.Matrix, q: sp.Matrix) -> sp.Expr:
+    """Signed area (a-o) x (q-o)."""
+    return sp.expand((a[0] - o[0]) * (q[1] - o[1]) - (a[1] - o[1]) * (q[0] - o[0]))
+
+
+def expect_zero(name: str, e: sp.Expr, fails: list[str], red: bool = True) -> None:
+    """Print and record whether e is identically 0 (after reduce_rel if red)."""
+    r = reduce_rel(e) if red else sp.simplify(sp.expand(e))
+    ok = (r == 0)
+    print(('  ok   ' if ok else '  FAIL ') + name + ('' if ok else f'   remainder = {r}'))
+    if not ok:
+        fails.append(name)
 
 
 def check_trapezoid() -> list[str]:
