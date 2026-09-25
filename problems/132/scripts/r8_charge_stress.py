@@ -36,16 +36,34 @@ def circle_pts(p: Pt, q: Pt, r1: float, r2: float) -> list[Pt]:
     return [(mx - h * uy, my + h * ux), (mx + h * uy, my - h * ux)]
 
 
+TOL = 1e-9
+
+
+def dist_ok(dd: float, Dl: float) -> bool:
+    """The only hypothesis on distances: every distance of distinct points is <= 1 or = Delta."""
+    return dd <= 1 + TOL or abs(dd - Dl) < TOL
+
+
 def trapezoid(s: float, t: float) -> tuple[float, dict[str, Pt]] | None:
     """Hook-1 + trapezoid configuration in frame T, or None if a hypothesis fails.
 
-    TODO: implement.
-    What's missing: build x,p,u,b,w; check pairwise distances in (0,1] u {Delta}, and the two
-      hook side conditions (u beyond line xw from p; b beyond line pw from x).
-    Acceptance: returns (Delta, pts) for (s,t)=(0.3,0.2); None when |xp|=2s in (1,Delta).
-    Depends on: cross.
+    Hypotheses checked: 0<s<1, |t-s|<1; all 10 distances among x,p,u,b,w in (0,1] u {Delta};
+    u strictly beyond line xw from p; b strictly beyond line pw from x.
     """
-    raise NotImplementedError("trapezoid builder")
+    if not (0 < s < 1 and t > 0 and abs(t - s) < 1):
+        return None
+    d, k = math.sqrt(1 - (t - s) ** 2), math.sqrt(1 - s * s)
+    Dl = math.sqrt(1 + 4 * s * t)
+    P = {'x': (-s, 0.0), 'p': (s, 0.0), 'u': (-t, -d), 'b': (t, -d), 'w': (0.0, -k)}
+    x, p, u, b, w = P['x'], P['p'], P['u'], P['b'], P['w']
+    if not (cross(x, w, u) * cross(x, w, p) < 0 and cross(p, w, b) * cross(p, w, x) < 0):
+        return None
+    names = list(P)
+    for i in range(5):
+        for j in range(i + 1, 5):
+            if not dist_ok(math.dist(P[names[i]], P[names[j]]), Dl):
+                return None
+    return Dl, P
 
 
 def is_extreme(q: Pt, pts: list[Pt]) -> bool:
@@ -60,14 +78,19 @@ def is_extreme(q: Pt, pts: list[Pt]) -> bool:
 
 
 def st_grid(N: int) -> list[tuple[float, float]]:
-    """(s,t) grid including the strata 2s=1, 2t=1, 2s=Delta, 2t=Delta, s=2t.
-
-    TODO: implement.
-    What's missing: generic grid plus the one-parameter strata solved in closed form.
-    Acceptance: contains (0.5, t) points, and points with 4t^2 = 1+4st.
-    Depends on: nothing.
-    """
-    raise NotImplementedError("parameter grid")
+    """(s,t) grid including the strata 2s=1, 2t=1, 2s=Delta, 2t=Delta, s=2t."""
+    out: list[tuple[float, float]] = []
+    for i in range(1, N):
+        s = i / N
+        out += [(s, j / N + 1e-6) for j in range(1, 2 * N)]      # generic
+        out += [(s, 0.5), (s, s / 2), (s, s / 2 + 1e-7)]          # 2t = 1, s = 2t (and just above)
+        out.append((s, (4 * s + math.sqrt(16 * s * s + 16)) / 8))  # 2t = Delta: 4t^2 = 1 + 4st
+        if s > 0.5:
+            out.append((s, (4 * s * s - 1) / (4 * s)))              # 2s = Delta: 4s^2 = 1 + 4st
+    out += [(0.5, j / N + 1e-6) for j in range(1, 2 * N)]          # 2s = 1
+    phi = (1 + math.sqrt(5)) / 2
+    out += [(0.5, phi / 2), (phi / 2, 0.5)]                          # regular-pentagon corners
+    return out
 
 
 def stress_step1(N: int) -> Counter:
