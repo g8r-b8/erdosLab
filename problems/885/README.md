@@ -38,7 +38,7 @@ Near-miss counters (added 2026-09-25): K₅,₄ = 5 N's sharing a k=4 difference
 
 | run | pairs | K₄,₄ | K₅,₄ | K₄,₅ | K₅,₅ |
 |---|---|---|---|---|---|
-| g = 1, all d ≤ 12000 (**complete**, 33 min × 8 cores) | 1.26e9 | 13 (10 up to scaling) | 0 | 0 | **0** |
+| g = 1, all d ≤ 12000 (**complete**, 33 min × 8 cores) | 1.26e9 | 13 (10 up to scaling) | 0 | not counted | **0** |
 | g = 2520, m ≤ 1000 | 4.1e8 | 11 | 0 | 0 | 0 |
 | g = 5040, m ≤ 1000 | 5.4e8 | 12 | 0 | 0 | 0 |
 | g = 10080, m ≤ 1000 | 6.7e8 | 12 | 0 | 0 | 0 |
