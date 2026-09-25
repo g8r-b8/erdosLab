@@ -360,6 +360,52 @@ private theorem c43_slot_of_angle {y n q : Pt} (hn : ‖n‖ = 1) {ψ s η : ℝ
     rw [← sq_abs]; exact pow_le_pow_left₀ (abs_nonneg _) h 2
   linarith
 
+/-- Reals `c`-separated in `[lo, hi]` number at most `(hi − lo)/c + 1`. -/
+private theorem c43_count {ι : Type*} (T : Finset ι) (f : ι → ℝ) {c lo hi : ℝ} (hc : 0 < c)
+    (hlh : lo ≤ hi) (hsep : ∀ a ∈ T, ∀ b ∈ T, a ≠ b → c ≤ |f a - f b|)
+    (hT : ∀ a ∈ T, lo ≤ f a ∧ f a ≤ hi) : (T.card : ℝ) * c ≤ hi - lo + c := by
+  have hinj : Set.InjOn (fun a => f a / c) T := by
+    intro a ha b hb h
+    by_contra hne
+    have h3 := hsep a ha b hb hne
+    simp only at h
+    have : f a = f b := by
+      have := congrArg (· * c) h
+      simpa [div_mul_cancel₀ _ hc.ne'] using this
+    rw [this, sub_self, abs_zero] at h3
+    linarith
+  have hcard := card_le_of_sep_real (a := lo / c) (T.image fun a => f a / c)
+    (hi / c) (by have := div_le_div_of_nonneg_right hlh hc.le; linarith)
+    (by
+      intro x hx
+      obtain ⟨a, ha, rfl⟩ := mem_image.1 hx
+      exact ⟨div_le_div_of_nonneg_right (hT a ha).1 hc.le,
+        div_le_div_of_nonneg_right (hT a ha).2 hc.le⟩)
+    (by
+      intro x hx x' hx' hne
+      obtain ⟨a, ha, rfl⟩ := mem_image.1 hx
+      obtain ⟨b, hb, rfl⟩ := mem_image.1 hx'
+      have hab : a ≠ b := by rintro rfl; exact hne rfl
+      have h3 := hsep a ha b hb hab
+      rw [← sub_div, abs_div, abs_of_pos hc, le_div_iff₀ hc, one_mul]
+      exact h3)
+  rw [card_image_of_injOn hinj] at hcard
+  have e : (hi / c - lo / c + 1) * c = hi - lo + c := by
+    rw [add_mul, sub_mul, div_mul_cancel₀ _ hc.ne', div_mul_cancel₀ _ hc.ne', one_mul]
+  calc (T.card : ℝ) * c ≤ (hi / c - lo / c + 1) * c := mul_le_mul_of_nonneg_right hcard hc.le
+    _ = hi - lo + c := e
+
+private theorem c43_rot_eq (θ : ℝ) (x : Pt) : rot θ x = dirF x θ := by
+  rw [pt_ext_iff]; refine ⟨?_, ?_⟩ <;> simp [rot, dirF, perp] <;> ring
+
+/-- Two vectors with the same coordinates in a frame are equal. -/
+private theorem c43_eq_of_coords {n v w : Pt} (hn : ‖n‖ = 1) (h1 : inner ℝ v n = inner ℝ w n)
+    (h2 : inner ℝ v (perp n) = inner ℝ w (perp n)) : v = w := by
+  have e := c43_sq hn (v - w)
+  rw [inner_sub_left, inner_sub_left, h1, h2, sub_self, sub_self] at e
+  have h0 : ‖v - w‖ ^ 2 = 0 := by rw [e]; ring
+  exact sub_eq_zero.1 (norm_eq_zero.1 (pow_eq_zero_iff (n := 2) (by norm_num) |>.1 h0))
+
 /-- **Four points on the upper arc**: four unit vectors pairwise `≥ 60°` apart with height
 `> −1/49` sit within `0.021` (in angle) of the slots `−90°, −30°, 30°, 90°`. -/
 private theorem c43_arc4 {y n : Pt} (hn : ‖n‖ = 1) (P : Finset Pt) (hcard : P.card = 4)
@@ -504,7 +550,70 @@ Acceptance: no `sorry`.
 Depends on: `exists_angle`, `rot`, `one_le_dist`, `dist_of_mem_nbδ`. Difficulty M–L. -/
 theorem hexagon_exact (hX : Normal X) {y : Pt} (h6 : degδ X y = 6) :
     ∀ q ∈ nbδ X y, y + rot (π / 3) (q - y) ∈ nbδ X y := by
-  sorry
+  intro q hq
+  have hπ := Real.pi_pos
+  have hn : ‖q - y‖ = 1 := by rw [← dist_eq_norm, dist_of_mem_nbδ hX hq]
+  set n := q - y with hndef
+  set P := (nbδ X y).erase q with hP
+  have hPc : P.card = 5 := by
+    have : (nbδ X y).card = 6 := h6
+    rw [hP, card_erase_of_mem hq, this]
+  have hPm : ∀ a ∈ P, a ∈ nbδ X y ∧ a ≠ q := fun a ha => ⟨(mem_erase.1 ha).2, (mem_erase.1 ha).1⟩
+  have hang : ∀ a ∈ P, ∃ φ : ℝ, 0 ≤ φ ∧ φ < 2 * π ∧ Real.cos φ = inner ℝ (a - y) n ∧
+      Real.sin φ = inner ℝ (a - y) (perp n) := by
+    intro a ha
+    obtain ⟨ψ, h1, h2, hc, hs⟩ := c43_angle (c43_unit hX hn (hPm a ha).1)
+    rcases le_or_gt 0 ψ with h | h
+    · exact ⟨ψ, h, by linarith, hc, hs⟩
+    · refine ⟨ψ + 2 * π, by linarith, by linarith, ?_, ?_⟩
+      · rw [Real.cos_add_two_pi, hc]
+      · rw [Real.sin_add_two_pi, hs]
+  choose! φ hφ0 hφ1 hφc hφs using hang
+  have hqZ : inner ℝ (q - y) n = 1 := by
+    rw [← hndef, real_inner_self_eq_norm_sq, hn]; norm_num
+  have hqX : inner ℝ (q - y) (perp n) = 0 := by rw [← hndef]; exact c43_np n
+  -- every other neighbour is at angle in `[π/3, 5π/3]`
+  have hrange : ∀ a ∈ P, π / 3 ≤ φ a ∧ φ a ≤ 5 * π / 3 := by
+    intro a ha
+    have h1 := c43_sep hX hn (hPm a ha).1 hq (hPm a ha).2
+    have hu := c43_unit hX hn (hPm a ha).1
+    rw [hqZ, hqX] at h1
+    have hc : Real.cos (φ a) ≤ 1 / 2 := by rw [hφc a ha]; nlinarith
+    constructor
+    · by_contra h
+      push Not at h
+      have := c43_cos_gt_half (d := φ a) (by rw [abs_of_nonneg (hφ0 a ha)]; exact h)
+      linarith
+    · by_contra h
+      push Not at h
+      have := c43_cos_gt_half (d := φ a - 2 * π)
+        (by rw [abs_lt]; constructor <;> linarith [hφ1 a ha])
+      rw [Real.cos_sub_two_pi] at this
+      linarith
+  have hsepφ : ∀ a ∈ P, ∀ b ∈ P, a ≠ b → π / 3 ≤ |φ a - φ b| := by
+    intro a ha b hb hne
+    by_contra hc
+    push Not at hc
+    have h1 := c43_cos_gt_half hc
+    have h2 := c43_sep hX hn (hPm a ha).1 (hPm b hb).1 hne
+    rw [← hφc a ha, ← hφc b hb, ← hφs a ha, ← hφs b hb, c43_chord] at h2
+    linarith
+  have hne : P.Nonempty := by rw [← card_pos, hPc]; norm_num
+  obtain ⟨m, hm, hmin⟩ := P.exists_min_image φ hne
+  have hcnt := c43_count P φ (c := π / 3) (lo := φ m) (hi := 5 * π / 3) (by positivity)
+    (hrange m hm).2 hsepφ (fun a ha => ⟨hmin a ha, (hrange a ha).2⟩)
+  rw [hPc] at hcnt
+  have hφm : φ m = π / 3 := by
+    have := (hrange m hm).1
+    push_cast at hcnt
+    linarith
+  have hrot : rot (π / 3) n = m - y := by
+    rw [c43_rot_eq]
+    apply c43_eq_of_coords hn
+    · rw [c43_dirF_n hn, ← hφc m hm, hφm]
+    · rw [c43_dirF_p hn, ← hφs m hm, hφm]
+  rw [hrot, show y + (m - y) = m by abel]
+  exact (hPm m hm).1
 
 /-! ## Lemma M and Lemma H -/
 
