@@ -11,7 +11,7 @@ Deviations from the paper:
 * fallbacks (F2), (F3) are replaced by the single case `|A| ≤ 1000h` (perimeter-free; `CoreE`
   absorbs the implication `|A| > 1000h ⇒ r_in(K) > h ∧ per K ≥ 100h`);
 * (F1) is not needed: `Normal X` has `Δ₂ ≥ 10⁴`, so `ρ₀ ≥ 1`;
-* packing `n ≤ (2Δ + 2)²` (grid of cells of side `7/10`) instead of `(2Δ + 1)²`; `CE = 10⁵`.
+* packing `n ≤ (2Δ + 2)²` (grid of cells of side `7/10`) instead of `(2Δ + 1)²`; `CE = 2·10⁷` (absorbs `Eh = 3·10⁶h²`).
 -/
 
 open Finset Real
@@ -182,7 +182,7 @@ theorem card_le_sq_diam (h1 : minDist X = 1) : (X.card : ℝ) ≤ (2 * diam X + 
 
 TODO: none — proved.
 What's missing: real arithmetic with `rpow`: `h < 2n^{1/3}`, `⌊m⌋ ≥ m/2` for `m ≥ 1`,
-`3n/ρ₀ ≤ 6n^{2/3} + 2400 n/Δ₂ ≤ 6n^{2/3} + 9600 √n`, `E(h) ≤ 7506 n^{2/3}`,
+`3n/ρ₀ ≤ 6n^{2/3} + 2400 n/Δ₂ ≤ 6n^{2/3} + 9600 √n`, `E(h) ≤ 1.2·10⁷ n^{2/3}`,
 `√n ≤ n^{2/3}`, `n^{1/3} ≤ n^{2/3}` (`n ≥ 1`).
 Acceptance: no `sorry`.
 Depends on: nothing (analysis of `Real.rpow`, `Nat.floor`). Difficulty M. -/
@@ -212,10 +212,9 @@ theorem eprime_arith {n D₂ : ℝ} {ρ₀ ρ : ℕ} (hn : 4 ≤ n) (hD : 10 ^ 4
   refine ⟨hρ₀1, by linarith, ?_, ?_⟩
   · have : c ≤ c ^ 2 := by nlinarith
     unfold CE; nlinarith
-  · have hE : Eh ((ρ : ℝ) + 1 / 2) ≤ 7506 * c ^ 2 := by
+  · have hE : Eh ((ρ : ℝ) + 1 / 2) ≤ 12 * 10 ^ 6 * c ^ 2 := by
       unfold Eh
       have h1 : ((ρ : ℝ) + 1 / 2) ^ 2 ≤ 4 * c ^ 2 := by nlinarith
-      have : c ≤ c ^ 2 := by nlinarith
       nlinarith
     have hm2 : m ≤ 2 * ρ₀ := by linarith
     have hshell : 3 * n / ρ₀ ≤ 9600 * c ^ 2 := by

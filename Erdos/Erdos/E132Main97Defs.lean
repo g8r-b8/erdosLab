@@ -50,11 +50,13 @@ def Yin (X : Finset Pt) (ρ : ℝ) : Finset Pt :=
 def Yshell (X : Finset Pt) (ρ : ℝ) : Finset Pt :=
   (Yset X).filter (fun y => (∀ w ∈ X, dist y w ≤ dist2 X - ρ) ∧ ∃ w ∈ X, dist2 X - (ρ + 1) < dist y w)
 
-/-- The error `E(h) = 1764h² + 223h + 4` of §5.2 Step 7. -/
-def Eh (h : ℝ) : ℝ := 1764 * h ^ 2 + 223 * h + 4
+/-- The core error `E(h) = 3·10⁶ h²`.  It dominates the paper's `1764h² + 223h + 4`
+(§5.2 Step 7) for `h ≥ 3/2`, Route A's visible-path bound `71h + 7` and Route A's steep-chain
+bound `2(1200h + 2)²` (`problems/132/lean/L97_reports/`). -/
+def Eh (h : ℝ) : ℝ := 3 * 10 ^ 6 * h ^ 2
 
 /-- The constant of Theorem E′ (paper: `3·10⁴`; generous here). -/
-def CE : ℝ := 10 ^ 5
+def CE : ℝ := 2 * 10 ^ 7
 
 /-- The constant of the main theorem. -/
 def C97 : ℝ := 10 ^ 11
@@ -64,9 +66,10 @@ def C97 : ℝ := 10 ^ 11
 For `δ = 1`, `Δ ≤ 1.94Δ₂`, an integer shell parameter `ρ ≥ 1` with `h = ρ + ½ < Δ₂/200`,
 and `|A| > 1000h`: `Def(G[Yout ρ]) ≥ 2|A| − E(h)`.
 
-Why this is what §5.2 proves: `|A| > 1000h` gives `per K ≥ |A| − 1 > 100h` (P7) and, by
-Lemma F, `r_in(K) ≥ diam K/300 ≥ per K/(300π) > h`; so the fallbacks (F2), (F3) do not apply
-and Steps 2–7 give `Def(H_out) ≥ 2|A| − E(h)`.  See MAIN97_PLAN.md (routes A/B/C). -/
+Why this is what §5.2 proves (refereed: REF_core_report.md, Task 1): the `|A|` gap arcs of `∂K`
+have length `≥ 1` each (P7), so `per K ≥ |A| > 1000h > 300πh` (in particular `per K ≥ 100h`), and
+by Lemma F, Steinhagen and Cauchy `r_in(K) ≥ diam K/300 ≥ per K/(300π) > h`; so the fallbacks
+(F2), (F3) do not apply and Steps 2–7 give `Def(H_out) ≥ 2|A| − (1764h² + 223h + 4) ≥ 2|A| − E(h)`.  See MAIN97_PLAN.md (routes A/B/C). -/
 def CoreE : Prop :=
   ∀ (X : Finset Pt) (ρ : ℕ), Normal X → 1 ≤ ρ → ((ρ : ℝ) + 1 / 2) < dist2 X / 200 →
     1000 * ((ρ : ℝ) + 1 / 2) < (Aset X).card →

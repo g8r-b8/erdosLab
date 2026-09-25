@@ -65,7 +65,7 @@ child first; Route B only if A fails and budget remains.  Reports: `problems/132
 Notation (δ = 1, `Normal X`): `D = Dset X`, `Y = X ∖ D ⊆ K` (all distances from a non-D point are
 `≤ Δ₂`), `A = S ∖ D = Y ∩ ∂K`, `depth y < ρ ⇔ ∃ w ∈ X, |y − w| > Δ₂ − ρ`,
 `Yout ρ = {y ∈ Y : depth y < ρ}`, `Def(Z) = 3|Z| − mult Z 1`, `h = ρ + ½`,
-`E(h) = 1764h² + 223h + 4`.
+`E(h) = 3·10⁶h²` (was `1764h² + 223h + 4`; enlarged 2026-09-25 so that both Route A proofs fit; `CE = 2·10⁷`).
 
 ```lean
 theorem core (hX : Normal X) {ρ : ℕ} (hρ : 1 ≤ ρ) (hρΔ : (ρ + 1/2 : ℝ) < dist2 X / 200)
@@ -73,7 +73,7 @@ theorem core (hX : Normal X) {ρ : ℕ} (hρ : 1 ≤ ρ) (hρΔ : (ρ + 1/2 : �
     2 * (Aset X).card - Eh (ρ + 1/2) ≤ defc (Yout X ρ)
 ```
 
-Why true (from angle_R6 §5.2): |A| > 1000h ≥ 2 gives per K ≥ |A| − 1 > 100h (P7) and, via Lemma F
+Why true (from angle_R6 §5.2; refereed in L97_reports/REF_core_report.md): the |A| gap arcs have length ≥ 1 (P7), so per K ≥ |A| > 1000h > 300πh (hence per K ≥ 100h), and via Lemma F
 (`r_in ≥ diam K/300 ≥ per K/(300π)`), r_in(K) > h; so (F2), (F3) do not apply and Steps 2–7 give
 `Def(H_out) ≥ 2|A| − E(h)`.  Steps 2–7 use only `h < Δ₂/200`, `h ≥ 3/2`, r_in > h, per K ≥ 100h.
 
@@ -114,3 +114,23 @@ Check one file: `cd Erdos && /Users/wingatejones/Projects/erdosLab/tools/leanslo
   the only `sorry` is `core : CoreE` (E132Main97Core.lean).
 - Deviation (D-part): the repo's `DirField` lives on `S`, so `Def(G[D]) ≥ 2|S∩D| − cBad` is proved
   with `deg ≤ 3` on `D ∖ S` and T-edges/bad edges on `S ∩ D` (paper: T-edges on all of `D`).
+
+## Route A results and referee (2026-09-25)
+
+- Two independent elementary (Euler/Jordan/winding/arc-length-free) proofs of `CoreE`:
+  - **visible path** (`L97_reports/RouteA_visiblepath_report.md`): `Def(G[Yout]) ≥ 2|A| − (71h + 7)`;
+    refereed (`L97_reports/REF_core_report.md`, Task 2): **CORRECT WITH GAPS** G1 (a vertex can be a
+    corner twice — count corner occurrences), G2 (`ν(a)·n_a > 0` from `D(c,h) ⊆ K`), G3 (ν-monotonicity
+    along a segment: injective + continuous), G4 (a compactness sentence).  No counterexample (300
+    stress configurations with sharp corners, exact "dip" configurations).  Lean estimate 4.5–7k lines.
+  - **steep chain** (`L97_reports/RouteA_report.md`): `Def ≥ 2|A| − 2(1200h + 2)²`; not refereed.
+    Lean estimate 4.6–5k lines.
+- REF_core Task 1: `CoreE` is TRUE as stated given §5.2 (doc chain corrected to `per K ≥ |A| > 300πh`).
+- `Eh` enlarged to `3·10⁶h²`, `CE = 2·10⁷` (both proofs fit); `erdos132_main97_of_core` re-checked.
+- Chosen for formalisation: the **visible-path** proof (refereed; fits `CoreE`).  New files `E132Main97A*.lean`.
+
+**Research note (not in the paper; unverified).**  Both Route A proofs give a core error `O(h)` in the
+main case (visible path: `71h + 7`).  With a linear core error the shell pigeonhole can be rebalanced
+(`ρ₀ ≈ min(√n, Δ₂/400)`, shell cost `3n/ρ₀`), which suggests Theorem E′ with error `O(√n)` and hence
+`min{μ(Δ₂), μ(δ)} ≤ 9n/7 + O(√n)` for `τ > 1`.  Needs a careful re-derivation (the `Δ₂/400` branch and
+the small-`|A|` fallback) before anyone relies on it.
