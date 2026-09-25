@@ -457,7 +457,31 @@ Depends on: `frame_outside`, `frame_mem_interior`, `dist_of_mem_nbδ`, `Frame43.
 `Metric.le_infDist`. Difficulty M. -/
 theorem lower_mem_Low (hX : Normal X) {y n : Pt} (hF : Frame43 X y n) {a : Pt}
     (ha : a ∈ nbδ X y) (hz : inner ℝ (a - y) n ≤ -(4 / 5)) : a ∈ Low X y := by
-  sorry
+  have hay : dist a y = 1 := dist_of_mem_nbδ hX ha
+  have hh0 := hF.depth_pos
+  have hh1 := hF.depth_le
+  have hXa := (frame_coords_le (v := a - y) hF.unit).2
+  rw [← dist_eq_norm, hay] at hXa
+  have hai : a ∈ interior (KBall X) := by
+    refine frame_mem_interior hX hF (by linarith) ?_
+    unfold ε43; linarith
+  refine mem_filter.2 ⟨ha, interior_subset hai, ?_⟩
+  show depth X y + 2 / 3 ≤ Metric.infDist a (frontier (KBall X))
+  refine (Metric.le_infDist ⟨_, hF.foot_mem⟩).2 fun b hb => ?_
+  by_cases hby : dist b y ≤ 3
+  · have hfo := frame_outside hX hF (by linarith) hb.2
+    have hXb := (frame_coords_le (v := b - y) hF.unit).2
+    rw [← dist_eq_norm] at hXb
+    have hZab := (abs_le.1 (frame_coords_le (v := b - a) hF.unit).1).2
+    have e : inner ℝ (b - a) n = inner ℝ (b - y) n - inner ℝ (a - y) n := by
+      rw [show b - a = (b - y) - (a - y) by abel, inner_sub_left]
+    rw [e, ← dist_eq_norm, dist_comm] at hZab
+    have : ε43 * |inner ℝ (b - y) (perp n)| ≤ 3 / 49 := by unfold ε43; linarith
+    linarith
+  · push Not at hby
+    have := dist_triangle b a y
+    rw [dist_comm b a] at this
+    linarith
 
 /-- **Window packing**: unit vectors `q − a`, pairwise `≥ 1` apart (i.e. `≥ 60°`), all strictly
 within `60°` of `n` (`⟨q − a, n⟩ > 1/2`), number at most `2`.
