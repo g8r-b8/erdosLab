@@ -13,7 +13,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Callable, Iterator, Tuple
 
-from arith import Factorization
+from arith import Factorization, big_omega, mul_prime, next_prime
 
 
 @dataclass
@@ -26,28 +26,59 @@ class Node:
 def children(node: Node, K: int) -> Iterator[Node]:
     """Children n·q for q = gpf(n), next primes..., until the depth barrier fails.
 
-    TODO: implement: q starts at gpf(n) (repeat) and runs through primes; break when
-        s·(q+1)^r < 2·n·q^r (r = K − Ω(n)).  σ update: new prime -> s·(q+1); repeat -> exact.
-    Acceptance: for K=5 yields exactly the tree whose abundant leaves are the 121 odd Ω=5 PANs
-        plus non-primitive ones (none for Ω=5).
-    Depends on: arith.next_prime, arith.mul_prime.
+    Barrier: s·(q+1)^r < 2·n·q^r (r = K − Ω(n)) ⇒ every n·q·(r−1 more factors ≥ q) is deficient,
+    and the same holds for all larger q, so the loop stops.
     """
-    raise NotImplementedError("children not written yet")
+    f, n, s = node.f, node.n, node.s
+    r = K - big_omega(f)
+    if r <= 0:
+        return
+    q, e = f[-1]
+    # repeat child
+    if s * (q + 1) ** r >= 2 * n * q ** r:
+        pe = (q ** (e + 1) - 1) // (q - 1)
+        pe2 = pe * q + 1
+        yield Node(mul_prime(f, q), n * q, s // pe * pe2)
+    q = next_prime(q)
+    while s * (q + 1) ** r >= 2 * n * q ** r:
+        yield Node(f + ((q, 1),), n * q, s * (q + 1))
+        q = next_prime(q)
+
+
+def roots(K: int) -> Iterator[Node]:
+    """Odd primes p with (1 + 1/p)^K ≥ 2 (otherwise nothing below p·... can be non-deficient)."""
+    p = 3
+    while (p + 1) ** K >= 2 * p ** K:
+        yield Node(((p, 1),), p, p + 1)
+        p = next_prime(p)
 
 
 def walk(K: int,
          on_abundant: Callable[[Node], None],
          on_prefix: Callable[[Node], None]) -> None:
-    """Run the DFS from the roots 3, 5, 7, ... (all odd primes p with (1+1/p)^K ≥ 2).
+    """DFS over odd n with Ω(n) ≤ K (see module docstring).
 
-    TODO: implement recursively (depth ≤ K so recursion is shallow).
-        - abundant child (s ≥ 2n)  -> on_abundant(child), do not descend;
-        - deficient child with Ω = K−1 -> on_prefix(child) (new-prime extensions) AND descend into
-          its repeat child only (q = gpf) — which, having Ω = K, is either abundant (-> on_abundant)
-          or deficient (dropped);
-        - deficient child with Ω < K−1 -> recurse.
-    Acceptance: prefix count 23067 and abundant-leaf counts [121 @Ω5, 15810 @Ω6] for K = 7
-        (numbers from the scratch measurement, 2026-09-25).
-    Depends on: children.
+    - non-deficient node -> on_abundant, no descent;
+    - deficient node with Ω = K−1 -> on_prefix (new-prime extensions), plus its repeat child;
+    - deficient node with Ω < K−1 -> recurse into children.
     """
-    raise NotImplementedError("walk not written yet")
+    def visit(node: Node) -> None:
+        if node.s >= 2 * node.n:
+            on_abundant(node)
+            return
+        om = big_omega(node.f)
+        if om >= K:
+            return
+        if om == K - 1:
+            on_prefix(node)
+            q, e = node.f[-1]
+            pe = (q ** (e + 1) - 1) // (q - 1)
+            rep = Node(mul_prime(node.f, q), node.n * q, node.s // pe * (pe * q + 1))
+            if rep.s >= 2 * rep.n:
+                on_abundant(rep)
+            return
+        for c in children(node, K):
+            visit(c)
+
+    for r in roots(K):
+        visit(r)

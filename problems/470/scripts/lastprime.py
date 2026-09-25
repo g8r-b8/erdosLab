@@ -16,8 +16,9 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from typing import List, Tuple
 
-from arith import Factorization
+from arith import Factorization, divisors, is_probable_prime, mul_prime, sigma, value
 from intervals import IntervalSet
+from subsetsum import is_pseudoperfect, subset_sums
 
 
 @dataclass
@@ -34,57 +35,90 @@ class PrefixReport:
 
 
 def good_p_for_t(X: IntervalSet, t: int, lo: int, hi: int) -> IntervalSet:
-    """{p ∈ [lo, hi] : t·p ∈ X} = ∪ over X-intervals [u, v] of [⌈u/t⌉, ⌊v/t⌋] ∩ [lo, hi].
-
-    TODO: implement using X.overlapping(t*lo, t*hi).
-    Acceptance: X = [0,10]∪[20,30], t = 2, [0, 20] -> [0,5]∪[10,15].
-    Depends on: IntervalSet.overlapping.
-    """
-    raise NotImplementedError("good_p_for_t not written yet")
+    """{p ∈ [lo, hi] : t·p ∈ X} = ∪ over X-intervals [u, v] of [⌈u/t⌉, ⌊v/t⌋] ∩ [lo, hi]."""
+    out = []
+    for u, v in X.overlapping(t * lo, t * hi):
+        a = max(-(-u // t), lo)
+        b = min(v // t, hi)
+        if a <= b:
+            out.append((a, b))
+    return IntervalSet(out)
 
 
 def t_candidates(delta: int, J: IntervalSet, limit: int) -> List[int]:
-    """The `limit` smallest elements of δ + J (J = SS(D'(m)) contains 0, 1, ...).
-
-    TODO: implement by walking J's intervals.  Acceptance: δ=5, J={0,1,3,4} -> [5,6,8,9].
-    Depends on: IntervalSet iteration.
-    """
-    raise NotImplementedError("t_candidates not written yet")
+    """The `limit` smallest elements of δ + J."""
+    out: List[int] = []
+    for lo, hi in J:
+        for j in range(lo, hi + 1):
+            if len(out) >= limit:
+                return out
+            out.append(delta + j)
+    return out
 
 
 def exact_single_p(X: IntervalSet, J: IntervalSet, delta: int, s: int, p: int) -> bool:
-    """LEMMA LP for one p: is there t ∈ δ + J with t·p ∈ X?  (t ≤ s/p necessarily.)
-
-    TODO: implement: for each X-interval [u, v] meeting [δp, s], the multiples of p in [u, v]
-        form t ∈ [⌈u/p⌉, ⌊v/p⌋]; test whether (that range − δ) meets J.
-    Acceptance: agrees with subsetsum.is_pseudoperfect(m·p) on random small cases.
-    Depends on: IntervalSet.overlapping.
-    """
-    raise NotImplementedError("exact_single_p not written yet")
+    """LEMMA LP for one p: is there t ∈ δ + J with t·p ∈ X?"""
+    for u, v in X.overlapping(delta * p, s):
+        tlo = max(-(-u // p), delta)
+        thi = v // p
+        if tlo <= thi and any(True for _ in J.overlapping(tlo - delta, thi - delta)):
+            return True
+    return False
 
 
 def settle_prefix(m: Factorization, max_t: int = 64, max_residual: int = 10**6) -> PrefixReport:
-    """Settle all n = m·p with p prime, p > gpf(m), n non-deficient.
-
-    TODO: implement.
-    What's missing: compute s, δ, U, X, J; bad := [P+1, U]; for t in t_candidates: bad -= good_p_for_t;
-        stop when bad is empty or small; then for every integer p in bad: skip composites (MR witness),
-        otherwise run exact_single_p; record weird p (and double-check it with is_pseudoperfect).
-        If bad still has > max_residual integers after max_t values of t, set flagged.
-    Acceptance: for all Ω=5,6 PAN of the form m·p (p new largest prime) the result agrees with
-        brute-force is_pseudoperfect; no weird found; residual counts are small.
-    Depends on: subset_sums, good_p_for_t, t_candidates, exact_single_p, is_probable_prime.
-    """
-    raise NotImplementedError("settle_prefix not written yet")
+    """Settle all n = m·p with p prime, p > gpf(m), n non-deficient (see module docstring)."""
+    mv, s = value(m), sigma(m)
+    delta = 2 * mv - s
+    assert delta > 0, "prefix must be deficient"
+    P = m[-1][0]
+    U = s // delta
+    rep = PrefixReport(m_factors=m, p_lo=P + 1, p_hi=U)
+    if U <= P:
+        return rep
+    divs = divisors(m)
+    X = subset_sums(divs)
+    J = subset_sums(divs[:-1])
+    bad = IntervalSet([(P + 1, U)])
+    for t in t_candidates(delta, J, max_t):
+        if not len(bad) or t * bad.ivs[0][0] > s:
+            break
+        good = []
+        for a, b in bad:
+            good.extend(good_p_for_t(X, t, a, b).ivs)
+        rep.t_used.append(t)
+        bad = bad.subtract(IntervalSet(good))
+    rep.residual_ints = bad.size()
+    if rep.residual_ints > max_residual:
+        rep.flagged = f"{rep.residual_ints} residual integers after t={rep.t_used[-1:]}"
+        return rep
+    for a, b in bad:
+        for p in range(a, b + 1):
+            if not is_probable_prime(p):
+                continue
+            rep.residual_primes += 1
+            if not exact_single_p(X, J, delta, s, p):
+                # independent re-check on the full divisor set before recording
+                if not is_pseudoperfect(mul_prime(m, p)):
+                    rep.weird.append(p)
+                else:
+                    rep.flagged += f" LP/direct disagree at p={p};"
+    return rep
 
 
 def primitive_p_range(m: Factorization) -> Tuple[int, int]:
-    """(L, U): m·p (p prime > gpf m) is a primitive non-deficient number ⇔ L < p ≤ U.
+    """(L, U): m·p (p prime > gpf m) is primitive abundant ⇔ L < p ≤ U.
 
-    TODO: implement: U = ⌊σ(m)/δ(m)⌋; for each prime q | m with m/q =: m_q, need m_q·p deficient,
-        i.e. p·δ(m_q) > σ(m_q), so L = max(gpf(m), max_q ⌊σ(m_q)/δ(m_q)⌋).
-    Acceptance: used by validate_counts to reproduce Amato et al.'s odd PAN counts
-        (Ω=5: 121, Ω=6: 15772, Ω=7: 102896101).
-    Depends on: arith.sigma.
+    U = largest p with δp < s (strictly abundant); L = max(gpf(m), max_q ⌊σ(m/q)/δ(m/q)⌋) where
+    q runs over the primes dividing m (m/q·p must be deficient: p·δ(m/q) > σ(m/q)).
     """
-    raise NotImplementedError("primitive_p_range not written yet")
+    mv, s = value(m), sigma(m)
+    delta = 2 * mv - s
+    U = (s - 1) // delta
+    L = m[-1][0]
+    for i, (q, e) in enumerate(m):
+        mq = m[:i] + (((q, e - 1),) if e > 1 else ()) + m[i + 1:]
+        sq, vq = sigma(mq), value(mq)
+        dq = 2 * vq - sq
+        L = max(L, sq // dq)
+    return L, U

@@ -107,9 +107,47 @@ class TestSubsetSum(unittest.TestCase):
 
 
 class TestLastPrime(unittest.TestCase):
-    def test_placeholder(self) -> None:
-        """TODO: settle_prefix agrees with per-n brute force on Ω ≤ 6 prefixes."""
-        self.skipTest("not written yet")
+    def test_settle_vs_direct_all_parities(self) -> None:
+        """Lemma LP + uniform elimination must report exactly the weird m·p (p prime > gpf m).
+
+        Uses every deficient m < 1500 (even m included: there weird m·p exist, e.g. 70 = 10·7,
+        836 = 44·19), all primes p up to U = ⌊σ(m)/δ(m)⌋, and several max_t settings.
+        """
+        from lastprime import settle_prefix
+        found_weird = 0
+        for mv in range(2, 1500):
+            m = factor_small(mv)
+            if sigma(m) >= 2 * mv:
+                continue
+            direct = []
+            P, s = m[-1][0], sigma(m)
+            U = s // (2 * mv - s)
+            p = next_prime(P)
+            while p <= U:
+                if not is_pseudoperfect(mul_prime(m, p)):
+                    direct.append(p)
+                p = next_prime(p)
+            for max_t in (1, 3, 64):
+                rep = settle_prefix(m, max_t=max_t)
+                self.assertEqual(rep.flagged, "", (mv, max_t))
+                self.assertEqual(rep.weird, direct, (mv, max_t))
+            found_weird += len(direct)
+        self.assertGreater(found_weird, 10)  # the test is not vacuous
+
+    def test_exact_single_p(self) -> None:
+        from lastprime import exact_single_p
+        for mv in range(2, 400):
+            m = factor_small(mv)
+            s = sigma(m)
+            if s >= 2 * mv:
+                continue
+            ds = divisors(m)
+            X, J = subset_sums(ds), subset_sums(ds[:-1])
+            P, delta = m[-1][0], 2 * mv - s
+            p = next_prime(P)
+            while p <= s // delta:
+                self.assertEqual(exact_single_p(X, J, delta, s, p), is_pseudoperfect(mul_prime(m, p)))
+                p = next_prime(p)
 
 
 if __name__ == "__main__":
