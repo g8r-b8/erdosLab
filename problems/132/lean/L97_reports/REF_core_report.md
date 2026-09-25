@@ -60,15 +60,174 @@ but I did not re-referee the plane topology in depth (Task 2 bypasses it).
 Gaps: none mathematical. One documentation fix: the justification "per K > 100h ⇒ r_in > h" in the `CoreE`
 docstring and in MAIN97_PLAN.md must read "per K ≥ |A| > 1000h > 300πh ⇒ r_in ≥ per K/(300π) > h".
 
-## 2. Task 2 — the visible-path proof
-### 2.1 Setting and Lemma 0
-### 2.2 Step 1 (N1–N6)
-### 2.3 Step 2 (visible path, V1–V4, m ≥ n + J)
-### 2.4 Step 3 (turning identity)
-### 2.5 Step 4 (wedge lemma)
-### 2.6 Steps 5–6 (per-vertex)
-### 2.7 Steps 7–8 (summation, counting, assembly)
+## 2. Task 2 — hostile referee of the visible-path proof (RouteA_visiblepath_report.md)
+
+Convention below: ν increases counter-clockwise; at a ray pointing "up", increasing ν means moving left; the
+path is traversed with ν increasing; ψ = arg d − ν.
+
+### 2.1 Setting and Lemma 0 — CORRECT
+
+- Removing isolated vertices: Def(G[Yout]) = Def(H) + 3·#iso and 3 ≥ 2, so a bound for H in terms of
+  |A ∩ V(H)| gives the bound for G[Yout] in terms of |A|. Correct.
+- Drawing depth < h: a point of a unit edge is within ½ of an endpoint of depth < ρ, depth is 1-Lipschitz. So
+  𝒟 ∩ K′ = ∅. Correct.
+- Lemma 0, checked line by line. (2) first-order increase of the min of finitely many smooth functions: correct.
+  (3) Carathéodory in ℝ²: 0 in the hull of two unit vectors forces them antipodal: correct. (4)
+  D(w, Δ₂) ⊆ {(x − o)·u_w ≤ r} for active w: correct; triangle with incircle radius r has min altitude
+  r(a+b+c)/max ≤ 3r: correct. (5) Lemma F steps 1–9 (re-checked in §1(a)) give diam K ≤ 100·w₀ ≤ 300h.
+  (6) upper/lower graphs over the long axis: Σ|Δx| ≤ 300h, Σ|Δy| ≤ 2w ≤ 6h per graph, |Δx| + |Δy| ≥ 1: so
+  |A| ≤ 2(306h + 1) < 1000h (h ≥ 3/2). Correct. It replaces Steinhagen and perimeter, as claimed.
+
+### 2.2 Step 1 (N1–N6) — CORRECT; N4 needs its (easy) proof written
+
+- (N1) ψ_c bound: |w₁ − w₂| ≤ Δ ≤ 1.94Δ₂, R′ = Δ₂ − h > (199/200)Δ₂: sin(ψ_c/2) ≤ 194/199. Σψ_c ≤ 2π. Correct.
+- (N2) nearest-point projection onto the compact convex K′: rays partition ℝ² ∖ K′. Correct.
+- (N3) poles: on an arc range r_ν = {w + sν : s > R′}; on N(c), r_ν = {c + tν}; at a range boundary the two
+  poles (w_i and c = w_i + R′ν_i) both lie on the line of the common ray, behind every point of the ray. Correct.
+- **(N4) is asserted without proof.** A clean proof (arc/corner transitions play no role):
+  (i) ν = arg(x − P x) is continuous off K′ (P is 1-Lipschitz);
+  (ii) a segment σ not contained in a ray meets each ray at most once (two distinct lines meet once; if σ lies on
+  the line of r_ν it lies either inside r_ν or on the far component of that line minus K′, which is transversal to
+  every ray it meets) — so ν|σ is injective, hence strictly monotone on a lift;
+  (iii) ν(σ) lies in an open half-circle: separate σ from K′ by a line {x·u = s′} with K′ ⊆ {x·u ≤ s′}; then
+  x = y + tν with y ∈ K′ and x·u > s′ force ν·u > 0;
+  (iv) d = ±ν(x) at some x ∈ σ would put a neighbourhood of x in σ on r_ν(x), contradicting (ii); so ψ ∈ (0, π)
+  with constant sign, and the local pole picture (N3) shows ψ ∈ (0, π) ⇔ ν increasing. Only 1-D facts are used
+  (continuous injective map on an interval is monotone: `Continuous.strictMono_of_inj`-type).
+- (N5) offset points: D(y, h) ⊆ K and touches ∂K at y + hν, so K is smooth there with normal ν. Hence every
+  K-corner lies in some Z_c. For a ∈ Z_c, N_K(a) ⊆ N(c) (monotone Gauss map, endpoint normals ν_i at p_i).
+  Correct. **Missing sentence (needed in Step 6):** ν(a)·n_a > 0 for every a ∈ A. For a ∉ ∪Z_c it is 1. For
+  a ∈ Z_c, ν(a) = (a − c)/|a − c| and D(c, h) ⊆ K gives (c − a)·n_a ≤ −h < 0. Note that |α_a| ≤ ψ_c does NOT
+  give this, since ψ_c can be as large as 2θ* ≈ 2.69 > π/2. Consequence: |α_a| < π/2 always.
+- (N6) len Z_c = ∫_{N(c)} H dφ with G(ν_i) = (hν_i)·(iν_i) = 0: correct (support-function identity; on each
+  circular piece it is an explicit antiderivative, at K-corners a zero-length jump). H ≤ |x − c| ≤ |T − c| =
+  h/cos(ψ_c/2) ≤ κh, κ = 199/√1965 = 4.48923 < 4.49. Σ len Z_c ≤ 2πκh = 28.2067h < 28.22h. Correct.
+
+### 2.3 Step 2 (visible path, V1–V4, m ≥ n + J) — CORRECT WITH ONE FALSE SENTENCE (gap G1)
+
+- (V1) constancy of the first-hit edge on I_i: correct (edges meet only at common endpoints — P1 plus
+  "no vertex inside a unit edge"; the hit parameter is continuous, so IVT on the difference).
+- (V3.1) needs a compactness sentence: if drawing points x_k ∈ r_{ν_k}, ν_k → ν_i, were below e's hit point, a
+  subsequence on one edge e′ converges to a point of e′ ∩ r_{ν_i} not beyond B_i, i.e. to B_i, so e′ = e
+  (B_i is interior to e). Fine.
+- (V3.2)–(V3.4): correct. Feet have κ > 0 (the jump at a foot L_i ≠ B_i is inward, at R_i ≠ B_i outward, and
+  ψ ∈ (0, π) strictly on a transversal edge).
+- **G1 (V4, false as written): "A vertex lies on exactly one ray, so it is a corner at most once."** Counter-
+  example (the "dip"): v with path edges on both sides (L_i = R_i = v) and a pendant vertex B = v − ν(v) joined
+  to v by a *radial* unit edge (possible whenever ρ ≥ 2: depth B = depth v + 1 < ρ). Then B_i = B and the
+  path is v → B → v: **v is a corner twice**. The author's harness asserts this never happens
+  (`assert … 'vertex visited twice'`) and it indeed never arose in the random tests (it is a measure-zero event);
+  `l97R_dip.py` builds it exactly (v may even be an A-point) and the author's harness raises the assertion.
+  **Fix:** let m count corner *occurrences*. (V4)'s bound m ≥ n + J is unchanged (it only needs one occurrence
+  per piece boundary and per hit-arc end). The wedge lemma holds per occurrence, the wedges of different
+  occurrences of one vertex are disjoint (they lie below different path pieces on different sides of −ν₀, the
+  radial edge direction −ν₀ lying in neither), and Step 5 with k free arcs gives exactly
+  Def_v ≥ (3/2π)Σ_occ(2π/3 − κ) (+1 for A-points, with H⁺_a as an extra disjoint free arc). Checked in
+  `l97R_dip.py` with the patched harness `l97R_harness.py` (occurrence counting): all checks pass, MI slack ≥ 1.
+  (Merging the two occurrences into one corner with κ = κ₁ + κ₂ is NOT correct: the single wedge would contain
+  the radial edge.)
+- Hit arcs: #hit arcs = J exactly when J ≥ 1 (every escape interval is followed by a hit ray); one-ray hit arcs
+  need one vertex corner = p + 1 with p = 0. So m ≥ n + J (J ≥ 1), m ≥ n (J = 0; a single piece cannot close up
+  since an edge's ν-arc is < π). Correct.
+
+### 2.4 Step 3 (turning identity) — CORRECT (a definition-level telescoping)
+
+Σ_corners κ = Σ_i [ψ_out(last at ν_i) − ψ_in(first at ν_{i+1})] = Σ_{hit}|I_i| − πJ. The content is only that
+ψ along a fixed edge decreases by exactly Δν (d constant), and ψ ≡ π / 0 at virtual arrivals / departures.
+No winding number, no lifting beyond ψ ∈ [0, π]. Then Σ_{vertex occ} κ ≤ 2π − |E| − πJ because feet κ ≥ 0.
+
+### 2.5 Step 4 (wedge lemma) — CORRECT
+
+- |W_v| = (ψ_in + π) − ψ_out = π − κ_v; orientation checked (W_v is the K′-side of the path at v).
+- Sine rule: distance from the pole = D sin ψ / sin(ψ − δ), ∂/∂ψ = −sin δ / sin²(ψ − δ) < 0: correct.
+- Different poles on the two sides (arc/corner transitions): each side is compared with its own pole, both on
+  the line of r_{ν₀} behind v. Correct.
+- Outward-jump sides (ψ = 0): the path on that side is near R_i, at pole distance D_R > D; pointwise in d as
+  s → 0. Correct. −ν₀ ∈ W_v only when v = B_i. Correct.
+- Virtual sides: all nearby rays on that side escape. Correct — but note the conclusion there is "on an escaping
+  ray", which does NOT put v + sd inside K. Step 6 correctly uses the wedge lemma to get a + s n_a ∈ K only when
+  both sides are real (see 2.6).
+
+### 2.6 Steps 5–6 (per-vertex) — CORRECT modulo G1 and the missing sentence of 2.2
+
+- Step 5: points ≥ 60° apart; a closed arc of length μ holds ≤ 3μ/π + 1; with k disjoint open free arcs,
+  deg ≤ 3(2π − Σλ)/π + k, so 3 − deg/2 ≥ (3/2π)Σ(λ_j − π/3). Correct (also for touching arcs and λ = 0).
+- Interior A-corner: bounding directions of W_a are edge directions from a (strictly inner by the chord
+  inequality) or −ν(a) (strictly inner by the missing sentence of 2.2). There is no outward jump from a and no
+  inward-jump arrival at a (a is the last point of its ray in K). n_a ∈ W_a would put a + s n_a strictly between
+  y(ν) and a first hit, hence in K, but |a + s n_a − w| = Δ₂ + s. So W_a avoids n_a, hence lies in the open inner
+  half-circle and is disjoint from H⁺_a. Correct; κ_a = −π is impossible here.
+- A-endpoint (start type; end type symmetric): a = B_s = R_s. In coordinates relative to ν₀,
+  W_a = (ψ_out, 2π), H⁺_a = [α − π/2, α + π/2], ψ_out − α ∈ (π/2, 3π/2) (inner edge). The overlap is exactly
+  [α + 3π/2, 2π), of length π/2 − α ≤ π/2 + |α|. Correct (with |α| < π/2 from 2.2).
+- A one-ray hit arc whose vertex is in A is impossible in H (such an a would be isolated). Correct.
+
+### 2.7 Steps 7–8 (summation, counting, assembly) — CORRECT
+
+- MI: Def(H) ≥ |A| + (3/2π)[(2π/3)m − Σκ] − (3/2π)Σ_{endpoints}(π/2 + |α_a|) ≥ |A| + m − 3 + (3/2π)|E| −
+  (3/2π)Σ|α_a|, using #endpoints ≤ 2J. Correct.
+- α-term: Σ|α_a| ≤ Σ_c ψ_c(1 + len Z_c) ≤ 2π + κh·2θ*·2π; times 3/2π: 3 + 6θ*κh = 3 + 36.26h (θ* = 1.34616,
+  exact bound θ* ≤ 1.347 verified by the Taylor lower bound for sin).
+- Counting: every A-point is on a hit ray; within a closed hit arc the exit map e is injective and monotone, so
+  #A ≤ μ_K(I) + 1 (chord ≤ Σ sub-chords ≤ Σ R·angle). Per piece: two points at distance ≥ R′ from w, angle
+  Δν apart, are ≥ 2R′ sin(Δν/2) apart (minimised at s₁ = s₂ = R′); y/sin y ≤ 1 + y², y ≤ 1/R′; so
+  μ_K(piece) ≤ 1 + ε′ + col(piece), ε′ = (h + Δ₂/R′²)/R′. Σ col ≤ Σ len Z_c. min(n, |A|) trick correct.
+  ε′|A| ≤ 6.457h + 0.022.
+- Assembly: m ≥ n + J ≥ |A| − 34.68h − 0.03; Def(H) ≥ 2|A| − 70.96h − 6.03 ≥ 2|A| − (71h + 7). Arithmetic
+  re-derived; `l97A_vp_constants.py` (exact Fractions) re-run: passes.
+
 ### 2.8 Degenerate cases
-### 2.9 Counterexample searches
+
+| case | status |
+|---|---|
+| isolated vertices | removed; 3 ≥ 2 per isolated A-point — correct |
+| pendant A-points | Def_a ≥ 1 (non-corner) or per-occurrence bound — correct |
+| A-points at K-corners | lie in some Z_c; any disc normal n_a ∈ N(c); |α_a| < π/2 — correct (needs 2.2 sentence) |
+| several vertices on one ray | path L → B → R — correct; **dip = G1** (vertex twice), fixed by occurrence counting |
+| radial edges (on a ray) | never a first-hit edge on an open interval; only appear below the path as "stalactites" — correct |
+| edge on the far part of a ray line | transversal to every ray it meets — correct |
+| edge tangent to a ray | impossible (segments/lines) |
+| vertex on a ray at an arc/corner boundary | two poles, one per side — correct |
+| J = 0 | Σκ = 2π, m ≥ n, |A| ≤ μ_K(S¹) — correct |
+| one-ray hit arcs | two virtual ends at one corner, κ = −π — correct |
+| int K′ = ∅ | excluded by Lemma 0 |
+
+### 2.9 Counterexample searches (all with `.venv/bin/python`, one process, < 100 MB)
+
+- `l97R_dip.py`: exact dip configurations (D2 ∈ {60, 200, 500}, ρ ∈ {2, 3}, one or two radial pendants): the
+  author's harness raises `vertex visited twice`; the patched harness (`l97R_harness.py`: occurrence counting,
+  per-occurrence per-vertex claims, and an explicit check of |W_a ∩ H⁺_a| ≤ π/2 + |α_a|) passes all checks.
+- `l97R_stress.py 300 2`: SHARP corners, which the author's tests did not reach (their lenses had
+  |w₁ − w₂| ≤ 1.2Δ₂, i.e. ψ_c ≲ 1.3; here lenses with |w₁ − w₂| ∈ [1.5, 1.94]Δ₂, ψ_c up to ≈ 2.69, and
+  three-disc bodies), Δ₂ ≥ 200h (the CoreE regime), ρ ∈ {1..5}, A-chains concentrated on the collapse zones,
+  A-points exactly at K-corners, dense apex growth and pendants. RESULTS_PLACEHOLDER
+
 ### 2.10 Verdict, fixes, formalisability
 
+**Verdict: CORRECT WITH GAPS (all minor, all fixable in a few lines).** No counterexample; the final bound
+Def(G[Yout]) ≥ 2|A| − (71h + 7) follows, and it implies `CoreE` with the current `Eh` (1764h² + 152h − 3 ≥ 0
+for h ≥ 3/2) under exactly CoreE's hypotheses (δ = 1, Δ ≤ 1.94Δ₂, h < Δ₂/200, |A| > 1000h; ρ ∈ ℕ is not used).
+
+Fixes:
+1. **G1 (V4).** Replace "a vertex is a corner at most once" by occurrence counting; state the wedge lemma per
+   occurrence; note that the wedges of the occurrences of one vertex are disjoint; apply Step 5 with k free
+   arcs. (Needed only for dips, which require ρ ≥ 2.)
+2. **G2 (N5/Step 6).** Add: ν(a)·n_a ≥ h/|a − c| > 0 for a ∈ Z_c because D(c, h) ⊆ K; hence |α_a| < π/2 and
+   −ν(a) is strictly inner. (|α_a| ≤ ψ_c alone does not give it.)
+3. **G3 (N4).** Write the injectivity proof (2.2): continuity of P, "a line meets a ray at most once",
+   separation ⇒ ν(σ) in an open half-circle.
+4. **G4 (V3.1).** Add the compactness sentence (2.3).
+5. Cosmetic: "E" is used both for the escape set and for edges; "|W_a ∩ H⁺_a| ≤ π/2 + |α_a|" is in fact
+   π/2 ∓ α_a (sign by side).
+
+**Formalisability without plane topology: YES.** No step uses the Jordan curve theorem, faces, Euler, winding
+numbers or path lifting. The only topological inputs are 1-D: continuity of the nearest-point map, "continuous
+injective on an interval ⇒ monotone", IVT for the order of two edges along rays, a compactness argument in V3.1,
+and cyclic telescoping on a finite sorted list of angles. The relative angle ψ ∈ [0, π] is a canonical real value,
+so the "lift" is by definition, not by a covering argument. I found no step that secretly uses a Jordan- or
+winding-type fact: global information enters only through (a) the cyclic partition of S¹ by Φ (Σ|I_i| + |E| = 2π)
+and (b) "A-point = last point of its ray inside K" (convexity). The heavy Lean part is N1–N6 (local structure of
+the support map of an intersection of discs, poles at range boundaries) and μ_K (circular arc lengths along ∂K).
+
+Side remark of the report (O(√n) error for E′): plausible (E = O(h) lets ρ₀ ≍ √n; Δ₂ ≳ √n keeps ρ₀ ≤ Δ₂/400
+admissible), not checked here.
