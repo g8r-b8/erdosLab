@@ -81,3 +81,59 @@ i.e. 0 < G ≤ 2. **Correct.** Only exact distance relations enter; no tolerance
   d = 0 case is covered by C's charging argument. The C report is lost, so I cannot re-verify that its C is d-independent; E's
   "uniform" claim (and D1r §9) inherit this. *Fix E2:* add "Theorem W's constant C is absolute (independent of d)" to the list of
   inputs in E §3.3.
+
+## 4. Lemma U, Lemma C2(a) (flag 3), Proposition F — CORRECT (C2(a) needs a one-line rewording)
+
+**Lemma U.** By §2, every Δ₂-partner w″ of k has |z₂ − w″| = |z₃ − w″| = Δ, so w″ ∈ C(z₂,Δ) ∩ C(z₃,Δ) = {w, w*}. w* is the reflection
+of w in the line z₂z₃, so |ww*| = 2√(Δ² − |z₂z₃|²/4), |ww*|² = 4Δ² − |z₂z₃|² ≥ 3Δ² (|z₂z₃| ≤ Δ trivially). As w″ ∈ X, |ww″| ≤ Δ, so
+w″ = w. k has exactly one Δ₂-partner: **k ∈ Q** (paper's Q, all Δ₂-degree-1 points). Two K-extremes of one fan share w. **Correct.**
+(It uses only that the middles are in D, not that they are in S.)
+
+**Lemma C2(a).** E's flag 3 describes the argument as "frames of good points within 2 differ by ≤ 2ε₀". As a citation this is
+imprecise: the second sentence of (G5) needs |y − y′| ≤ ρ − 1, and D1r's goodness uses ρ = 1, so it gives nothing for |y − y′| ≤ 2.
+The argument is nevertheless right, through the **first** sentence of (G5) at the common point k:
+by Lemma U, u_k = (w − k)/R is the unique inward normal defined by a partner, and −u_k is an outer normal of K at k ∈ γ^Λ_y ∩ γ^Λ_{y′};
+so n₀(y) and n₀(y′) are both within ε₀ of −u_k. In y's frame y − k = −(sin ψ_k, cos ψ_k) with |ψ_k ∓ 90°| ≤ a₀, so the direction of
+y − k is within a₀ + ε₀ of ∓(tangent at k); the same holds for y′. If both have k on the same side (+90° or −90°), the directions of
+y − k and y′ − k differ by ≤ 2(a₀ + ε₀) ≤ 0.04 rad, so |y − y′| ≤ 2 sin 0.02 < 1, contradicting y ≠ y′. Hence ≤ 1 per side, ≤ 2 in all.
+
+*Fix E3 (replacement text for C2(a)'s proof).* "Let y, y′ ∈ F* have K-extreme k. By Lemma U, −u_k = (k − w)/R is an outer normal of K at k,
+and k ∈ γ^Λ_y ∩ γ^Λ_{y′}; by the first sentence of (G5) at y and at y′, n₀(y) and n₀(y′) are within ε₀ of −u_k. As k is within a₀ of ±90°
+in each frame, y − k and y′ − k are within a₀ + ε₀ of ∓u_k^⊥. If k has the same sign in both frames, then ∠(y − k, y′ − k) ≤ 2(a₀ + ε₀)
+< 60°, so |y − y′| < 1, which is impossible. So k is the K-extreme of at most one point of F* on each side."
+
+**The factor 2 is locally sharp (new).** `r7_refE7_geom.py` (3): two fans y, y′ on opposite sides of one K-extreme k, both with centre w,
+are locally realisable at **every** τ in the window (40/40 grid points, R = 10⁴ and 10⁶, 90 digits; all 8 points w, k, y, y′, z₂, z₃,
+z₂′, z₃′ pairwise ≥ 1; at G = 2, |z₃z₃′| = 1 + √3/R + O(R⁻²)). So F ≤ 2p cannot be improved to F ≤ p (which would give 45/34) by the
+local geometry around one K-extreme; any such improvement must be global.
+
+**Proposition F.** y ↦ k(y) (a chosen K-extreme) maps F* into Q_K ⊆ Q with fibres of size ≤ 2. So |F*₄| ≤ |F*| ≤ 2|Q_K| ≤ 2p,
+and |F*₄| ≤ r. **Correct.**
+
+## 5. The LP (Theorem E) — CORRECT; exact vertex enumeration and "what survives"
+
+`r7_refE7_lp.py`: variables (s, p, q′, F, z), r = 1 − s; maximise z subject to z ≤ (3/2)s − ½p, z ≤ s + θq′ + 3r + F, 0 ≤ q′ ≤ p ≤ s,
+0 ≤ F ≤ r, F ≤ 2p (optionally p ≤ 2s/3); **all** 5-subsets of the constraints solved exactly in Fractions, feasible vertices kept.
+
+| θ | V (exact) | optimal vertex (s, p, q′, F) | p ≤ 2s/3 cap |
+|---|---|---|---|
+| 2/3 | **81/61** = 1.327869 | (55, 3, 3, 6)/61 | inactive (same value) |
+| ½ | **53/40** = 1.325 | (36, 2, 2, 4)/40 | inactive |
+
+E's dual certificates were re-checked independently: for θ = 2/3, weights (40/61, 21/61) and multipliers (14/61, 18/61, 3/61) on
+(p − q′, r − F, 2p − F) give coefficients exactly (81/61, 81/61, 0, 0, 0) on (s, r, p, q′, F); for θ = ½, (13/20, 7/20) and
+(7/40, 11/40, 3/40) give (53/40, 53/40, 0, 0, 0). E's closed form V(φ) = (9 + 4.5φ)/(7 + 19φ/6) (θ = 2/3, F = 2p) was re-derived by hand.
+
+**What survives if an input fails** (same enumeration):
+
+| scenario | value |
+|---|---|
+| all inputs as claimed (θ = 2/3) | 81/61 = 1.32787 |
+| Proposition F fails (only F ≤ r), any θ ≤ 2/3 | 4/3 |
+| Theorem W fails (R4's e(S) ≤ s + p, θ = 1), even with Proposition F | 4/3 |
+| C's fallback θ = 4/5 (AI, SG, NC only) with Proposition F | 137/103 = 1.33010 |
+| C2 weakened to ≤ 3 (resp. 4) fans per K-extreme | 117/88 = 1.32955 (resp. 153/115 = 1.33043) |
+| hypothetical F ≤ p (θ = 2/3; θ = ½) | 45/34 = 1.32353; 29/22 = 1.31818 |
+
+So the improvement below 4/3 needs **both** Theorem W (θ < 1) and Proposition F; either alone gives exactly 4/3. With only C's fallback
+θ = 4/5, the bound is still below 4/3 (137/103).
