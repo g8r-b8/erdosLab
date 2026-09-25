@@ -56,10 +56,10 @@ wiring `frame_of_good`, `card_E43_le`, `thin_card_le43`, `card_bigTurning_le43`,
 | Defs | 8 | 296 | 1 |
 | Good | 15 | 351 | 5 |
 | Frame | 15 | 247 | 8 |
-| Classify | 13 | 280 | 10 |
+| Classify | 13 | 276 | 10 |
 | Charge | 6 | 144 | 4 |
 | Main43 | 5 | 174 | 0 |
-| **total** | **62** | **1492** | **28** |
+| **total** | **62** | **1488** | **28** |
 
 Count again with `grep -c '^  sorry' Erdos/Erdos/E132Main43*.lean` and
 `grep -c '^theorem' Erdos/Erdos/E132Main43*.lean`.
