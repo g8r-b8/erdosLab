@@ -353,7 +353,13 @@ PROMPT.md rule 4: check all cross-referenced/sibling problems and their threads.
   Re-check 2026-09-24: exact DP over all partial reps of x=1 to a=1600 → live-branch count doubles at
   exactly a=2,4,80,236,432,1504 (matches orbit); orbit returns to 2e10 reproduced (identical list).
   Reduction itself still only a sketch (no rigorous proof that live branches never die).
-  Blog draft (partial result) written; publishing awaits user go-ahead (blog-repo write was blocked).
+  Blog post published 2026-09-24 by user: g8r-b8.github.io/erdos-lab/2026/09/erdos-261-iii-integer-orbit/
+  2026-09-25: reduction PROVED (elementary). u_a=min(s,2a+2−s), v_a=a+1−u_a ⇒ every live branch follows
+  v_{a+1}=|a−2v_a|; v=0 (centre) splits into 2 mirror live branches; u=a spawns only a finite/cofinite
+  branch; u≥1 ⇒ u'≥2 so no live branch dies ⇒ #inf non-cofinite reps = 2^{#{a: v_a=0}}. x=1: v_1=0,
+  zeros at a=L−1 (to 2e10). Old e_L = min(v_{L−1}+1, L−v_{L−1}) (proved by case t=a−2v ≥/< 0).
+  General dyadic m/2^k: several orbits (one per integer state at a=k). Post updated (dated) in blog
+  repo, committed locally; push awaits user OK. Open problem itself: still need ∞ zeros of v.
 - Drops (one line): 3/5/9/10/11/14/15/17/18/20/25/28/30/32/33/36/39–41/44/50–52/60–62/65/66/68/
   70/75/77/78/80–82/84–87/89/91/96–104/107/108/111/114/120/122/124/128–131/137/138/141–143/145/148/
   149/151/153/155/158/159/161/162/165/167–170/172–174/176/177/181/184/187/188/195–197/200/201/203/
