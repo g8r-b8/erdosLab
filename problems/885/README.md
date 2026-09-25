@@ -45,6 +45,7 @@ Near-miss counters (added 2026-09-25): K₅,₄ = 5 N's sharing a k=4 difference
 | run | pairs | K₄,₄ | K₅,₄ | K₄,₅ | K₅,₅ |
 |---|---|---|---|---|---|
 | g = 1, all d ≤ 12000 (**complete**, 33 min × 8 cores) | 1.26e9 | 13 (10 up to scaling) | 0 | not counted | **0** |
+| g = 1, all d ≤ 50000 (**complete**, dpair2, 2 jobs at a time, ~3.5 h) | 2.9e10 | 181 row-sets* | **1** | 0 | **0** |
 | g = 2520, m ≤ 1000 | 4.1e8 | 11 | 0 | 0 | 0 |
 | g = 5040, m ≤ 1000 | 5.4e8 | 12 | 0 | 0 | 0 |
 | g = 10080, m ≤ 1000 | 6.7e8 | 12 | 0 | 0 | 0 |
@@ -54,9 +55,26 @@ Near-miss counters (added 2026-09-25): K₅,₄ = 5 N's sharing a k=4 difference
 
 (g = 1 run predates the near-miss counters; its K₄,₄ lines all have rows = 4, so K₅,₄ = 0 there too.)
 
-**Theorem (computational, 2026-09-25):** no k = 5 witness has all five common differences ≤ 12000
+\* dpair2 counts 4-row sets (a K₅,₄ contributes 5), not distinct 3-subset keys.
+
+**Theorem (computational, 2026-09-25):** no k = 5 witness has all five common differences ≤ 50000
 (in the x = 4N normalisation; N unrestricted). Not Lean-checked; the search is exhaustive by the factorisation argument above.
 
-**Observation:** ~70 K₄,₄ configurations across all runs, and **none** extends by even one row or one column.
-Blind search for K₅,₅ looks hopeless at this scale. A witness would need a structured family: curves with extra
+**★ Near miss K₅,₄ (found 2026-09-25, verified in gp from the definition of D):** five numbers whose
+difference sets share four elements:
+
+    N = 10046592, 24561225, 115706752, 281637972, 564578560
+    D(N_1) ∩ … ∩ D(N_5) = {5976, 10104, 24216, 69624}   (exactly these four)
+
+(x-form: x_i = N_i, d = 2988, 5052, 12108, 34812 = 12·{249, 421, 1009, 2901}.) Aleksanndr_NFA's search (forum,
+23 Sep 2026) reported *no* five numbers sharing four differences within their height bounds. In sumset-of-squares
+language this is a 6 × 4 array; Choudhry (arXiv 2508.07806) lists parametric (3,3), (5,3), (4,4) only.
+Novelty not yet audited. Rational 5th-column search for it (q ≤ 1e6): logs/ext54/.
+
+**Rational extension of the 32 distinct 4×4 configurations (ext.c, q ≤ 1e5, all 32):** 6.9e9 divisor
+candidates, 223 filter survivors, **0 genuine** after exact gp verification (verify_ext.py).
+
+**Observation:** besides the one K₅,₄, none of the ~80 K₄,₄ configurations extends by a row or column.
+Height heuristic: #K_{m,n} of height ≤ H ≈ H^{m+n−1−mn/2}, i.e. H^{−3.5} for 5 × 5 (and H^{−1} already for 4 × 4,
+which nevertheless exist only sporadically, with no known parametric family). Blind search for K₅,₅ looks hopeless. A witness would need a structured family: curves with extra
 automorphisms, or a parametric K₄,₄ family whose genus-5 extension curve has a rational point.
