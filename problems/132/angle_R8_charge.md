@@ -213,7 +213,7 @@ So b′ = b.
 
 ### Step 2: p′ is the upper axis point, and s > 2t
 
-- **The two candidates.** p′ ∈ C(u, 1) ∩ C(b, 1) = {P₁, P₂}, where P₁ = (0, c − d) and P₂ = (0, −d − c) with c = √(1 − t²) (in the identity script the Step 3 angle η is called `phi`). Here t < 1 because 2t ≤ Δ ≤ φ < 2.
+- **The two candidates.** p′ ∈ C(u, 1) ∩ C(b, 1) = {P₁, P₂}, where P₁ = (0, c − d) and P₂ = (0, −d − c) with c = √(1 − t²). Here t < 1 because 2t ≤ Δ ≤ φ < 2.
 - **P₂ is excluded by the side conditions.**
   - (b) requires sign cross(x; u, P₂) = sign cross_w > 0.
   - (c) requires cross(u; P₂, x) < 0, because cross(u; P₂, b) = 2ct > 0.
@@ -226,7 +226,7 @@ So b′ = b.
 
 ### Step 3: p′ = P₁ has no admissible c′
 
-**Frame.** Put y = c − d > 0 and η = arcsin t ∈ (0, π/6]. Then, measured from p′:
+**Frame.** Put y = c − d > 0 and η = arcsin t ∈ (0, π/6]. (In `r8_charge_identities.py` this angle is called `phi`.) Then, measured from p′:
 
   u − p′ = (−t, −c) = e(3π/2 − η),  b − p′ = (t, −c) = e(3π/2 + η),  p − p′ = (s, −y) = R e(−ζ),
 
@@ -254,11 +254,13 @@ with R = √(s² + y²) and ζ ∈ (0, π/2).
   This contradicts the definition of Δ. ∎
 
 **Which hypotheses were used.**
-- (★): only for the pairs pb′, ub′, p′b in Step 1.
-- Extremality: of p′ throughout, and of x (via T7).
-- The strict side conditions of both hooks.
-
-The distances from c′ to x, b, u, w and the "outer" choice of b, b′ were never used. So the theorem is stronger than the configuration R5 scanned.
+- Beyond T6 and T7, (★) is used only for these pairs:
+  - in Step 1: pb′, ub′ and p′b;
+  - in Step 2: ub (to get 2t ≤ 1).
+- The bound "no distance exceeds Δ" is used for pp′ (γ3, sign "−") and for c′p (Step 3).
+- Extremality is used for p′ throughout, and for x via T7.
+- The strict side conditions of both hooks are used.
+- Never used: the distances from c′ to x, b, u, w, and the "outer" choice of b and b′. So the theorem is stronger than the configuration R5 scanned.
 
 ## 6. Consequence
 
