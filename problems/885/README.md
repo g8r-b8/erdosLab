@@ -70,7 +70,9 @@ difference sets share four elements:
 23 Sep 2026) reported *no* five numbers sharing four differences within their height bounds. In sumset-of-squares
 language this is a 6 × 4 array; Choudhry (arXiv 2508.07806) lists parametric (3,3), (5,3), (4,4) only.
 Novelty (2026-09-25): not in the forum thread (Aleksanndr_NFA: "no five numbers sharing four differences"),
-not in Choudhry's list; Bremner 2019 full text (paywalled) not read — must check before any public claim. Rational 5th-column search for it (q ≤ 1e6): logs/ext54/.
+not in Choudhry's list; Bremner 2019 full text (paywalled) not read — must check before any public claim. Rational 5th-column search for it (ext.c on rows 1–4, q ≤ 1e6, 7.5e9 divisor candidates): **no column candidate
+even passes the modular filter**, so there is no 5th common difference p/q with q ≤ 10⁶. The row side
+rediscovers only the known 5th row (validation).
 
 **Rational extension of the 32 distinct 4×4 configurations (ext.c, q ≤ 1e5, all 32):** 6.9e9 divisor
 candidates, 223 filter survivors, **0 genuine** after exact gp verification (verify_ext.py).
