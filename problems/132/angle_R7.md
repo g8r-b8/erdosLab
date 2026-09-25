@@ -10,7 +10,7 @@ Starting point: angle_R6.md — L ≤ 4/3 overall (N3, refereed); 21/16 in Regio
 | A3 | referee Region III off-window e(S) ≤ s + 70/d + C, resonance strip, Lemma DP | **DONE: CORRECT WITH FIXES** (§2) |
 | B | average R-weight ≤ 7 in Region II (⇒ 21/16 there, given A2) | **DONE: PROVED, REFEREED (REF_B: correct with fixes)** (§3) |
 | C | break the Region III resonance window via diametral partners (Lemma DP) | **DONE: Theorem W PROVED, REFEREED (REF_C: correct with minor fixes)** (§4) |
-| D1 | Region I: average weight ≤ 6 (Conjecture C1) ⇒ 9/7 | **DONE: Theorem G PROVED, unrefereed** (§5). Reconstructed and repaired by D1r (`angle_R7_reports/D1_report.md`, FINAL); hostile referee REF_D1 running |
+| D1 | Region I: average weight ≤ 6 (Conjecture C1) ⇒ 9/7 | **DONE: Theorem G PROVED, unrefereed** (§5). Reconstructed by D1r (`angle_R7_reports/D1_report.md`); **REFEREED ONCE (REF_D1: correct with cosmetic fixes)**; a second independent referee is queued |
 | E | Region III fan zone \|t − √3/2\| ≤ κ₁: bound \|F*\| or the average weight (off the fan zone, D1 covers it) | running (relaunched after the panics) |
 | D2 | Region I: cross-edge e(D, X∖D) ≤ ½g_D + o(n) via E′ on conv X ⇒ 9/7 | pending |
 
@@ -22,7 +22,7 @@ Process: after a usage-limit outage killed all six first-launch agents (no outpu
 at most two at a time; this file is checkpointed and committed after each branch reports.
 
 ## Established so far
-Overall bound still **4/3** (refereed). After A2 and A3, the |Q| term is removed (refereed) everywhere except the Region III
+Overall bound still **4/3** (refereed). **Off the fan zone: 9/7 + η, refereed once (D1r + REF_D1).** After A2 and A3, the |Q| term is removed (refereed) everywhere except the Region III
 resonance window τ = √3/2 + O(1/R). Off that window, every regime has value max{5/4, 3c/(2c+1)}, so the bound drops below 4/3
 as soon as the average R-weight 2c is < 8 there (branch B). The window itself is branch C.
 Branch B, refereed by REF_B, gives 2c = 7 in Region II, so **21/16 is REFEREED in Regions I, II and τ > 1**.
@@ -233,3 +233,31 @@ D1r's self-critique names the weakest points:
 - the Gauss-map/seam argument (Lemma 4.5);
 - the Remark 5.2 constants;
 - that C(η,κ) → ∞ as κ → 0, so nothing uniform holds on the fan zone.
+
+### 5.2 REF_D1: hostile referee of D1r (`angle_R7_reports/REF_D1_report.md`, FINAL)
+
+**Verdict: CORRECT WITH FIXES.** The fixes are cosmetic and no statement changes. The following stand:
+- Theorem G;
+- Corollary 6.1;
+- Theorem 9.1 (in Region III it is conditional on Theorem W, which has been refereed once);
+- the fan-zone value 3(3+φ)/(7+2φ).
+
+Checks:
+- κ₁ < 1.5525·10⁻³ (60-digit intervals).
+- The random threshold T is essential.
+- The constant is huge: C(0.1, 0.02) ≈ 2.57·10¹⁵.
+- On the curved-K / r ~ R stress test, the excess is O(width) and no counterexample was found. This settles the flat-hexagon worry: E_𝓡 = 3r + 6k − 3 comes from the 60° corners, and K has none.
+- The LP is exact, and ienjoymath's construction is consistent.
+
+Fixes (appended to D1_report.md as Errata):
+- F1: restrict rule (O1) to 𝓡∖D.
+- F2: allow any η > 0, with M = ⌈36/η⌉.
+- F3: "own ≤ 4 on F*∖Exc".
+- F4: §4.6 wording.
+
+Optional sharpening R1: the pinning window is θ-independent, κ′ ≤ 7ε₀ + 5/Δ₂ (e.g. < 4.57·10⁻⁴).
+
+Scripts: `r7_refD1_{lemmaS,global,lp}.py`.
+
+**Status of the headline.** min ≤ (9/7 + η)n + C(η,κ) holds off the fan zone |t − √3/2| < κ, refereed once. It is sharp (ienjoymath). The overall rigorous bound stays 4/3
+until the fan-zone density φ = |F*₄|/r is bounded (branch E). A second independent referee of D1r is required before this goes in the paper.

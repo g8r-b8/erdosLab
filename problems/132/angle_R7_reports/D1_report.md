@@ -718,3 +718,25 @@ With the e(S) bounds of the table in §9, these give min{μ(Δ₂), μ(δ)} ≤ 
 not close.
 
 STATUS: FINAL
+
+## Errata (from REF_D1, commit 7380d81) — to be read as part of this report
+
+REF_D1 verdict: CORRECT WITH FIXES (cosmetic; no statement changes). Replacement text, verbatim from REF_D1 §8:
+
+
+**Replacement text.**
+- **F1 (§4.2, rule O1).** Replace "(O1) *Spoke:* y ∈ 𝓡, q ∈ S. Owned by y, its only 𝓡-end." by "(O1) *Spoke:* y ∈ 𝓡∖D, q ∈ S. Owned by y."
+  Rule (O2) then covers every edge with an end in 𝓡∩D, including 𝓡∩D–S edges, and the four cases are disjoint as claimed.
+- **F2 (§4.1/§5, range of η).** Replace "For every η ∈ (0,1]" by "For every η > 0", with M := ⌈36/η⌉ ≥ 1 (nothing else uses η ≤ 1).
+  Alternatively, in §9 use η' := min(14η/3, 1).
+- **F3 (§0 and §6).** Replace "At every point of F*, own(y) ≤ 4; elsewhere off Exc, own ≤ 3" by "At every point of F*∖Exc, own(y) ≤ 4;
+  at every other point off Exc, own(y) ≤ 3."
+- **F4 (§4.6, wording).** After "The true toy excess Σv − 6r also grows like the perimeter (≍ √r)", add: "for K filled to depth ≍ √r.
+  For a band of fixed width w along ∂K, E_𝓡 − 3r ≈ 6·(number of rows) = O(w), independent of the perimeter (REF_D1 §4)."
+
+**Optional improvements (not needed).**
+- **R1.** The pinning window is θ-independent: κ' ≤ 7ε₀ + 5/Δ₂ on all samples (§2). So θ_s can be an absolute constant, and C(η, κ)
+  loses a factor 1/κ in the seam term.
+- **R2.** The toy identity E_𝓡 − 3r = ½(e(𝓡,S) − e(𝓡, absent)), together with "S touches 𝓡 only from outside K", explains the
+  corner/turning law directly (§4).
+
