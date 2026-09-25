@@ -294,7 +294,6 @@ The distances from c′ to x, b, u, w and the "outer" choice of b, b′ were nev
 | `r8_charge_stress.py 60` | Float, *not* part of the proof. Step 1: b′ swept over C(x, Δ) plus the special points b, p and the γ3 point; p′ from both circle intersections; each admissible (p′, b′) classified into α/β/γ1/γ2/γ3± and the proof's stated reason re-checked. Steps 2–3: both apexes, and a sweep of γ over the whole x-side. Lemma D: θ < θ′ grid, plus the stratum \|xp′\| = Δ by bisection | 1,113,237 admissible (p′, b′), 0 failures. Every out-of-cone b′ has a pair > Δ (T4). γ3 "+" occurs 1,042 times, all non-extreme. Min normalised margin of \|c′p\| − Δ > 0. `ALL OK` |
 | `r8_charge_exact.py tri 49` | Exact Z[ω] cliques (the pools of `r5_b_exact.py`): tests CH, LD, CC, EX, x-on-line, K8+ = Theorem 6.1, and E ≤ 2\|V_Δ ∩ L₁′\| | 76,187 sets, 5,062 hooks, 0 violations |
 | `r8_charge_exact.py sq 65` | Same tests on Z[i] | 128,827 sets, 755 hooks, 0 violations |
-
 | `r8_charge_exact.py rings` | Float: Theorem 6.1 and the Charge Lemma on rings, m = 7…12, 16 | tight in every case (μ₂ = bound = 3m, 2m hooks) |
 
 The lattice counts reproduce R5's (76,187 / 5,062 and 128,827 / 755).
