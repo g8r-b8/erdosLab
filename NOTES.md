@@ -333,8 +333,9 @@ PROMPT.md rule 4: check all cross-referenced/sibling problems and their threads.
   Kovač 5 May 2026 ("2" believed misprint for 2^ℵ0); formal-conjectures 261.lean (main @ 2026-09-23):
   parts.iii + two_representations tagged `research open`; not on Tao's AI wiki (frozen 30 Jun 2026);
   see-also only #260 (checked thread); no OEIS link. BoLo90 abstract: "some numbers have a unique
-  representation, others have uncountably many" (not rationals); TUZ20 (arXiv 2008.01501): rationals
-  with ≥3 reps, infinitely many with ≥9 — so continuum-for-rational open in 2020 and since.
+  representation, others have uncountably many" (not rationals); TUZ20 (arXiv 2008.01501) is about the
+  FINITE equation n/2^n=Σ_{i≤k}a_i/2^{a_i} (≥5 solutions for k in an infinite set) — it does NOT count
+  infinite reps of rationals (earlier note '≥3 reps, ≥9' was WRONG; corrected on blog 2026-09-25).
   Own reduction (scratchpad/e001/e261/): s_a := 2^a·(remaining target before a) must stay in
   [0,2a+2]; include a iff s≥a, exclude iff s≤a+2 ⇒ choice ONLY in window s∈[a,a+2]; map commutes
   with s↦2a+2−s. BL identity n/2^n=Σ_{n<k≤n+m}k/2^k (n=2^{m+1}−m−2) = a diamond at ANY window
@@ -357,9 +358,12 @@ PROMPT.md rule 4: check all cross-referenced/sibling problems and their threads.
   zeros at a=L−1 (to 2e10). Old e_L = min(v_{L−1}+1, L−v_{L−1}) (proved by case t=a−2v ≥/< 0).
   General dyadic m/2^k: several orbits (one per integer state at a=k). Post updated (dated) in blog
   repo, pushed 2026-09-25 (7862f15). Open problem itself: still need ∞ zeros of v.
-  Next (cheap, 1 core, KB memory): extend v-search 2e10→1e12 (~17 min; expect ~3–4 zeros if rate
-  ≈0.7/a). Deferred 2026-09-25: machine just recovered from kernel panics (load 28); shared-box rule =
-  ≤2–3 heavy processes total, check `ps -Ao pid,rss,comm -m | head` first.
+  2026-09-25: v-search to 1e12 → two more zeros a=129465909327, 212089391807 (L=a+1) ⇒ 1 has ≥2^17
+  inf non-cofinite reps. Mirror branches take opposite choices at EVERY later a (reps differ infinitely
+  often; cf. Rafik's cofinite 7/4 pair). FC file also has variants.two_representations tagged `research
+  open` (≥2 infinite reps of some rational) — literally answered by Rafik's cofinite 7/4 pair (forum,
+  27 Apr 2026); a Lean proof of that variant for x=1 via our orbit (a=1 split) is a possible small FC PR.
+  Blog post corrected + updated (daa99d8).
 - Drops (one line): 3/5/9/10/11/14/15/17/18/20/25/28/30/32/33/36/39–41/44/50–52/60–62/65/66/68/
   70/75/77/78/80–82/84–87/89/91/96–104/107/108/111/114/120/122/124/128–131/137/138/141–143/145/148/
   149/151/153/155/158/159/161/162/165/167–170/172–174/176/177/181/184/187/188/195–197/200/201/203/
