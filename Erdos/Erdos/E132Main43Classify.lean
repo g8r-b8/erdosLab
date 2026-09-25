@@ -298,6 +298,198 @@ theorem pair_D (hX : Normal X) {y n : Pt} (hF : Frame43 X y n) {q₁ q₂ : Pt}
   have := c43_r_hi
   nlinarith [abs_nonneg (inner ℝ (q₁ - y) n - inner ℝ (q₂ - y) n)]
 
+/-! ## Angles in the frame (private helpers) -/
+
+private theorem c43_angle {a b : ℝ} (h : a ^ 2 + b ^ 2 = 1) :
+    ∃ ψ : ℝ, -π < ψ ∧ ψ ≤ π ∧ Real.cos ψ = a ∧ Real.sin ψ = b := by
+  set z : ℂ := ⟨a, b⟩ with hzdef
+  have hz : ‖z‖ = 1 := by
+    rw [Complex.norm_def, Complex.normSq_apply]
+    simp only [z]
+    rw [show a * a + b * b = 1 by nlinarith, Real.sqrt_one]
+  have hz0 : z ≠ 0 := by intro h; rw [h, norm_zero] at hz; norm_num at hz
+  refine ⟨Complex.arg z, Complex.neg_pi_lt_arg z, Complex.arg_le_pi z, ?_, ?_⟩
+  · rw [Complex.cos_arg hz0, hz, div_one]
+  · rw [Complex.sin_arg, hz, div_one]
+
+private theorem c43_cos_gt_half {d : ℝ} (h : |d| < π / 3) : 1 / 2 < Real.cos d := by
+  rw [← Real.cos_abs, ← Real.cos_pi_div_three]
+  exact Real.cos_lt_cos_of_nonneg_of_le_pi (abs_nonneg d) (by linarith [Real.pi_pos]) h
+
+private theorem c43_chord (a b : ℝ) :
+    (Real.cos a - Real.cos b) ^ 2 + (Real.sin a - Real.sin b) ^ 2 = 2 - 2 * Real.cos (a - b) := by
+  rw [Real.cos_sub]
+  linear_combination Real.sin_sq_add_cos_sq a + Real.sin_sq_add_cos_sq b
+
+/-- A neighbour `q` distinct from a neighbour `q'` in the slot `ψ` (within `η`) satisfies
+`⟨q − y, dirF n ψ⟩ ≤ 1/2 + η`. -/
+private theorem c43_dot_slot (hX : Normal X) {y n q q' : Pt} (hq : q ∈ nbδ X y)
+    (hq' : q' ∈ nbδ X y) (hne : q ≠ q') {s η : ℝ} (hs : Slot y n s η q') :
+    inner ℝ (q - y) n * Real.cos s + inner ℝ (q - y) (perp n) * Real.sin s ≤ 1 / 2 + η := by
+  have hu : ‖q - y‖ = 1 := by rw [← dist_eq_norm, dist_of_mem_nbδ hX hq]
+  have hu' : ‖q' - y‖ = 1 := by rw [← dist_eq_norm, dist_of_mem_nbδ hX hq']
+  have hsep : 1 ≤ ‖(q - y) - (q' - y)‖ := by
+    rw [sub_sub_sub_cancel_right, ← dist_eq_norm]
+    exact one_le_dist hX.minDist_eq (mem_nbδ.1 hq).1 (mem_nbδ.1 hq').1 hne
+  have e := norm_sub_sq_real (q - y) (q' - y)
+  rw [hu, hu'] at e
+  have hi : inner ℝ (q - y) (q' - y) ≤ 1 / 2 := by
+    nlinarith [norm_nonneg ((q - y) - (q' - y))]
+  have h2 : -η ≤ inner ℝ (q - y) (q' - y - dirF n s) := by
+    have := abs_real_inner_le_norm (q - y) (q' - y - dirF n s)
+    rw [hu, one_mul] at this
+    unfold Slot at hs
+    linarith [(abs_le.1 this).1]
+  have h3 : inner ℝ (q - y) (dirF n s) =
+      inner ℝ (q - y) n * Real.cos s + inner ℝ (q - y) (perp n) * Real.sin s := by
+    unfold dirF; rw [inner_add_right, real_inner_smul_right, real_inner_smul_right]; ring
+  have h4 : inner ℝ (q - y) (dirF n s) =
+      inner ℝ (q - y) (q' - y) - inner ℝ (q - y) (q' - y - dirF n s) := by
+    rw [inner_sub_right (q - y) (q' - y) (dirF n s)]; ring
+  linarith
+
+/-- Slot from an angle: `|ψ − s| ≤ η` gives `Slot y n s η q` when `q − y = dirF n ψ` in
+coordinates. -/
+private theorem c43_slot_of_angle {y n q : Pt} (hn : ‖n‖ = 1) {ψ s η : ℝ} (hη : 0 ≤ η)
+    (hc : Real.cos ψ = inner ℝ (q - y) n) (hs : Real.sin ψ = inner ℝ (q - y) (perp n))
+    (h : |ψ - s| ≤ η) : Slot y n s η q := by
+  refine c43_slot_of hn hη ?_
+  rw [← hc, ← hs, c43_chord]
+  have h2 := Real.one_sub_sq_div_two_le_cos (x := ψ - s)
+  have h3 : (ψ - s) ^ 2 ≤ η ^ 2 := by
+    rw [← sq_abs]; exact pow_le_pow_left₀ (abs_nonneg _) h 2
+  linarith
+
+/-- **Four points on the upper arc**: four unit vectors pairwise `≥ 60°` apart with height
+`> −1/49` sit within `0.021` (in angle) of the slots `−90°, −30°, 30°, 90°`. -/
+private theorem c43_arc4 {y n : Pt} (hn : ‖n‖ = 1) (P : Finset Pt) (hcard : P.card = 4)
+    (hu : ∀ q ∈ P, inner ℝ (q - y) n ^ 2 + inner ℝ (q - y) (perp n) ^ 2 = 1)
+    (hsep : ∀ q ∈ P, ∀ q' ∈ P, q ≠ q' →
+      1 ≤ (inner ℝ (q - y) n - inner ℝ (q' - y) n) ^ 2 +
+        (inner ℝ (q - y) (perp n) - inner ℝ (q' - y) (perp n)) ^ 2)
+    (hcone : ∀ q ∈ P, -(1 / 49) < inner ℝ (q - y) n) :
+    ∀ j : ℕ, j < 4 → ∃ q ∈ P, Slot y n (-(π / 2) + (j : ℝ) * (π / 3)) (21 / 1000) q := by
+  have hπ := Real.pi_pos
+  have hπ3 := Real.pi_gt_three
+  have hang : ∀ q ∈ P, ∃ ψ : ℝ, -π < ψ ∧ ψ ≤ π ∧ Real.cos ψ = inner ℝ (q - y) n ∧
+      Real.sin ψ = inner ℝ (q - y) (perp n) := fun q hq => c43_angle (hu q hq)
+  choose! ψ hψ1 hψ2 hψc hψs using hang
+  have hsin : (1 : ℝ) / 49 < Real.sin (21 / 1000) := by
+    have := Real.sin_gt_sub_cube (x := 21 / 1000) (by norm_num)
+    linarith [show (1 : ℝ) / 49 < 21 / 1000 - (21 / 1000) ^ 3 / 6 by norm_num]
+  have hbound : ∀ q ∈ P, |ψ q| < π / 2 + 21 / 1000 := by
+    intro q hq
+    by_contra hc
+    push Not at hc
+    have habs : |ψ q| ≤ π := abs_le.2 ⟨by linarith [hψ1 q hq], hψ2 q hq⟩
+    have h1 := Real.cos_le_cos_of_nonneg_of_le_pi
+      (by positivity : (0 : ℝ) ≤ π / 2 + 21 / 1000) habs hc
+    rw [Real.cos_abs, hψc q hq, Real.cos_add, Real.cos_pi_div_two, Real.sin_pi_div_two] at h1
+    have := hcone q hq
+    linarith
+  have hsepψ : ∀ q ∈ P, ∀ q' ∈ P, q ≠ q' → π / 3 ≤ |ψ q - ψ q'| := by
+    intro q hq q' hq' hne
+    by_contra hc
+    push Not at hc
+    have h1 := c43_cos_gt_half hc
+    have h2 := hsep q hq q' hq' hne
+    rw [← hψc q hq, ← hψc q' hq', ← hψs q hq, ← hψs q' hq', c43_chord] at h2
+    linarith
+  have hc3 : (0 : ℝ) < π / 3 := by positivity
+  -- separated angles in an interval
+  have hcount : ∀ (T : Finset Pt) (lo hi : ℝ), T ⊆ P → lo ≤ hi →
+      (∀ q ∈ T, lo ≤ ψ q ∧ ψ q ≤ hi) → (T.card : ℝ) * (π / 3) ≤ hi - lo + π / 3 := by
+    intro T lo hi hTP hlh hT
+    have hinj : Set.InjOn (fun q => ψ q / (π / 3)) T := by
+      intro q hq q' hq' h
+      by_contra hne
+      have h3 := hsepψ q (hTP hq) q' (hTP hq') hne
+      simp only at h
+      have : ψ q = ψ q' := by
+        have := congrArg (· * (π / 3)) h
+        simpa [div_mul_cancel₀ _ hc3.ne'] using this
+      rw [this, sub_self, abs_zero] at h3
+      linarith
+    have hcard := card_le_of_sep_real (a := lo / (π / 3)) (T.image fun q => ψ q / (π / 3))
+      (hi / (π / 3)) (by have := div_le_div_of_nonneg_right hlh hc3.le; linarith)
+      (by
+        intro x hx
+        obtain ⟨q, hq, rfl⟩ := mem_image.1 hx
+        exact ⟨div_le_div_of_nonneg_right (hT q hq).1 hc3.le,
+          div_le_div_of_nonneg_right (hT q hq).2 hc3.le⟩)
+      (by
+        intro x hx x' hx' hne
+        obtain ⟨q, hq, rfl⟩ := mem_image.1 hx
+        obtain ⟨q', hq', rfl⟩ := mem_image.1 hx'
+        have hqq : q ≠ q' := by rintro rfl; exact hne rfl
+        have h3 := hsepψ q (hTP hq) q' (hTP hq') hqq
+        rw [← sub_div, abs_div, abs_of_pos hc3, le_div_iff₀ hc3, one_mul]
+        exact h3)
+    rw [card_image_of_injOn hinj] at hcard
+    have e : (hi / (π / 3) - lo / (π / 3) + 1) * (π / 3) = hi - lo + π / 3 := by
+      rw [add_mul, sub_mul, div_mul_cancel₀ _ hc3.ne', div_mul_cancel₀ _ hc3.ne', one_mul]
+    calc (T.card : ℝ) * (π / 3) ≤ (hi / (π / 3) - lo / (π / 3) + 1) * (π / 3) :=
+          mul_le_mul_of_nonneg_right hcard hc3.le
+      _ = hi - lo + π / 3 := e
+  -- the rank of `q` among the angles
+  obtain ⟨k, hk⟩ : ∃ k : Pt → ℕ, ∀ q, k q = (P.filter (fun q' => ψ q' < ψ q)).card :=
+    ⟨_, fun q => rfl⟩
+  have hB : ∀ q ∈ P, |ψ q - (-(π / 2) + (k q : ℝ) * (π / 3))| ≤ 21 / 1000 := by
+    intro q hq
+    have hb := abs_lt.1 (hbound q hq)
+    have hLc : k q + 1 ≤ (P.filter (fun q' => ψ q' ≤ ψ q)).card := by
+      have hsub : insert q (P.filter (fun q' => ψ q' < ψ q)) ⊆
+          P.filter (fun q' => ψ q' ≤ ψ q) := by
+        intro x hx
+        rcases mem_insert.1 hx with rfl | hx
+        · exact mem_filter.2 ⟨hq, le_refl _⟩
+        · have := mem_filter.1 hx; exact mem_filter.2 ⟨this.1, this.2.le⟩
+      have hnm : q ∉ P.filter (fun q' => ψ q' < ψ q) := fun h => lt_irrefl _ (mem_filter.1 h).2
+      have := card_le_card hsub
+      rwa [card_insert_of_notMem hnm, ← hk] at this
+    have hL := hcount (P.filter (fun q' => ψ q' ≤ ψ q)) (-(π / 2 + 21 / 1000)) (ψ q)
+      (filter_subset _ _) (by linarith)
+      (fun x hx => ⟨(abs_lt.1 (hbound x (mem_filter.1 hx).1)).1.le, (mem_filter.1 hx).2⟩)
+    have hHc : (P.filter (fun q' => ¬ ψ q' < ψ q)).card + k q = 4 := by
+      have := card_filter_add_card_filter_not (s := P) (fun q' => ψ q' < ψ q)
+      rw [hcard, ← hk] at this; omega
+    have hH := hcount (P.filter (fun q' => ¬ ψ q' < ψ q)) (ψ q) (π / 2 + 21 / 1000)
+      (filter_subset _ _) (by linarith)
+      (fun x hx => ⟨not_lt.1 (mem_filter.1 hx).2,
+        (abs_lt.1 (hbound x (mem_filter.1 hx).1)).2.le⟩)
+    have h1 : ((k q : ℕ) : ℝ) + 1 ≤ ((P.filter (fun q' => ψ q' ≤ ψ q)).card : ℝ) := by
+      exact_mod_cast hLc
+    have h2 : ((P.filter (fun q' => ¬ ψ q' < ψ q)).card : ℝ) = 4 - k q := by
+      have : (((P.filter (fun q' => ¬ ψ q' < ψ q)).card + k q : ℕ) : ℝ) = 4 := by
+        exact_mod_cast hHc
+      push_cast at this; linarith
+    rw [h2] at hH
+    have h3 := mul_le_mul_of_nonneg_right h1 hc3.le
+    rw [abs_le]; constructor <;> nlinarith
+  have hkP : ∀ q ∈ P, k q ∈ range 4 := by
+    intro q hq
+    rw [mem_range, hk]
+    have : (P.filter (fun q' => ψ q' < ψ q)).card < P.card :=
+      card_lt_card (filter_ssubset.2 ⟨q, hq, lt_irrefl _⟩)
+    omega
+  have hinj : Set.InjOn k P := by
+    intro q hq q' hq' h
+    by_contra hne
+    obtain ⟨a1, a2⟩ := abs_le.1 (hB q hq)
+    obtain ⟨b1, b2⟩ := abs_le.1 (hB q' hq')
+    have h3 := hsepψ q hq q' hq' hne
+    rw [h] at a1 a2
+    have : |ψ q - ψ q'| ≤ 42 / 1000 := by rw [abs_le]; constructor <;> linarith
+    linarith
+  intro j hj
+  obtain ⟨q, hq, hqj⟩ := Finset.surjOn_of_injOn_of_card_le k
+    (fun q hq => mem_coe.2 (hkP q (mem_coe.1 hq))) hinj (by rw [card_range, hcard])
+    (mem_coe.2 (mem_range.2 hj))
+  have hq' : q ∈ P := mem_coe.1 hq
+  have h1 := hB q hq'
+  rw [hqj] at h1
+  exact ⟨q, hq', c43_slot_of_angle hn (by norm_num) (hψc q hq') (hψs q hq') h1⟩
+
 /-! ## The exact hexagon -/
 
 /-- **Exact hexagon**: if `y` has six `δ`-neighbours, they form a regular hexagon: the set of
@@ -336,7 +528,75 @@ theorem lemmaM (hX : Normal X) {y n : Pt} (hF : Frame43 X y n) (hy : y ∈ Rset 
       z₁ ∈ Sset X ∧ z₁ ∈ Dset X ∧ z₂ ∈ Sset X ∧ z₂ ∈ Dset X ∧
       Slot y n (π / 2) (1 / 40) p₁ ∧ Slot y n (-(π / 2)) (1 / 40) p₂ ∧
       Slot y n (π / 6) (1 / 40) z₁ ∧ Slot y n (-(π / 6)) (1 / 40) z₂ := by
-  sorry
+  have hn := hF.unit
+  have hdp := hF.depth_pos
+  have ht := c43_tgap_pos hX
+  have hr := c43_r_lo
+  set P := (nbδ X y).filter (· ∈ Sset X) with hP
+  have hPc : P.card = 4 := hm
+  have hPm : ∀ q ∈ P, q ∈ nbδ X y ∧ q ∈ Sset X := fun q hq => mem_filter.1 hq
+  have harc := c43_arc4 hn P hPc (fun q hq => c43_unit hX hn (hPm q hq).1)
+    (fun q hq q' hq' hne => c43_sep hX hn (hPm q hq).1 (hPm q' hq').1 hne)
+    (fun q hq => by
+      have h1 := hPm q hq
+      have hlow := c43_S_low hX hF h1.1 h1.2
+      have hu := c43_abs_le_one (c43_unit hX hn h1.1)
+      linarith)
+  obtain ⟨q0, hq0, hs0⟩ := harc 0 (by norm_num)
+  obtain ⟨q1, hq1, hs1⟩ := harc 1 (by norm_num)
+  obtain ⟨q2, hq2, hs2⟩ := harc 2 (by norm_num)
+  obtain ⟨q3, hq3, hs3⟩ := harc 3 (by norm_num)
+  rw [show -(π / 2) + ((0 : ℕ) : ℝ) * (π / 3) = -(π / 2) by push_cast; ring] at hs0
+  rw [show -(π / 2) + ((1 : ℕ) : ℝ) * (π / 3) = -(π / 6) by push_cast; ring] at hs1
+  rw [show -(π / 2) + ((2 : ℕ) : ℝ) * (π / 3) = π / 6 by push_cast; ring] at hs2
+  rw [show -(π / 2) + ((3 : ℕ) : ℝ) * (π / 3) = π / 2 by push_cast; ring] at hs3
+  obtain ⟨hn0, hS0⟩ := hPm q0 hq0
+  obtain ⟨hn1, hS1⟩ := hPm q1 hq1
+  obtain ⟨hn2, hS2⟩ := hPm q2 hq2
+  obtain ⟨hn3, hS3⟩ := hPm q3 hq3
+  obtain ⟨z0, x0⟩ := c43_slot_coords hn hs0
+  obtain ⟨z1, x1⟩ := c43_slot_coords hn hs1
+  obtain ⟨z2, x2⟩ := c43_slot_coords hn hs2
+  obtain ⟨z3, x3⟩ := c43_slot_coords hn hs3
+  simp only [Real.cos_neg, Real.sin_neg, Real.cos_pi_div_two, Real.sin_pi_div_two,
+    Real.cos_pi_div_six, Real.sin_pi_div_six, sub_zero] at z0 x0 z1 x1 z2 x2 z3 x3
+  obtain ⟨z0a, z0b⟩ := abs_le.1 z0
+  obtain ⟨z1a, z1b⟩ := abs_le.1 z1
+  obtain ⟨z2a, z2b⟩ := abs_le.1 z2
+  obtain ⟨z3a, z3b⟩ := abs_le.1 z3
+  have u0 := c43_abs_le_one (c43_unit hX hn hn0)
+  have u3 := c43_abs_le_one (c43_unit hX hn hn3)
+  have ne01 : q0 ≠ q1 := by rintro rfl; linarith
+  have ne32 : q3 ≠ q2 := by rintro rfl; linarith
+  -- the points at `±90°` are K-row points
+  have hD0 : q0 ∉ Dset X := by
+    intro hD0
+    have l0 := c43_D_low hX hF hn0 hD0
+    by_cases hD1 : q1 ∈ Dset X
+    · have := (abs_le.1 (pair_D hX hF hn0 hn1 ne01 hD0 hD1).1).1
+      linarith
+    · have := c43_K_top hF hn1 hD1
+      linarith
+  have hD3 : q3 ∉ Dset X := by
+    intro hD3
+    have l3 := c43_D_low hX hF hn3 hD3
+    by_cases hD2 : q2 ∈ Dset X
+    · have := (abs_le.1 (pair_D hX hF hn3 hn2 ne32 hD3 hD2).1).1
+      linarith
+    · have := c43_K_top hF hn2 hD2
+      linarith
+  -- the points at `±30°` are D-points
+  have hD1 : q1 ∈ Dset X := by
+    by_contra hD1
+    have := (abs_le.1 (pair_K hX hF hn0 hn1 ne01 hS0 hD0 hS1 hD1).1).1
+    linarith
+  have hD2 : q2 ∈ Dset X := by
+    by_contra hD2
+    have := (abs_le.1 (pair_K hX hF hn3 hn2 ne32 hS3 hD3 hS2 hD2).1).1
+    linarith
+  exact ⟨q3, hn3, q0, hn0, q2, hn2, q1, hn1, hS3, hD3, hS0, hD0, hS2, hD2, hS1, hD1,
+    c43_slot_mono hs3 (by norm_num), c43_slot_mono hs0 (by norm_num),
+    c43_slot_mono hs2 (by norm_num), c43_slot_mono hs1 (by norm_num)⟩
 
 /-- **F6 / F5** (`m = 4`, `deg ≥ 5`) have fan shape.
 
@@ -350,7 +610,66 @@ Depends on: `lemmaM`, `hexagon_exact` (F6), `dist_of_mem_nbδ`, `one_le_dist`.
 Difficulty M. -/
 theorem fanShape_of_m4 (hX : Normal X) {y n : Pt} (hF : Frame43 X y n) (hy : y ∈ Rset X)
     (hm : mS X y = 4) (hd : 5 ≤ degδ X y) : FanShape X y n := by
-  sorry
+  have hn := hF.unit
+  have hr := c43_r_lo
+  obtain ⟨p₁, hp₁, p₂, hp₂, z₁, hz₁, z₂, hz₂, hp₁S, hp₁D, hp₂S, hp₂D, hz₁S, hz₁D, hz₂S, hz₂D,
+    hs₁, hs₂, hs₃, hs₄⟩ := lemmaM hX hF hy hm
+  obtain ⟨a1, -⟩ := c43_slot_coords hn hs₁
+  obtain ⟨a2, -⟩ := c43_slot_coords hn hs₂
+  simp only [Real.cos_neg, Real.cos_pi_div_two, sub_zero] at a1 a2
+  -- `|X a| ≤ 21/40` for the neighbours other than `p₁, p₂`
+  have hXa : ∀ a ∈ nbδ X y, a ≠ p₁ → a ≠ p₂ →
+      inner ℝ (a - y) (perp n) ^ 2 ≤ (21 / 40) ^ 2 := by
+    intro a ha h1 h2
+    have d1 := c43_dot_slot hX ha hp₁ h1 hs₁
+    have d2 := c43_dot_slot hX ha hp₂ h2 hs₂
+    simp only [Real.cos_neg, Real.sin_neg, Real.cos_pi_div_two, Real.sin_pi_div_two] at d1 d2
+    have : |inner ℝ (a - y) (perp n)| ≤ 21 / 40 := by
+      rw [abs_le]; constructor <;> linarith
+    rw [← sq_abs]; exact pow_le_pow_left₀ (abs_nonneg _) this 2
+  -- non-`S` neighbours are low
+  have hnonS : ∀ a ∈ nbδ X y, a ∉ Sset X → inner ℝ (a - y) n ≤ -(4 / 5) := by
+    intro a ha haS
+    have ne1 : a ≠ p₁ := fun h => haS (h ▸ hp₁S)
+    have ne2 : a ≠ p₂ := fun h => haS (h ▸ hp₂S)
+    have ne3 : a ≠ z₁ := fun h => haS (h ▸ hz₁S)
+    have ne4 : a ≠ z₂ := fun h => haS (h ▸ hz₂S)
+    have hx := hXa a ha ne1 ne2
+    have hu := c43_unit hX hn ha
+    have d3 := c43_dot_slot hX ha hz₁ ne3 hs₃
+    have d4 := c43_dot_slot hX ha hz₂ ne4 hs₄
+    simp only [Real.cos_neg, Real.sin_neg, Real.cos_pi_div_six, Real.sin_pi_div_six] at d3 d4
+    have hz : inner ℝ (a - y) n ≤ 61 / 100 := by
+      by_contra hc
+      push Not at hc
+      nlinarith
+    by_contra hc
+    push Not at hc
+    nlinarith
+  refine ⟨⟨1, Or.inl rfl, p₂, hp₂, p₁, hp₁, z₁, hz₁, hp₂S, hp₂D, hz₁D, ?_, ?_, ?_,
+    Or.inl hp₁S⟩, ?_, ?_⟩
+  · rw [one_mul]; exact c43_slot_mono hs₂ (by norm_num)
+  · rw [one_mul]; exact c43_slot_mono hs₁ (by norm_num)
+  · rw [one_mul]; exact c43_slot_mono hs₃ (by norm_num)
+  · intro a ha hZ
+    have ne1 : a ≠ p₁ := by rintro rfl; linarith [(abs_le.1 a1).1]
+    have ne2 : a ≠ p₂ := by rintro rfl; linarith [(abs_le.1 a2).1]
+    have hx := hXa a ha ne1 ne2
+    have hu := c43_unit hX hn ha
+    by_contra hc
+    push Not at hc
+    nlinarith
+  · have hsub : (nbδ X y).filter (fun a => a ∉ Sset X) ⊆
+        (nbδ X y).filter (fun a => inner ℝ (a - y) n ≤ -(4 / 5)) := by
+      intro a ha
+      obtain ⟨ha1, ha2⟩ := mem_filter.1 ha
+      exact mem_filter.2 ⟨ha1, hnonS a ha1 ha2⟩
+    have hc := card_le_card hsub
+    have hsplit := card_filter_add_card_filter_not (s := nbδ X y) (fun a => a ∈ Sset X)
+    have hmS : ((nbδ X y).filter (fun a => a ∈ Sset X)).card = mS X y := rfl
+    have hdeg : (nbδ X y).card = degδ X y := rfl
+    unfold vR
+    omega
 
 /-- **Lemma H** (`deg = 6`, `m = 3`): the exact hexagon is within `1.3°` of
 `{±30°, ±90°, ±150°}` (HF1: K pair at `±90°` + D at `±30°`; HF2: D pair at `±30°` + K at
