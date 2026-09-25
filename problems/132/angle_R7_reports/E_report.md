@@ -254,8 +254,78 @@ LP optimum of Theorem E needs |F*₄| = r = 2p, i.e. every 𝓡-point a fan and 
 be linear at all.
 
 *Referee flags for §3.*
-- 3.1: Q′ ⊆ Q in Theorem W (the prime denotes rung K-ends of Δ₂-degree 1; `r7_C_q.py` docstring "v+ in Q′"); if Q′ were not a
-  subset of Q, replace p by |Q ∪ Q′| in VSQ — no, VSQ needs Δ₂-degree 1, so the argument needs Q′ ⊆ Q exactly as Theorem W's own
-  LP does (it uses μ(Δ₂) ≤ 1.5s − ½|Q′|).
+- 3.1: the argument needs Q′ ⊆ Q in Theorem W (Q′ = rung K-ends of Δ₂-degree 1; cf. the `r7_C_q.py` docstring "v+ in Q′").
+  Theorem W's own LP needs the same inclusion, since it pairs e(S) ≤ s + θ|Q′| with μ(Δ₂) ≤ 1.5s − ½|Q′| (VSQ on Q′).
 - 3.2: Lemma C2(a) uses that the frames of two good points within distance 2 differ by ≤ 2ε₀ (G5 through the common point k).
 - 3.3: the additive constant is C(η) = C_Cor6.1(η, 10⁻²) + (constants of Theorem W and VSQ); it does not depend on the window.
+
+## 4. Lower bound: can fans be linear?
+
+**Verdict: I found no configuration with more than O(1) points of F*, and two natural families are killed by exact
+obstructions. Whether |F*| = Θ(n) is possible stays OPEN; §3's bound 81/61 does not depend on it.**
+
+What a point of F* needs (all proved in §1–§2): a centre w (a D-point in S with ≥ 2 diametral partners), two consecutive S-points
+z₂, z₃ of X ∩ C(w, Δ) at distance 2 sin ψ_z ∈ [1, 1 + O(1/R)], a K-extreme k ∈ C(w, R) ∩ Q, the fan point y ∈ int K within
+1/(2R) of C(w, R), τ in the window 0 < G ≤ 2, and — the hard part — **Δ₂-partners for both middles**, one of which (z₃, on k's side)
+is a pendant of the diameter graph (Lemma X1).
+
+### 4.1 R4's fan chain (paper Remark rem:sharp, `r6_n3_examples.py` (a))
+
+All middles lie on one circle C(w, Δ) (one centre). By Lemma AI at most 4 of them are in S, and by Lemma C2(b) at most 2 of the chain's
+fans can be in F*. The chain sits exactly at the lower end τ = τ_lo of the window (§1). **Obstruction: one centre carries ≤ 2 fans;
+linear fans need linearly many centres.**
+
+### 4.2 Reuleaux skeleton with pendants (`r7_E_reuleaux.py`, 50 digits)
+
+The natural way to get many centres is a Reuleaux polygon: vertices v_j (N = 2m + 1), v_j diametral to v_{j+m}, v_{j+m+1}. Every
+vertex has two diametral partners, so it can be a centre. X1 demands a pendant middle, so put on each arc of C(v_j, Δ) a pendant a_j at
+the fan chord 2 sin ψ_z from v_{j+m}, the fan point y_j and its K-extreme k_j ∈ C(v_j, R) (Lemma EW geometry, ρ in the middle of the
+feasible interval). (A second fan at the other end of the arc would be 0.973 from the neighbouring arc's fan at the shared vertex.)
+
+Checked exactly for N = 101, 301, 1001 at G = 1 and N = 301 at G = 0.3, 1.9 (R = 10⁴): the skeleton is valid (min distance ≥ 1,
+diameter Δ, each y in int K, each k on ∂K with unique partner v_j, v_j has exactly 3 diametral partners v_{j+m}, v_{j+m+1}, a_j). All
+vertices are in S (partner k). But **no pendant a_j can have a Δ₂-partner**: the set of p ∈ C(a_j, R) with |p − x| ≤ R for all x
+in the skeleton is empty (exact arc intersection), and no point of C(a_j, R) ∩ C(x, Δ) (x in the skeleton) is compatible with the
+other distances. So the pendants are in 𝓡∩D, every "fan" is of HF1 type (cost 0), and F* = ∅.
+
+*Why (the precise obstruction).* a_j lies strictly inside the arc of X ∩ C(v_j, Δ) (between v_{j+m} and v_{j+m+1}). By the cone lemma
+(branch C) a Δ₂-partner p of such a point must be diametral to a neighbour on the arc. For a neighbour at distance s from a_j,
+|p − z_±| = Δ and |p − a_j| = R give cos∠(p − a_j, a_j − z_±) = (2Rt + t² − s²)/(2Rs) ≈ t/s, so p sits at angle ≈ arcsin(t/s)
+from the centre as seen from a_j: about 60° for s = 1. Then p is ≈ R away from v_j, far outside the arc of v_{j+m}'s partners
+(which spans π/N), and violates the diameter bound.
+
+### 4.3 General structure (partly proved)
+
+**Lemma ORD (ordering of partners; proved from Hopf–Pannwitz).** If c, c′ are diametral partners of w that each have another
+diametral partner, then every diametral partner of w lies on the closed arc of C(w, Δ) between c and c′.
+
+*Proof.* Any two diametral segments of X intersect. Orient the near side (around w's partners) left to right. If [a, b] and [a′, b′]
+are diametral with a ≠ a′, b ≠ b′ and a′ right of a, crossing forces b′ left of b on the far side (this is the computation in X1:
+sin β ≥ sin β₀). Let z be a partner of w left of c, and w_c ≠ w another partner of c. [c, w_c] must cross [w, z] (z left of c ⇒ w_c
+left of w) and [w, c′] (c left of c′ ⇒ w_c right of w). Contradiction. ∎ (Referee flag 4.1: the "left/right" orientation is
+exactly X1's inequality; it should be written out once in this generality.)
+
+**Consequence: two cases for a fan with centre w and pendant middle z₃.**
+- (i) z₃ is interior to X ∩ C(w, Δ). Then, by the cone lemma, a Δ₂-partner p of z₃ is diametral to its arc-neighbour z_± (z₂, or
+  the next point z₄), which must be non-pendant; p sits at angle ≈ arcsin(t/s) about z₃ from w, s = |z₃z_±|. For z_± = z₂ (s ≈ 1)
+  this is ≈ 60°: z₂ is then the vertex of a "Reuleaux triangle"-sized diametral arc (its partners w and p are ≈ R apart).
+  **Conjecture (not proved):** the angular spans of the partner arcs of different D-points have disjoint interiors in the circle of
+  directions (so they sum to ≤ π). Granting it, only O(1) points z₂ can have a 60° span, so this sub-case gives O(1) fans; the
+  sub-case z_± = z₄ gives Σ 1/s ≤ π/t together with Σ s ≤ πΔ, hence O(√Δ) fans (Cauchy–Schwarz).
+- (ii) z₃ is an end of X ∩ C(w, Δ). By Lemma ORD, w has at most one non-pendant partner, so w's partners are a pendant fan with at
+  most one "attached" point. Then z₃'s partner p lies on z₂'s side of the bisector of z₂z₃ (|p − z₂| ≤ R), or is diametral to z₂.
+  I could not rule this case out, nor build it globally: each centre w is a sharp spike (X∖{w} ⊂ D(z₃, R), so the hull near w
+  falls t below C(z₃, Δ) within distance 1 of w), and each pendant needs its own far partner p ∈ ∂K ∩ C(z₃, R).
+
+### 4.4 The value of the best construction
+
+The only exact configurations with points of F* that I know are the local ones (§1.1 (7), R4's fan with its middles declared in S),
+which are not sets with those middles actually in S. **No construction with |F*₄| ≥ 3 is known**; every known global construction
+has F* = ∅ and so min{μ(Δ₂), μ(δ)} ≤ (9/7 + η)n + C by Corollary 6.1. The best lower bound for the fan window is therefore not
+better than the global 9/7 (ienjoymath, which lies in Region I, t → 0, not in the window). In particular I cannot exhibit
+min{μ(Δ₂), μ(δ)}/n > 9/7 anywhere, and the gap between 9/7 and 81/61 in the fan window is open.
+
+*What would close it.* Either (a) prove the case-(ii) obstruction and the arc-span conjecture, which would give |F*| = O(√Δ) + O(1)
+and hence φ = o(1) whenever r ≫ √Δ (and then 9/7 in the window, except for sets with r = O(√Δ), which would need separate
+treatment); or (b) a global construction of case (ii) with Θ(n) fans, which would show that Corollary 6.1's accounting cannot give 9/7
+and that the LP of §3 must be sharpened by a genuinely new inequality.
