@@ -142,16 +142,41 @@ def check_offline() -> list[str]:
     return F
 
 
+def e_(a: sp.Expr) -> sp.Matrix:
+    """Unit vector at angle a."""
+    return sp.Matrix([sp.cos(a), sp.sin(a)])
+
+
+def trig_zero(name: str, e: sp.Expr, fails: list[str]) -> None:
+    """expect_zero for trigonometric expressions (expand_trig + trigsimp)."""
+    z = sp.simplify(sp.trigsimp(sp.expand_trig(sp.expand(e))))
+    ok = (z == 0)
+    print(('  ok   ' if ok else '  FAIL ') + name + ('' if ok else f'   remainder = {z}'))
+    if not ok:
+        fails.append(name)
+
+
 def check_lemma_D() -> list[str]:
     """Lemma D (same middle vertex, same orientation) identities in frame W.
 
-    TODO: implement.
-    What's missing: |p'b'|^2-1 = rho(rho-2cos(th2-th/2)), |xb'|^2 = 1+rho(rho-2cos(th/2)),
-      chord formula |e(a)-e(b)| = 2|sin((a-b)/2)|.
-    Acceptance: returns [].
-    Depends on: nothing.
+    Frame W: w=0, x=e(0), p=e(th), p'=e(th2), 0<th<th2<pi, b' = rho e(th/2).
     """
-    raise NotImplementedError("Lemma D identities")
+    F: list[str] = []
+    print('[Lemma D]')
+    th, th2, rho, a, b_ = sp.symbols('th th2 rho a b', real=True)
+    x, p, pp = e_(0), e_(th), e_(th2)
+    bp = rho * e_(th/2)
+    trig_zero("b' on the bisector of angle xwp: |b'x|^2 = |b'p|^2", sq(bp - x) - sq(bp - p), F)
+    trig_zero("|p'b'|^2 - 1 = rho(rho - 2cos(th2 - th/2))",
+              sq(bp - pp) - 1 - rho*(rho - 2*sp.cos(th2 - th/2)), F)
+    trig_zero("|xb'|^2 = 1 + rho(rho - 2cos(th/2))", sq(bp - x) - 1 - rho*(rho - 2*sp.cos(th/2)), F)
+    trig_zero('chord: |e(a)-e(b)|^2 = 4 sin^2((a-b)/2)', sq(e_(a) - e_(b_)) - 4*sp.sin((a - b_)/2)**2, F)
+    # the final linear contradiction: th2 > pi/2 + th/2 and th2 <= th + pi/3 imply th > pi/3
+    ok = sp.simplify((sp.pi/2 + th/2) - (th + sp.pi/3) - (sp.pi/6 - th/2)) == 0
+    print(('  ok   ' if ok else '  FAIL ') + '(pi/2 + th/2) - (th + pi/3) = pi/6 - th/2  (<0 iff th > pi/3)')
+    if not ok:
+        F.append('lemma D linear')
+    return F
 
 
 def check_step1() -> list[str]:
