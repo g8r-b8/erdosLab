@@ -34,4 +34,23 @@ Validation: g = 168, M = 1000 recovers Bremner's k = 4 example (d/168 = 30, 165,
 x = 4·65984625, …) in 17 s.
 
 ## Results
-(filled in as runs finish)
+Near-miss counters (added 2026-09-25): K₅,₄ = 5 N's sharing a k=4 difference set; K₄,₅ = 4 N's sharing 5 differences.
+
+| run | pairs | K₄,₄ | K₅,₄ | K₄,₅ | K₅,₅ |
+|---|---|---|---|---|---|
+| g = 1, all d ≤ 12000 (**complete**, 33 min × 8 cores) | 1.26e9 | 13 (10 up to scaling) | 0 | 0 | **0** |
+| g = 2520, m ≤ 1000 | 4.1e8 | 11 | 0 | 0 | 0 |
+| g = 5040, m ≤ 1000 | 5.4e8 | 12 | 0 | 0 | 0 |
+| g = 10080, m ≤ 1000 | 6.7e8 | 12 | 0 | 0 | 0 |
+| g = 27720, m ≤ 1000 | 1.1e9 | 14 | 0 | 0 | 0 |
+| g = 55440, m ≤ 700 | 6.8e8 | 5 | 0 | 0 | 0 |
+| g = 720720, m ≤ 250 | 1.9e8 | 0 | 0 | 0 | 0 |
+
+(g = 1 run predates the near-miss counters; its K₄,₄ lines all have rows = 4, so K₅,₄ = 0 there too.)
+
+**Theorem (computational, 2026-09-25):** no k = 5 witness has all five common differences ≤ 12000
+(in the x = 4N normalisation; N unrestricted). Not Lean-checked; the search is exhaustive by the factorisation argument above.
+
+**Observation:** ~70 K₄,₄ configurations across all runs, and **none** extends by even one row or one column.
+Blind search for K₅,₅ looks hopeless at this scale. A witness would need a structured family: curves with extra
+automorphisms, or a parametric K₄,₄ family whose genus-5 extension curve has a rational point.

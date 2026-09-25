@@ -75,7 +75,7 @@ int main(int argc, char **argv) {
 
   size_t capP = 1 << 20; P *pairs = malloc(capP * sizeof(P));
   size_t capK = 1 << 16; K *keys3 = malloc(capK * sizeof(K)), *keys4 = malloc(capK * sizeof(K));
-  long nk4 = 0, nk5 = 0; uint64_t totpairs = 0;
+  long nk4 = 0, nk5 = 0, nk54 = 0, nk45 = 0; uint64_t totpairs = 0;
   uint64_t divs[1 << 16];
 
   for (uint64_t ma = 1 + part; ma <= M; ma += nparts) {
@@ -126,6 +126,7 @@ int main(int argc, char **argv) {
     qsort(keys3, n3, sizeof(K), cmpK);
     for (size_t i = 0; i < n3;) {
       size_t j = i; while (j < n3 && keys3[j].key == keys3[i].key) j++;
+      if (j - i >= 5) nk54++;
       if (j - i >= 4) {
         nk4++;
         if (pk4) {
@@ -140,6 +141,15 @@ int main(int argc, char **argv) {
     qsort(keys4, n4, sizeof(K), cmpK);
     for (size_t i = 0; i < n4;) {
       size_t j = i; while (j < n4 && keys4[j].key == keys4[i].key) j++;
+      if (j - i == 4) {
+        nk45++;
+        if (pk4) {
+          printf("K45 g=%llu m={%llu,%u,%u,%u,%u} x:", (unsigned long long)g, (unsigned long long)ma, (uint32_t)(keys4[i].key >> 96),
+                 (uint32_t)(keys4[i].key >> 64), (uint32_t)(keys4[i].key >> 32), (uint32_t)keys4[i].key);
+          for (size_t t = i; t < j; t++) { putchar(' '); pr128(stdout, keys4[t].x); }
+          putchar('\n');
+        }
+      }
       if (j - i >= 5) {
         uint64_t mm[5] = { ma, (uint32_t)(keys4[i].key >> 96), (uint32_t)(keys4[i].key >> 64), (uint32_t)(keys4[i].key >> 32), (uint32_t)keys4[i].key };
         int ok = 1;
@@ -153,7 +163,7 @@ int main(int argc, char **argv) {
       i = j;
     }
   }
-  fprintf(stderr, "done g=%llu M=%llu part=%d/%d pairs=%llu k4keys=%ld k5=%ld\n", (unsigned long long)g, (unsigned long long)M,
-          part, nparts, (unsigned long long)totpairs, nk4, nk5);
+  fprintf(stderr, "done g=%llu M=%llu part=%d/%d pairs=%llu k4keys=%ld k54=%ld k45=%ld k5=%ld\n", (unsigned long long)g, (unsigned long long)M,
+          part, nparts, (unsigned long long)totpairs, nk4, nk54, nk45, nk5);
   return 0;
 }
