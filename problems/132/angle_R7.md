@@ -10,7 +10,7 @@ Starting point: angle_R6.md — L ≤ 4/3 overall (N3, refereed); 21/16 in Regio
 | A3 | referee Region III off-window e(S) ≤ s + 70/d + C, resonance strip, Lemma DP | **DONE: CORRECT WITH FIXES** (§2) |
 | B | average R-weight ≤ 7 in Region II (⇒ 21/16 there, given A2) | **DONE: PROVED, REFEREED (REF_B: correct with fixes)** (§3) |
 | C | break the Region III resonance window via diametral partners (Lemma DP) | **DONE: Theorem W PROVED, REFEREED (REF_C: correct with minor fixes)** (§4) |
-| D1 | Region I: average weight ≤ 6 (Conjecture C1) ⇒ 9/7 | **DONE: Theorem G PROVED, unrefereed** (§5). The full report was LOST in the scratchpad wipe; D1r is reconstructing it, then the hostile referee REF_D1 |
+| D1 | Region I: average weight ≤ 6 (Conjecture C1) ⇒ 9/7 | **DONE: Theorem G PROVED, unrefereed** (§5). Reconstructed and repaired by D1r (`angle_R7_reports/D1_report.md`, FINAL); hostile referee REF_D1 running |
 | E | Region III fan zone \|t − √3/2\| ≤ κ₁: bound \|F*\| or the average weight (off the fan zone, D1 covers it) | running (relaunched after the panics) |
 | D2 | Region I: cross-edge e(D, X∖D) ≤ ½g_D + o(n) via E′ on conv X ⇒ 9/7 | pending |
 
@@ -213,3 +213,23 @@ D1's referee flags:
 3. The expected cut count ℓ/Λ_s for perimeters that are not multiples.
 
 Scripts (`scripts/`, all pass): `r7_D1_flat_orient.py`, `r7_D1_tilt.py`, `r7_D1_global_hex.py`, `r7_D1_ring.py`.
+
+### 5.1 D1r: reconstruction and repair (`angle_R7_reports/D1_report.md`, STATUS FINAL; UNREFEREED)
+
+- **Theorem G.** For every η, κ > 0: if |t − √3/2| ≥ κ, then Σ_𝓡 v ≤ (6+η)r + C(η,κ). C is explicit, and there is no hypothesis on τ.
+  D1's constant is rigorously κ₁ < 1.553·10⁻³.
+- **Corollary 6.1.** For all t, Σ_𝓡 v ≤ 6r + 2|F*₄| + ηr + C, where each F*₄ point owns exactly 4 edges.
+- **Theorem 9.1.** min{μ(Δ₂), μ(δ)} ≤ (9/7 + η)n + C(η,κ) off the fan zone. The Region III row uses Theorem W.
+- **Fan-zone value.** 3(3+φ)/(7+2φ), where φ = |F*₄|/r. This equals 9/7 at φ = 0 and 4/3 at φ = 1.
+
+Repairs relative to D1:
+1. Edges at 𝓡∩D points are owned by the 𝓡∩D end.
+2. The deep zone uses a single frame with a random depth threshold T; the interface costs ≤ 3r/M.
+3. Lemma S is proved directly from paper Lemmas 9.3, 9.4 and 2.2(b).
+
+D1's flags are resolved. The random-configuration test `r7_D1r_global.py` passes: each edge is owned exactly once, and Σv ≤ 6r + 2#fans + 6|Exc|.
+
+D1r's self-critique names the weakest points:
+- the Gauss-map/seam argument (Lemma 4.5);
+- the Remark 5.2 constants;
+- that C(η,κ) → ∞ as κ → 0, so nothing uniform holds on the fan zone.
