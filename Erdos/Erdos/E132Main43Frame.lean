@@ -162,7 +162,39 @@ Depends on: `frame_outside`, `ball_polygon_c`, `norm_perp`. Difficulty M. -/
 theorem frame_D (hX : Normal X) {y n : Pt} (hF : Frame43 X y n) {z : Pt} (hz : z ∈ Dset X)
     (hzy : dist z y ≤ 3) :
     depth X y + tgap X - ε43 * |inner ℝ (z - y) (perp n)| ≤ inner ℝ (z - y) n := by
-  sorry
+  have hyK : y ∈ KBall X := interior_subset hF.mem_int
+  have ht := ball_polygon_c hz hyK
+  have ht0 : 0 < tgap X := by
+    have hT := two_of_pos hX.dist2_pos
+    unfold tgap; linarith [hT.lt]
+  set s0 := inner ℝ (z - y) n - depth X y + ε43 * |inner ℝ (z - y) (perp n)| with hs0
+  by_contra hc
+  push Not at hc
+  have hs0t : s0 < tgap X := by rw [hs0]; linarith
+  set s := (max s0 0 + tgap X) / 2 with hs
+  have hs1 : s0 < s := by rw [hs]; linarith [le_max_left s0 0, le_max_right s0 0]
+  have hs2 : 0 ≤ s := by rw [hs]; linarith [le_max_right s0 0]
+  have hs3 : s < tgap X := by rw [hs]; linarith [max_lt hs0t ht0]
+  have hdw : dist (z - s • n) z = s := by
+    rw [dist_eq_norm, show z - s • n - z = -(s • n) by abel, norm_neg, norm_smul, hF.unit,
+      mul_one, Real.norm_eq_abs, abs_of_nonneg hs2]
+  have hwK : z - s • n ∉ interior (KBall X) := by
+    intro hw
+    have := ball_polygon_c hz (interior_subset hw)
+    rw [dist_comm, hdw] at this
+    linarith
+  have hwy : dist (z - s • n) y ≤ 6 := by
+    have := dist_triangle (z - s • n) z y
+    linarith
+  have hfo := frame_outside hX hF hwy hwK
+  have e : z - s • n - y = (z - y) - s • n := by abel
+  have e1 : inner ℝ ((z - y) - s • n) (perp n) = inner ℝ (z - y) (perp n) := by
+    rw [inner_sub_left, real_inner_smul_left, inner_self_perp, mul_zero, sub_zero]
+  have e2 : inner ℝ ((z - y) - s • n) n = inner ℝ (z - y) n - s := by
+    rw [inner_sub_left, real_inner_smul_left, real_inner_self_eq_norm_sq, hF.unit]; ring
+  rw [e, e1, e2] at hfo
+  rw [hs0] at hs1
+  linarith
 
 /-- **Lemma 3.2(a), general form**: for a diametral pair `(z, w)` every `k ∈ X` has
 `⟨k − z, w − z⟩ ≥ ‖k − z‖²/2` (as `|k − w| ≤ Δ = |z − w|`).
