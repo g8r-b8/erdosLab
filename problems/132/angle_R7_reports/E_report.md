@@ -186,3 +186,76 @@ are on the outer sides. Three fans (1,2), (2,3), (3,4) (N = 4) would leave the m
 - In a Reuleaux-type chain of D-points in which every D-point has two diametral partners (odd cycle, as for regular Reuleaux
   polygons), no fan can occur: X1 needs a pendant. This is why R4's single-centre chain and the Reuleaux skeleton both fail to
   give many fans in S (§4).
+
+## 3. Upper bound in the fan window
+
+### 3.1 What can and cannot be bounded
+
+The task asked for φ = |F*₄|/r ≤ φ₀ < 1, or φ = o(1). **I cannot prove any bound φ ≤ φ₀ < 1**: a bare fan (4,4) has no 𝓡-neighbour
+at all, so nothing local attaches a second 𝓡-point to it, and §4 shows that the obstruction to many fans is global (it concerns the
+Δ₂-partners of D-points, not 𝓡). What the structure of §2 does give is a bound of the fans by **Δ₂-degree-1 points**, and that is
+enough to beat 4/3, because Q-points lower μ(Δ₂) while fans raise μ(δ).
+
+**Proposition F (PROVED, from Lemmas U and C2(a)).** For every X and a₀ ≤ 10⁻²: |F*₄| ≤ |F*| ≤ 2|Q_K| ≤ 2|Q| = 2p, where Q_K is the
+set of K-extremes of points of F*. Together with |F*₄| ≤ r.
+
+(Each y ∈ F* chooses a K-extreme k(y); k(y) ∈ Q by Lemma U; each k is chosen by ≤ 2 points by Lemma C2(a).)
+
+Other bounds that hold but are weaker for the LP: |F*| ≤ 2·#centres (C2(b)); 2|F*| ≤ 3|S∩D| (D1r Cor. 6.1(3)); |F*| ≤ number of
+pendant vertices of the diameter graph that lie in S (X1: y ↦ its K-side middle is injective, since a second fan using z as K-side
+middle would sit in the first fan's K-slot).
+
+### 3.2 The LP with the Q-information
+
+Inputs (additive constants suppressed; all per unit n = s + r):
+- μ(Δ₂) ≤ (3/2)s − ½p (paper Lemma VSQ, p = |Q|);
+- μ(δ) = e(S) + ½Σ_𝓡 v ≤ e(S) + 3r + |F*₄| + ηr/2 + C(η) (D1r Corollary 6.1, a₀ = 10⁻² fixed);
+- e(S) ≤ s + θ|Q′| + C with Q′ ⊆ Q (Theorem W; θ = 2/3 on all of Region III, θ = ½ off the curve G = 1 by REF_C's shadow remark);
+- |F*₄| ≤ r and |F*₄| ≤ 2p (Proposition F).
+
+The adversary maximises min{μ(Δ₂), μ(δ)}. Exact values with primal optimum and dual certificate (`r7_E_lp.py`, Fractions):
+
+| θ | value | optimum (s, r, p = \|Q′\|, \|F*₄\|) | weights (λ on μ(Δ₂), 1 − λ) and multipliers (Q′ ≤ Q, F ≤ r, F ≤ 2p) |
+|---|---|---|---|
+| 2/3 (Theorem W, every G, incl. G = 1) | **81/61 = 1.327869…** | (55, 6, 3, 6)/61 | (40/61, 21/61); (14/61, 18/61, 3/61) |
+| ½ (G ≠ 1, REF_C) | **53/40 = 1.325** | (36, 4, 2, 4)/40 | (13/20, 7/20); (7/40, 11/40, 3/40) |
+
+The certificate for θ = 2/3, written out: (40/61)·μ(Δ₂) + (21/61)·μ(δ) ≤ (40/61)(3s/2 − p/2) + (21/61)(s + (2/3)p + 3r + F)
++ (14/61)(p − |Q′|)·0 … i.e. adding (14/61)(p − |Q′|) ≥ 0, (18/61)(r − F) ≥ 0 and (3/61)(2p − F) ≥ 0 gives every coefficient
+≤ 81/61 on s and r and ≤ 0 on p, |Q′|, F. So
+
+**Theorem E (fan window; PROVED given the inputs' statuses).** For every η > 0 there is C(η) such that every X in the
+nondegenerate regime with 0 < G ≤ 2 satisfies
+  min{μ(Δ₂), μ(δ)} ≤ (81/61 + η)·n + C(η),
+and ≤ (53/40 + η)·n + C(η) if moreover G ≠ 1 (using REF_C's θ = ½).
+
+As a function of the fan density (worst case |F*₄| = 2p, θ = 2/3) the value is (9 + 4.5φ)/(7 + 19φ/6) (φ = |F*₄|/r): 9/7 at φ = 0,
+1.3107 at φ = ½, 81/61 at φ = 1, against D1r's 3(3 + φ)/(7 + 2φ) (13/10 → 21/16 → 4/3). The improvement comes entirely from the
+Q-term: every fan forces at least ½ a Δ₂-degree-1 point.
+
+### 3.3 The overall bound
+
+Combining Theorem G′ (§1.4: 9/7 + η outside the window) with Theorem E (inside):
+
+  **min{μ(Δ₂), μ(δ)} ≤ (81/61 + η)·n + C(η) for every finite X ⊂ ℝ² (all regimes), 81/61 = 1.32787 < 4/3 = 1.33333.**
+
+(Degenerate regime n + 1; Δ₂ < Δ₂*: bounded n; Regions I, II, τ > 1 and Region III off the window: Theorem G′ with D1r §9's
+e(S) inputs; the window: Theorem E.) With REF_C's θ = ½ the only X that can exceed 53/40 lie on the curve G = 1.
+
+Status of the inputs (a referee must check each):
+- D1r Theorem G / Corollary 6.1: refereed once (REF_D1: correct, cosmetic fixes); a second referee is queued.
+- Theorem W (e(S) ≤ s + (2/3)|Q′| + C in Region III, Q′ ⊆ Q): refereed once (REF_C). θ = ½ off G = 1: REF_C's own remark, one pass.
+- Lemma VSQ: paper, refereed.
+- Lemmas EW, U, X1, C2 and Proposition F: new (this report), unrefereed; exact proofs above, numerical checks in
+  `r7_E_window.py`, `r7_E_structure.py`.
+
+**What stays open.** φ ≤ φ₀ < 1 is not proved, and neither is φ = o(1) (which would give 9/7 everywhere by Corollary 6.1). The
+LP optimum of Theorem E needs |F*₄| = r = 2p, i.e. every 𝓡-point a fan and one Q-point per two fans; §4 examines whether fans can
+be linear at all.
+
+*Referee flags for §3.*
+- 3.1: Q′ ⊆ Q in Theorem W (the prime denotes rung K-ends of Δ₂-degree 1; `r7_C_q.py` docstring "v+ in Q′"); if Q′ were not a
+  subset of Q, replace p by |Q ∪ Q′| in VSQ — no, VSQ needs Δ₂-degree 1, so the argument needs Q′ ⊆ Q exactly as Theorem W's own
+  LP does (it uses μ(Δ₂) ≤ 1.5s − ½|Q′|).
+- 3.2: Lemma C2(a) uses that the frames of two good points within distance 2 differ by ≤ 2ε₀ (G5 through the common point k).
+- 3.3: the additive constant is C(η) = C_Cor6.1(η, 10⁻²) + (constants of Theorem W and VSQ); it does not depend on the window.
