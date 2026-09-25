@@ -13,6 +13,7 @@ strictly off line pw) and test:
   K8+  mu2 <= |L1| + |L2| + |V_Delta n L1'|   (the consequence, sharpened form).
 
 usage: python3 r8_charge_exact.py tri|sq R2MAX [cap]
+       python3 r8_charge_exact.py rings      (float tightness check on R5's rings)
 """
 from __future__ import annotations
 
@@ -152,8 +153,42 @@ def run(kind: str, r2max: int, cap: int) -> Counter:
     return C
 
 
+def ring_tightness(ms: tuple[int, ...] = (7, 8, 9, 10, 11, 12, 16)) -> list[str]:
+    """Float check (quantised squared distances, 1e-9 orientation tolerance) that Theorem 6.1
+    and the Charge Lemma are tight on R5's rings: regular m-gon plus one server per edge.
+    Expected: mu2 = 3m = |L1| + |L2| + |V_Delta n L1'| and exactly 2 hooks per hull vertex."""
+    import math
+    global sgn
+    exact_sgn = sgn
+    sgn = lambda v: 0 if abs(v) < 1e-9 else (1 if v > 0 else -1)
+    out: list[str] = []
+    try:
+        for m in ms:
+            V = [(math.cos(2 * math.pi * j / m), math.sin(2 * math.pi * j / m)) for j in range(m)]
+            D2 = 2 * math.cos(math.pi / m) if m % 2 == 0 else 2 * math.cos(3 * math.pi / (2 * m))
+            S = []
+            for j in range(m):
+                th = 2 * math.pi * (j + .5) / m
+                c_ = V[j][0] * math.cos(th) + V[j][1] * math.sin(th)
+                r = -c_ + math.sqrt(c_ * c_ - 1 + D2 ** 2)
+                S.append((-r * math.cos(th), -r * math.sin(th)))
+            H, info = hooks(V + S, 'flt')
+            bound = len(info['L1']) + len(info['L2']) + len(info['VD'] & info['L1'] & info['core'])
+            C: Counter = Counter()
+            check_set(V + S, 'flt', C)
+            ok = info['mu2'] == bound == 3 * m and len(H) == 2 * m and not any(k_.startswith('VIOL') for k_ in C)
+            out.append(f"ring m={m}: n={2*m} mu2={info['mu2']} bound={bound} hooks={len(H)} {'tight' if ok else 'FAIL'}")
+    finally:
+        sgn = exact_sgn
+    return out
+
+
 def main() -> int:
     """CLI entry: parse args, run, print, return 0 iff no violations."""
+    if sys.argv[1] == 'rings':
+        lines = ring_tightness()
+        print('\n'.join(lines))
+        return 1 if any('FAIL' in ln for ln in lines) else 0
     kind, r2max = sys.argv[1], int(sys.argv[2])
     cap = int(sys.argv[3]) if len(sys.argv) > 3 else 20000
     C = run(kind, r2max, cap)
