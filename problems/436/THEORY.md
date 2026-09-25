@@ -249,3 +249,250 @@ kissat -q --time=300 c.cnf > c.out; ./lamenc run 5 3 8000000 s.map c.out
   learning, which could beat the 2·10^14 floor in principle. The CDCL runs so far show no sign of
   it (> 45 min per 3-prime cube on F_1000). A cloud cube-and-conquer should first be
   Knuth-estimated per cube.
+
+## 7. Case analysis via the Elliott literature (2026-09-25)
+
+Scope: which completely multiplicative g: N → μ_5 are **unconditionally** known to have a zero run
+g(n) = g(n+1) = g(n+2) = 1, and what exactly is left. By compactness (README), Λ(5,3) < ∞ iff every
+such g has one zero run. One n per g is enough, so positive density along *some* sequence of scales
+is more than we need.
+All theorem numbers below were checked against the arXiv PDFs (text extracted with pypdf, 2026-09-25).
+Nothing was quoted from memory.
+Labels: **PROOF** (a full argument is given here), **CITED** (a published theorem, cited by arXiv id
+and number), **HEURISTIC**, **OPEN**.
+
+**Status check (2026-09-25).** erdosproblems.com/436 still says "open, and cannot be resolved with
+a finite computation" (last edited 25 Oct 2025). None of the papers read settles Λ(k,3) < ∞ for any
+odd k ≥ 5. **The literature does not settle Λ(5,3).**
+
+### 7.0 Notation and the expansion
+
+- D(f,h;x)^2 = Σ_{p≤x} (1 − Re f(p) \bar h(p))/p is the Granville–Soundararajan distance.
+  D(f,h;y,x) is the same sum over y < p ≤ x.
+- g is **pretentious** if D(g, χ n^{it}; ∞) < ∞ for some Dirichlet character χ and some t ∈ R.
+  Otherwise g is **non-pretentious (NP)**. This is KMT Definition 1.1.
+- g **weakly pretends** to χ if D(g,χ;x)^2 = o(log log x). This is Tao–Teräväinen's notion in
+  1708.02610, §1.2, with t = 0.
+- Set C(a,b,c)(x) := E^log_{n≤x} g^a(n) g^b(n+1) g^c(n+2), for (a,b,c) ∈ (Z/5)^3. Then
+  E^log_{n≤x} 1[zero run at n] = (1/125) Σ_{(a,b,c)} C(a,b,c)(x).
+  This is exact, because g(n) ∈ μ_5 for every n ≥ 1.
+- The 124 nontrivial terms fall into four groups: 12 one-point, 48 two-point, 52 three-point with
+  a+b+c ≢ 0, and the set **T** of 12 three-point terms with a,b,c ≠ 0 and a+b+c ≡ 0. The six
+  conjugate pairs in T are
+  (1,1,3)~(4,4,2), (1,2,2)~(4,3,3), (1,3,1)~(4,2,4), (2,1,2)~(3,4,3), (2,2,1)~(3,3,4),
+  (2,4,4)~(3,1,1).
+
+**Lemma 7.1 (twists and powers) [PROOF].** Let g: N → μ_5 be completely multiplicative.
+(i) If g is pretentious, the t in its definition is 0, and χ^5 is principal. In particular
+    χ(−1) = 1 and χ(p) ∈ μ_5 for p ∤ q.
+(ii) For j ≢ 0 mod 5, g^j is pretentious iff g is. Likewise, g^j weakly pretends to some character
+    iff g does.
+*Proof.* (i) The triangle inequality D(f_1f_2, h_1h_2) ≤ D(f_1,h_1) + D(f_2,h_2) holds for
+1-bounded functions. It gives D(1, χ^5 n^{5it}; ∞) ≤ 5 D(g, χ n^{it}; ∞) < ∞, because g^5 ≡ 1.
+Now Σ_{p≤x} Re(ψ(p)p^{-iu})/p = log|L(1+1/log x+iu, ψ)| + O(1), and this is bounded above unless
+L has a pole at 1+iu, that is, unless ψ is principal and u = 0. Since Σ 1/p diverges, ψ = χ^5 is
+principal and 5t = 0.
+Also χ(−1)^5 = 1 and χ(−1) = ±1, so χ(−1) = 1.
+(ii) Take j j' ≡ 1 mod 5. Then g = (g^j)^{j'} pointwise, and D(f^m, h^m) ≤ m D(f,h). ∎
+
+So "pretentious" for g means exactly this: there is a χ of order dividing 5 with
+Σ_{p: g(p) ≠ χ(p)} 1/p < ∞. (For p ∤ q, g(p)\bar χ(p) ∈ μ_5, and 1 − Re ζ^j ≥ 1 − cos 72° for j ≠ 0.)
+
+**Lemma 7.2 (NP ⇒ Tao's hypothesis (1.8)) [PROOF from standard inputs].** Let g: N → μ_k be
+completely multiplicative and NP. Then for every χ and every A ≥ 1,
+inf_{|t|≤Ax} D(g, χ n^{it}; x) → ∞.
+*Proof.* The standard inputs (Vinogradov–Korobov, Mertens) are:
+- (F1) For fixed ψ and 1 ≤ |u| ≤ x^2 (any |u| ≤ x^2 if ψ is non-principal):
+  Σ_{p≤x} Re ψ(p)p^{-iu}/p ≤ (2/3 + o(1)) log log x.
+- (F2) For |u| ≤ 1: Σ_{p≤x} cos(u log p)/p = log min(log x, 1/|u|) + O(1).
+
+Since g^k ≡ 1, D(g, χ n^{it}; x) ≥ k^{-1} D(1, χ^k n^{ikt}; x).
+- If χ^k is non-principal, or |kt| ≥ 1: by (F1) the right side is ≥ k^{-1}((1/3 − o(1)) log log x)^{1/2}.
+- If χ^k is principal and |kt| log x ≥ T: by (F2) the right side is ≥ k^{-1}(log T − O(1))^{1/2}.
+- If |kt| log x < T: D(g,χn^{it};x) ≥ D(g,χ;x) − D(1,n^{it};x) ≥ D(g,χ;x) − (log(1+T) + O(1))^{1/2}.
+
+Now choose T = T(x) → ∞ so slowly that log(1+T(x)) ≤ D(g,χ;x)^2/4. This is possible because
+D(g,χ;x) → ∞ (g is NP). All three bounds then tend to ∞. ∎
+(Tao 1509.05422, below Cor. 1.5, and Tao–Teräväinen 1904.05096, eq. (6.4), make the same VK remark
+for λ and for ζ^{ω(n)}.)
+
+### 7.1 The case split
+
+Every g falls in exactly one of three classes. Lemma 7.1(i) rules out weak pretension to χ n^{it}
+with t ≠ 0 for μ_5-valued g.
+
+| case | definition | status | reference |
+|---|---|---|---|
+| **A** pretentious | D(g,χ;∞) < ∞ for some χ (so χ^5 = χ_0) | **closed**, zero runs of positive lower natural density | **PROOF** (§7.2), elementary |
+| **B** NP, weakly pretentious | D(g,χ;∞) = ∞ ∀χ, but D(g,χ;x)^2 = o(log log x) for some χ | **closed**, zero-run density → 1/125 along a set of scales of log-log density 1 | **CITED** KMT 2304.05344 Thm 4.1 + Lemma 6.1 (the engine of Thm 1.6), §7.3 |
+| **C** strongly NP | limsup D(g,χ;x)^2/log log x > 0 ∀χ | 112 of 124 terms → 0 at all scales. The 12 terms in T are **OPEN** | **CITED** TT 1708.02610 Cor 1.6; Tao 1509.05422 Cor 1.5 + Lemma 7.2 (§7.4) |
+
+Our empirical near-counterexample (g(p) = ζ for almost all p > 100) lies in **case C**:
+D(g,χ;x)^2 ≍ log log x for every χ. So does g = ζ^{Ω(n)}. This is exactly the uncovered class.
+
+### 7.2 Case A (pretentious) [PROOF]
+
+Let g pretend to χ mod q, with χ^5 = χ_0. Let E = {p | q} ∪ {p ∤ q : g(p) ≠ χ(p)}. Then Σ_{p∈E} 1/p < ∞.
+Choose y > q with Σ_{p∈E, p>y} 1/p < 1/6. Put S = E ∩ [1,y] and L = ∏_{p∈S} p.
+Pick j with q | L^{5j}, and set n_0 = L^{5j} − 1.
+
+Step 1: g' has a zero run at n_0. Let g' be completely multiplicative with g' = g on S and g' = χ off S.
+- n_0 + 1 = L^{5j}, so g'(n_0+1) = g'(L)^{5j} = 1, because values lie in μ_5.
+- n_0 ≡ −1 and n_0 + 2 ≡ 1 mod every p ∈ S. So they are coprime to S, and g' = χ on them.
+  Since q | L^{5j}, n_0 ≡ −1 mod q and n_0 + 2 ≡ 1 mod q.
+  So g'(n_0) = χ(−1) = 1 and g'(n_0+2) = χ(1) = 1.
+- (This is the README's CRT observation. It is where "k odd" enters: for even k, χ(−1) = −1 is
+  possible.)
+
+Step 2: transfer to g. Let M = L^{5j+1}. Take any n ≡ n_0 mod M such that none of n, n+1, n+2 has a
+prime factor in E ∖ S.
+- The S-parts of n+i are the same as for n_0 + i: they are 1, L^{5j}, 1.
+- The S-free parts are ≡ n_0 + i mod q, and all their primes lie outside E.
+- So g(n+i) = g'(n+i) = g'(n_0+i) = 1.
+
+Step 3: count. For X large, the number of bad n ≤ X in the class is
+≤ Σ_{p∈E, y<p≤X+2} 3(X/(Mp) + 1) ≤ X/(2M) + 3π(X+2).
+Here p > y is coprime to M. So the zero runs of g have lower natural density ≥ 1/(2M) > 0.
+The same proof works verbatim for μ_k-valued g with k odd. ∎
+
+Remarks.
+- Klurman's formula (1603.08453, Thm 1.3, stated there for pairs) would give the exact density as an
+  Euler product, but positivity is easier by the construction above.
+- THEORY §4(ii) said this case was "plausibly elementary, not done". **It is now done.**
+
+### 7.3 Case B (NP but weakly pretentious) [CITED + short deduction]
+
+KMT Definition 1.5 (**moderately NP**): f is NP and, for some A,
+(1/log log X)·inf_{|t|≤X^A, q≤(log X)^A} D(f, χ n^{it}; X)^2 → 0.
+Weak pretension to a fixed χ implies this (take A = 1). The proof of KMT Lemma 6.1 shows the converse
+up to a twist: moderately NP ⇒ weakly pretends to a fixed χ n^{it}. So for μ_5-valued g:
+case B = moderately NP.
+
+Deduction. Let g be in case B.
+1. **KMT Lemma 6.1** gives χ, t and η(x) → 0 such that
+   S = {x : D(g, χ n^{it}; x^{η(x)}, x) ≤ η(x)} has δ_loglog(S) = 1. This is a limit, not an upper
+   density.
+2. Let f_i = g^{e_i}, e_i ∈ {1..4}, with χ_i = χ^{e_i} and t_i = e_i t. By the triangle inequality,
+   D(f_i, χ_i n^{it_i}; x^ε, x) ≤ 4η(x) ≤ ε for x ∈ S large.
+3. D(f_1, χ_1 n^{it_1}; x) → ∞, because g^{e_1} is NP (Lemma 7.1(ii)).
+4. **KMT Theorem 4.1** (1, 2 or 3 functions, a_j = 1, distinct h_j) then gives
+   limsup_{x∈S} |(1/x) Σ_{n≤x} f_1(n+h_1)⋯| ≪ (log 1/ε)^{1/2} ε, for every ε.
+
+So all 124 nontrivial Cesàro correlations → 0 along the single set S. Hence
+(1/x)#{n ≤ x : zero run} → 1/125 along S, and g has infinitely many zero runs.
+
+We avoid quoting KMT Thm 1.6 as stated. Its conclusion is "δ^+_loglog(X) = 1" with X depending on
+{f_1,…,f_k}, and upper-density-1 sets for different (a,b,c) need not intersect. The proof, which
+we re-derived above, gives one S of full density for all powers of g at once.
+
+This class contains KMT's "Liouville-like" functions:
+- KMT §2.1, Thm 2.1: (−1)^{Ω_P(n)} with P of relative density 0 in the primes and Σ_P 1/p = ∞.
+- **Their "Liouville-like" means g(p) = 1 for almost all p (a sparse sign set). That is the opposite
+  of our g(p) = ζ for almost all p. Thm 2.1 does not reach case C.**
+- KMT Thm 1.7 (powers, needs (d, e_1+…+e_k) = 1) and Cor 1.4 (real-valued, odd k) also do not
+  reach T: for d = 5, T is exactly where 5 | e_1+e_2+e_3.
+
+### 7.4 Case C (strongly NP): what is controlled [CITED], what is not [OPEN]
+
+For g in case C, every g^s with s ≢ 0 fails to weakly pretend to any χ (Lemma 7.1(ii)).
+- **12 one-point terms, 36 two-point terms with a+b ≢ 0, 52 three-point terms with a+b+c ≢ 0:**
+  C → 0 as x → ∞ (log averages, at all scales). Reference: Tao–Teräväinen 1708.02610, **Cor 1.6**
+  (the product g_0⋯g_k does not weakly pretend to any χ ⇒ E^log → 0). For the one-point terms,
+  Halász also applies.
+- **12 two-point terms with a+b ≡ 0** (for example g(n)\bar g(n+1)): C → 0. Reference: Tao
+  1509.05422, **Cor 1.5**. Its hypothesis (1.8) on g^a holds by Lemma 7.2. (Cor 1.5 in fact covers
+  all 48 two-point terms.)
+- **The 12 terms in T:** no theorem applies. TT Cor 1.6 needs a non-weakly-pretentious product, but
+  the product here is g^0 = 1. KMT Thm 4.1 needs small truncated distance, which fails in case C.
+  KMT Thm 1.7 needs (5, a+b+c) = 1. Frantzikinakis–Host 1804.08556 (Thm 1.2: superlinear block
+  complexity; Thm 1.5: structure of Furstenberg systems) gives no specific pattern.
+  **So the §4 count "12 uncontrolled terms" is confirmed**, with two corrections:
+  - "non-pretentious" in §4 must be read as "not weakly pretentious" (case C). Case B is handled by
+    KMT instead.
+  - The trivial-product two-point terms need Tao Cor 1.5 plus Lemma 7.2, not TT.
+
+**Lemma 7.3 (diagonal invariance) [PROOF, given the citations above].** Let g be in case C. Take any
+sequence x_m → ∞ along which the log-averaged law ν of (g(n), g(n+1), g(n+2)) on μ_5^3 converges.
+- Then ν(ζu, ζv, ζw) = ν(u, v, w).
+- Hence δ_log(zero runs) = (1/5) δ_log{n : g(n) = g(n+1) = g(n+2)} along x_m.
+- It also equals (1/125)(1 + 2 Re Σ_{6 reps of T} C(a,b,c)).
+
+*Proof.* ν̂ is supported on {0} ∪ T, which lies in the plane a+b+c = 0. Translating by (1,1,1)
+multiplies ν̂(a,b,c) by ζ^{a+b+c} = 1. ∎
+
+So the question is whether the "difference process" d_1 = f(n+1) − f(n), d_2 = f(n+2) − f(n+1)
+(with g = ζ^f) hits (0,0). Known: d_1, d_2 and d_1 + d_2 are each uniform on Z/5 (the two-point
+results).
+
+**Lemma 7.4 (the known Fourier constraints cannot close the gap) [PROOF].** Let ν be uniform on the
+25 triples (x, x+t, x+3t+1), for x, t ∈ Z/5.
+- ν̂(a,b,c) ≠ 0 only for (a,b,c) = (2c,2c,c) with c ≠ 0. These four points are in T. So ν meets
+  every constraint known in case C (all 112 vanishing terms).
+- ν(0,0,0) = 0, since that would need t = 0 and 2t+1 = 0.
+
+So any proof for case C must use arithmetic input beyond the vanishing of the 112 correlations.
+This is the same "local Bohr set" obstruction that Tao–Teräväinen 1904.05096 describe:
+- Their Thm 1.8 needs δ_1+δ_2+δ_3 > 1, and Thm 1.9 is the critical case = 1. Below 1, local Bohr
+  sets can avoid the pattern (their discussion before §1.4, and Remark 2.5).
+- Here each level set {g = 1} has density 1/5, so the sum is 3/5 < 1.
+
+Why k = 3 is different. The TT proof of Thm 1.3 (ω, Ω mod 3 patterns) works because for k = 3, T is
+the line spanned by (1,1,1). So the pattern density depends only on ω(n)+ω(n+1)+ω(n+2) mod 3, and the
+critical-density Thm 1.9 applies. It also needs g(p) constant (weak stability), and applies to ζ^ω,
+not to general μ_3-valued g. For k = 5, T is not a line and each density is 1/5.
+[HEURISTIC: the "Elliott literature" route does not even reprove Λ(3,3) < ∞. That is known only by
+LLMS's machine proof.]
+
+### 7.5 The exact remaining gap
+
+**Conjecture G_5 [OPEN].** Every completely multiplicative g: N → μ_5 that weakly pretends to no
+Dirichlet character (Σ_{p≤x}(1 − Re g(p)\bar χ(p))/p ≠ o(log log x) for every χ) has some n with
+g(n) = g(n+1) = g(n+2) = 1.
+
+**Theorem 7.5 [PROOF modulo the cited theorems].** G_5 ⟺ Λ(5,3) < ∞.
+- (⇐) is trivial.
+- (⇒) holds because cases A and B are closed (§7.2, §7.3) and G_5 is case C.
+
+Sufficient analytic forms of G_5, each implying the next:
+1. The log 3-point Elliott conjecture for the 12 exponent patterns in T.
+2. limsup_x Re Σ_{(a,b,c)∈T} E^log_{n≤x} g^a(n) g^b(n+1) g^c(n+2) > −1.
+3. {n : g(n) = g(n+1) = g(n+2)} has positive upper log density (Lemma 7.3).
+4. G_5.
+
+**Conditional theorem for all odd k [PROOF modulo X].** Let X be the logarithmic three-point Elliott
+conjecture for consecutive shifts, in Tao's corrected form:
+
+> **X.** If f_0, f_1, f_2: N → D are multiplicative and at least one f_i satisfies (1.8) of
+> 1509.05422 (inf_{|t|≤Ax} D(f_i, χ n^{it}; x) → ∞ for all χ and all A), then
+> E^log_{n≤x} f_0(n) f_1(n+1) f_2(n+2) → 0.
+
+Then X ⇒ Λ(k,3) < ∞ for every odd k.
+*Proof.* Let g: N → μ_k.
+1. H = {j ∈ Z/k : g^j pretentious} is a subgroup, H = mZ/k with m | k.
+2. For j ∉ H, g^j is NP and μ_k-valued, so it satisfies (1.8) by Lemma 7.2. By X, every term (a,b,c)
+   with some coordinate ∉ H vanishes.
+3. The terms with (a,b,c) ∈ H^3 sum to (k/m)^3 E^log 1[G(n) = G(n+1) = G(n+2) = 1], where
+   G := g^m: N → μ_{k/m} is pretentious and k/m is odd.
+4. By §7.2, G has zero runs of positive lower density δ_G. So the zero runs of g have log density
+   ≥ δ_G/m^3 > 0 at every scale. ∎
+
+For k prime, X can be weakened to G_k (the analogue of G_5): the cases A and B arguments are
+unconditional for any prime k. For composite k we did not check case B, because mixed
+pretentious/NP powers occur there.
+X is open. It contains the 2-point log-Chowla-type "trivial product" case in three-point form.
+Even the 4-point log Chowla for λ is open.
+
+### 7.6 Sources read (arXiv, 2026-09-25)
+
+| arXiv id | paper | used |
+|---|---|---|
+| 1509.05422 | Tao, log-averaged Chowla/Elliott, two-point | Thm 1.3, Cor 1.5 |
+| 1708.02610 | Tao–Teräväinen, Duke 2019 | Thm 1.2, Cor 1.6, Cor 1.13 |
+| 1710.02112 | Tao–Teräväinen, odd order log Chowla | Thm 1.1 (λ only; subsumed by the above for our purpose) |
+| 1904.05096 | Tao–Teräväinen, value patterns | Thms 1.3, 1.8, 1.9; §6 proof of Thm 1.3 |
+| 2304.05344 | Klurman–Mangerel–Teräväinen | Def 1.1, 1.5; Thms 1.2, 1.6, 1.7, 2.1, 4.1; Lemma 6.1 |
+| 1603.08453 | Klurman, Compositio 2017 | Thm 1.3 (pretentious asymptotics; not needed) |
+| 1804.08556 | Frantzikinakis–Host | Thms 1.2, 1.5 (no pattern information) |
+| 1509.01545 | Matomäki–Radziwiłł–Tao, sign patterns | Thm 1.6 (±1 only; pigeonhole fails for 5 colours, cf. Lemma 7.4) |
+
+PDFs and text extracts are in the session scratchpad, not in the repo.
