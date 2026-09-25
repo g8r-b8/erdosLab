@@ -344,6 +344,37 @@ theorem frame_dn1 (hX : Normal X) {y n : Pt} (hF : Frame43 X y n) {z w : Pt} (hz
   refine ⟨hc, ?_⟩
   linarith
 
+/-- Helper (one side of `dd_heights`). -/
+private theorem dd_side (hX : Normal X) {y n : Pt} (hF : Frame43 X y n) {z₁ z₂ : Pt}
+    (hz₁ : z₁ ∈ Dset X) (hz₂ : z₂ ∈ Dset X) (h₁ : dist z₁ y ≤ 1) :
+    inner ℝ (z₂ - y) n - inner ℝ (z₁ - y) n ≤
+      9 / 400 * |inner ℝ (z₁ - y) (perp n) - inner ℝ (z₂ - y) (perp n)| := by
+  obtain ⟨w, hw⟩ := (mem_filter.1 hz₁).2
+  obtain ⟨hwX, -, hd⟩ := mem_partners.1 hw
+  obtain ⟨hc, hb⟩ := frame_dn1 hX hF hz₁ h₁ hwX hd
+  have hDi := D_inner hwX (mem_filter.1 hz₂).1 hd
+  have e : z₂ - z₁ = (z₂ - y) - (z₁ - y) := by abel
+  have g1 : inner ℝ (z₂ - z₁) n = inner ℝ (z₂ - y) n - inner ℝ (z₁ - y) n := by
+    rw [e, inner_sub_left]
+  have g2 : inner ℝ (z₂ - z₁) (perp n) =
+      -(inner ℝ (z₁ - y) (perp n) - inner ℝ (z₂ - y) (perp n)) := by
+    rw [e, inner_sub_left]; ring
+  rw [n1_inner_frame hF.unit, g1, g2] at hDi
+  have h0 : 0 ≤ ‖z₂ - z₁‖ ^ 2 / 2 := by positivity
+  have hab : -(inner ℝ (z₁ - y) (perp n) - inner ℝ (z₂ - y) (perp n)) *
+      inner ℝ (w - z₁) (perp n) ≤
+      |inner ℝ (z₁ - y) (perp n) - inner ℝ (z₂ - y) (perp n)| *
+        (9 / 400 * -inner ℝ (w - z₁) n) := by
+    calc _ ≤ |-(inner ℝ (z₁ - y) (perp n) - inner ℝ (z₂ - y) (perp n)) *
+          inner ℝ (w - z₁) (perp n)| := le_abs_self _
+      _ = |inner ℝ (z₁ - y) (perp n) - inner ℝ (z₂ - y) (perp n)| *
+          |inner ℝ (w - z₁) (perp n)| := by rw [abs_mul, abs_neg]
+      _ ≤ _ := mul_le_mul_of_nonneg_left hb (abs_nonneg _)
+  by_contra hcon
+  push Not at hcon
+  have := mul_lt_mul_of_pos_right hcon (neg_pos.2 hc)
+  nlinarith
+
 /-- **Corollary (D–D heights)**: two diametral points within `1` of `y` have
 `|Z z₁ − Z z₂| ≤ (9/400)|Xz₁ − Xz₂|`.
 
@@ -358,7 +389,10 @@ theorem dd_heights (hX : Normal X) {y n : Pt} (hF : Frame43 X y n) {z₁ z₂ : 
     (hz₁ : z₁ ∈ Dset X) (hz₂ : z₂ ∈ Dset X) (h₁ : dist z₁ y ≤ 1) (h₂ : dist z₂ y ≤ 1) :
     |inner ℝ (z₁ - y) n - inner ℝ (z₂ - y) n| ≤
       9 / 400 * |inner ℝ (z₁ - y) (perp n) - inner ℝ (z₂ - y) (perp n)| := by
-  sorry
+  have a1 := dd_side hX hF hz₁ hz₂ h₁
+  have a2 := dd_side hX hF hz₂ hz₁ h₂
+  rw [abs_sub_comm (inner ℝ (z₂ - y) (perp n))] at a2
+  exact abs_le.2 ⟨by linarith, by linarith⟩
 
 /-! ## Depth and receivers -/
 
