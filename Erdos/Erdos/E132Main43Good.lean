@@ -71,7 +71,7 @@ theorem heavy_depth_le (hX : Normal X) {y : Pt} (hy : y ∈ heavy X) : depth X y
 /-- **Nearest boundary point.**  For `y` interior to `K`, `h = depth X y > 0` is attained at
 `p₀ = y + h n` for a unit `n`, and `n` is an outer normal of `K` at `p₀`.
 
-TODO: prove.
+TODO: none — proved.
 What's missing: `frontier K` is compact (closed subset of the compact `K`) and nonempty (`K` is
 bounded, `≠ univ`), so `IsCompact.exists_infDist_eq_dist` gives `p₀` with `dist y p₀ = h`;
 `h > 0` since `y ∉ frontier K` (interior) and the frontier is closed
@@ -173,7 +173,7 @@ theorem good_normals {y b₀ n : Pt} (hg : IsGood43 X y) (hb₀ : b₀ ∈ front
 (`0 ≤ h ≤ 1`, `n` a unit normal at `p₀`), `K` contains points at abscissa `σ·463` and height
 `≥ h − 9.31`, for `σ = ±1`.
 
-TODO: prove.
+TODO: none — proved.
 What's missing (Euclidean replacement of the paper's graph points `g± = (±463, f(±463))`):
 let `d = (n + σ κ perp n)/‖·‖` with `κ = 201/10000`, so `‖d − n‖ > 1/50`, and let `x` maximise
 `⟨·, d⟩` on `K` (compact; `mem_frontier_of_max`), so `d ∈ normalCone K x`.  Goodness with
@@ -340,7 +340,7 @@ theorem frame_of_good (hX : Normal X) {y : Pt} (hy : y ∈ heavy X) (hg : IsGood
 /-- **Box packing**: points pairwise `≥ 1` apart in a box `[c₀, c₀ + L] × [c₁, c₁ + W]` of the
 orthonormal frame `(e, perp e)` number at most `(2L + 1)(2W + 1)`.
 
-TODO: prove.
+TODO: none — proved.
 What's missing: grid pigeonhole with cells of side `1/2` (diameter `√2/2 < 1`), as in
 `card_sep_box_le`/`card_sep_ball_le`: `x ↦ (⌊2(⟨x,e⟩ − c₀)⌋, ⌊2(⟨x,perp e⟩ − c₁)⌋)` is
 injective into `[0, ⌊2L⌋] × [0, ⌊2W⌋]`; `‖x − x'‖² = ⟨x−x',e⟩² + ⟨x−x',perp e⟩²`
@@ -399,7 +399,7 @@ theorem card_sep_box_le43 {P : Finset Pt} (hsep : ∀ a ∈ P, ∀ b ∈ P, a �
 points within `Λ = 464` of `y ∈ K` have nearly antipodal unit normals and `Δ₂ ≥ 10⁶`, then
 `K` lies in a box of length `2·10⁵` and width `5000`.
 
-TODO: prove.
+TODO: none — proved.
 What's missing: rerun the proof of `thin_box` with `1 ↦ Λ`.  Frame `e = −perp ν₁`
 (`perp e = ν₁`), heights `H = ⟨·, ν₁⟩`, lengths `S = ⟨·, e⟩`, `L = max S − min S` on `K`.
 `K ⊂ {H ≤ H(b₁)}`; `‖ν₁ + ν₂‖ ≤ √(2·10⁻⁴) < 1/70` and `⟨x − b₂, ν₂⟩ ≤ 0` give
@@ -422,7 +422,202 @@ theorem thin_box43 (hX : Normal X) (hlarge : 10 ^ 6 ≤ dist2 X) {y b₁ b₂ ν
     ∃ e : Pt, ‖e‖ = 1 ∧ ∃ c₀ c₁ : ℝ, ∀ x ∈ KBall X,
       c₀ ≤ inner ℝ x e ∧ inner ℝ x e ≤ c₀ + 2 * 10 ^ 5 ∧
         c₁ ≤ inner ℝ x (perp e) ∧ inner ℝ x (perp e) ≤ c₁ + 5000 := by
-  sorry
+  have hne : X.Nonempty := card_pos.1 (by have := hX.four_le; omega)
+  have hKc := KBall_isCompact hne
+  have hD := hlarge
+  unfold Lam43 at h₁ h₂
+  have hΔ := hX.nondeg
+  have hDpos : 0 < dist2 X := by linarith
+  -- the frame `(e, ν₁)`
+  set e : Pt := -perp ν₁ with hedef
+  have hpe : perp e = ν₁ := by
+    rw [hedef, perp_neg, pt_ext_iff]; simp [perp]
+  have he : ‖e‖ = 1 := by rw [hedef, norm_neg, norm_perp, hn₁]
+  have hframe : ∀ w₁ w₂ : Pt,
+      inner ℝ w₁ w₂ = inner ℝ w₁ e * inner ℝ w₂ e + inner ℝ w₁ ν₁ * inner ℝ w₂ ν₁ := by
+    intro w₁ w₂; rw [← hpe]; exact n1_inner_frame he w₁ w₂
+  have hnsq : ∀ w : Pt, ‖w‖ ^ 2 = inner ℝ w e ^ 2 + inner ℝ w ν₁ ^ 2 := by
+    intro w; rw [← hpe, norm_sq_frame he, det2_eq_inner_perp]
+  have horth : inner ℝ ν₁ e = 0 := by
+    have h := hnsq ν₁
+    rw [hn₁, real_inner_self_eq_norm_sq, hn₁] at h
+    have : inner ℝ ν₁ e ^ 2 = 0 := by linarith
+    exact pow_eq_zero_iff (two_ne_zero) |>.1 this
+  -- `ν₂ ≈ −ν₁`
+  have hε : ‖ν₁ + ν₂‖ ≤ 3 / 200 := by
+    have h := norm_add_sq_real ν₁ ν₂
+    rw [hn₁, hn₂] at h
+    nlinarith [norm_nonneg (ν₁ + ν₂)]
+  have hb₁K : b₁ ∈ KBall X := (KBall_isClosed X).closure_eq ▸ hb₁.1
+  have hb₂K : b₂ ∈ KBall X := (KBall_isClosed X).closure_eq ▸ hb₂.1
+  have hsplit : ∀ (x b' ν : Pt), inner ℝ (x - y) ν = inner ℝ (x - b') ν + inner ℝ (b' - y) ν := by
+    intro x b' ν; rw [← inner_add_left]; congr 1; abel
+  have hbd : ∀ b' ν : Pt, dist y b' ≤ 464 → ‖ν‖ = 1 → inner ℝ (b' - y) ν ≤ 464 := by
+    intro b' ν hb' hν
+    refine (real_inner_le_norm _ _).trans ?_
+    rw [hν, mul_one, ← dist_eq_norm, dist_comm]; exact hb'
+  have up₁ : ∀ x ∈ KBall X, inner ℝ (x - y) ν₁ ≤ 464 := by
+    intro x hx; rw [hsplit x b₁]; linarith [hν₁ x hx, hbd b₁ ν₁ h₁ hn₁]
+  have up₂ : ∀ x ∈ KBall X, inner ℝ (x - y) ν₂ ≤ 464 := by
+    intro x hx; rw [hsplit x b₂]; linarith [hν₂ x hx, hbd b₂ ν₂ h₂ hn₂]
+  have lo₁ : ∀ x ∈ KBall X, -464 - 3 / 200 * ‖x - y‖ ≤ inner ℝ (x - y) ν₁ := by
+    intro x hx
+    have h2 := up₂ x hx
+    have hs : inner ℝ (x - y) ν₂ = inner ℝ (x - y) (ν₁ + ν₂) - inner ℝ (x - y) ν₁ := by
+      rw [inner_add_right]; ring
+    have hcs := (abs_le.1 (abs_real_inner_le_norm (x - y) (ν₁ + ν₂))).1
+    have : ‖x - y‖ * ‖ν₁ + ν₂‖ ≤ ‖x - y‖ * (3 / 200) :=
+      mul_le_mul_of_nonneg_left hε (norm_nonneg _)
+    linarith
+  -- extreme levels along `e`
+  have hcont : Continuous fun z : Pt => inner ℝ z e := continuous_id.inner continuous_const
+  obtain ⟨xm, hxm, hmin⟩ := hKc.exists_isMinOn ⟨y, hy⟩ hcont.continuousOn
+  obtain ⟨xp, hxp, hmax⟩ := hKc.exists_isMaxOn ⟨y, hy⟩ hcont.continuousOn
+  have hsK : ∀ x ∈ KBall X, inner ℝ xm e ≤ inner ℝ x e ∧ inner ℝ x e ≤ inner ℝ xp e :=
+    fun x hx => ⟨hmin hx, hmax hx⟩
+  set L := inner ℝ xp e - inner ℝ xm e with hLdef
+  have hL0 : 0 ≤ L := by have := hsK y hy; linarith
+  have hnorm : ∀ x ∈ KBall X, 197 / 200 * ‖x - y‖ ≤ L + 464 := by
+    intro x hx
+    have h1 := hnsq (x - y)
+    have hs : |inner ℝ (x - y) e| ≤ L := by
+      rw [inner_sub_left, abs_le]
+      have := hsK x hx; have := hsK y hy
+      constructor <;> linarith
+    have hh : |inner ℝ (x - y) ν₁| ≤ 464 + 3 / 200 * ‖x - y‖ :=
+      abs_le.2 ⟨by linarith [lo₁ x hx], by linarith [up₁ x hx, norm_nonneg (x - y)]⟩
+    have hsq : ‖x - y‖ ^ 2 ≤ (|inner ℝ (x - y) e| + |inner ℝ (x - y) ν₁|) ^ 2 := by
+      rw [h1]
+      nlinarith [abs_nonneg (inner ℝ (x - y) e), abs_nonneg (inner ℝ (x - y) ν₁),
+        sq_abs (inner ℝ (x - y) e), sq_abs (inner ℝ (x - y) ν₁)]
+    have := (pow_le_pow_iff_left₀ (norm_nonneg _) (by positivity) two_ne_zero).1 hsq
+    linarith
+  have hlow : ∀ x ∈ KBall X, inner ℝ y ν₁ - 464 - (L + 464) / 64 ≤ inner ℝ x ν₁ := by
+    intro x hx
+    have h1 := lo₁ x hx
+    have h2 := hnorm x hx
+    rw [inner_sub_left] at h1
+    nlinarith [norm_nonneg (x - y)]
+  have hup : ∀ x ∈ KBall X, inner ℝ x ν₁ ≤ inner ℝ y ν₁ + 464 := by
+    intro x hx; have := up₁ x hx; rw [inner_sub_left] at this; linarith
+  -- **the fatness step**: `L ≤ 400`
+  have hL : L ≤ 180000 := by
+    by_contra hL
+    push Not at hL
+    set W := 928 + (L + 464) / 64 with hWdef
+    have hW0 : 0 ≤ W := by positivity
+    have hWL : W ≤ L / 48 := by rw [hWdef]; linarith
+    have hwid : ∀ x ∈ KBall X, ∀ z ∈ KBall X, -W ≤ inner ℝ x ν₁ - inner ℝ z ν₁ := by
+      intro x hx z hz; have := hlow x hx; have := hup z hz; rw [hWdef]; linarith
+    have hne' : xm ≠ xp := by rintro h; rw [h] at hLdef; linarith
+    set m : Pt := (1 / 2 : ℝ) • (xm + xp) with hmdef
+    have hmI : m ∈ interior (KBall X) := n1_mid_interior hxm hxp hne'
+    have hmK : m ∈ KBall X := interior_subset hmI
+    have hms : inner ℝ m e = (inner ℝ xm e + inner ℝ xp e) / 2 := by
+      rw [hmdef, inner_smul_left, inner_add_left]; simp; ring
+    clear_value m
+    obtain ⟨r, hr, hball⟩ := Metric.mem_nhds_iff.1 (mem_interior_iff_mem_nhds.1 hmI)
+    have hshift : ∀ σ : ℝ, |σ| = 1 → m + (r / 2) • (σ • ν₁) ∈ KBall X := by
+      intro σ hσ
+      apply hball
+      rw [Metric.mem_ball, dist_eq_norm, add_sub_cancel_left, norm_smul, norm_smul, hn₁,
+        Real.norm_eq_abs σ, hσ, Real.norm_eq_abs, abs_of_pos (by linarith)]
+      linarith
+    have hshs : ∀ σ : ℝ, inner ℝ (m + (r / 2) • (σ • ν₁)) e = inner ℝ m e := by
+      intro σ; rw [inner_add_left, inner_smul_left, inner_smul_left, horth]; simp
+    have hshh : ∀ σ : ℝ, inner ℝ (m + (r / 2) • (σ • ν₁)) ν₁ = inner ℝ m ν₁ + r / 2 * σ := by
+      intro σ
+      rw [inner_add_left, inner_smul_left, inner_smul_left, real_inner_self_eq_norm_sq, hn₁]
+      simp
+    have hnν : ‖-ν₁‖ = 1 := by rw [norm_neg, hn₁]
+    have hnorth : inner ℝ (-ν₁) e = 0 := by rw [inner_neg_left, horth, neg_zero]
+    obtain ⟨pT, hpTF, hpTs, hpTmax⟩ := n1_slice_extreme hne hn₁ horth hmK
+    obtain ⟨pB, hpBF, hpBs, hpBmax⟩ := n1_slice_extreme hne hnν hnorth hmK
+    have hpTK : pT ∈ KBall X := (KBall_isClosed X).closure_eq ▸ hpTF.1
+    have hpBK : pB ∈ KBall X := (KBall_isClosed X).closure_eq ▸ hpBF.1
+    have hT : inner ℝ m ν₁ + r / 2 ≤ inner ℝ pT ν₁ := by
+      have := hpTmax _ (hshift 1 (by simp)) (hshs 1)
+      rw [hshh] at this; linarith
+    have hB : inner ℝ pB ν₁ ≤ inner ℝ m ν₁ - r / 2 := by
+      have := hpBmax _ (hshift (-1) (by simp)) (hshs (-1))
+      rw [inner_neg_right, inner_neg_right, hshh] at this; linarith
+    obtain ⟨wT, hwT, hdT, hnT⟩ := n1_circle_normal hX hpTF
+    obtain ⟨wB, hwB, hdB, hnB⟩ := n1_circle_normal hX hpBF
+    have hnormT : inner ℝ (pT - wT) e ^ 2 + inner ℝ (pT - wT) ν₁ ^ 2 = dist2 X ^ 2 := by
+      rw [← hnsq, ← dist_eq_norm, hdT]
+    have hnormB : (inner ℝ (pB - wB) e) ^ 2 + (-inner ℝ (pB - wB) ν₁) ^ 2 = dist2 X ^ 2 := by
+      rw [neg_sq, ← hnsq, ← dist_eq_norm, hdB]
+    have hexpT : ∀ z, inner ℝ (z - pT) (pT - wT) = (inner ℝ z e - inner ℝ pT e) *
+        inner ℝ (pT - wT) e + (inner ℝ z ν₁ - inner ℝ pT ν₁) * inner ℝ (pT - wT) ν₁ := by
+      intro z; rw [hframe (z - pT), inner_sub_left z pT e, inner_sub_left z pT ν₁]
+    have hexpB : ∀ z, inner ℝ (z - pB) (pB - wB) = (inner ℝ z e - inner ℝ pB e) *
+        inner ℝ (pB - wB) e + (inner ℝ z ν₁ - inner ℝ pB ν₁) * inner ℝ (pB - wB) ν₁ := by
+      intro z; rw [hframe (z - pB), inner_sub_left z pB e, inner_sub_left z pB ν₁]
+    have hLpos : 0 < L := by linarith
+    -- top normal
+    have sT : 0 ≤ inner ℝ (pT - wT) ν₁ := by
+      have h := hnT pB hpBK
+      rw [hexpT, hpBs, hpTs, sub_self, zero_mul, zero_add] at h
+      by_contra hc; push Not at hc
+      nlinarith
+    have tT : 999 / 1000 * dist2 X ≤ inner ℝ (pT - wT) ν₁ := by
+      have hp := hnT xp hxp
+      have hm := hnT xm hxm
+      rw [hexpT, hpTs, hms] at hp hm
+      refine n1_tilt hLpos hW0 hWL hDpos hnormT sT (a := inner ℝ xp ν₁ - inner ℝ pT ν₁)
+        (b := inner ℝ xm ν₁ - inner ℝ pT ν₁) ?_ ?_ (hwid xp hxp pT hpTK) (hwid xm hxm pT hpTK)
+      · have : inner ℝ xp e - (inner ℝ xm e + inner ℝ xp e) / 2 = L / 2 := by rw [hLdef]; ring
+        rw [this] at hp; exact hp
+      · have : inner ℝ xm e - (inner ℝ xm e + inner ℝ xp e) / 2 = -(L / 2) := by rw [hLdef]; ring
+        rw [this] at hm; exact hm
+    -- bottom normal
+    have sB : 0 ≤ -inner ℝ (pB - wB) ν₁ := by
+      have h := hnB pT hpTK
+      rw [hexpB, hpBs, hpTs, sub_self, zero_mul, zero_add] at h
+      by_contra hc; push Not at hc
+      nlinarith
+    have tB : 999 / 1000 * dist2 X ≤ -inner ℝ (pB - wB) ν₁ := by
+      have hp := hnB xp hxp
+      have hm := hnB xm hxm
+      rw [hexpB, hpBs, hms] at hp hm
+      refine n1_tilt hLpos hW0 hWL hDpos hnormB sB (ns := inner ℝ (pB - wB) e)
+        (a := inner ℝ pB ν₁ - inner ℝ xp ν₁)
+        (b := inner ℝ pB ν₁ - inner ℝ xm ν₁) ?_ ?_ (hwid pB hpBK xp hxp) (hwid pB hpBK xm hxm)
+      · have : inner ℝ xp e - (inner ℝ xm e + inner ℝ xp e) / 2 = L / 2 := by rw [hLdef]; ring
+        rw [this] at hp
+        have e2 : (inner ℝ pB ν₁ - inner ℝ xp ν₁) * -inner ℝ (pB - wB) ν₁ =
+            (inner ℝ xp ν₁ - inner ℝ pB ν₁) * inner ℝ (pB - wB) ν₁ := by ring
+        rw [e2]; exact hp
+      · have : inner ℝ xm e - (inner ℝ xm e + inner ℝ xp e) / 2 = -(L / 2) := by rw [hLdef]; ring
+        rw [this] at hm
+        have e2 : (inner ℝ pB ν₁ - inner ℝ xm ν₁) * -inner ℝ (pB - wB) ν₁ =
+            (inner ℝ xm ν₁ - inner ℝ pB ν₁) * inner ℝ (pB - wB) ν₁ := by ring
+        rw [e2]; exact hm
+    -- the two centres are too far apart
+    have hcent : inner ℝ (wB - wT) ν₁ ≤ 1.94 * dist2 X := by
+      refine (real_inner_le_norm _ _).trans ?_
+      rw [hn₁, mul_one, ← dist_eq_norm]
+      exact (dist_le_diam hwB hwT).trans hΔ
+    have hcent' : inner ℝ (wB - wT) ν₁ =
+        (inner ℝ pB ν₁ - inner ℝ pT ν₁) - inner ℝ (pB - wB) ν₁ + inner ℝ (pT - wT) ν₁ := by
+      simp only [inner_sub_left]; ring
+    have hLD : L ≤ 2 * dist2 X := by
+      obtain ⟨w, hw⟩ := hne
+      have h1 := (mem_KBall.1 hxp) w hw
+      have h2 := (mem_KBall.1 hxm) w hw
+      have h3 : inner ℝ (xp - xm) e ≤ ‖xp - xm‖ := by
+        refine (real_inner_le_norm _ _).trans ?_; rw [he, mul_one]
+      rw [← dist_eq_norm] at h3
+      have h4 := dist_triangle xp w xm
+      rw [dist_comm w xm] at h4
+      rw [hLdef, ← inner_sub_left]; linarith
+    have := hwid pB hpBK pT hpTK
+    rw [hWdef] at this
+    linarith
+  refine ⟨e, he, inner ℝ xm e, inner ℝ y ν₁ - 464 - (L + 464) / 64, fun x hx => ?_⟩
+  rw [hpe]
+  refine ⟨(hsK x hx).1, by linarith [(hsK x hx).2], hlow x hx, ?_⟩
+  linarith [hup x hx]
 
 /-- Small `Δ₂`: `X ∖ D ⊂ K ⊂ B̄(w, Δ₂)` for any `w ∈ X`, so packing bounds `|X ∖ D|`.
 
@@ -555,7 +750,7 @@ private theorem support_near43 (hX : Normal X) {y b₁ b₂ ν₁ ν₂ d : Pt} 
 `Λ` of `y ∈ K` carry unit normals with `‖ν₁ − ν₂‖ > ε₀` and `ν₁·ν₂ > −(1 − 10⁻⁴)`, then
 `turning(K, ∂K ∩ B̄(y, 69600)) ≥ ε₀`.
 
-TODO: prove.
+TODO: none — proved.
 What's missing: copy `turning_ge_of_nonflat` / `n1_support_near` with `1 ↦ Λ`:
 `|ν₁·ν₂| ≤ 1 − 10⁻⁴` (upper side: `‖ν₁ − ν₂‖² > 1/2500` gives `ν₁·ν₂ < 1 − 1/5000`); a support
 point `x` in a direction `d = aν₁ + bν₂` (`a, b ≥ 0`) has `|⟨x − y, ν_i⟩| ≤ Λ`, hence
