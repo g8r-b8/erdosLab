@@ -144,6 +144,11 @@ then ¬(almost-all o(N)) as in PR #4076's Erdos468MinimalPreimageLittleOAlmostAl
   R5.4: min(μ₂, μ₃, μ₄) ≤ n. Charge Lemma conjectured (0 violations in ~205k sets).
 - The paper and Lean proof still state 54/37. The upgrade to 15/11 awaits the user's decision.
 
+## ★ Lean milestone 4 (2026-09-25): 4/3 fully formalised
+- Erdos132Main.erdos132_main43: min{μ(Δ₂),μ(δ)} ≤ 4/3·n + C₀, sorry-free, axioms = propext, Classical.choice, Quot.sound;
+  leanchecker passes on all 6 E132Main43* modules. Next: 21/16 (E132Main2116*) and E′ (E132Main97*; one sorry: CoreE,
+  topological core; Route A is working on an elementary proof). No arXiv until fully formalised (user decision).
+
 ## ★ R6 result (2026-09-24): L ≤ 4/3 (refereed twice); 9/7 for τ > 1 (matches the global lower bound; not "sharp" — the 9/7 constructions have t < 1)
 - Theorem N3: average weight (deg y + m_y) ≤ 8 ⇒ L ≤ 4/3 for all τ (refereed; six wording fixes applied).
 - 21/16 in Region I and for τ > 1 (refereed). Theorem E′ (global shell/Euler) ⇒ 9n/7 + O(n^{2/3}) for τ > 1, matching
