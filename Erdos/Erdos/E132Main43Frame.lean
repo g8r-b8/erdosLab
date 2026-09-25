@@ -408,7 +408,31 @@ Acceptance: no `sorry`.
 Depends on: `Frame43.top`, `exists_frontier_seg`, `KBall_isClosed`. Difficulty M. -/
 theorem frame_depth_le (hX : Normal X) {y n : Pt} (hF : Frame43 X y n) {a : Pt}
     (ha : a ∈ KBall X) : depth X a ≤ depth X y - inner ℝ (a - y) n := by
-  sorry
+  have htop := hF.top ha
+  by_cases hfr : a ∈ frontier (KBall X)
+  · have : depth X a = 0 := Metric.infDist_zero_of_mem hfr
+    linarith
+  have hai : a ∈ interior (KBall X) := by
+    by_contra hni
+    exact hfr ⟨subset_closure ha, hni⟩
+  refine le_of_forall_pos_le_add fun η hη => ?_
+  set L := depth X y - inner ℝ (a - y) n + η with hL
+  have hL0 : 0 < L := by rw [hL]; linarith
+  have hq : a + L • n ∉ interior (KBall X) := by
+    intro hq
+    have := hF.top (interior_subset hq)
+    rw [show a + L • n - y = (a - y) + L • n by abel, inner_add_left, real_inner_smul_left,
+      real_inner_self_eq_norm_sq, hF.unit, hL] at this
+    linarith
+  obtain ⟨l, hl0, hl1, hb⟩ := exists_frontier_seg (KBall_isClosed X) hai hq
+  have hd : dist a (a + l • (a + L • n - a)) ≤ L := by
+    rw [dist_eq_norm, show a - (a + l • (a + L • n - a)) = -((l * L) • n) by
+      rw [add_sub_cancel_left, smul_smul]; abel, norm_neg, norm_smul, hF.unit, mul_one,
+      Real.norm_eq_abs, abs_of_pos (mul_pos hl0 hL0)]
+    nlinarith
+  have := Metric.infDist_le_dist_of_mem (x := a) hb
+  unfold depth
+  linarith
 
 /-- Receivers have height `≤ −2/3`.
 
