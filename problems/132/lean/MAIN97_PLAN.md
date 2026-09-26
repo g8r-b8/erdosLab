@@ -134,3 +134,11 @@ main case (visible path: `71h + 7`).  With a linear core error the shell pigeonh
 (`ρ₀ ≈ min(√n, Δ₂/400)`, shell cost `3n/ρ₀`), which suggests Theorem E′ with error `O(√n)` and hence
 `min{μ(Δ₂), μ(δ)} ≤ 9n/7 + O(√n)` for `τ > 1`.  Needs a careful re-derivation (the `Δ₂/400` branch and
 the small-`|A|` fallback) before anyone relies on it.
+
+## Visible-path DAG (Route A formalisation)
+
+Skeleton `5288946`: 8 files, 70 theorems, 63 sorry stubs; `coreA : CoreE` and `core := coreA` are
+proved from the statements; `erdos132_main97_of_core` unchanged (standard axioms).  Import DAG:
+Lemma0, Arcs → Cert, Normal → Path → Count, Wedge → Assembly.  Stubs per file: Lemma0 4, Arcs 6,
+Cert 3, Normal 23, Path 16, Count 3, Wedge 6, Assembly 2.  Next: statement referee of the A-stubs
+(every stub TRUE as written, G1–G4 built in), then fill one child at a time in DAG order.
