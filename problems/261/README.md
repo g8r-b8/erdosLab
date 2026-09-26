@@ -20,3 +20,10 @@ Integer s: every live branch follows one deterministic orbit.
   FC PR #6605 (duplicates the earlier LLM-audit issue #6538, x = 3/2).
 - TUZ20 DOES treat infinite reps (Cor 2.6: infinitely many rationals with ≥3; abstract: a set with ≥9). 2^k reps for
   any finite k are easy via disjoint Borwein–Loring diamonds inside a cofinite set.
+
+## Prior art found 2026-09-26
+- TUZ20 Conjecture 3.7 (every solution has a_k ≤ 2(n+k)) is FALSE — but already refuted: KunHcz, Justin Sun Prize
+  PR TheJustinSunPrize/awards#85 (16 Sep 2026; n=2, k=185, a_k=392, Lean). Our DP found the identical witness
+  (scratchpad cex_search.py: n=2..18 all end at a_k=392). NOT new. TUZ20 Cor 3.6 already gives a 191-term one.
+- JSP-000226 (= #261) submissions: #60 (BL family), #85 (above), #268 (Lean, n ≤ 10^4 = TUZ Thm 3.5), #3482
+  (Lean registration). None beyond 10^4 ⇒ our n ≤ 10^6 sweep appears new. JSP now only accepts complete solutions.

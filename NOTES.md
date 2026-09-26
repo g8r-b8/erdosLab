@@ -371,6 +371,8 @@ PROMPT.md rule 4: check all cross-referenced/sibling problems and their threads.
   Blog post updated (daa99d8); its TUZ 'correction' retracted (c818eca).
   ★ 2026-09-26: part (ii) VERIFIED for all n ≤ 10^6 (TUZ20: 10^4) via signed orbit d'=2d−a·sgn(d);
   see problems/261/README.md. FC issue #6538 (LLM audit, 24 Sep, x=3/2) predates our #6604.
+  TUZ Conj 3.7 counterexample (n=2,k=185,a_k=392) found by our DP but ALREADY published by KunHcz (JSP PR #85,
+  16 Sep 2026). Justin Sun Prize catalog has #261 as JSP-000226 (complete solutions only).
   2026-09-25: FC variant formalised: Erdos/Erdos/E261.lean (7/4, Rafik's pair; sorry-free, std axioms).
   Public proof repo github.com/g8r-b8/erdos261-lean (976bddf). FC issue #6604, PR #6605 (retag solved,
   answer(True), formal_proof link). PR blocked on Google CLA — user must sign at cla.developers.google.com.
