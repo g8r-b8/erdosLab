@@ -339,8 +339,8 @@ PROMPT.md rule 4: check all cross-referenced/sibling problems and their threads.
   parts.iii + two_representations tagged `research open`; not on Tao's AI wiki (frozen 30 Jun 2026);
   see-also only #260 (checked thread); no OEIS link. BoLo90 abstract: "some numbers have a unique
   representation, others have uncountably many" (not rationals); TUZ20 (arXiv 2008.01501) is about the
-  FINITE equation n/2^n=Σ_{i≤k}a_i/2^{a_i} (≥5 solutions for k in an infinite set) — it does NOT count
-  infinite reps of rationals (earlier note '≥3 reps, ≥9' was WRONG; corrected on blog 2026-09-25).
+  finite equation AND (Cor 2.6 / abstract) infinite reps: infinitely many rationals with ≥3, a set with ≥9.
+  (A 2026-09-25 'correction' claiming otherwise was itself wrong — retracted on blog, c818eca.)
   Own reduction (scratchpad/e001/e261/): s_a := 2^a·(remaining target before a) must stay in
   [0,2a+2]; include a iff s≥a, exclude iff s≤a+2 ⇒ choice ONLY in window s∈[a,a+2]; map commutes
   with s↦2a+2−s. BL identity n/2^n=Σ_{n<k≤n+m}k/2^k (n=2^{m+1}−m−2) = a diamond at ANY window
@@ -368,7 +368,9 @@ PROMPT.md rule 4: check all cross-referenced/sibling problems and their threads.
   often; cf. Rafik's cofinite 7/4 pair). FC file also has variants.two_representations tagged `research
   open` (≥2 infinite reps of some rational) — literally answered by Rafik's cofinite 7/4 pair (forum,
   27 Apr 2026); a Lean proof of that variant for x=1 via our orbit (a=1 split) is a possible small FC PR.
-  Blog post corrected + updated (daa99d8).
+  Blog post updated (daa99d8); its TUZ 'correction' retracted (c818eca).
+  ★ 2026-09-26: part (ii) VERIFIED for all n ≤ 10^6 (TUZ20: 10^4) via signed orbit d'=2d−a·sgn(d);
+  see problems/261/README.md. FC issue #6538 (LLM audit, 24 Sep, x=3/2) predates our #6604.
   2026-09-25: FC variant formalised: Erdos/Erdos/E261.lean (7/4, Rafik's pair; sorry-free, std axioms).
   Public proof repo github.com/g8r-b8/erdos261-lean (976bddf). FC issue #6604, PR #6605 (retag solved,
   answer(True), formal_proof link). PR blocked on Google CLA — user must sign at cla.developers.google.com.
