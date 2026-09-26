@@ -1,0 +1,4 @@
+n in [1,10000]: fails=0 max steps=51511 at n=3817 mean=11903.0
+n in [10001,1000000]: fails=0 max steps=7431262 at n=734946 mean=1009072.6
+
+[exited with code 0]
